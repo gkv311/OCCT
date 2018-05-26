@@ -26,6 +26,12 @@ else ()
 endif()
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Make it possible to ignore if there are no atomics support, needed for armel.
+IF(IGNORE_NO_ATOMICS)
+    ADD_DEFINITIONS(-DIGNORE_NO_ATOMICS)
+ENDIF(IGNORE_NO_ATOMICS)
+
+
 # macro: include patched file if it exists
 macro (OCCT_INCLUDE_CMAKE_FILE BEING_INCLUDED_FILE)
   if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/${BEING_INCLUDED_FILE}.cmake")
