@@ -575,6 +575,13 @@ void BRepFill_Filling::FindExtremitiesOfHoles(const TopTools_ListOfShape& WireLi
 //======================================================================
 void BRepFill_Filling::Build()
 {
+  if (myBoundary.IsEmpty())
+  {
+    myBuilder.reset();
+    myIsDone = Standard_False;
+    return;
+  }
+
   myBuilder.reset (new GeomPlate_BuildPlateSurface (myDegree, myNbPtsOnCur, myNbIter,
                                                     myTol2d, myTol3d, myTolAng, myTolCurv, myAnisotropie));
   TopoDS_Edge CurEdge;
