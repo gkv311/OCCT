@@ -21,6 +21,8 @@
 #include <OpenGl_Element.hxx>
 #include <OpenGl_Vec.hxx>
 
+class OpenGl_ShadowMapArray;
+
 //! Defines interface for OpenGL state.
 class OpenGl_StateInterface
 {
@@ -137,10 +139,20 @@ public:
   //! Sets number of mipmap levels used in specular IBL map.
   void SetSpecIBLMapLevels(Standard_Integer theSpecIBLMapLevels) { mySpecIBLMapLevels = theSpecIBLMapLevels; }
 
+  //! Returns TRUE if shadowmap is set.
+  bool HasShadowMaps() const { return !myShadowMaps.IsNull(); }
+
+  //! Returns shadowmap.
+  const Handle(OpenGl_ShadowMapArray)& ShadowMaps() const { return myShadowMaps; }
+
+  //! Sets shadowmap.
+  void SetShadowMaps (const Handle(OpenGl_ShadowMapArray)& theMap) { myShadowMaps = theMap; }
+
 private:
 
   Handle(Graphic3d_LightSet) myLightSources;     //!< List of OCCT light sources
   Standard_Integer           mySpecIBLMapLevels; //!< Number of mipmap levels used in specular IBL map (0 by default or in case of using non-PBR shading model)
+  Handle(OpenGl_ShadowMapArray) myShadowMaps;    //!< active shadowmap
 
 };
 
