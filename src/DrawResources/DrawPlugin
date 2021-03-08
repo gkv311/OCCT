@@ -31,7 +31,7 @@
 
 DEFAULT            : MODELING
 MODELING           : TOPTEST
-VISUALIZATION      : AISV
+VISUALIZATION      : AISV, OPENGL
 OCAFKERNEL         : DCAF
 DATAEXCHANGEKERNEL : XSDRAW
 OCAF               : VISUALIZATION, OCAFKERNEL
@@ -42,6 +42,8 @@ ALL                : MODELING, OCAFKERNEL, DATAEXCHANGE
 TOPTEST            : TKTopTest
 DCAF               : TKDCAF
 AISV               : TKViewerTest
+OPENGL             : TKOpenGlTest
+D3DHOST            : TKD3DHostTest
 XSDRAW             : TKXSDRAW
 XDEDRAW            : TKXDEDRAW
 TOBJ               : TKTObjDRAW
