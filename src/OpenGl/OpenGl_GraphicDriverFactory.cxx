@@ -15,6 +15,12 @@
 
 #include <OpenGl_GraphicDriver.hxx>
 
+#ifdef HAVE_GLES2
+  #define OpenGl_DRIVER_NAME "GLES"
+#else
+  #define OpenGl_DRIVER_NAME "OpenGL"
+#endif
+
 IMPLEMENT_STANDARD_RTTIEXT(OpenGl_GraphicDriverFactory, Graphic3d_GraphicDriverFactory)
 
 // =======================================================================
@@ -22,7 +28,7 @@ IMPLEMENT_STANDARD_RTTIEXT(OpenGl_GraphicDriverFactory, Graphic3d_GraphicDriverF
 // purpose  :
 // =======================================================================
 OpenGl_GraphicDriverFactory::OpenGl_GraphicDriverFactory()
-: Graphic3d_GraphicDriverFactory ("OpenGL"),
+: Graphic3d_GraphicDriverFactory (OpenGl_DRIVER_NAME),
   myDefaultCaps (new OpenGl_Caps())
 {
   //

@@ -15,11 +15,15 @@
 ;# Liste des toolkits WOK sous forme de full path
 ;# 
 proc Draw:toolkits { } {
-  set aResult [list TKDraw TKTopTest TKOpenGlTest TKViewerTest TKXSDRAW TKDCAF TKXDEDRAW TKTObjDRAW TKQADraw]
+  set aResult [list TKDraw TKTopTest TKViewerTest TKXSDRAW TKDCAF TKXDEDRAW TKTObjDRAW TKQADraw]
 
   if { [info exists ::env(HAVE_VTK)] && $::env(HAVE_VTK) == "true" } {
     lappend aResult "TKIVtkDraw"
   }
+
+  lappend aResult "TKOpenGlTest"
+  lappend aResult "TKOpenGlesTest"
+
   if { "$::tcl_platform(platform)" == "windows" } {
     if { [info exists ::env(HAVE_D3D)] } {
       if { "$::env(HAVE_D3D)" == "true" } {

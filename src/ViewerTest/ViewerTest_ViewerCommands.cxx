@@ -1958,9 +1958,16 @@ static int VDriver (Draw_Interpretor& theDi, Standard_Integer theArgsNb, const c
     {
       aNewActive = theArgVec[anArgIter];
       if (TCollection_AsciiString::IsSameString (aNewActive, "gl", false)
+       || TCollection_AsciiString::IsSameString (aNewActive, "opengl", false)
        || TCollection_AsciiString::IsSameString (aNewActive, "tkopengl", false))
       {
         aNewActive = "opengl";
+      }
+      else if (TCollection_AsciiString::IsSameString (aNewActive, "gles", false)
+            || TCollection_AsciiString::IsSameString (aNewActive, "opengles", false)
+            || TCollection_AsciiString::IsSameString (aNewActive, "tkopengles", false))
+      {
+        aNewActive = "gles";
       }
       else if (TCollection_AsciiString::IsSameString (aNewActive, "d3d", false)
             || TCollection_AsciiString::IsSameString (aNewActive, "tkd3dhost", false))

@@ -17,12 +17,14 @@
 proc Visualization:toolkits { } {
     set aResult [list TKService \
                      TKV3d \
-                     TKOpenGl \
                      TKMeshVS]
 
     if { [info exists ::env(HAVE_VTK)] && "$::env(HAVE_VTK)" == "true" } {
       lappend aResult "TKIVtk"
     }
+
+    lappend aResult "TKOpenGl"
+    lappend aResult "TKOpenGles"
 
     if { "$::tcl_platform(platform)" == "windows" } {
       if { [info exists ::env(HAVE_D3D)] } {
