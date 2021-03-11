@@ -1678,6 +1678,22 @@ TCollection_AsciiString ViewerTest::ViewerInit (const Standard_Integer thePxLeft
     theViewToClone->Window()->Size (aPxWidth, aPxHeight);
   }
 
+  Handle(Graphic3d_GraphicDriverFactory) aFactory = Graphic3d_GraphicDriverFactory::DefaultDriverFactory();
+  if (aFactory.IsNull())
+  {
+    Draw::GetInterpretor().Eval ("pload OPENGL");
+    aFactory = Graphic3d_GraphicDriverFactory::DefaultDriverFactory();
+    if (aFactory.IsNull())
+    {
+      Draw::GetInterpretor().Eval ("pload GLES");
+      aFactory = Graphic3d_GraphicDriverFactory::DefaultDriverFactory();
+      if (aFactory.IsNull())
+      {
+        throw Standard_ProgramError("Error: no graphic driver factory registered");
+      }
+    }
+  }
+
   Handle(Graphic3d_GraphicDriver) aGraphicDriver;
   ViewerTest_Names aViewNames(theViewName);
   if (ViewerTest_myViews.IsBound1 (aViewNames.GetViewName ()))
@@ -1718,11 +1734,6 @@ TCollection_AsciiString ViewerTest::ViewerInit (const Standard_Integer thePxLeft
     SetDisplayConnection (new Aspect_DisplayConnection ());
   #endif
 
-    Handle(Graphic3d_GraphicDriverFactory) aFactory = Graphic3d_GraphicDriverFactory::DefaultDriverFactory();
-    if (aFactory.IsNull())
-    {
-      throw Standard_ProgramError("Error: no graphic driver factory registered");
-    }
     aGraphicDriver = aFactory->CreateDriver (GetDisplayConnection());
     if (isVirtual)
     {
@@ -1929,13 +1940,23 @@ static int VDriver (Draw_Interpretor& theDi, Standard_Integer theArgsNb, const c
 {
   if (theArgsNb == 1)
   {
+    theDi << "Registered: ";
+    for (Graphic3d_GraphicDriverFactoryList::Iterator aFactoryIter (Graphic3d_GraphicDriverFactory::DriverFactories());
+         aFactoryIter.More(); aFactoryIter.Next())
+    {
+      const Handle(Graphic3d_GraphicDriverFactory)& aFactory = aFactoryIter.Value();
+      theDi << aFactory->Name() << " ";
+    }
+
+    theDi << "\n";
+    theDi << "Default: ";
     if (Handle(Graphic3d_GraphicDriverFactory) aFactory =  Graphic3d_GraphicDriverFactory::DefaultDriverFactory())
     {
       theDi << aFactory->Name();
     }
     else
     {
-      theDi << "N/A";
+      theDi << "NONE";
     }
     return 0;
   }
@@ -1954,43 +1975,28 @@ static int VDriver (Draw_Interpretor& theDi, Standard_Integer theArgsNb, const c
         theDi << aFactory->Name() << " ";
       }
     }
+    else if (anArgCase == "-default"
+          && aNewActive.IsEmpty())
+    {
+      if (anArgIter + 1 < theArgsNb)
+      {
+        aNewActive = theArgVec[++anArgIter];
+      }
+      else
+      {
+        if (Handle(Graphic3d_GraphicDriverFactory) aFactory =  Graphic3d_GraphicDriverFactory::DefaultDriverFactory())
+        {
+          theDi << aFactory->Name();
+        }
+        else
+        {
+          theDi << "NONE";
+        }
+      }
+    }
     else if (aNewActive.IsEmpty())
     {
       aNewActive = theArgVec[anArgIter];
-      if (TCollection_AsciiString::IsSameString (aNewActive, "gl", false)
-       || TCollection_AsciiString::IsSameString (aNewActive, "opengl", false)
-       || TCollection_AsciiString::IsSameString (aNewActive, "tkopengl", false))
-      {
-        aNewActive = "opengl";
-      }
-      else if (TCollection_AsciiString::IsSameString (aNewActive, "gles", false)
-            || TCollection_AsciiString::IsSameString (aNewActive, "opengles", false)
-            || TCollection_AsciiString::IsSameString (aNewActive, "tkopengles", false))
-      {
-        aNewActive = "gles";
-      }
-      else if (TCollection_AsciiString::IsSameString (aNewActive, "d3d", false)
-            || TCollection_AsciiString::IsSameString (aNewActive, "tkd3dhost", false))
-      {
-        aNewActive = "d3dhost";
-      }
-      bool isFound = false;
-      for (Graphic3d_GraphicDriverFactoryList::Iterator aFactoryIter (Graphic3d_GraphicDriverFactory::DriverFactories());
-           aFactoryIter.More(); aFactoryIter.Next())
-      {
-        Handle(Graphic3d_GraphicDriverFactory) aFactory = aFactoryIter.Value();
-        if (TCollection_AsciiString::IsSameString (aFactory->Name(), aNewActive, false))
-        {
-          Graphic3d_GraphicDriverFactory::RegisterFactory (aFactory, true);
-          isFound = true;
-          break;
-        }
-      }
-      if (!isFound)
-      {
-        theDi << "Syntax error: driver factory '" << theArgVec[anArgIter] << "' is found";
-        return 1;
-      }
     }
     else
     {
@@ -1998,6 +2004,46 @@ static int VDriver (Draw_Interpretor& theDi, Standard_Integer theArgsNb, const c
       return 1;
     }
   }
+
+  if (!aNewActive.IsEmpty())
+  {
+    const TCollection_AsciiString aNameCopy = aNewActive;
+    if (TCollection_AsciiString::IsSameString (aNewActive, "gl", false)
+     || TCollection_AsciiString::IsSameString (aNewActive, "opengl", false)
+     || TCollection_AsciiString::IsSameString (aNewActive, "tkopengl", false))
+    {
+      aNewActive = "opengl";
+    }
+    else if (TCollection_AsciiString::IsSameString (aNewActive, "gles", false)
+          || TCollection_AsciiString::IsSameString (aNewActive, "opengles", false)
+          || TCollection_AsciiString::IsSameString (aNewActive, "tkopengles", false))
+    {
+      aNewActive = "gles";
+    }
+    else if (TCollection_AsciiString::IsSameString (aNewActive, "d3d", false)
+          || TCollection_AsciiString::IsSameString (aNewActive, "tkd3dhost", false))
+    {
+      aNewActive = "d3dhost";
+    }
+    bool isFound = false;
+    for (Graphic3d_GraphicDriverFactoryList::Iterator aFactoryIter (Graphic3d_GraphicDriverFactory::DriverFactories());
+         aFactoryIter.More(); aFactoryIter.Next())
+    {
+      Handle(Graphic3d_GraphicDriverFactory) aFactory = aFactoryIter.Value();
+      if (TCollection_AsciiString::IsSameString (aFactory->Name(), aNewActive, false))
+      {
+        Graphic3d_GraphicDriverFactory::RegisterFactory (aFactory, true);
+        isFound = true;
+        break;
+      }
+    }
+    if (!isFound)
+    {
+      theDi << "Syntax error: driver factory '" << aNameCopy << "' not found";
+      return 1;
+    }
+  }
+
   return 0;
 }
 
@@ -14278,11 +14324,12 @@ void ViewerTest::ViewerCommands(Draw_Interpretor& theCommands)
 
   const char *group = "ZeViewer";
   theCommands.Add("vdriver",
-          "vdriver [-list] [ActiveName]"
+          "vdriver [-list] [-default DriverName]"
     "\n\t\t: Manages active graphic driver factory."
     "\n\t\t: Prints current active driver when called without arguments."
     "\n\t\t: Makes specified driver active when ActiveName argument is specified."
-    "\n\t\t:  -list print registered factories",
+    "\n\t\t:  -list    print registered factories"
+    "\n\t\t:  -default define which factory should be used by default (to be used by next vinit call)",
                   __FILE__, VDriver, group);
   theCommands.Add("vinit",
           "vinit [-name viewName] [-left leftPx] [-top topPx] [-width widthPx] [-height heightPx]"
