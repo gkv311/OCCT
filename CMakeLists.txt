@@ -1324,6 +1324,8 @@ if (APPLE)
   set (SET_OpenCASCADE_WITH_GLX "set (OpenCASCADE_WITH_GLX       ${USE_XLIB})")
 endif()
 
+include(GNUInstallDirs)
+
 # Configure and install cmake config file
 # remove -ffile-prefix-map=
 string(REGEX REPLACE " -ffile-prefix-map=.*=\\. " " " OpenCASCADE_C_FLAGS   ${CMAKE_C_FLAGS})
