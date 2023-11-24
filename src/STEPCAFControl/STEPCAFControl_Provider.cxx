@@ -184,6 +184,7 @@ bool STEPCAFControl_Provider::Read(const TCollection_AsciiString& thePath,
   aReader.SetNameMode(aNode->InternalParameters.ReadName);
   aReader.SetLayerMode(aNode->InternalParameters.ReadLayer);
   aReader.SetPropsMode(aNode->InternalParameters.ReadProps);
+  aReader.SetMetaMode(aNode->InternalParameters.ReadMetadata);
 
   IFSelect_ReturnStatus aReadStat = IFSelect_RetVoid;
   aReadStat = aReader.ReadFile(thePath.ToCString());

@@ -477,6 +477,12 @@ if(!Interface_Static::SetIVal("read.step.tessellated",1))
 ~~~~
 Default value is 1 (On). 
 
+<h4>read.step.metadata:</h4>
+
+Boolean flag regulating translation of User-Defined Attributes into `TDataStd_NamedData` properties.
+
+Default value is 1 (On).
+
 @subsubsection occt_step_2_3_4 Performing the STEP file translation
 
 Perform the translation according to what you want to translate. You can choose either root entities (all or selected by the number of root), or select any entity by its number in the STEP file. There is a limited set of types of entities that can be used as starting entities for translation. Only the following entities are recognized as transferable: 
@@ -1653,6 +1659,13 @@ For each Saved View OCCT STEP Reader will retrieve the following attributes:
 - clipping planes (single plane of combination of planes);
 - front and back plane clipping.
 
+### User defined attributes
+Attributes are implemented in accordance with <a href="https://www.mbx-if.org/documents/rec_prac_user_def_attributes_v18.pdf">Recommended practices for User Defined Attributes</a> section 4, 5, 6.1-6.3 and 7.
+Attributes can be read for shapes at levels:
+- Part/Product Level;
+- Component Instances in an Assembly;
+- Geometry Level.
+
 @subsection occt_step_7_3 Writing to STEP
 
 The translation from XDE to STEP can be initialized as follows: 
@@ -1729,6 +1742,9 @@ Interface_Static::SetIVal("write.step.schema", 5));
 ~~~~
 ### Saved views
 Saved Views are not exported by OCCT.
+
+### User defined attributes
+Attributes can be imported from STEP.
 
 
 

@@ -426,7 +426,7 @@ static Standard_Integer ReadStep(Draw_Interpretor& di, Standard_Integer argc, co
   if (!aModeStr.IsEmpty())
   {
     Standard_Boolean aMode = Standard_True;
-    for (Standard_Integer i = 1; aModeStr.Value (i); ++i)
+    for (Standard_Integer i = 1; i <= aModeStr.Length(); ++i)
     {
       switch (aModeStr.Value (i))
       {
@@ -436,6 +436,7 @@ static Standard_Integer ReadStep(Draw_Interpretor& di, Standard_Integer argc, co
         case 'n' : aReader.SetNameMode  (aMode); break;
         case 'l' : aReader.SetLayerMode (aMode); break;
         case 'v' : aReader.SetPropsMode (aMode); break;
+        case 'm' : aReader.SetMetaMode (aMode); break;
         default:
         {
           Message::SendFail() << "Syntax error at '" << aModeStr << "'\n";
@@ -1344,6 +1345,11 @@ void XDEDRAW_Common::InitCommands(Draw_Interpretor& di)
   di.Add("ReadStep",
          "Doc filename [mode] [-stream]"
          "\n\t\t: Read STEP file to a document."
+         "\n\t\t:   mode can be: +c or -c : Read colors"
+         "\n\t\t:                +n or -n : Read names"
+         "\n\t\t:                +l or -l : Read layers"
+         "\n\t\t:                +v or -v : Read validation properties"
+         "\n\t\t:                +m or -m : Read metadata (user-defined properties)"
          "\n\t\t:  -stream read using istream reading interface (testing)",
          __FILE__, ReadStep, g);
   di.Add("WriteStep" ,
