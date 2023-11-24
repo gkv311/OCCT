@@ -1,0 +1,30 @@
+# !!!! This file is generated automatically, do not edit manually! See end script
+set filename bug28345_30338.stp
+
+set ref_data {
+Property for [0:1:1:1]:
+H_CIP : 55.546
+Property for [0:1:1:2]:
+A : 3
+B : 16
+C : 140
+D : 3
+DESCRIPTION : 
+E : 55
+F : 0.3
+H : 45
+I : 15
+MODELED_BY : 
+Property for [0:1:1:3]:
+A : 3
+B : 16
+C : 140
+D : 3
+DESCRIPTION : 
+E : 55
+F : 0.3
+H : 45
+I : 15
+MODELED_BY : 
+
+}
