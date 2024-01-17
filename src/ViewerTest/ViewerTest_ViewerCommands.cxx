@@ -115,6 +115,14 @@
   #include <Aspect_NeutralWindow.hxx>
 #endif
 
+#if defined(HAVE_WAYLAND)
+  #include <Aspect_DisplayConnectionDefinitionError.hxx>
+  #include <Wayland_DisplayConnection.hxx>
+  #include <Wayland_Window.hxx>
+
+  #include <wayland-client-core.h>
+#endif
+
 //==============================================================================
 //  VIEWER GLOBAL VARIABLES
 //==============================================================================
@@ -439,6 +447,7 @@ void ViewerTest::InitViewName (const TCollection_AsciiString& theName,
   ViewerTest_myViews.Bind (theName, theView);
   Handle(ViewerTest_EventManager) aViewMgr = new ViewerTest_EventManager (theView, Handle(AIS_InteractiveContext)());
   ViewerTest_myEventManagers.Bind (theName, aViewMgr);
+  theView->Window()->SetListener(aViewMgr.get());
 }
 
 TCollection_AsciiString ViewerTest::GetCurrentViewName ()
@@ -549,6 +558,23 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
   {
     // Get connection string
     Handle(Aspect_DisplayConnection) aDispConn;
+  #if defined(HAVE_WAYLAND)
+    try
+    {
+      if (theParams.ToPreferWayland)
+      {
+        if (!theParams.DisplayName.IsEmpty())
+          aDispConn = new Wayland_DisplayConnection (theParams.DisplayName);
+        else
+          aDispConn = new Wayland_DisplayConnection();
+      }
+    }
+    catch (const Aspect_DisplayConnectionDefinitionError& theErr)
+    {
+      Message::SendTrace() << theErr;
+      aDispConn.Nullify();
+    }
+  #endif
   #if defined(HAVE_XLIB)
     if (aDispConn.IsNull())
     {
@@ -745,12 +771,31 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
       aWin->SetIgnoreDpi(true);
 
     VT_GetWindow() = aWin;
-  #elif defined(HAVE_XLIB)
+  #elif defined(HAVE_XLIB) || defined(HAVE_WAYLAND)
+    #if defined(HAVE_WAYLAND)
+    Handle(Wayland_DisplayConnection) aWayDispCon = Handle(Wayland_DisplayConnection)::DownCast(aGraphicDriver->GetDisplayConnection());
+    if (!aWayDispCon.IsNull())
+    {
+      Handle(Wayland_Window) aWin = new Wayland_Window();
+      aWin->SetVirtual(isVirtual);
+      if (Draw_DpiAware == 0)
+        aWin->SetIgnoreDpi(true);
+
+      aWin->Create(aWayDispCon, "org.opencascade.draw", aTitle.ToCString(), Graphic3d_Vec2i(aPxSize));
+      aWin->Map(); // SetWindow() hangs within eglSwapBuffers() for unmapped Wayland window
+      VT_GetWindow() = aWin;
+    }
+    #endif
+    #if defined(HAVE_XLIB)
     Handle(Xw_DisplayConnection) anXDispCon = Handle(Xw_DisplayConnection)::DownCast(aGraphicDriver->GetDisplayConnection());
-    VT_GetWindow() = new Xw_Window(anXDispCon,
-                                   aTitle.ToCString(),
-                                   (int )aPxTopLeft.x(), (int )aPxTopLeft.y(),
-                                   (int )aPxSize.x(), (int )aPxSize.y());
+    if (!anXDispCon.IsNull())
+    {
+      VT_GetWindow() = new Xw_Window(anXDispCon,
+                                     aTitle.ToCString(),
+                                     (int )aPxTopLeft.x(), (int )aPxTopLeft.y(),
+                                     (int )aPxSize.x(), (int )aPxSize.y());
+    }
+    #endif
   #elif defined(__APPLE__)
     Handle(Cocoa_Window) aWin = new Cocoa_Window(aTitle.ToCString(),
                                                  (int )aPxTopLeft.x(), (int )aPxTopLeft.y(),
@@ -810,6 +855,7 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
   ViewerTest_myViews.Bind (aViewNames.GetViewName(), aView);
   Handle(ViewerTest_EventManager) anEventMgr = new ViewerTest_EventManager (aView, ViewerTest::GetAISContext());
   ViewerTest_myEventManagers.Bind (aViewNames.GetViewName(), anEventMgr);
+  VT_GetWindow()->SetListener(anEventMgr.get());
 
   // Setup for X11 or NT
   SetDisplayConnection (ViewerTest::CurrentView()->Viewer()->Driver()->GetDisplayConnection());
@@ -826,7 +872,7 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
     a3DViewer->SetLightOn();
   }
 
-#if defined(HAVE_XLIB)
+#if defined(HAVE_XLIB) || defined(HAVE_WAYLAND)
   if (isNewDriver && !GetDisplayConnection().IsNull() && GetDisplayConnection()->FileDescriptor() != -1)
   {
     Tcl_CreateFileHandler(GetDisplayConnection()->FileDescriptor(), TCL_READABLE,
@@ -1105,6 +1151,17 @@ static int VInit (Draw_Interpretor& theDi, Standard_Integer theArgsNb, const cha
     else if (anArgCase == "-dpiaware")
     {
       aDpiAware = Draw::ParseOnOffIterator (theArgsNb, theArgVec, anArgIt) ? 1 : 0;
+    }
+    else if (anArgCase == "-wayland")
+    {
+      aParams.ToPreferWayland = Draw::ParseOnOffIterator (theArgsNb, theArgVec, anArgIt);
+    #ifndef HAVE_WAYLAND
+      if (aParams.ToPreferWayland)
+      {
+        theDi << "Syntax error: -wayland is unsupported within current configuration";
+        return 1;
+      }
+    #endif
     }
     else if (!ViewerTest::CurrentView().IsNull()
           &&  aParams.ViewToClone.IsNull()
@@ -1476,7 +1533,6 @@ static int VHLRType (Draw_Interpretor& , Standard_Integer argc, const char** arg
 //function : FindViewIdByWindowHandle
 //purpose  : Find theView Id in the map of views by window handle
 //==============================================================================
-#if defined(_WIN32) || defined(HAVE_XLIB)
 static TCollection_AsciiString FindViewIdByWindowHandle (Aspect_Drawable theWindowHandle)
 {
   for (NCollection_DoubleMap<TCollection_AsciiString, Handle(V3d_View)>::Iterator
@@ -1488,7 +1544,6 @@ static TCollection_AsciiString FindViewIdByWindowHandle (Aspect_Drawable theWind
   }
   return TCollection_AsciiString("");
 }
-#endif
 
 //! Make the view active
 void ActivateView (const TCollection_AsciiString& theViewName,
@@ -1498,6 +1553,31 @@ void ActivateView (const TCollection_AsciiString& theViewName,
   {
     ViewerTest::ActivateView (aView, theToUpdate);
   }
+}
+
+//==============================================================================
+//function : ActivateView
+//purpose  :
+//==============================================================================
+void ViewerTest::ActivateView (const Aspect_Window& theWin,
+                               Standard_Boolean theToUpdate)
+{
+  if (VT_GetWindow().IsNull()
+   || VT_GetWindow()->NativeHandle() != theWin.NativeHandle())
+  {
+    ::ActivateView(FindViewIdByWindowHandle(theWin.NativeHandle()), theToUpdate);
+  }
+}
+
+//==============================================================================
+//function : RemoveView
+//purpose  :
+//==============================================================================
+void ViewerTest::RemoveView (const Aspect_Window& theWin,
+                             const Standard_Boolean theToRemoveContext)
+{
+  const TCollection_AsciiString aViewName = FindViewIdByWindowHandle(theWin.NativeHandle());
+  RemoveView (aViewName, theToRemoveContext);
 }
 
 //==============================================================================
@@ -1543,6 +1623,8 @@ void ViewerTest::ActivateView (const Handle(V3d_View)& theView,
   if (!VT_GetWindow().IsNull())
   {
     VT_GetWindow()->SetTitle (TCollection_AsciiString("3D View - ") + *aViewName + "(*)");
+    // redirect native window events to view or subview listener
+    VT_GetWindow()->SetListener(ViewerTest::CurrentEventManager().get());
   }
   SetDisplayConnection(aView->Viewer()->Driver()->GetDisplayConnection());
   if (theToUpdate)
@@ -1625,11 +1707,12 @@ void ViewerTest::RemoveView (const TCollection_AsciiString& theViewName, const S
   ViewerTest_myEventManagers.UnBind1(theViewName);
   if (!aView->Window().IsNull())
   {
+    aView->Window()->SetListener(nullptr);
     aView->Window()->Unmap();
   }
   aView->Remove();
 
-#if defined(HAVE_XLIB)
+#if defined(HAVE_XLIB) || defined(HAVE_WAYLAND)
   if (!GetDisplayConnection().IsNull())
     GetDisplayConnection()->Flush();
 #endif
@@ -1659,7 +1742,7 @@ void ViewerTest::RemoveView (const TCollection_AsciiString& theViewName, const S
       if(isRemoveDriver)
       {
         ViewerTest_myDrivers.UnBind2 (aCurrentContext->CurrentViewer()->Driver());
-      #if defined(HAVE_XLIB)
+      #if defined(HAVE_XLIB) || defined(HAVE_WAYLAND)
         const Handle(Aspect_DisplayConnection)& aDispCon = aCurrentContext->CurrentViewer()->Driver()->GetDisplayConnection();
         if (!aDispCon.IsNull() && aDispCon->FileDescriptor() != -1)
           Tcl_DeleteFileHandler(aDispCon->FileDescriptor());
@@ -2341,10 +2424,11 @@ int ViewerMainLoop (Standard_Integer theNbArgs, const char** theArgVec)
   return 0;
 }
 
-#elif defined(HAVE_XLIB)
+#elif defined(HAVE_XLIB) || defined(HAVE_WAYLAND)
 
 int ViewerMainLoop (Standard_Integer theNbArgs, const char** theArgVec)
 {
+#if defined(HAVE_XLIB)
   static XEvent aReport;
   const Standard_Boolean toPick = theNbArgs > 0;
   if (theNbArgs > 0)
@@ -2399,6 +2483,9 @@ int ViewerMainLoop (Standard_Integer theNbArgs, const char** theArgVec)
     }
   }
   return (!toPick || ViewerTest::CurrentEventManager()->ToPickPoint()) ? 1 : 0;
+#else
+  return 0;
+#endif
 }
 
 //==============================================================================
@@ -2426,7 +2513,35 @@ static void VProcessEvents (ClientData theDispX, int)
 
   // process new events in queue
   SetDisplayConnection (aDispConn);
+#if defined(HAVE_WAYLAND)
+  if (Wayland_DisplayConnection* aWayDispCon = dynamic_cast<Wayland_DisplayConnection*>(aDispConn.get()))
+  {
+    while (wl_display_prepare_read(aWayDispCon->GetWlDisplay()) != 0)
+      wl_display_dispatch_pending(aWayDispCon->GetWlDisplay());
 
+    wl_display_flush(aWayDispCon->GetWlDisplay());
+    wl_display_read_events(aWayDispCon->GetWlDisplay());
+
+    wl_display_dispatch_pending(aWayDispCon->GetWlDisplay());
+
+    Handle(ViewerTest_EventManager) anActiveMgr = ViewerTest::CurrentEventManager();
+    if (!anActiveMgr.IsNull())
+      anActiveMgr->ProcessExpose();
+
+    for (NCollection_DoubleMap<TCollection_AsciiString, Handle(ViewerTest_EventManager)>::Iterator
+         anIter(ViewerTest_myEventManagers); anIter.More(); anIter.Next())
+    {
+      const Handle(ViewerTest_EventManager)& anOtherMgr = anIter.Value();
+      if (anOtherMgr != anActiveMgr
+      && !anOtherMgr->View()->IsSubview()
+      &&  anOtherMgr->HasPendingInput())
+      {
+        anIter.Value()->ProcessExpose();
+      }
+    }
+  }
+#endif
+#if defined(HAVE_XLIB)
   if (dynamic_cast<Xw_DisplayConnection*>(aDispConn.get()) != nullptr)
   {
     int aNbRemain = 0;
@@ -2462,6 +2577,7 @@ static void VProcessEvents (ClientData theDispX, int)
       XFlush (aDispX);
     }
   }
+#endif
 
   if (const Handle(AIS_InteractiveContext)& anActiveCtx = ViewerTest::GetAISContext())
   {
@@ -14127,7 +14243,7 @@ Makes specified driver active when ActiveName argument is specified.
   addCmd ("vinit", VInit, /* [vinit] */ R"(
 vinit [-name viewName] [-left leftPx] [-top topPx] [-width widthPx] [-height heightPx]
       [-exitOnClose] [-closeOnEscape] [-cloneActive] [-virtual {0|1}]=0 [-2d_mode {0|1}]=0
-      [-display displayName] [-dpiAware {0|1}]=0
+      [-display displayName] [-dpiAware {0|1}]=0 [-wayland {0|1}=0]
       [-subview] [-parent OtherView] [-composer {0|1}]=0 [-margins DX DY]=0
 Creates new View window with specified name viewName.
 By default the new view is created in the viewer and in graphic driver shared with active view.
