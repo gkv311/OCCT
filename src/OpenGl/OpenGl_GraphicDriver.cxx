@@ -323,7 +323,7 @@ Standard_Boolean OpenGl_GraphicDriver::InitContext()
   EGLNativeDisplayType aDisplay = !myDisplayConnection.IsNull()
                                 ? (EGLNativeDisplayType)myDisplayConnection->GetDisplayAspect()
                                 : EGL_DEFAULT_DISPLAY;
-#if defined(HAVE_XLIB)
+#if defined(HAVE_XLIB) || defined(HAVE_WAYLAND)
   if (aDisplay == EGL_DEFAULT_DISPLAY)
   {
     ::Message::SendFail("Error: no connection to X11 display");
@@ -445,7 +445,7 @@ Standard_Boolean OpenGl_GraphicDriver::InitEglContext (Aspect_Display          t
 {
   ReleaseContext();
 #if defined(HAVE_EGL)
-#if defined(HAVE_XLIB)
+#if defined(HAVE_XLIB) || defined(HAVE_WAYLAND)
   if (myDisplayConnection.IsNull())
   {
     return Standard_False;
