@@ -1272,16 +1272,14 @@ static int dputs (Draw_Interpretor& theDI,
       {
         Message_PrinterOStream::SetConsoleTextColor (aStream, aColor, toIntense);
       }
-
       *aStream << theArgVec[anArgIter];
-      if (!isNoNewline)
-      {
-        *aStream << std::endl;
-      }
-
       if (toIntense || aColor != Message_ConsoleColor_Default)
       {
         Message_PrinterOStream::SetConsoleTextColor (aStream, Message_ConsoleColor_Default, false);
+      }
+      if (!isNoNewline)
+      {
+        *aStream << std::endl;
       }
       return 0;
     }
