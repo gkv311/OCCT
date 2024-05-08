@@ -299,13 +299,15 @@ private:
   //! others set trim.
   Standard_EXPORT void SetTrim (const Standard_Real U1, const Standard_Real U2, const Standard_Real V1, const Standard_Real V2, const Standard_Boolean UTrim, const Standard_Boolean VTrim, const Standard_Boolean USense, const Standard_Boolean VSense);
 
+private:
+
   Handle(Geom_Surface) basisSurf;
-  Standard_Real utrim1;
-  Standard_Real vtrim1;
-  Standard_Real utrim2;
-  Standard_Real vtrim2;
-  Standard_Boolean isutrimmed;
-  Standard_Boolean isvtrimmed;
+  Standard_Real utrim1 = 0.0;
+  Standard_Real vtrim1 = 0.0;
+  Standard_Real utrim2 = 0.0;
+  Standard_Real vtrim2 = 0.0;
+  Standard_Boolean isutrimmed = false;
+  Standard_Boolean isvtrimmed = false;
 
 };
 
