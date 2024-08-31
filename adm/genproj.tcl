@@ -2349,11 +2349,6 @@ proc osutils:cbptk { theCmpl theOutDir theToolKit thePlatform} {
         puts "Warning : more than one occurrences for [file tail $aSrcFile]"
       }
     }
-
-    # macros for correct DLL exports
-#    if { $thePlatform == "wnt" || $thePlatform == "uwp" } {
-#      lappend aTKDefines "__${xlo}_DLL"
-#    }
   }
 
   return [osutils:cbp $theCmpl $theOutDir $theToolKit $thePlatform $aTKSrcFiles $aUsedLibs $aFrameworks $anIncPaths $aTKDefines]
@@ -2468,11 +2463,6 @@ proc osutils:cbpx { theCmpl theOutDir theToolKit thePlatform } {
     } else {
       puts "Warning : in cbp there are more than one occurrences for [file tail $aSrcFile]"
     }
-
-    # macros for correct DLL exports
-#    if { $thePlatform == "wnt" || $thePlatform == "uwp" } {
-#      lappend aTKDefines "__${theToolKit}_DLL"
-#    }
 
     # common include paths
     lappend anIncPaths "../../../inc"

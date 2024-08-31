@@ -57,10 +57,6 @@ foreach (OCCT_PACKAGE ${USED_PACKAGES})
     set (OCCT_PACKAGE_NAME "${OCCT_PACKAGE}")
   endif()
 
-  if (WIN32)
-    list (APPEND PRECOMPILED_DEFS "-D__${OCCT_PACKAGE_NAME}_DLL")
-  endif()
-
   set (SOURCE_FILES)
   set (HEADER_FILES)
 
