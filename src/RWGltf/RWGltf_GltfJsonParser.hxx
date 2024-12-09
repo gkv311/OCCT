@@ -29,6 +29,8 @@
 #include <TopoDS_Face.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 
+class TDataStd_NamedData;
+
 // workaround name collisions with XLib
 #ifdef None
   #undef None
@@ -218,6 +220,12 @@ protected:
                                         const RWGltf_GltfBufferView& theView,
                                         const RWGltf_GltfArrayType   theType);
 
+  //! Parse "extras" value @p theValue recursivelly and fill in @p theData.
+  Standard_EXPORT bool gltfParseExtras (Handle(TDataStd_NamedData)& theData,
+                                        const TCollection_AsciiString& theParentId,
+                                        const TCollection_AsciiString& theKeyPrefix,
+                                        const RWGltf_JsonValue& theValue);
+
 protected:
 
   //! Read vec4 from specified item.
@@ -297,17 +305,19 @@ protected:
   void bindNodeShape (TopoDS_Shape& theShape,
                       const TopLoc_Location& theLoc,
                       const TCollection_AsciiString& theNodeId,
-                      const RWGltf_JsonValue* theUserName)
+                      const RWGltf_JsonValue* theUserName,
+                      const Handle(TDataStd_NamedData)& theExtras)
   {
-    bindNamedShape (theShape, ShapeMapGroup_Nodes, theLoc, theNodeId, theUserName);
+    bindNamedShape (theShape, ShapeMapGroup_Nodes, theLoc, theNodeId, theUserName, theExtras);
   }
 
   //! Bind name attribute.
   void bindMeshShape (TopoDS_Shape& theShape,
                       const TCollection_AsciiString& theMeshId,
-                      const RWGltf_JsonValue* theUserName)
+                      const RWGltf_JsonValue* theUserName,
+                      const Handle(TDataStd_NamedData)& theExtras)
   {
-    bindNamedShape (theShape, ShapeMapGroup_Meshes, TopLoc_Location(), theMeshId, theUserName);
+    bindNamedShape (theShape, ShapeMapGroup_Meshes, TopLoc_Location(), theMeshId, theUserName, theExtras);
   }
 
   //! Find named shape.
@@ -329,7 +339,8 @@ protected:
                                        ShapeMapGroup theGroup,
                                        const TopLoc_Location& theLoc,
                                        const TCollection_AsciiString& theId,
-                                       const RWGltf_JsonValue* theUserName);
+                                       const RWGltf_JsonValue* theUserName,
+                                       const Handle(TDataStd_NamedData)& theExtras);
 
   //! Find named shape.
   bool findNamedShape (TopoDS_Shape& theShape,
