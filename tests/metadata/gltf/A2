@@ -1,0 +1,26 @@
+# !!!! This file is generated automatically, do not edit manually! See end script
+set filename bug28389_CONFIDENTIAL_SHEET_METAL_F3D.stp
+set ref_size 85891
+set check_metadata 1
+set ref_metadata {Property for [0:1:1:1]:
+Density : 1000
+Ixx : 1.774e-06
+Ixy : 2.044e-07
+Ixz : 9.321e-07
+Iyx : 2.044e-07
+Iyy : 3.6385e-06
+Iyz : -1.203e-07
+Izx : 9.321e-07
+Izy : -1.203e-07
+Izz : 3.3559e-06
+JoggleFormula : 
+Mass : 0.137546
+OriginX : 0
+OriginY : 0
+OriginZ : 0
+Surface : 0.345954
+Volume : 0.000137546
+xCenterOfGravity : -0.126735
+yCenterOfGravity : 0.114845
+zCenterOfGravity : -0.0560645
+}

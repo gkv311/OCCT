@@ -1,0 +1,10 @@
+# !!!! This file is generated automatically, do not edit manually! See end script
+set filename gh1384_catiatest_metadata.stp
+set ref_size 3242
+set check_metadata 1
+set ref_metadata {Property for [0:1:1:1:1]:
+PartHeight : 284.75
+PartSource : 自定义模型库
+PartType : 158
+一级分类名称 : 基本三维图形
+}

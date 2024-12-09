@@ -25,6 +25,7 @@
 #include <OSD_ThreadPool.hxx>
 #include <Precision.hxx>
 #include <FSD_Base64.hxx>
+#include <TDataStd_NamedData.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Iterator.hxx>
@@ -1133,6 +1134,8 @@ bool RWGltf_GltfJsonParser::gltfParseSceneNode (TopoDS_Shape& theNodeShape,
   const RWGltf_JsonValue* aTrsfRotVal   = findObjectMember (theSceneNode, "rotation");
   const RWGltf_JsonValue* aTrsfScaleVal = findObjectMember (theSceneNode, "scale");
   const RWGltf_JsonValue* aTrsfTransVal = findObjectMember (theSceneNode, "translation");
+  const RWGltf_JsonValue* anExtrasVal   = findObjectMember (theSceneNode, "extras");
+
   if (findNodeShape (theNodeShape, theSceneNodeId))
   {
     return true;
@@ -1297,6 +1300,10 @@ bool RWGltf_GltfJsonParser::gltfParseSceneNode (TopoDS_Shape& theNodeShape,
     }
   }
 
+  Handle(TDataStd_NamedData) anExtras;
+  if (anExtrasVal != nullptr)
+    gltfParseExtras (anExtras, theSceneNodeId, "", *anExtrasVal);
+
   BRep_Builder aBuilder;
   TopoDS_Compound aNodeShape;
   aBuilder.MakeCompound (aNodeShape);
@@ -1306,7 +1313,7 @@ bool RWGltf_GltfJsonParser::gltfParseSceneNode (TopoDS_Shape& theNodeShape,
   && !gltfParseSceneNodes (aChildShapes, *aChildren, theProgress))
   {
     theNodeShape = aNodeShape;
-    bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName);
+    bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName, anExtras);
     return false;
   }
   for (TopTools_SequenceOfShape::Iterator aChildShapeIter (aChildShapes); aChildShapeIter.More(); aChildShapeIter.Next())
@@ -1326,7 +1333,7 @@ bool RWGltf_GltfJsonParser::gltfParseSceneNode (TopoDS_Shape& theNodeShape,
       if (aMesh == NULL)
       {
         theNodeShape = aNodeShape;
-        bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName);
+        bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName, anExtras);
         reportGltfError ("Scene node '" + theSceneNodeId + "' refers to non-existing mesh.");
         return false;
       }
@@ -1335,7 +1342,7 @@ bool RWGltf_GltfJsonParser::gltfParseSceneNode (TopoDS_Shape& theNodeShape,
       if (!gltfParseMesh (aMeshShape, getKeyString (*aMeshIter), *aMesh))
       {
         theNodeShape = aNodeShape;
-        bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName);
+        bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName, anExtras);
         return false;
       }
       if (!aMeshShape.IsNull())
@@ -1352,7 +1359,7 @@ bool RWGltf_GltfJsonParser::gltfParseSceneNode (TopoDS_Shape& theNodeShape,
     if (aMesh == NULL)
     {
       theNodeShape = aNodeShape;
-      bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName);
+      bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName, anExtras);
       reportGltfError ("Scene node '" + theSceneNodeId + "' refers to non-existing mesh.");
       return false;
     }
@@ -1361,7 +1368,7 @@ bool RWGltf_GltfJsonParser::gltfParseSceneNode (TopoDS_Shape& theNodeShape,
     if (!gltfParseMesh (aMeshShape, getKeyString (*aMesh_2), *aMesh))
     {
       theNodeShape = aNodeShape;
-      bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName);
+      bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName, anExtras);
       return false;
     }
     if (!aMeshShape.IsNull())
@@ -1380,7 +1387,7 @@ bool RWGltf_GltfJsonParser::gltfParseSceneNode (TopoDS_Shape& theNodeShape,
   {
     theNodeShape = aNodeShape;
   }
-  bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName);
+  bindNodeShape (theNodeShape, aNodeLoc, theSceneNodeId, aName, anExtras);
   return true;
 }
 
@@ -1392,8 +1399,9 @@ bool RWGltf_GltfJsonParser::gltfParseMesh (TopoDS_Shape& theMeshShape,
                                            const TCollection_AsciiString& theMeshId,
                                            const RWGltf_JsonValue& theMesh)
 {
-  const RWGltf_JsonValue* aName  = findObjectMember (theMesh, "name");
-  const RWGltf_JsonValue* aPrims = findObjectMember (theMesh, "primitives");
+  const RWGltf_JsonValue* aName       = findObjectMember (theMesh, "name");
+  const RWGltf_JsonValue* aPrims      = findObjectMember (theMesh, "primitives");
+  const RWGltf_JsonValue* anExtrasVal = findObjectMember (theMesh, "extras");
   if (aPrims == NULL
   || !aPrims->IsArray())
   {
@@ -1439,7 +1447,12 @@ bool RWGltf_GltfJsonParser::gltfParseMesh (TopoDS_Shape& theMeshShape,
   {
     theMeshShape = aMeshShape;
   }
-  bindMeshShape (theMeshShape, theMeshId, aName);
+
+  Handle(TDataStd_NamedData) anExtras;
+  if (anExtrasVal != nullptr)
+    gltfParseExtras (anExtras, theMeshId, "", *anExtrasVal);
+
+  bindMeshShape (theMeshShape, theMeshId, aName, anExtras);
   return true;
 }
 
@@ -1970,6 +1983,105 @@ bool RWGltf_GltfJsonParser::gltfParseBuffer (const Handle(RWGltf_GltfLatePrimiti
 }
 
 // =======================================================================
+// function : gltfParseExtras
+// purpose  :
+// =======================================================================
+bool RWGltf_GltfJsonParser::gltfParseExtras (Handle(TDataStd_NamedData)& theData,
+                                             const TCollection_AsciiString& theParentId,
+                                             const TCollection_AsciiString& theKeyPrefix,
+                                             const RWGltf_JsonValue& theValue)
+{
+  if (!theValue.IsObject())
+    return false;
+
+  const auto changeData = [](Handle(TDataStd_NamedData)& theDataIn) -> Handle(TDataStd_NamedData)&
+  {
+    if (theDataIn.IsNull())
+      theDataIn = new TDataStd_NamedData();
+
+    return theDataIn;
+  };
+
+  for (rapidjson::Document::ConstMemberIterator aChildIter = theValue.MemberBegin(); aChildIter != theValue.MemberEnd(); ++aChildIter)
+  {
+    const TCollection_AsciiString aKey = !theKeyPrefix.IsEmpty()
+                                       ? theKeyPrefix + "." + aChildIter->name.GetString()
+                                       : TCollection_AsciiString(aChildIter->name.GetString());
+
+    const RWGltf_JsonValue& aVal = aChildIter->value;
+    if (aVal.IsObject())
+    {
+      gltfParseExtras(theData, theParentId, aKey, aVal);
+    }
+    else if (aVal.IsString())
+    {
+      changeData(theData)->SetString(aKey, TCollection_AsciiString(aVal.GetString()));
+    }
+    else if (aVal.IsInt())
+    {
+      changeData(theData)->SetInteger(aKey, aVal.GetInt());
+    }
+    else if (aVal.IsNumber())
+    {
+      if (!aVal.IsLosslessDouble())
+        reportGltfWarning("Extras owner '" + theParentId + "', Value '" + aKey + "', number read with precision loss.");
+
+      changeData(theData)->SetReal(aKey, aVal.GetDouble());
+    }
+    else if (aVal.IsArray())
+    {
+      if (aVal.Size() == 0)
+      {
+        // Processing empty array first.
+        reportGltfWarning("Extras owner '" + theParentId + "', Value '" + aKey + "', empty array will be stored as empty string.");
+        changeData(theData)->SetString(aKey, "");
+      }
+      else if (aVal[0].IsInt())
+      {
+        // Array of integers is supported, storing as normal.
+        Handle(TColStd_HArray1OfInteger) anArray = new TColStd_HArray1OfInteger(1, aVal.Size());
+        for (Standard_Integer anIndex = 0; anIndex < anArray->Size(); ++anIndex)
+          anArray->SetValue(anIndex + 1, aVal[anIndex].GetInt());
+
+        changeData(theData)->SetArrayOfIntegers(aKey, anArray);
+      }
+      else if (aVal[0].IsNumber())
+      {
+        // Array of double is supported, storing as normal.
+        Handle(TColStd_HArray1OfReal) anArray = new TColStd_HArray1OfReal(1, aVal.Size());
+        for (Standard_Integer anIndex = 0; anIndex < anArray->Size(); ++anIndex)
+          anArray->SetValue(anIndex + 1, aVal[anIndex].GetDouble());
+
+        changeData(theData)->SetArrayOfReals(aKey, anArray);
+      }
+      else if (aVal[0].IsString())
+      {
+        // Storing array of strings as string with separator.
+        //Message::SendTrace() << "Extras owner '" <<theParentId << "', Value '" << aKey << "', "
+        //                     << "array of strings will be stored as string with separators.";
+        TCollection_AsciiString anArrayString = aVal[0].GetString();
+        for (rapidjson::Value::ConstValueIterator aStrIter = aVal.Begin(); aStrIter != aVal.End(); ++aStrIter)
+          anArrayString = anArrayString + ";" + aStrIter->GetString();
+
+        changeData(theData)->SetString(aKey, anArrayString);
+      }
+      else
+      {
+        // Unsupported type of array. Print waring and return.
+        reportGltfWarning("Extras owner '" + theParentId + "', Value '" + aKey + "', skipping array of unsupported type.");
+      }
+    }
+    else
+    {
+      reportGltfWarning("Extras owner '" + theParentId + "', Value '" + aKey
+                        + "', skipping item of unsupported type.");
+    }
+  }
+
+  return !theData.IsNull();
+}
+
+// =======================================================================
 // function : bindNamedShape
 // purpose  :
 // =======================================================================
@@ -1977,7 +2089,8 @@ void RWGltf_GltfJsonParser::bindNamedShape (TopoDS_Shape& theShape,
                                             ShapeMapGroup theGroup,
                                             const TopLoc_Location& theLoc,
                                             const TCollection_AsciiString& theId,
-                                            const RWGltf_JsonValue* theUserName)
+                                            const RWGltf_JsonValue* theUserName,
+                                            const Handle(TDataStd_NamedData)& theExtras)
 {
   if (theShape.IsNull())
   {
@@ -2012,6 +2125,7 @@ void RWGltf_GltfJsonParser::bindNamedShape (TopoDS_Shape& theShape,
   {
     RWMesh_NodeAttributes aShapeAttribs;
     aShapeAttribs.Name = aUserName;
+    aShapeAttribs.NamedData = theExtras;
     if (myIsGltf1)
     {
       aShapeAttribs.RawName = theId;
