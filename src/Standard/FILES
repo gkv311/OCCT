@@ -14,7 +14,6 @@ Standard_CLocaleSentry.hxx
 Standard_Condition.cxx
 Standard_Condition.hxx
 Standard_ConstructionError.hxx
-Standard_Copy.tcl
 Standard_CString.cxx
 Standard_CString.hxx
 Standard_DefineAlloc.hxx
