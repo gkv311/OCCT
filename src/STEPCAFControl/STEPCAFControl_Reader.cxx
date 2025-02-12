@@ -5696,17 +5696,16 @@ Standard_Boolean STEPCAFControl_Reader::fillAttributes(const Handle(XSControl_Wo
                                                        const StepData_Factors& theLocalFactors,
                                                        Handle(TDataStd_NamedData)& theAttr) const
 {
-  // skip if key is null
-  if (thePropDef->Name().IsNull())
-  {
+  // Skip if property definition or name is null
+  if (thePropDef.IsNull() || thePropDef->Name().IsNull())
     return Standard_False;
-  }
 
-  Handle(StepRepr_PropertyDefinitionRepresentation) aPropDefRepr;
+  const TCollection_AsciiString& aPropName = thePropDef->Name()->String();
   Interface_EntityIterator aSharingListOfPD = theWS->Graph().Sharings(thePropDef);
   for (aSharingListOfPD.Start(); aSharingListOfPD.More(); aSharingListOfPD.Next())
   {
-    aPropDefRepr = Handle(StepRepr_PropertyDefinitionRepresentation)::DownCast(aSharingListOfPD.Value());
+    Handle(StepRepr_PropertyDefinitionRepresentation) aPropDefRepr =
+        Handle(StepRepr_PropertyDefinitionRepresentation)::DownCast(aSharingListOfPD.Value());
     if (aPropDefRepr.IsNull())
       continue;
 
@@ -5715,41 +5714,49 @@ Standard_Boolean STEPCAFControl_Reader::fillAttributes(const Handle(XSControl_Wo
       continue;
 
     Handle(StepRepr_HArray1OfRepresentationItem) aReprItems = aUsedRepr->Items();
-    if (!aReprItems.IsNull())
+    if (aReprItems.IsNull())
+      continue;
+
+    for (const Handle(StepRepr_RepresentationItem)& anItem : *aReprItems)
     {
-      for (Standard_Integer anIndex = aReprItems->Lower(); anIndex <= aReprItems->Upper(); anIndex++)
+      if (anItem.IsNull())
+        continue;
+
+      if (Handle(StepRepr_DescriptiveRepresentationItem) aDescrItem = Handle(StepRepr_DescriptiveRepresentationItem)::DownCast(anItem))
       {
-        Handle(StepRepr_RepresentationItem) anItem = aReprItems->Value(anIndex);
-        if (anItem.IsNull())
+        Handle(TCollection_HAsciiString) aDescription = aDescrItem->Description();
+        if (!aDescription.IsNull())
+          theAttr->SetString(thePropDef->Name()->String(), aDescription->String());
+      }
+      else if (Handle(StepRepr_MeasureRepresentationItem) aMeasureItem = Handle(StepRepr_MeasureRepresentationItem)::DownCast(anItem))
+      {
+        if (aMeasureItem->Measure().IsNull()
+            || aMeasureItem->Measure()->ValueComponentMember().IsNull())
           continue;
 
-        if (anItem->IsKind(STANDARD_TYPE(StepRepr_DescriptiveRepresentationItem)))
+        Standard_Real aValue = aMeasureItem->Measure()->ValueComponent();
+        TCollection_AsciiString aValType = aMeasureItem->Measure()->ValueComponentMember()->Name();
+        StepBasic_Unit anUnit = aMeasureItem->Measure()->UnitComponent();
+        if (!anUnit.IsNull())
         {
-          Handle(StepRepr_DescriptiveRepresentationItem) aDescrItem = Handle(StepRepr_DescriptiveRepresentationItem)::DownCast(anItem);
-          Handle(TCollection_HAsciiString) aDescription = aDescrItem->Description();
-          theAttr->SetString(thePropDef->Name()->String(), aDescription->String());
-        }
-        else if (anItem->IsKind(STANDARD_TYPE(StepRepr_MeasureRepresentationItem)))
-        {
-          Handle(StepRepr_MeasureRepresentationItem) aMeasureItem = Handle(StepRepr_MeasureRepresentationItem)::DownCast(anItem);
-          Standard_Real aValue = aMeasureItem->Measure()->ValueComponent();
-          TCollection_AsciiString aValType = aMeasureItem->Measure()->ValueComponentMember()->Name();
-          StepBasic_Unit anUnit = aMeasureItem->Measure()->UnitComponent();
-          if (!anUnit.IsNull())
+          Standard_Real aParam = 1.;
+          if (anUnit.Type() == STANDARD_TYPE(StepBasic_DerivedUnit))
           {
-            Standard_Real aParam = 1.;
-            if (anUnit.Type() == STANDARD_TYPE(StepBasic_DerivedUnit))
+            Handle(StepBasic_DerivedUnit) aDUnit = anUnit.DerivedUnit();
+            if (!aDUnit.IsNull())
             {
-              Handle(StepBasic_DerivedUnit) aDUnit = anUnit.DerivedUnit();
               for (Standard_Integer anInd = 1; anInd <= aDUnit->NbElements(); ++anInd)
               {
                 Handle(StepBasic_DerivedUnitElement) aDUElem = aDUnit->ElementsValue(anInd);
+                if (aDUElem.IsNull())
+                  continue;
+
                 Standard_Real anExp = aDUElem->Exponent();
                 Handle(StepBasic_NamedUnit) aNUnit = aDUElem->Unit();
                 if (!aNUnit.IsNull())
                 {
                   if (aNUnit->IsKind(STANDARD_TYPE(StepBasic_ConversionBasedUnitAndLengthUnit)) ||
-                    aNUnit->IsKind(STANDARD_TYPE(StepBasic_SiUnitAndLengthUnit)))
+                      aNUnit->IsKind(STANDARD_TYPE(StepBasic_SiUnitAndLengthUnit)))
                   {
                     STEPConstruct_UnitContext anUnitCtx;
                     anUnitCtx.ComputeFactors(aNUnit, theLocalFactors);
@@ -5785,66 +5792,61 @@ Standard_Boolean STEPCAFControl_Reader::fillAttributes(const Handle(XSControl_Wo
               }
               aValue = aValue * aParam;
             }
-            else
+          }
+          else
+          {
+            Handle(StepBasic_NamedUnit) aNUnit = anUnit.NamedUnit();
+            if (!aNUnit.IsNull())
             {
-              Handle(StepBasic_NamedUnit) aNUnit = anUnit.NamedUnit();
-              if (!aNUnit.IsNull())
+              if (aNUnit->IsKind(STANDARD_TYPE(StepBasic_ConversionBasedUnitAndMassUnit)))
               {
-                if (aNUnit->IsKind(STANDARD_TYPE(StepBasic_ConversionBasedUnitAndMassUnit)))
+                Standard_Real aFact = 1.;
+                if (GetMassConversionFactor(aNUnit, aFact))
                 {
-                  Standard_Real aFact = 1.;
-                  if (GetMassConversionFactor(aNUnit, aFact))
-                  {
-                    aValue *= aFact;
-                  }
+                  aValue *= aFact;
                 }
-                else
-                {
-                  STEPConstruct_UnitContext anUnitCtx;
-                  anUnitCtx.ComputeFactors(aNUnit, theLocalFactors);
-                  if (anUnitCtx.AreaDone())
-                    aParam = anUnitCtx.AreaFactor();
-                  if (anUnitCtx.VolumeDone())
-                    aParam = anUnitCtx.VolumeFactor();
-                  if (anUnitCtx.LengthDone())
-                    aParam = anUnitCtx.LengthFactor();
+              }
+              else
+              {
+                STEPConstruct_UnitContext anUnitCtx;
+                anUnitCtx.ComputeFactors(aNUnit, theLocalFactors);
+                if (anUnitCtx.AreaDone())
+                  aParam = anUnitCtx.AreaFactor();
+                if (anUnitCtx.VolumeDone())
+                  aParam = anUnitCtx.VolumeFactor();
+                if (anUnitCtx.LengthDone())
+                  aParam = anUnitCtx.LengthFactor();
 
-                  aValue *= aParam;
-                }
+                aValue *= aParam;
               }
             }
           }
-          theAttr->SetReal(thePropDef->Name()->String(), aValue);
         }
-        else if (anItem->IsKind(STANDARD_TYPE(StepRepr_ValueRepresentationItem)))
+        theAttr->SetReal(aPropName, aValue);
+      }
+      else if (Handle(StepRepr_ValueRepresentationItem) aValueItem = Handle(StepRepr_ValueRepresentationItem)::DownCast(anItem))
+      {
+        Handle(StepBasic_MeasureValueMember) aMeasureValueMem = aValueItem->ValueComponentMember();
+        if (!aMeasureValueMem.IsNull())
         {
-          Handle(StepRepr_ValueRepresentationItem) aValueItem = Handle(StepRepr_ValueRepresentationItem)::DownCast(anItem);
-          Handle(StepBasic_MeasureValueMember) aMeasureValueMem = aValueItem->ValueComponentMember();
           Interface_ParamType aParamType = aMeasureValueMem->ParamType();
           if (aParamType == Interface_ParamInteger)
-          {
-            theAttr->SetInteger(thePropDef->Name()->String(), aMeasureValueMem->Integer());
-          }
+            theAttr->SetInteger(aPropName, aMeasureValueMem->Integer());
           else if (aParamType == Interface_ParamReal)
-          {
-            theAttr->SetReal(thePropDef->Name()->String(), aMeasureValueMem->Real());
-          }
+            theAttr->SetReal(aPropName, aMeasureValueMem->Real());
         }
-        else if (anItem->IsKind(STANDARD_TYPE(StepRepr_IntegerRepresentationItem)))
-        {
-          Handle(StepRepr_IntegerRepresentationItem) anIntegerItem = Handle(StepRepr_IntegerRepresentationItem)::DownCast(anItem);
-          theAttr->SetInteger(thePropDef->Name()->String(), anIntegerItem->Value());
-        }
-        else if (anItem->IsKind(STANDARD_TYPE(StepRepr_RealRepresentationItem)))
-        {
-          Handle(StepRepr_RealRepresentationItem) aRealItem = Handle(StepRepr_RealRepresentationItem)::DownCast(anItem);
-          theAttr->SetReal(thePropDef->Name()->String(), aRealItem->Value());
-        }
-        else if (anItem->IsKind(STANDARD_TYPE(StepRepr_BooleanRepresentationItem)))
-        {
-          Handle(StepRepr_BooleanRepresentationItem) aBoolItem = Handle(StepRepr_BooleanRepresentationItem)::DownCast(anItem);
-          theAttr->SetInteger(thePropDef->Name()->String(), aBoolItem->Value());
-        }
+      }
+      else if (Handle(StepRepr_IntegerRepresentationItem) anIntegerItem = Handle(StepRepr_IntegerRepresentationItem)::DownCast(anItem))
+      {
+        theAttr->SetInteger(aPropName, anIntegerItem->Value());
+      }
+      else if (Handle(StepRepr_RealRepresentationItem) aRealItem = Handle(StepRepr_RealRepresentationItem)::DownCast(anItem))
+      {
+        theAttr->SetReal(aPropName, aRealItem->Value());
+      }
+      else if (Handle(StepRepr_BooleanRepresentationItem) aBoolItem = Handle(StepRepr_BooleanRepresentationItem)::DownCast(anItem))
+      {
+        theAttr->SetInteger(aPropName, aBoolItem->Value());
       }
     }
   }
