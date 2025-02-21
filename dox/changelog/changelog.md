@@ -12,6 +12,148 @@ To examine the full set of changes between versions, you can use git to browse t
 Please take a look onto [upgrade/upgrade.md](../upgrade/upgrade.md)
 if you are upgrading your product to a newer version of OCCT.
 
+Cascade Technologia Septima 7.X (in development)
+-----------------------------------------------------------------------------------------------------------------------
+
+This version provides a smooth evolution of OCCT since version 7.7, and focused on:
+- Updated 3rd-parties to latest versions and improved *CMake* scripts
+  (*Tcl 9+*, *FFmpeg 7+*, *FreeType*, *Bison 3.8.2*, *Emscripten 4+*).
+- Improved stability and reproducibility of algorithms
+  (fixed uninitialized memory, inappropriate usage of unordered maps, removal of some global variables,
+   eliminated warnings from newest compilers, replaced unsafe `sprintf` with `snprintf`).
+- Improved regression testing system, CI/CD and test base based on publicly available dataset.
+- *Back-porting 100+ changes from OCCT 7.8 and OCCT 7.9 releases*,
+  avoiding dramatic changes in API, project structure and regressions.
+- Improvements, fixes and new features in Visualization module
+  (HiDPI support across platforms, Wayland support, image plugins, text formatter, and others).
+- Adaptation of OCCT classes / iterators for **C++ range-based loops**.
+
+The highlights in more details:
+- **Configuration**
+   - **Tcl**: fixed compatibility issues with *Tcl 9.0*.
+   - **FFmpeg**: code ported to API changes in FFmpeg and now requires *FFmpeg 7.0+*;
+                 added support to `Image_AlienPixMap`.
+   - **MinGW**: added `.dll.a` lookup and `.rc` embedding (DLL information).
+   - **Linux**:
+     - fixed auto-detection of system Draco library, added `-Wl,--no-undefined` and `-Wl,--as-needed` flags;
+     - added handling of `BUILD_FORCE_RelWithDebInfo` option;
+     - fixed treating of `BUILD_SOVERSION_NUMBERS=0` option to generate `.so` files without version;
+     - added handling of `GNUInstallDirs`.
+   - **WebAssembly**: fixed runtime issues within `WASM64` (`-sMEMORY64=1`), fixed building issues with Emscripten 4.x;
+   - **MSVC**: removed `#pragma comment(lib, "libX")` from code, fixed unescaped quotes within generated config file;
+   - Common: removed redundant building macros;
+             removed modification of `custom.sh` within INSTALL location during configure step.
+   - Removed legacy `TKIVtk` toolkit and optional *VTK* dependency (*VTK9* introduced dependency from OCCT).
+   - Removed *Inspector tool* (can be found within the dedicated git repository).
+- **General**
+   - Added missing class field initializers to many classes.
+   - `Standard_Failure` now inherits `std::exception`, implements `std::exception::what()`;
+     inheritance from `Standard_Transient` has been removed
+     (application code catching messages from `Standard_Failure` might require modifications).
+   - Adapted for **C++ range-based loops**: `TopExp_Explorer`, `TDF_ChildIterator` (`TDF_Label`), `NCollection_DataMap`,
+     `TopoDS_Iterator` (`TopoDS_Shape`), `TColStd_PackedMapOfInteger`.
+   - **Linux**: `Standard_ErrorHandler` now relies on `thread_local` stack instead of global mutex
+                (improves **performance** in *multi-threaded environments*).
+- **Modeling**
+   - Improved stability of results produced by `BRepOffset`, `BRepFill_Evolved`
+     (unordered maps replaced by ordered maps).
+   - Bugfixes in `HLRBRep_PolyAlgo` for transformed shapes.
+   - *Back-ported bug-fixes from OCCT 7.8 and OCCT 7.9 releases*.
+- **Data Exchange**
+   - Bugfixes for **STL** and **OBJ** formats.
+   - **Application Framework**: fix initialization of default migration map when `$CSF_MIGRATION_TYPES` is unset.
+   - **FreeBSD**, **STEP**: fixed timezone retrieval on FreeBSD systems before 15.0
+                            (due non-POSIX compliant definitions).
+   - *Back-ported bug-fixes for STEP and IGES from OCCT 7.8 and OCCT 7.9 releases*.
+   - *Back-ported STEP parser performance improvement*.
+- **Visualization**
+   - **HiDPI**: transform-persistent objects (non-zoomable text, trihedrons, ViewCube, etc.)
+                are now automatically scaled based on `Graphic3d_RenderingParams::ResolutionRatio()`.
+   - **OpenGL**:
+     - *wide lines* are now enabled within *OpenGL Core Profile*, when available;
+     - *FPE signals* are now disabled by renderer to avoid issues with software renderers like LLVMPIPE.
+   - **Linux**:
+     - introduced **Wayland** support;
+        `Aspect_DisplayConnection` is now virtual interface
+        (use `Xw_DisplayConnection` for *Xlib* and `Wayland_DisplayConnection` for *Wayland*);
+     - fixed ignoring of `OpenGl_Caps` within **EGL** implementation for creating *desktop OpenGL context*.
+   - Redesigned `Image_AlienPixMap` to split implementation per image library/format
+     with base interface defined by `Image_RWPixMap`, including:
+     - `Image_RWFreeImage` based on **FreeImage**;
+     - `Image_RWWinCodec` based on **WinCodec** (now behaves for consistent to FreeImage);
+     - (NEW) `Image_RWAppKit` based on **AppKit** on *macOS* (as a fallback when no other image library enabled);
+     - (NEW) `Image_RWPNG` based on `libpng`;
+     - (NEW) `Image_RWAVCodec` based on **FFmpeg** (previously used by `Media_PlayerContext` and `Image_VideoRecorder`).
+   - **macOS**:
+     - bug-fixes (multi-view support, automatic software rendering fallback, automatic HiDPI scaling),
+       introduction of `Cocoa_Window::SetupWindowDelegate()` to simplify integration.
+   - **Widgets**: added new interactive widgets `AIS_ClippingPlanes` and `AIS_ScaleRuler` supporting dragging operations.
+   - **Selection**: fixed detection of (some) cylinders;
+                    fixed misdetection of degenerated line segments;
+                    fixed `AIS_TextLabel` selection area in several cases (multi-line text and vertical alignment).
+   - **Fonts**:
+     - prefer "Microsoft Yahei" over legacy "SimSun" font on **Windows**;
+     - fixed rendering of *CJK* punctuation symbols;
+     - fixed handling of multiple fonts within `Font_TextFormatter::Append()`;
+     - added new font/formatting options (shear angle, various scaling factors);
+     - added `Graphic3d_VerticalTextAlignment_BottomDescender` alignment option;
+     - added `StdPrs_BRepFont::SetCapHeight()` option to initialize font size based on `CapHeight` metric in the font.
+   - **WebGL**: fixed minor compatibility issues.
+   - `AIS_ViewController`:
+     - introduced `AIS_InteractiveObject::ProcessRedraw()` interface, called before each frame redraw;
+     - refactored mouse click logic for improved *double-click detection*;
+     - mouse buttons are now propagated to `SelectMgr_EntityOwner::HandleMouseClick()`;
+     - fixed cranky zoom in case of too small scene;
+     - fixed changing of selection state of dragged object.
+   - Removed obsolete optimization forcing UNLIT shading for Phong material with no reflection properties,
+     which might lead to unexpected visual results in application.
+- **Draw Harness**
+   - Default display mode for `AIS_Shape` in DRAW is now shaded with *face boundaries*.
+   - **Linux**:
+     - fixed RED color propagated to the next command;
+     - fixed hanging `wzoom` with AXO viewer;
+     - added preliminary Wayland support (`vinit -wayland`) for 3D Viewer,
+     - which applies DPI scaling for *HiDPI* screens by default.
+   - `Draw_Interpreter` initialization is postponed till the first usage,
+     which fixes errors inside Tcl library when application links to `TKDraw` but doesn't use *Tcl*.
+   - Added commands `dumpjson` and `vdumpjson`.
+   - Added command `vtolshape` and aliases `vtolvertex`/`vtoledge`
+     visualizing shape tolerances as shaded sphere (vertex) or cylinder (edge).
+   - Added command `vorishape` and aliases `voriedge`/`voriface`/`vnormals`
+     visualizing shape orientation with arrows (curve tangent or surface normal direction) and color.
+   - Fixed double-inclusion of command in `help` listing.
+   - **Windows**: 3D Viewer now applies DPI scaling on *HiDPI* screens by default
+                  (can be disabled via `vinit -dpiAware 0`);
+                  `XProgress +g` now displays progress within taskbar icon (`ITaskbarList3`).
+- **Testing**
+   - Moved non-public tests from `tests` to `tests_occ`;
+     this makes regression testing environment more friendly to OCCT community,
+     and speeds up execution of pipeline (there should be no `SKIPPED` entities in `tests`).
+   - **Linux**: fixed updating of `cpulimit`, improved process termination by `cpulimit`.
+   - `testgrid` now prints progress details into console, may use GUI progress bat (`XProgress +g`),
+     and generates `summary.csv` (`testdiff` now generates `diff.csv`).
+   - **WebGL**: added test group `webgl2` for `EGL_ANGLE_create_context_webgl_compatibility`.
+   - Fixes:
+     - corrected specific cases to clean up generated large file artifacts / large logs;
+     - fixed cases generating file artifacts with the same name, leading to random failures;
+     - fixed usage of `checktrend` for detecting memory leaks;
+     - speed up specific cases by avoiding redundant expensive operation.
+- **Debugging**
+   - Improved Visual Studio debugger visualizers (*Natvis*) for OCCT classes.
+   - Added `OSD_Thread::SetName()` property.
+
+OCCT collections have been improved to allow **C++ range-based loop** syntax, e.g.:
+
+```cpp
+  for (const TopoDS_Shape& aFaceIter : TopExp_Explorer(theShape, TopAbs_FACE))
+  {
+    const TopoDS_Face& aFace = TopoDS::Face(aFaceIter);
+  }
+...
+  NCollection_DataMap<int, double> theMap = ...;
+  for (const auto& [key, value]: theMap) { ... }
+```
+
 Open CASCADE Technology 7.7 (2022-11-03)
 -----------------------------------------------------------------------------------------------------------------------
 **OCCT 7.7.0** (2022-11-03) provides about 250 improvements and corrections over the previous release 7.6.0.
