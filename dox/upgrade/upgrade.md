@@ -7,7 +7,7 @@ Upgrade from older OCCT versions  {#occt__upgrade}
 
 This document provides technical details on changes made in particular versions of OCCT. It can help to upgrade user applications based on previous versions of OCCT to newer ones.
 
-@ref upgrade_occt770 "SEEK TO THE LAST CHAPTER (UPGRADE TO 7.7.0)"
+@ref upgrade_occt777 "SEEK TO THE LAST CHAPTER (UPGRADE TO 7.7.7)"
 
 @subsection upgrade_intro_precautions Precautions
 
@@ -2343,3 +2343,51 @@ Please use `BRepLib_ToolTriangulatedShape::ComputeNormals()` to fill in normal a
 
 A new way of using the `BRepExtrema_ShapeProximity` class was provided for computing a proximity value between two shapes.
 If at initialization of the `BRepExtrema_ShapeProximity` class the *theTolerance* parameter is not defined (Precision::Infinite() by default), the proximity value will be computed.
+
+@section upgrade_occt777 Upgrade to OCCT 7.7.7
+
+@subsection upgrade_occt777_exceptions Standard_Failure
+
+The hierarchy of exception classes in OCCT starting from `Standard_Failure` now inherits `std::exception` and implements its interface.
+This change should be transparent to most of the users, however, some code might require small modifications:
+- When catching both OCCT-specific exceptions and `std::exception`, OCCT exceptions should be now caught in front of `std::exception`;
+- `Standard_Failure::ExceptionType()` should be used instead of removed `Standard_Failure::DynamicType()->Name()`.
+
+@subsection upgrade_occt777_extstring TCollection_ExtendedString
+
+The default value `isMultiByte` of `TCollection_ExtendedString` constructor taking `const char*` on input
+has been flipped from from `isMultiByte=false` to `isMultiByte=true`, so that it treats input  strings as UTF-8 by default.
+This should help accidental corruption of UTF-8 strings when dealing with OCAF/XCAF documents.
+However, the legacy code that needs to pass non UTF-8 strings to `TCollection_ExtendedString` should now pass the second argument explicitly.
+
+@subsection upgrade_occt777_static Interface_Static
+
+`Interface_Static` is now repsonsible only for managing a global registry of default parameters, and doesn't inherit `Interface_TypedValue`.
+Individual parameters are now stored as objects of class `Interface_TypedValue`.
+
+@subsection upgrade_occt777_xdisplay Xw_DisplayConnection
+
+`Aspect_DisplayConnection` is now a base class for platform-specific display connections
+and Xlib-specific implementation has been moved to a separate class `Xw_DisplayConnection`.
+- Applications using Xlib should now create `Xw_DisplayConnection` instead of `Aspect_DisplayConnection`;
+- On other platforms, `NULL` handle should be passed to `OpenGl_GraphicDriver` constructor
+  as constructor of `Aspect_DisplayConnection` is now protected to avoid misuses.
+
+@subsection upgrade_occt777_wayland Wayland
+
+New `CMake` option introduced `USE_WAYLAND=ON` for building OCCT with Wayland support (`Wayland_Window` and `Wayland_DisplayConnection` classes).
+This option could be combined with `USE_XLIB=ON`, but pay attention that in this case `TKOpenGl` implementation
+will be switched from `GLX` to `EGL` interface for creating OpenGL context for both Wayland and Xlib windows.
+
+End-user applications relying on GUI frameworks supporting Wayland don't need to use `Wayland_Window` and `Wayland_DisplayConnection` classes.
+Instead, applications should create OpenGL context using GUI framework and provide `Aspect_Window` wrapper - see `samples/glfw` and external samples for more details.
+
+@subsection upgrade_occt777_hidpi HiDPI support in visualization
+
+`Graphic3d_RenderingParams` now defines a pair of properties `BaseResolution` with `Resolution` to define HiDPI scale factor `Graphic3d_RenderingParams::ResolutionRatio()`.
+This parameter is automatically initialized from `Aspect_Window::DevicePixelRatio()` within `V3d_View::SetWindow()` call.
+Existing applications might need to adjust the code to benefit from new API and to handle new `AIS_ViewController::ProcessDpiChange()` event.
+
+`Graphic3d_TransModeFlags` now handles 2D-persistence implicitly for HiDPI (e.g. 2D presentations are automatically scaled up);
+this behavior could be adjusted by new method `Graphic3d_TransformPers::SetDensityIndependent()`
+if application needs to display some objects explicitly in pixels.
