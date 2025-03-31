@@ -482,36 +482,6 @@ static Standard_Integer  OCC138LC (Draw_Interpretor& di, Standard_Integer /*argc
   return 0; 
 }
 
-#include <BRepBndLib.hxx>
-#include <Draw.hxx>
-//=======================================================================
-//function : OCC566
-//purpose  : 
-//=======================================================================
-static Standard_Integer OCC566(Draw_Interpretor& di,Standard_Integer n,const char ** a)
-{
-  if (n < 2) {
-    di<<"Usage: " << a[0] << " shape [ xmin ymin zmin xmax ymax zmax]\n";
-    return 1;
-  }
-  TopoDS_Shape S = DBRep::Get(a[1]);
-  if (S.IsNull()) return 1;
-  Bnd_Box B;
-  BRepBndLib::AddClose(S,B);
-  Standard_Real axmin,aymin,azmin,axmax,aymax,azmax;
-  B.Get(axmin,aymin,azmin,axmax,aymax,azmax);
-  di << axmin<<" "<< aymin<<" "<< azmin<<" "<< axmax<<" "<< aymax<<" "<< azmax;
-  if (n >= 8) {
-    Draw::Set(a[2],axmin) ;
-    Draw::Set(a[3],aymin) ;
-    Draw::Set(a[4],azmin) ;
-    Draw::Set(a[5],axmax) ;
-    Draw::Set(a[6],aymax) ;
-    Draw::Set(a[7],azmax) ;
-  }
-  return 0;
-}
-
 #include <BRepFilletAPI_MakeFillet.hxx>
 //=======================================================================
 //function : OCC570
@@ -1353,7 +1323,6 @@ void QABugs::Commands_17(Draw_Interpretor& theCommands) {
   theCommands.Add ("OCC138", "OCC138", __FILE__, OCC138, group);
   theCommands.Add ("OCC353","OCC353",__FILE__,OCC353,group);
   theCommands.Add ("OCC138LC", "OCC138LC", __FILE__, OCC138LC, group);
-  theCommands.Add ("OCC566", "OCC566 shape [ xmin ymin zmin xmax ymax zmax] ; print bounding box", __FILE__, OCC566, group);
   theCommands.Add ("OCC570", "OCC570 result", __FILE__, OCC570, group);
 
   theCommands.Add("OCC570mkevol",

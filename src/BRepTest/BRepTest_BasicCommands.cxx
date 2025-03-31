@@ -541,6 +541,7 @@ static Standard_Integer BoundBox(Draw_Interpretor& theDI,
   Standard_Boolean isOBB = Standard_False;
   Standard_Boolean isTriangulationReq = Standard_True;
   Standard_Boolean isOptimal = Standard_False;
+  Standard_Boolean isClose = Standard_False;
   Standard_Boolean isTolerUsed = Standard_False;
   Standard_Boolean isFinitePart = Standard_False;
   Standard_Boolean hasToDraw = Standard_True;
@@ -593,6 +594,10 @@ static Standard_Integer BoundBox(Draw_Interpretor& theDI,
     {
       isOptimal = Standard_True;
     }
+    else if (anArgCase == "-close")
+    {
+      isClose = Standard_True;
+    }
     else if (anArgCase == "-exttoler")
     {
       isTolerUsed = Standard_True;
@@ -631,7 +636,7 @@ static Standard_Integer BoundBox(Draw_Interpretor& theDI,
     return 1;
   }
   else if (!anAABB.IsVoid()
-        && (isOBB || isOptimal || isTolerUsed))
+        && (isOBB || isOptimal || isClose || isTolerUsed))
   {
     Message::SendFail() << "Syntax error: Options -obb, -optimal and -extToler cannot be used for explicitly defined AABB";
     return 1;
@@ -704,9 +709,13 @@ static Standard_Integer BoundBox(Draw_Interpretor& theDI,
     if (!aShape.IsNull())
     {
       anAABB.SetVoid ();
-      if(isOptimal)
+      if (isOptimal)
       {
         BRepBndLib::AddOptimal (aShape, anAABB, isTriangulationReq, isTolerUsed);
+      }
+      else if (isClose)
+      {
+        BRepBndLib::AddClose (aShape, anAABB);
       }
       else
       {
@@ -1600,7 +1609,7 @@ void  BRepTest::BasicCommands(Draw_Interpretor& theCommands)
   
   theCommands.Add ("bounding",
                    "bounding {shape | xmin ymin zmin xmax ymax zmax}"
-         "\n\t\t:            [-obb] [-noTriangulation] [-optimal] [-extToler]"
+         "\n\t\t:            [-obb] [-noTriangulation] [-optimal] [-close] [-extToler]"
          "\n\t\t:            [-dump] [-print] [-dumpJson] [-shape name] [-nodraw] [-finitePart]"
          "\n\t\t:            [-save xmin ymin zmin xmax ymax zmax]"
          "\n\t\t:"
@@ -1615,6 +1624,7 @@ void  BRepTest::BasicCommands(Draw_Interpretor& theCommands)
          "\n\t\t:           In case of OBB:"
          "\n\t\t:           - for PCA approach applies to initial AABB used in OBB calculation"
          "\n\t\t:           - for DiTo approach modifies the DiTo algorithm to check more axes."
+         "\n\t\t:  -close   Use quick algorithm for polygonal planar faces."
          "\n\t\t:  -extToler Include tolerance of the shape in the resulting box."
          "\n\t\t:"
          "\n\t\t: Output options:"
