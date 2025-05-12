@@ -55,9 +55,6 @@ IMPLEMENT_STANDARD_RTTIEXT(OpenGl_Context,Standard_Transient)
 
 #if defined(HAVE_EGL)
   #include <EGL/egl.h>
-  #ifdef _MSC_VER
-    #pragma comment(lib, "libEGL.lib")
-  #endif
 #elif defined(_WIN32)
   //
 #elif defined(HAVE_XLIB)

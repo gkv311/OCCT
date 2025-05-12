@@ -18,7 +18,6 @@
 
 // paralleling with Intel TBB
 #ifdef HAVE_TBB
-#pragma comment (lib, "tbbmalloc.lib")
 #include <tbb/scalable_allocator.h>
 using namespace tbb;
 #else

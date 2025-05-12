@@ -19,10 +19,6 @@
 
 #ifdef HAVE_FREEIMAGE
   #include <FreeImage.h>
-
-  #ifdef _MSC_VER
-    #pragma comment( lib, "FreeImage.lib" )
-  #endif
 #elif defined(HAVE_WINCODEC)
   #include <wincodec.h>
   // prevent warnings on MSVC10
@@ -31,10 +27,6 @@
   #include <Standard_WarningsRestore.hxx>
   #undef min
   #undef max
-
-  #ifdef _MSC_VER
-    #pragma comment(lib, "Ole32.lib")
-  #endif
 #elif defined(__EMSCRIPTEN__)
   #include <emscripten/emscripten.h>
 #endif
