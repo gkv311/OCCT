@@ -19,9 +19,6 @@
   #include <process.h>
   #include <malloc.h>
   #include <psapi.h>
-  #ifdef _MSC_VER
-    #pragma comment(lib, "Psapi.lib")
-  #endif
 #elif (defined(__APPLE__))
   #include <mach/task.h>
   #include <mach/mach.h>

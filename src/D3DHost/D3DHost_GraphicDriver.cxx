@@ -20,10 +20,6 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(D3DHost_GraphicDriver,OpenGl_GraphicDriver)
 
-#ifdef _MSC_VER
-  #pragma comment (lib, "D3D9.lib")
-#endif
-
 // =======================================================================
 // function : D3DHost_GraphicDriver
 // purpose  :
