@@ -62,6 +62,7 @@
 #include <Image_RWFreeImage.hxx>
 #include <Image_RWWinCodec.hxx>
 #include <Image_RWPPM.hxx>
+#include <Image_RWPNG.hxx>
 #include <Message.hxx>
 #include <Message_ProgressScope.hxx>
 #include <NCollection_DataMap.hxx>
@@ -6289,6 +6290,10 @@ static bool parseImgLibName(Handle(Image_RWPixMap)& theLib,
   else if (aName == "ppm")
   {
     theLib = new Image_RWPPM();
+  }
+  else if (aName == "png" || aName == "libpng")
+  {
+    theLib = new Image_RWPNG();
   }
   else
   {
