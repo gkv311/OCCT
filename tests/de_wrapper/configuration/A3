@@ -62,6 +62,7 @@ provider.STEP.OCC.write.color :  1
 provider.STEP.OCC.write.name :   1
 provider.STEP.OCC.write.layer :  1
 provider.STEP.OCC.write.props :  1
+provider.STEP.OCC.write.metadata :	 0
 provider.STEP.OCC.write.model.type :     0
 provider.VRML.OCC.read.file.unit :       1
 provider.VRML.OCC.read.file.coordinate.system :  1
