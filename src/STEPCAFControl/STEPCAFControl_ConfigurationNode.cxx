@@ -149,6 +149,8 @@ bool STEPCAFControl_ConfigurationNode::Load(const Handle(DE_ConfigurationContext
     theResource->BooleanVal("write.layer", InternalParameters.WriteLayer, aScope);
   InternalParameters.WriteProps =
     theResource->BooleanVal("write.props", InternalParameters.WriteProps, aScope);
+  InternalParameters.WriteMetadata =
+    theResource->BooleanVal("write.metadata", InternalParameters.WriteMetadata, aScope);
   InternalParameters.WriteModelType = (STEPControl_StepModelType)
     theResource->IntegerVal("write.model.type", InternalParameters.WriteModelType, aScope);
 
@@ -484,6 +486,12 @@ TCollection_AsciiString STEPCAFControl_ConfigurationNode::Save() const
   aResult += "!Setting up the write.props parameter which is used to indicate write Validation properties or not\n";
   aResult += "!Default value: +. Available values: \"-\", \"+\"\n";
   aResult += aScope + "write.props :\t " + InternalParameters.WriteProps + "\n";
+  aResult += "!\n";
+
+  aResult += "!\n";
+  aResult += "!Setting up the write.metadata parameter which is used to indicate write Metadata or not\n";
+  aResult += "!Default value: +. Available values: \"-\", \"+\"\n";
+  aResult += aScope + "write.metadata :\t " + InternalParameters.WriteMetadata + "\n";
   aResult += "!\n";
 
   aResult += "!\n";
