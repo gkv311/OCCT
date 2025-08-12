@@ -227,6 +227,7 @@ public:
     bool WriteName = true; //<! NameMode is used to indicate write Name or not
     bool WriteLayer = true; //<! LayerMode is used to indicate write Layers or not
     bool WriteProps = true; //<! PropsMode is used to indicate write Validation properties or not
+    bool WriteMetadata = false; //!< MetadataMode is used to indicate write metadata properties or not.
     STEPControl_StepModelType WriteModelType = STEPControl_AsIs; //<! Gives you the choice of translation mode for an Open CASCADE shape that is being translated to STEP
 
   } InternalParameters;

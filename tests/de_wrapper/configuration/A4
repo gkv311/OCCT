@@ -62,6 +62,7 @@ provider.STEP.OCC.write.color :  1
 provider.STEP.OCC.write.name :   1
 provider.STEP.OCC.write.layer :  1
 provider.STEP.OCC.write.props :  1
+provider.STEP.OCC.write.metadata :	 0
 provider.STEP.OCC.write.model.type :     0
 provider.IGES.OCC.read.iges.bspline.continuity :         1
 provider.IGES.OCC.read.precision.mode :  0
