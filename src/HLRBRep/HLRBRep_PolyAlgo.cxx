@@ -986,6 +986,7 @@ void HLRBRep_PolyAlgo::InitBiPointsWithConnexity (const Standard_Integer theIEdg
         const TColStd_Array1OfInteger&      aPol2 = aHPol[1]->Nodes();
         const Handle(TColStd_HArray1OfReal)& par = aHPol[0]->Parameters();
         const Standard_Integer aNbPol1 = aPol1.Upper();
+        const Standard_Integer aNbPol2 = aPol2.Upper();
         HLRAlgo_Array1OfTData* aTData1 = &pid1->TData();
         HLRAlgo_Array1OfPISeg* aPISeg1 = &pid1->PISeg();
         HLRAlgo_Array1OfPINod* aPINod1 = &pid1->PINod();
@@ -1001,7 +1002,7 @@ void HLRBRep_PolyAlgo::InitBiPointsWithConnexity (const Standard_Integer theIEdg
         const Handle(HLRAlgo_PolyInternalNode)* pi2p1 = &aPINod2->ChangeValue (aPol2 (1));
         HLRAlgo_PolyInternalNode::NodeIndices*  aNod21Indices = &(*pi2p1)->Indices();
         HLRAlgo_PolyInternalNode::NodeData*     aNod21RValues = &(*pi2p1)->Data();
-        const Handle(HLRAlgo_PolyInternalNode)* pi2p2 = &aPINod2->ChangeValue (aPol2 (aNbPol1));
+        const Handle(HLRAlgo_PolyInternalNode)* pi2p2 = &aPINod2->ChangeValue (aPol2 (aNbPol2));
         HLRAlgo_PolyInternalNode::NodeIndices*  aNod22Indices = &(*pi2p2)->Indices();
         HLRAlgo_PolyInternalNode::NodeData*     aNod22RValues = &(*pi2p2)->Data();
         aNode11Indices->Flag |=  NMsk_Vert;
@@ -1011,6 +1012,10 @@ void HLRBRep_PolyAlgo::InitBiPointsWithConnexity (const Standard_Integer theIEdg
 	
         for (Standard_Integer iPol = 1; iPol <= aNbPol1; iPol++)
         {
+          // protect from SIGSEGV due to unsafe memory access
+          if (iPol > aNbPol2)
+            return;
+
           const Handle(HLRAlgo_PolyInternalNode)* pi1pA = &aPINod1->ChangeValue (aPol1 (iPol));
           HLRAlgo_PolyInternalNode::NodeIndices*  aNod1AIndices = &(*pi1pA)->Indices();
           HLRAlgo_PolyInternalNode::NodeData*     aNod1ARValues = &(*pi1pA)->Data();
