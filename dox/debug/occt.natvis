@@ -1,6 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+<!--
+
+This file defines rules for Visual Studio debugger to display properly content
+of objects of OCCT library.
+
+Put this file to %HOMEDRIVE%%HOMEPATH%\Documents\Visual Studio 20xx\Visualizers
+(here xx might be 17, 19, 22 etc., according to VS version used).
+
+Note: to debug visualizers, enable diagnostic output in Visual Studio, in
+Tools / Options / Debugging / Output Window / Natvis diagnostic messages
+
+-->
+
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
-<Type Name="gp_XY">
+
+  <!-- Simple data structures -->
+  <Type Name="gp_XY">
     <DisplayString>[{(float)x} {(float)y}]</DisplayString>
   </Type>
   <Type Name="gp_Pnt2d">
@@ -38,27 +54,27 @@
       <Item Name="row3">((NCollection_Vec4&lt;$T1&gt;*)myMat)[3]</Item>
     </Expand>
   </Type>
-  <Type Name="Handle_Standard_Transient">
-    <DisplayString Condition="entity==0x00000000">NULL</DisplayString>
-    <DisplayString Condition="entity!=0x00000000">[cnt={entity->count}]</DisplayString>
-    <Expand>
-      <ExpandedItem>*entity</ExpandedItem>
-    </Expand>
+  
+  <!-- Handle -->
+  <Type Name="Standard_Transient">
+    <DisplayString>$(Type) [refCount={myRefCount_}]</DisplayString>
   </Type>
   <Type Name="NCollection_Handle&lt;*&gt;">
     <DisplayString Condition="entity==0x00000000">NULL</DisplayString>
-    <DisplayString Condition="entity!=0x00000000">{(void*)entity} [cnt={entity->count}]</DisplayString>
+    <DisplayString Condition="entity!=0x00000000">{(void*)entity} [refCount={entity->myRefCount_}]</DisplayString>
     <Expand>
       <ExpandedItem>*((NCollection_Handle&lt;$T1&gt;::Ptr*)entity)->myPtr</ExpandedItem>
     </Expand>
   </Type>
   <Type Name="opencascade::handle&lt;*&gt;">
     <DisplayString Condition="entity==0x00000000">NULL</DisplayString>
-    <DisplayString Condition="entity!=0x00000000">{(void*)entity} [cnt={entity->count} {*entity}]</DisplayString>
+    <DisplayString Condition="entity!=0x00000000">{(void*)entity} {*entity}</DisplayString>
     <Expand>
-      <ExpandedItem>(opencascade::handle&lt;$T1&gt;::element_type*)entity</ExpandedItem>
+      <ExpandedItem>entity</ExpandedItem>
     </Expand>
   </Type>
+  
+  <!-- Strings -->
   <Type Name="TCollection_AsciiString">
     <DisplayString>{mylength}: {mystring,s}</DisplayString>
     <Expand>
@@ -77,9 +93,27 @@
   <Type Name="TCollection_HExtendedString">
     <DisplayString>{myString.mylength}: {(wchar_t *)myString.mystring,su}</DisplayString>
   </Type>
+  
+  <!-- Collections -->
+
+  <Type Name="NCollection_Array1&lt;*&gt;">
+    <DisplayString>NCollection_Array1 [{myLowerBound}, {myUpperBound}]</DisplayString>
+    <Expand>
+      <!-- Show elements as custom list to be able to specify non-zero based index -->
+      <CustomListItems Condition="myData != nullptr">
+        <Variable Name="index" InitialValue="myLowerBound" />
+        <Loop Condition="index &lt;= myUpperBound">
+          <Item Name="[{index}]">myData[index]</Item>
+          <Exec>index++</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
   <Type Name="TColStd_PackedMapOfInteger">
     <DisplayString>TColStd_PackedMapOfInteger [{myExtent}]</DisplayString>
   </Type>
+
   <Type Name="NCollection_Vector&lt;*&gt;">
     <DisplayString>NCollection_Vector [{myLength}]</DisplayString>
     <Expand>
@@ -93,6 +127,7 @@
       </IndexListItems>
     </Expand>
   </Type>
+  
   <Type Name="NCollection_List&lt;*&gt;">
     <DisplayString>NCollection_List [{myLength}]</DisplayString>
     <Expand>
@@ -104,17 +139,332 @@
       </LinkedListItems>
     </Expand>
   </Type>
+  
   <Type Name="NCollection_Sequence&lt;*&gt;">
     <DisplayString>NCollection_Sequence [{mySize}]</DisplayString>
     <Expand>
-      <LinkedListItems>
-        <Size>mySize</Size>
-        <HeadPointer>myFirstItem</HeadPointer>
-        <NextPointer>myNext</NextPointer>
-        <ValueNode>*($T1*)(sizeof(NCollection_SeqNode) + ((char *)this))</ValueNode>
-      </LinkedListItems>
+      <!-- Show elements as custom list to be able to specify non-zero based index -->
+      <CustomListItems>
+        <Variable Name="index" InitialValue="1" />
+        <Variable Name="node" InitialValue="myFirstItem" />
+        <Loop Condition="node != nullptr">
+          <Item Name="[{index}]">((NCollection_Sequence&lt;$T1&gt;::Node*)node)->myValue</Item>
+          <Exec>index++</Exec>
+          <Exec>node = node->myNext</Exec>
+        </Loop>
+      </CustomListItems>
     </Expand>
   </Type>
+
+  <!-- NCollection_IndexedMap -->
+  <Type Name="NCollection_IndexedMap&lt;*&gt;">
+    <DisplayString>NCollection_IndexedMap [{mySize}]</DisplayString>
+    <Expand>
+      <!-- Show elements as custom list to be able to specify non-zero based index -->
+      <CustomListItems>
+        <Variable Name="index" InitialValue="1" />
+        <Loop Condition="index &lt;= mySize">
+          <Item Name="[{index}]">((NCollection_IndexedMap&lt;$T1,$T2&gt;::IndexedMapNode*)myData2[index-1])->myValue</Item>
+          <Exec>index++</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
+  <!-- NCollection_IndexedDataMap::IndexedDataMapNode -->
+  <Type Name="NCollection_IndexedDataMap&lt;*&gt;::IndexedDataMapNode">
+    <DisplayString>{myKey1} -&gt; {myValue}</DisplayString>
+    <Expand>
+      <Item Name="Key">myKey1</Item>
+      <Item Name="Value">myValue</Item>
+    </Expand>
+  </Type>
+
+  <!-- NCollection_IndexedDataMap -->
+  <Type Name="NCollection_IndexedDataMap&lt;*&gt;">
+    <DisplayString>NCollection_IndexedDataMap [{mySize}]</DisplayString>
+    <Expand>
+      <!-- Show elements as custom list to be able to specify non-zero based index -->
+      <CustomListItems>
+        <Variable Name="index" InitialValue="1" />
+        <Loop Condition="index &lt;= mySize">
+          <Item Name="[{index}]">(NCollection_IndexedDataMap&lt;$T1,$T2,$T3&gt;::IndexedDataMapNode*)myData2[index-1]</Item>
+          <Exec>index++</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
+  <!-- NCollection_Map -->
+  <Type Name="NCollection_Map&lt;*&gt;">
+    <DisplayString>NCollection_Map [{mySize}]</DisplayString>
+    <Expand>
+      <!-- Basic information -->
+      <Item Name="Size">mySize</Item>
+      <Item Name="Number of Buckets">myNbBuckets</Item>
+
+      <!-- Elements as flat list -->
+      <CustomListItems>
+        <Variable Name="index" InitialValue="0" />
+        <Variable Name="bucketIndex" InitialValue="0" />
+        <Variable Name="currentNode" InitialValue="myData1[0]" />
+
+        <!-- Restrict number of items shown -->
+        <Variable Name="size" InitialValue="mySize" />
+        <If Condition="size &gt; 10000">
+          <Exec>size = 10000</Exec>
+          <Item Name="[Warning]">"Showing only first 10000 items"</Item>
+        </If>
+
+        <!-- Iterate over items -->
+        <Loop Condition="index &lt; size">
+          <!-- If current node is null, go to next bucket -->
+          <Loop Condition="currentNode == nullptr &amp;&amp; bucketIndex &lt; myNbBuckets">
+            <Exec>bucketIndex++</Exec>
+            <Exec>currentNode = myData1[bucketIndex]</Exec>
+          </Loop>
+
+          <!-- Protection against broken data -->
+          <If Condition="currentNode == nullptr">
+            <Item Name="[Error]">"Could not find all items!"</Item>
+            <Break/>
+          </If>
+
+          <!-- Show item -->
+          <Item Name="[{index}]">((NCollection_Map&lt;$T1,$T2&gt;::MapNode*)currentNode)->myValue</Item>
+
+          <!-- Advance to next one (within the bucket) -->
+          <Exec>index++</Exec>
+          <Exec>currentNode = currentNode->myNext</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
+  <!-- NCollection_DataMap::DataMapNode -->
+  <Type Name="NCollection_DataMap&lt;*&gt;::DataMapNode">
+    <DisplayString>{myKey} -&gt; {myValue}</DisplayString>
+    <Expand>
+      <Item Name="Key">myKey</Item>
+      <Item Name="Value">myValue</Item>
+    </Expand>
+  </Type>
+
+  <!-- NCollection_DataMap -->
+  <Type Name="NCollection_DataMap&lt;*&gt;">
+    <DisplayString>NCollection_DataMap [{mySize}]</DisplayString>
+    <Expand>
+      <!-- Basic information -->
+      <Item Name="Size">mySize</Item>
+      <Item Name="Number of Buckets">myNbBuckets</Item>
+
+      <!-- Elements as flat list -->
+      <CustomListItems>
+        <Variable Name="index" InitialValue="0" />
+        <Variable Name="bucketIndex" InitialValue="0" />
+        <Variable Name="currentNode" InitialValue="myData1[0]" />
+
+        <!-- Restrict number of items shown -->
+        <Variable Name="size" InitialValue="mySize" />
+        <If Condition="size &gt; 10000">
+          <Exec>size = 10000</Exec>
+          <Item Name="[Warning]">"Showing only first 10000 items"</Item>
+        </If>
+
+        <!-- Iterate over items -->
+        <Loop Condition="index &lt; size">
+          <!-- If current node is null, go to next bucket -->
+          <Loop Condition="currentNode == nullptr &amp;&amp; bucketIndex &lt; myNbBuckets">
+            <Exec>bucketIndex++</Exec>
+            <Exec>currentNode = myData1[bucketIndex]</Exec>
+          </Loop>
+
+          <!-- Protection against broken data -->
+          <If Condition="currentNode == nullptr">
+            <Item Name="[Error]">"Could not find all items!"</Item>
+            <Break/>
+          </If>
+
+          <!-- Show item -->
+          <Item Name="[{index}]">*((NCollection_DataMap&lt;$T1,$T2,$T3&gt;::DataMapNode*)currentNode)</Item>
+
+          <!-- Advance to next one (within the bucket) -->
+          <Exec>index++</Exec>
+          <Exec>currentNode = currentNode->myNext</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
+  <!-- Shapes -->
+  
+  <Type Name="TopoDS_Shape">
+    <DisplayString>{myOrient} {*myTShape.entity} Loc={myLocation.myItems.myNode}</DisplayString>
+  </Type>
+
+  <Type Name="TopoDS_TShape">
+    <DisplayString>$(Type) NbChildren={myShapes.myLength} Flags={myFlags}</DisplayString>
+    <Expand>
+      <Item Name="Children">myShapes</Item>
+      <Synthetic Name="Flags">
+        <DisplayString>{myFlags}, hex = {myFlags,x}</DisplayString>
+        <Expand>
+          <!-- Simple true/false for each flag -->
+          <Item Name="🔓 FREE">(myFlags &amp; TopoDS_TShape_Flags_Free) != 0</Item>
+          <Item Name="✎ MODIFIED">(myFlags &amp; TopoDS_TShape_Flags_Modified) != 0</Item>
+          <Item Name="✓ CHECKED">(myFlags &amp; TopoDS_TShape_Flags_Checked) != 0</Item>
+          <Item Name="⟲ ORIENTABLE">(myFlags &amp; TopoDS_TShape_Flags_Orientable) != 0</Item>
+          <Item Name="● CLOSED">(myFlags &amp; TopoDS_TShape_Flags_Closed) != 0</Item>
+          <Item Name="∞ INFINITE">(myFlags &amp; TopoDS_TShape_Flags_Infinite) != 0</Item>
+          <Item Name="⭔ CONVEX">(myFlags &amp; TopoDS_TShape_Flags_Convex) != 0</Item>
+          <Item Name="🔑 LOCKED">(myFlags &amp; TopoDS_TShape_Flags_Locked) != 0</Item>
+        </Expand>
+      </Synthetic>
+    </Expand>
+  </Type>
+
+  <Type Name="TopoDS_TCompound">
+    <DisplayString>COMPOUND NbChildren={myShapes.myLength} Flags={myFlags}</DisplayString>
+    <Expand>
+      <ExpandedItem>(TopoDS_TShape&amp;)*this,nd</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="TopoDS_TCompSolid">
+    <DisplayString>COMPSOLID NbChildren={myShapes.myLength} Flags={myFlags}</DisplayString>
+    <Expand>
+      <ExpandedItem>(TopoDS_TShape&amp;)*this,nd</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="TopoDS_TSolid">
+    <DisplayString>SOLID NbChildren={myShapes.myLength} Flags={myFlags}</DisplayString>
+    <Expand>
+      <ExpandedItem>(TopoDS_TShape&amp;)*this,nd</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="TopoDS_TShell">
+    <DisplayString>SHELL NbChildren={myShapes.myLength} Flags={myFlags}</DisplayString>
+    <Expand>
+      <ExpandedItem>(TopoDS_TShape&amp;)*this,nd</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="BRep_TFace">
+    <DisplayString>FACE NbChildren={myShapes.myLength} Flags={myFlags}</DisplayString>
+    <Expand>
+      <ExpandedItem>(TopoDS_TShape&amp;)*this,nd</ExpandedItem>
+      <Item Name="Triangulations">myTriangulations</Item>
+      <Item Name="Active Triangulation">myActiveTriangulation</Item>
+      <Item Name="Surface">mySurface</Item>
+      <Item Name="Location">myLocation</Item>
+      <Item Name="Tolerance">myTolerance</Item>
+      <Item Name="Natural Restriction">myNaturalRestriction</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="TopoDS_TWire">
+    <DisplayString>WIRE NbChildren={myShapes.myLength} Flags={myFlags}</DisplayString>
+    <Expand>
+      <ExpandedItem>(TopoDS_TShape&amp;)*this,nd</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="BRep_TEdge">
+    <DisplayString>EDGE NbChildren={myShapes.myLength} Flags={myFlags}</DisplayString>
+    <Expand>
+      <ExpandedItem>(TopoDS_TShape&amp;)*this,nd</ExpandedItem>
+      <Item Name="Tolerance">myTolerance</Item>
+      <Synthetic Name="Edge Flags">
+        <DisplayString>{myFlags}</DisplayString>
+        <Expand>
+          <!-- Simple true/false for each flag -->
+          <Item Name="↔ SAME RANGE">(myFlags &amp; 1) != 0</Item>
+          <Item Name="≡ SAME PARAMETER">(myFlags &amp; 2) != 0</Item>
+          <Item Name="⦰ DEGENERATED">(myFlags &amp; 4) != 0</Item>
+        </Expand>
+      </Synthetic>
+      <Item Name="Representations">myCurves</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="BRep_TVertex">
+    <DisplayString>VERTEX NbChildren={myShapes.myLength} Flags={myFlags}</DisplayString>
+    <Expand>
+      <ExpandedItem>(TopoDS_TShape&amp;)*this,nd</ExpandedItem>
+      <Item Name="Point">myPnt</Item>
+      <Item Name="Tolerance">myTolerance</Item>
+      <Item Name="Representations">myPoints</Item>
+    </Expand>
+  </Type>
+
+  <!-- OCAF classes -->
+  
+  <Type Name="TDF_Label">
+    <DisplayString Condition="myLabelNode==0">{(void*)myLabelNode}</DisplayString>
+    <DisplayString Condition="myLabelNode!=0">{(void*)myLabelNode} id={*myLabelNode}</DisplayString>
+    <Expand>
+      <ExpandedItem>*myLabelNode</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="TDF_LabelNode">
+    <DisplayString Condition="myFather==0">:{myTag}</DisplayString>
+    <DisplayString Condition="myFather!=0">{*myFather}:{myTag}</DisplayString>
+    <Expand>
+      <Item Name="Father" Condition="myFather==0">nullptr</Item>
+      <Item Name="Father" Condition="myFather!=0">*myFather</Item>
+
+      <Item Name="Brother" Condition="myBrother==0">nullptr</Item>
+      <Item Name="Brother" Condition="myBrother!=0">*myBrother</Item>
+
+      <!-- Show children as custom list -->
+      <Synthetic Name="Children" Condition="myFirstChild != 0">
+        <Expand>
+          <CustomListItems>
+            <Variable Name="current" InitialValue="myFirstChild"/>
+            <Loop Condition="current != nullptr">
+              <Item>*current</Item>
+              <Exec>current = current->myBrother</Exec>
+            </Loop>
+          </CustomListItems>
+        </Expand>
+      </Synthetic>
+
+      <!-- Show attributes as custom list -->
+      <Synthetic Name="Attributes" Condition="myFirstAttribute.entity != 0">
+        <Expand>
+          <CustomListItems>
+            <Variable Name="current" InitialValue="myFirstAttribute.entity"/>
+            <Loop Condition="current != nullptr">
+              <Item>*current</Item>
+              <Exec>current = ((TDF_Attribute*)current)->myNext.entity</Exec>
+            </Loop>
+          </CustomListItems>
+        </Expand>
+      </Synthetic>
+      
+      <Item Name="Data">*myData</Item>
+    </Expand>
+  </Type>
+
+  <Type Name="TDF_Attribute">
+    <DisplayString>$(Type)</DisplayString>
+  </Type>
+
+  <Type Name="TDataStd_GenericExtString">
+    <DisplayString>$(Type) {myString.mystring,su}</DisplayString>
+  </Type>
+
+  <Type Name="TObj_TObject">
+    <DisplayString>$(Type) -&gt; {*myElem.entity}</DisplayString>
+    <Expand>
+      <ExpandedItem>*myElem.entity</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <!-- Specific data types -->
   <Type Name="Bnd_B2f">
     <AlternativeType Name="Bnd_B2d"></AlternativeType>
     <DisplayString Condition="myCenter[0] &gt; 1000000000000000000.">VOID</DisplayString>
@@ -129,125 +479,17 @@
       Center: [{(float)myCenter[0]} {(float)myCenter[1]} {(float)myCenter[2]}], hSize: [{(float)myHSize[0]} {(float)myHSize[1]} {(float)myHSize[2]}]
     </DisplayString>
   </Type>
-  <Type Name="TDF_Label">
-    <DisplayString Condition="myLabelNode==0">NULL</DisplayString>
-    <DisplayString Condition="myLabelNode!=0">[:{myLabelNode->myTag}]</DisplayString>
-    <Expand>
-      <ExpandedItem>*myLabelNode</ExpandedItem>
-    </Expand>
-  </Type>
-  <Type Name="TDF_LabelNode">
-    <DisplayString>[:{myTag}]</DisplayString>
-    <Expand>
-      <Item Name="brother" Condition="myBrother!=0">* myBrother</Item>
-      <Item Name="child" Condition="myFirstChild!=0">* myFirstChild</Item>
-      <ExpandedItem>myFirstAttribute</ExpandedItem>
-    </Expand>
-  </Type>
-  <Type Name="Handle_TDF_Attribute">
-    <DisplayString Condition="entity==0x00000000">NULL</DisplayString>
-    <DisplayString Condition="entity!=0x00000000">
-      [transaction={((TDF_Attribute*)entity)->myTransaction}]
-    </DisplayString>
-    <Expand>
-      <!--Item Name="next" Condition="myNext.entity!=0x00000000">myNext</Item-->
-      <ExpandedItem>(TDF_Attribute*)entity</ExpandedItem>
-    </Expand>
-  </Type>
+
   <Type Name="OpenGl_Context">
     <DisplayString>[{myGlVerMajor}.{myGlVerMinor}]</DisplayString>
   </Type>
 
-<!--ArrayItems Expansion-->
-<Type Name="TColStd_Array1OfInteger">
-    <DisplayString Condition="isAllocated != 1">empty</DisplayString> 
-    <DisplayString>{{size = {myUpperBound - myLowerBound + 1}}}</DisplayString>
-    <Expand>
-        <Item Condition="isAllocated == 1" Name="[size]">myUpperBound - myLowerBound + 1</Item>
-        <ArrayItems Condition="isAllocated == 1">
-            <Size>myUpperBound - myLowerBound + 1</Size>
-            <ValuePointer>(Standard_Integer*)(myStart) + myLowerBound</ValuePointer>
-        </ArrayItems>
-    </Expand>
-</Type>
-
-<Type Name="TColStd_Array1OfReal">
-    <DisplayString Condition="isAllocated != 1">empty</DisplayString> 
-    <DisplayString>{{size = {myUpperBound - myLowerBound + 1}}}</DisplayString>
-    <Expand>
-        <Item Condition="isAllocated == 1" Name="[size]">myUpperBound - myLowerBound + 1</Item>
-        <ArrayItems Condition="isAllocated == 1">
-            <Size>myUpperBound - myLowerBound + 1</Size>
-            <ValuePointer>(Standard_Real*)(myStart) + myLowerBound</ValuePointer>
-        </ArrayItems>
-    </Expand>
-</Type>
-
-<!--Multi-dimensional Arrays-->
-<Type Name="TColStd_Array2OfInteger">
-    <DisplayString Condition="(myUpperColumn == myLowerColumn) &amp;&amp; (myUpperRow == myLowerRow)">empty</DisplayString>
-    <DisplayString>extent = {(myUpperColumn-myLowerColumn+1) * (myUpperRow-myLowerRow+1)}</DisplayString>
-</Type>
-
-
-<!--LinkedListItems Expansion-->
-<Type Name="TColStd_ListNodeOfListOfInteger">
-    <DisplayString>{{current = {myValue}}}</DisplayString>
-    <Expand>
-        <LinkedListItems>
-            <HeadPointer>this</HeadPointer>
-            <NextPointer>(TColStd_ListNodeOfListOfInteger*)myNext</NextPointer>
-            <ValueNode>this-&gt;myValue</ValueNode>
-        </LinkedListItems>
-    </Expand>
-</Type>
-
-<Type Name="TColStd_ListOfInteger">
-    <DisplayString Condition="myFirst == 0">empty</DisplayString>
-    <Expand>
-        <Item Name="values">(TColStd_ListNodeOfListOfInteger*)(myFirst)</Item>
-    </Expand>
-</Type>
-
-<Type Name="TColStd_ListNodeOfListOfReal">
-    <DisplayString>{{current = {myValue}}}</DisplayString>
-    <Expand>
-        <LinkedListItems>
-            <HeadPointer>this</HeadPointer>
-            <NextPointer>(TColStd_ListNodeOfListOfReal*)myNext</NextPointer>
-            <ValueNode>this-&gt;myValue</ValueNode>
-        </LinkedListItems>
-    </Expand>
-</Type>
-
-<Type Name="TColStd_ListOfReal">
-    <DisplayString Condition="myFirst == 0">empty</DisplayString>
-    <Expand>
-        <Item Name="values">(TColStd_ListNodeOfListOfReal*)(myFirst)</Item>
-    </Expand>
-</Type>
-
-<Type Name="BRep_ListOfCurveRepresentation">
-    <DisplayString Condition="myFirst == 0">empty</DisplayString>
-    <Expand>
-        <Item Name="values">(BRep_ListNodeOfListOfCurveRepresentation*)(myFirst)</Item>
-    </Expand>
-</Type>
-
-<Type Name="TopoDS_Shape">
-    <DisplayString>{myOrient} {myTShape} loc={myLocation}</DisplayString>
-</Type>
-
-<Type Name="TopoDS_TShape">
-    <DisplayString>subshapes={myShapes} flags={myFlags}</DisplayString>
-</Type>
-
-<Type Name="BOPDS_Pave">
+  <Type Name="BOPDS_Pave">
     <DisplayString>{{{myIndex} {myParameter}}}</DisplayString>
-</Type>
+  </Type>
 
-<Type Name="BOPDS_PaveBlock">
+  <Type Name="BOPDS_PaveBlock">
     <DisplayString>edge={myEdge} orig={myOriginalEdge} pave1={myPave1} pave2={myPave2} extpaves={myExtPaves}</DisplayString>
-</Type>
+  </Type>
 
 </AutoVisualizer>
