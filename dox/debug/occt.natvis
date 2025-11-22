@@ -110,10 +110,6 @@ Tools / Options / Debugging / Output Window / Natvis diagnostic messages
     </Expand>
   </Type>
 
-  <Type Name="TColStd_PackedMapOfInteger">
-    <DisplayString>TColStd_PackedMapOfInteger [{myExtent}]</DisplayString>
-  </Type>
-
   <Type Name="NCollection_Vector&lt;*&gt;">
     <DisplayString>NCollection_Vector [{myLength}]</DisplayString>
     <Expand>
@@ -290,6 +286,89 @@ Tools / Options / Debugging / Output Window / Natvis diagnostic messages
 
           <!-- Advance to next one (within the bucket) -->
           <Exec>index++</Exec>
+          <Exec>currentNode = currentNode->myNext</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
+  <Type Name="TColStd_PackedMapOfInteger">
+    <DisplayString>TColStd_PackedMapOfInteger [{myExtent}]</DisplayString>
+    <Expand>
+      <!-- Basic information -->
+      <Item Name="Size">myExtent</Item>
+
+      <!-- Elements as flat list -->
+      <CustomListItems Condition="myData1 != nullptr">
+        <Variable Name="index" InitialValue="0" />
+        <Variable Name="bucketIndex" InitialValue="0" />
+        <Variable Name="currentNode" InitialValue="myData1[0]" />
+        <Variable Name="intMask" InitialValue="0" />
+        <Variable Name="nZeros" InitialValue="0" />
+        <Variable Name="value" InitialValue="0" />
+
+        <!-- Restrict number of items shown -->
+        <Variable Name="size" InitialValue="myExtent" />
+        <If Condition="size &gt; 10000">
+          <Exec>size = 10000</Exec>
+          <Item Name="[Warning]">"Showing only first 10000 items"</Item>
+        </If>
+
+        <!-- Iterate over items -->
+        <Loop Condition="index &lt; size">
+          <!-- If current node is null, go to next bucket -->
+          <Loop Condition="currentNode == nullptr &amp;&amp; bucketIndex &lt; myNbBuckets">
+            <Exec>bucketIndex++</Exec>
+            <Exec>currentNode = myData1[bucketIndex]</Exec>
+          </Loop>
+
+          <!-- Protection against broken data -->
+          <If Condition="currentNode == nullptr">
+            <Item Name="[Error]">"Could not find all items!"</Item>
+            <Break/>
+          </If>
+
+          <!-- Iterate over values in the node, see TColStd_intMapNode_findNext() -->
+          <Exec>intMask = ~0U</Exec>
+          <Loop>
+            <Exec>value = currentNode->myData &amp; intMask</Exec>
+            <Exec>nZeros = 0</Exec>
+            <If Condition="value == 0">
+              <Break/>
+            </If>
+            <Exec>intMask = ~0U</Exec>
+            <If Condition="(value &amp; 0x0000ffff) == 0">
+              <Exec>intMask = 0xffff0000</Exec>
+              <Exec>nZeros = 16</Exec>
+              <Exec>value &gt;&gt;= 16</Exec>
+            </If>
+            <If Condition="(value &amp; 0x000000ff) == 0">
+              <Exec>intMask &lt;&lt;= 8</Exec>
+              <Exec>nZeros += 8</Exec>
+              <Exec>value &gt;&gt;= 8</Exec>
+            </If>
+            <If Condition="(value &amp; 0x0000000f) == 0">
+              <Exec>intMask &lt;&lt;= 4</Exec>
+              <Exec>nZeros += 4</Exec>
+              <Exec>value &gt;&gt;= 4</Exec>
+            </If>
+            <If Condition="(value &amp; 0x00000003) == 0">
+              <Exec>intMask &lt;&lt;= 2</Exec>
+              <Exec>nZeros += 2</Exec>
+              <Exec>value >>= 2</Exec>
+            </If>
+            <If Condition="(value &amp; 0x00000001) == 0">
+              <Exec>intMask &lt;&lt;= 1</Exec>
+              <Exec>nZeros ++</Exec>
+            </If>
+            <Exec>intMask = (intMask &lt;&lt; 1)</Exec>
+
+            <!-- Show item -->
+            <Item Name="[{index}]">nZeros + (currentNode->myMask &amp; MASK_HIGH)</Item>
+            <Exec>index++</Exec>
+          </Loop>
+
+          <!-- Advance to next one (within the bucket) -->
           <Exec>currentNode = currentNode->myNext</Exec>
         </Loop>
       </CustomListItems>
@@ -480,6 +559,51 @@ Tools / Options / Debugging / Output Window / Natvis diagnostic messages
     </DisplayString>
   </Type>
 
+  <Type Name="math_Vector">
+    <AlternativeType Name="math_IntegerVector"/>
+    <DisplayString>math_Vector [{Array.myLowerBound}, {Array.myUpperBound}]</DisplayString>
+    <Expand>
+      <Item Name="Memory" Condition="Array.myData + Array.myLowerBound == myLocArray.myPtr &amp;&amp; myLocArray.myPtr == myLocArray.myBuffer">"Own, stack",sb</Item>
+      <Item Name="Memory" Condition="Array.myData + Array.myLowerBound == myLocArray.myPtr &amp;&amp; myLocArray.myPtr != myLocArray.myBuffer">"Own, dynamic",sb</Item>
+      <Item Name="Memory" Condition="Array.myData + Array.myLowerBound != myLocArray.myPtr">"External",sb</Item>
+      <ExpandedItem>Array</ExpandedItem>
+    </Expand>
+  </Type>
+
+  <Type Name="math_Matrix">
+    <DisplayString>math_Matrix [{LowerRowIndex}, {UpperRowIndex}] [{LowerColIndex}, {UpperColIndex}]</DisplayString>
+    <Expand>
+      <ExpandedItem>Array</ExpandedItem>
+    </Expand>
+  </Type>
+  <Type Name="math_DoubleTab">
+    <DisplayString>meth_DoubleTab [{LowR}, {UppR}] [{LowC}, {UppC}]</DisplayString>
+    <Expand>
+      <Item Name="Memory" Condition="Addr == Buf &amp;&amp; !isAllocated">"Own, stack",sb</Item>
+      <Item Name="Memory" Condition="Addr == Buf &amp;&amp; isAllocated">"Own, dynamic",sb</Item>
+      <Item Name="Memory" Condition="Addr != Buf">"External",sb</Item>
+
+      <Item Name="Matrix 2x2" Condition="UppR - LowR == 1 &amp;&amp; UppC - LowC == 1">(double(*)[2][2])Addr,na</Item>
+      <Item Name="Matrix 3x3" Condition="UppR - LowR == 2 &amp;&amp; UppC - LowC == 2">(double(*)[3][3])Addr,na</Item>
+
+      <!-- Show elements as custom list to be able to specify non-zero based index -->
+      <CustomListItems Condition="Addr != nullptr">
+        <Variable Name="index1" InitialValue="LowR" />
+        <Variable Name="index2" InitialValue="LowC" />
+        <Variable Name="index" InitialValue="0" />
+        <Loop Condition="index1 &lt;= UppR &amp;&amp; index2 &lt;= UppC">
+          <Item Name="[{index1},{index2}]">((double*)Addr)[index]</Item>
+          <Exec>index++</Exec>
+          <Exec>index2++</Exec>
+          <If Condition="index2 > UppC">
+            <Exec>index1++</Exec>
+            <Exec>index2 = LowC</Exec>
+          </If>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+  
   <Type Name="OpenGl_Context">
     <DisplayString>[{myGlVerMajor}.{myGlVerMinor}]</DisplayString>
   </Type>
