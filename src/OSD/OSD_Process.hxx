@@ -43,6 +43,9 @@ public:
   //! Return full path to the folder containing current process executable with trailing separator.
   Standard_EXPORT static TCollection_AsciiString ExecutableFolder();
 
+  //! Return TRUE if debugger attached to this process has been detected.
+  Standard_EXPORT static bool IsDebuggerAttached();
+
 public:
 
   DEFINE_STANDARD_ALLOC
