@@ -34,6 +34,7 @@
 #ifdef _WIN32
   #include <OSD_WNT.hxx>
   #include <lmcons.h> // for UNLEN - maximum user name length GetUserName()
+  #include <debugapi.h> // for IsDebuggerPresent()
 #else
   const OSD_WhoAmI Iam = OSD_WProcess;
   #include <errno.h>
@@ -48,6 +49,10 @@
 
 #if defined(__APPLE__)
   #include <mach-o/dyld.h>
+  #include <sys/sysctl.h>
+  #include <sys/types.h>
+//#elif defined(__FreeBSD__)
+//  #include <sys/procctl.h>
 #endif
 
 #ifndef _WIN32
@@ -471,4 +476,66 @@ TCollection_AsciiString OSD_Process::ExecutableFolder()
     return aFullPath.SubString (1, aLastSplit);
   }
   return TCollection_AsciiString();
+}
+
+// =======================================================================
+// function : IsDebuggerAttached
+// purpose  :
+// =======================================================================
+bool OSD_Process::IsDebuggerAttached()
+{
+#ifdef _WIN32
+  return IsDebuggerPresent();
+#elif defined(__EMSCRIPTEN__)
+  // Assume that debugger is always present in WinASM
+  return true;
+#elif (defined(__linux__) || defined(__linux))
+  static constexpr char THE_PROC_SELF_STATUS[] = "/proc/self/status";
+  static constexpr char THE_TracerPid[] = "TracerPid:";
+  static constexpr int  THE_TracerPid_LEN = 10;
+
+  // use the same logic for parsing procfs as in OSD_MemInfo::Update()
+  std::ifstream aFile;
+  aFile.open(THE_PROC_SELF_STATUS);
+  if (!aFile.is_open())
+    return false;
+
+  char aBuff[512];
+  while (!aFile.eof())
+  {
+    memset(aBuff, 0, sizeof(aBuff));
+    aFile.getline(aBuff, sizeof(aBuff));
+    if (aBuff[0] == '\0')
+      continue;
+
+    if (strncmp(aBuff, THE_TracerPid, THE_TracerPid_LEN) != 0)
+      continue;
+
+    const long aTracerPid = atol(aBuff + THE_TracerPid_LEN);
+    return aTracerPid != 0;
+  }
+  return false;
+#elif defined(__APPLE__)
+  // Detect presence of debugger on macOS by looking for P_TRACED flag
+  int aMib[4] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
+
+  struct kinfo_proc aKInfo = {};
+  size_t aKInfoSize = sizeof(aKInfo);
+
+  const int isOk = sysctl(aMib, sizeof(aMib) / sizeof(*aMib),
+                          &aKInfo, &aKInfoSize, nullptr, 0);
+  if (isOk != 0)
+    return false; // something is wrong
+
+  return (aKInfo.kp_proc.p_flag & P_TRACED) != 0;
+/*#elif defined(__FreeBSD__)
+  int aStatus = 0;
+  if (procctl(P_PID, getpid(), PROC_TRACE_STATUS, &aStatus) == -1)
+    return false; // failed to get state
+
+  return aStatus > 0;*/
+#else
+  // Assume no debugger
+  return false;
+#endif
 }
