@@ -29,6 +29,8 @@
 //! Except for the message for developer that appears only in Debug mode,
 //! the macros behave in the same way in both Release and Debug modes.
 //!
+//! The preprocessor macro Standard_ASSERT_ENABLE can be defined
+//! to enable the same behavior as in debug mode also in Release build.
 //!
 //! The ASSERT macros differ in the way they react on a wrong situation:
 //! - Standard_ASSERT_RAISE:  raises exception Standard_ProgramError
@@ -48,14 +50,17 @@
 //! The mode is triggered by preprocessor macro _DEBUG: if it is defined,
 //! Debug mode is assumed, Release otherwise.
 //!
-//! In debug mode, if condition is not satisfied the macros call 
-//! Standard_ASSERT_INVOKE_ which:
-//! - on Windows (under VC++), stops code execution and prompts to attach 
-//!   debugger to the process immediately.
-//! - on POSIX systems, prints message to cerr and raises signal SIGTRAP to stop 
-//!   execution when under debugger (may terminate the process if not under debugger).
+//! The second argument (error message) should be C string (const char*).
 //!
-//! The second argument (message) should be string constant ("...").
+//! The environment variable CSF_ASSERT_MODE can be set to tune behavior of assert
+//! handler when assertion fails.
+//! The supported values are:
+//! - "abort"  print message to cerr and call exit(1)
+//! - "break"  print message to cerr and raise debugger break
+//! - "debug"  (default) print message to cerr and raise debugger break,
+//!            but only if the process is run under debugger, otherwise continue
+//! - "report" only print report message to cerr and continue
+//! - "quiet"  do nothing, do not even print the report message
 //!
 //! The Standard_STATIC_ASSERT macro is to be used for compile time checks.
 //! To use this macro, write:
@@ -69,61 +74,22 @@
 // Stub function used to make macros complete C++ operator 
 inline void Standard_ASSERT_DO_NOTHING() {}
 
+//! Handle assert failure.
+//! Depending on the current system and environment variable CSF_ASSERT_MODE (see above),
+//! print error message to std::cerr to inform about failed assert,
+//! propose the user and/or just do raise debug break, or continue.
+Standard_EXPORT void Standard_ASSERT_HANDLER(const char* theFile, int theLine, const char* theExpr, const char* theDesc);
+
+#if !defined(Standard_ASSERT_ENABLE) && (defined(_DEBUG) || !defined(NDEBUG))
+#define Standard_ASSERT_ENABLE
+#endif
+
 // User messages are activated in debug mode only
-#ifdef _DEBUG
-  #if (defined(_WIN32) || defined(__WIN32__))
-    #if defined(_MSC_VER) || defined(__MINGW64__)
-      // VS-specific intrinsic
-      #define Standard_ASSERT_DBGBREAK_() __debugbreak()
-    #else
-      // WinAPI function
-      #include <windows.h>
-      #define Standard_ASSERT_DBGBREAK_() DebugBreak()
-    #endif
-  #elif defined(__EMSCRIPTEN__)
-    #include <emscripten.h>
-    #define Standard_ASSERT_DBGBREAK_() emscripten_debugger()
-  #else
-    // POSIX systems
-    #include <signal.h>
-    #define Standard_ASSERT_DBGBREAK_() raise(SIGTRAP)
-  #endif
-
-  #if defined(_MSC_VER)
-    #include <crtdbg.h>
-    // use debug CRT built-in function that show up message box to user
-    // with formatted assert description and 3 possible actions
-    inline Standard_Boolean Standard_ASSERT_REPORT_ (const char* theFile,
-                                                     const int   theLine,
-                                                     const char* theExpr,
-                                                     const char* theDesc)
-    {
-      // 1 means user pressed Retry button
-      return _CrtDbgReport (_CRT_ASSERT, theFile, theLine, NULL,
-                            "%s\n(Condition: \"%s\")\n", theDesc, theExpr) == 1;
-    }
-  #else
-    // just log assertion description into standard error stream
-    inline Standard_Boolean Standard_ASSERT_REPORT_ (const char* theFile,
-                                                     const int   theLine,
-                                                     const char* theExpr,
-                                                     const char* theDesc)
-    {
-      std::cerr << "ERROR: statement '" << theExpr << "' is not TRUE!\n"
-                << "\nFile: '"   << theFile << "'"
-                << "\nLine: "    << theLine << "\n";
-      if (theDesc != NULL && *theDesc != '\0')
-        std::cerr << "Description: " << theDesc << "\n";
-
-      std::cerr << std::flush;
-      return Standard_True;
-    }
-  #endif
+#ifdef Standard_ASSERT_ENABLE
 
   // report issue and add debug breakpoint or abort execution
   #define Standard_ASSERT_INVOKE_(theExpr, theDesc) \
-    if (Standard_ASSERT_REPORT_ (__FILE__, __LINE__, #theExpr, theDesc)) { Standard_ASSERT_DBGBREAK_(); } \
-    else Standard_ASSERT_DO_NOTHING()
+    Standard_ASSERT_HANDLER(__FILE__, __LINE__, #theExpr, theDesc)
 
   // Basic ASSERT macros
   #define Standard_ASSERT(theExpr, theDesc, theAction)                        \
@@ -133,6 +99,7 @@ inline void Standard_ASSERT_DO_NOTHING() {}
     Standard_ASSERT(theExpr, theDesc,)
   #define Standard_ASSERT_VOID(theExpr, theDesc) \
     Standard_ASSERT(theExpr, theDesc,)
+
 #else
 
   // dummy block
@@ -158,7 +125,7 @@ inline void Standard_ASSERT_DO_NOTHING() {}
   Standard_ASSERT(theExpr, theDesc, return theReturnValue)
 
 //! Raise debug message
-#define Standard_ASSERT_INVOKE(theDesc) Standard_ASSERT_INVOKE_(always, theDesc)
+#define Standard_ASSERT_INVOKE(theDesc) Standard_ASSERT_INVOKE_(false, theDesc)
 
 //! Static assert --
 //! empty default template
