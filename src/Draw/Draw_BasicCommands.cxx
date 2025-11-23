@@ -30,6 +30,7 @@
 #include <OSD_MAllocHook.hxx>
 #include <OSD_MemInfo.hxx>
 #include <OSD_Parallel.hxx>
+#include <OSD_Process.hxx>
 #include <OSD_ThreadPool.hxx>
 #include <Standard_Macro.hxx>
 #include <Standard_SStream.hxx>
@@ -409,8 +410,10 @@ static Standard_Integer dbreak(Draw_Interpretor& di, Standard_Integer, const cha
   return 0;
 }
 
-static Standard_Integer dversion(Draw_Interpretor& di, Standard_Integer, const char**)
+static Standard_Integer dversion(Draw_Interpretor& di, Standard_Integer theNbArgs, const char**)
 {
+  Standard_ASSERT_RETURN(theNbArgs == 1, "wrong number of arguments", 1);
+
   // print OCCT version and OCCTY-specific macros used
   di << "Open CASCADE Technology " << OCC_VERSION_STRING_EXT << "\n";
 #ifdef OCCT_DEBUG
@@ -636,7 +639,7 @@ static unsigned int __stdcall CpuFunc (void * /*param*/)
     if (CPU_LIMIT > 0 && (aCurrent - CPU_CURRENT) >= CPU_LIMIT)
     {
       aTimer.Stop();
-      if (IsDebuggerPresent())
+      if (OSD_Process::IsDebuggerAttached())
       {
         std::cout << "Info: CPU limit (" << CPU_LIMIT << " sec) has been reached but ignored because of attached Debugger" << std::endl;
         return 0;
@@ -650,7 +653,7 @@ static unsigned int __stdcall CpuFunc (void * /*param*/)
     if (CPU_LIMIT > 0 && anElapCurrent >= CPU_LIMIT)
     {
       aTimer.Stop();
-      if (IsDebuggerPresent())
+      if (OSD_Process::IsDebuggerAttached())
       {
         std::cout << "Info: Elapsed limit (" << CPU_LIMIT << " sec) has been reached but ignored because of attached Debugger" << std::endl;
         return 0;
@@ -673,8 +676,16 @@ static void *CpuFunc(void* /*threadarg*/)
     const clock_t anElapCurrent = clock_t(aTimer.ElapsedTime());
     if (CPU_LIMIT > 0 && anElapCurrent >= CPU_LIMIT)
     {
-      std::cout << "Process killed by elapsed limit  (" << CPU_LIMIT << " sec)" << std::endl;
-      std::abort();
+      if (OSD_Process::IsDebuggerAttached())
+      {
+        std::cout << "Info: Elapsed limit (" << CPU_LIMIT << " sec) has been reached but ignored because of attached Debugger" << std::endl;
+        return NULL;
+      }
+      else
+      {
+        std::cout << "Process killed by elapsed limit  (" << CPU_LIMIT << " sec)" << std::endl;
+        std::abort();
+      }
     }
   }
   return NULL;
