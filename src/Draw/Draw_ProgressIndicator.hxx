@@ -16,10 +16,10 @@
 #ifndef _Draw_ProgressIndicator_HeaderFile
 #define _Draw_ProgressIndicator_HeaderFile
 
-#include <Standard.hxx>
-
+#include <Aspect_Drawable.hxx>
 #include <Message_ProgressIndicator.hxx>
 #include <Draw_Interpretor.hxx>
+#include <Standard.hxx>
 
 class Draw_ProgressIndicator;
 DEFINE_STANDARD_HANDLE(Draw_ProgressIndicator, Message_ProgressIndicator)
@@ -99,6 +99,12 @@ private:
   Standard_Real myLastPosition;
   Standard_Size myStartTime;
   Standard_ThreadId myGuiThreadId;
+
+#ifdef _WIN32
+  struct ITaskbarList3* myTaskbarList = nullptr;
+  Aspect_Drawable       myTaskbarWin1 = nullptr;
+  Aspect_Drawable       myTaskbarWin2 = nullptr;
+#endif
 };
 
 #endif // _Draw_ProgressIndicator_HeaderFile
