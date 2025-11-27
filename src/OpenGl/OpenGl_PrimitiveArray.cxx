@@ -967,6 +967,10 @@ void OpenGl_PrimitiveArray::Render (const Handle(OpenGl_Workspace)& theWorkspace
       }
     }
 
+    // protect from cascade errors in case of GLSL program failure
+    if (aCtx->ActiveProgram().IsNull() && aCtx->core11ffp == nullptr)
+      return;
+
     // bind textures after GLSL program to set mock textures to slots used by program
     aCtx->BindTextures (aTextureSet, aCtx->ActiveProgram());
     if (!aTextureSet.IsNull()

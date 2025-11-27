@@ -1712,6 +1712,23 @@ void OpenGl_GlFunctions::load (OpenGl_Context& theCtx,
   #define isGlGreaterEqualShort(theMaj,theMin) theCtx.IsGlGreaterEqual(theMaj,theMin)
 
 #if defined(GL_ES_VERSION_2_0)
+  const char* anExtString = (const char*)theCtx.core11fwd->glGetString(GL_EXTENSIONS);
+  if (OpenGl_Context::CheckExtension(anExtString, "GL_ANGLE_request_extension")
+   && theCtx.FindProcVerbose(aLastFailedProc, "glRequestExtensionANGLE", this->glRequestExtensionANGLE))
+  {
+    theCtx.FindProcVerbose(aLastFailedProc, "glDisableExtensionANGLE", this->glDisableExtensionANGLE);
+    // enable extensions commonly supported by WebGL implementations and used by OCCT
+    const char* aReqExtList = (const char*)theCtx.core11fwd->glGetString(0x93A8); // REQUESTABLE_EXTENSIONS_ANGLE
+    const char* aDefExtList[] = {"GL_EXT_color_buffer_float",
+                                 "GL_EXT_float_blend",
+                                 "GL_OES_texture_float_linear",
+                                 "GL_EXT_texture_filter_anisotropic"};
+    for (const char* aDefIter : aDefExtList)
+    {
+      if (OpenGl_Context::CheckExtension(aReqExtList, aDefIter))
+        this->glRequestExtensionANGLE(aDefIter);
+    }
+  }
 
   theCtx.hasTexRGBA8 = isGlGreaterEqualShort (3, 0)
                     || checkExtensionShort ("GL_OES_rgb8_rgba8");

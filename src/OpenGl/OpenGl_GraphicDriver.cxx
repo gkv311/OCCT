@@ -347,20 +347,50 @@ Standard_Boolean OpenGl_GraphicDriver::InitContext()
   }
 
 #if defined(OpenGl_USE_GLES2)
-  EGLint anEglCtxAttribs3[] = { EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE, EGL_NONE };
-  EGLint anEglCtxAttribs2[] = { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE, EGL_NONE };
+  const char* aEglExt = eglQueryString ((EGLDisplay )myEglDisplay, EGL_EXTENSIONS);
+  if (myCaps->contextWebGlCompatibility
+   && !OpenGl_Context::CheckExtension(aEglExt, "EGL_ANGLE_create_context_webgl_compatibility"))
+  {
+    ::Message::SendFail("Error: EGL does not provide EGL_ANGLE_create_context_webgl_compatibility extension");
+    return Standard_False;
+  }
+  const bool hasBackCompatAngle = myCaps->contextMajorVersionUpper == 2
+    && OpenGl_Context::CheckExtension(aEglExt, "EGL_ANGLE_create_context_backwards_compatible");
+
+  EGLint aEglCtxAttribs[] =
+  {
+    EGL_NONE, EGL_NONE,
+    EGL_NONE, EGL_NONE,
+    EGL_NONE, EGL_NONE,
+    EGL_NONE, EGL_NONE
+  };
+  int aLastAttrib = 0;
+  const int aClientVerAttrib = aLastAttrib++;
+  aEglCtxAttribs[aClientVerAttrib * 2 + 0] = EGL_CONTEXT_CLIENT_VERSION;
+  aEglCtxAttribs[aClientVerAttrib * 2 + 1] = myCaps->contextMajorVersionUpper != 2 ? 3 : 2;
+  if (hasBackCompatAngle)
+  {
+    aEglCtxAttribs[aLastAttrib * 2 + 0] = 0x3483; // EGL_CONTEXT_OPENGL_BACKWARDS_COMPATIBLE_ANGLE
+    aEglCtxAttribs[aLastAttrib * 2 + 1] = EGL_FALSE;
+    ++aLastAttrib;
+  }
+  if (myCaps->contextWebGlCompatibility)
+  {
+    aEglCtxAttribs[aLastAttrib * 2 + 0] = 0x33AC; // EGL_CONTEXT_WEBGL_COMPATIBILITY_ANGLE
+    aEglCtxAttribs[aLastAttrib * 2 + 1] = EGL_TRUE;
+    ++aLastAttrib;
+  }
+
   if (eglBindAPI (EGL_OPENGL_ES_API) != EGL_TRUE)
   {
     ::Message::SendFail ("Error: EGL does not provide OpenGL ES client");
     return Standard_False;
   }
-  if (myCaps->contextMajorVersionUpper != 2)
+  myEglContext = (Aspect_RenderingContext)eglCreateContext((EGLDisplay)myEglDisplay, myEglConfig, EGL_NO_CONTEXT, aEglCtxAttribs);
+  if ((EGLContext)myEglContext == EGL_NO_CONTEXT && myCaps->contextMajorVersionUpper > 2)
   {
-    myEglContext = (Aspect_RenderingContext )eglCreateContext ((EGLDisplay )myEglDisplay, myEglConfig, EGL_NO_CONTEXT, anEglCtxAttribs3);
-  }
-  if ((EGLContext )myEglContext == EGL_NO_CONTEXT)
-  {
-    myEglContext = (Aspect_RenderingContext )eglCreateContext ((EGLDisplay )myEglDisplay, myEglConfig, EGL_NO_CONTEXT, anEglCtxAttribs2);
+    aEglCtxAttribs[aClientVerAttrib * 2 + 1] = 2;
+    myEglContext = (Aspect_RenderingContext)eglCreateContext((EGLDisplay)myEglDisplay, myEglConfig, EGL_NO_CONTEXT, aEglCtxAttribs);
   }
 #else
   if (eglBindAPI (EGL_OPENGL_API) != EGL_TRUE)

@@ -44,20 +44,28 @@ namespace
   //! Return TRUE if GL_DEPTH_STENCIL_ATTACHMENT can be used.
   static bool hasDepthStencilAttach (const Handle(OpenGl_Context)& theCtx)
   {
+    bool isWebGlComp = theCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGLES
+                    && theCtx->caps->contextWebGlCompatibility;
   #ifdef __EMSCRIPTEN__
-    // supported since WebGL 2.0,
-    // while WebGL 1.0 + GL_WEBGL_depth_texture needs GL_DEPTH_STENCIL_ATTACHMENT
-    // and NOT separate GL_DEPTH_ATTACHMENT+GL_STENCIL_ATTACHMENT calls which is different to OpenGL ES 2.0 + extension
-    return theCtx->IsGlGreaterEqual (3, 0) || theCtx->extPDS;
-  #else
+    isWebGlComp = theCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGLES;
+  #endif
+    if (isWebGlComp)
+    {
+      // supported since WebGL 2.0,
+      // while WebGL 1.0 + GL_WEBGL_depth_texture needs GL_DEPTH_STENCIL_ATTACHMENT
+      // and NOT separate GL_DEPTH_ATTACHMENT+GL_STENCIL_ATTACHMENT calls,
+      // which is different to OpenGL ES 2.0 + extension
+      return theCtx->IsGlGreaterEqual (3, 0) || theCtx->extPDS;
+    }
+
     // supported since OpenGL ES 3.0,
-    // while OpenGL ES 2.0 + GL_EXT_packed_depth_stencil needs separate GL_DEPTH_ATTACHMENT+GL_STENCIL_ATTACHMENT calls
+    // while OpenGL ES 2.0 + GL_EXT_packed_depth_stencil
+    // needs separate GL_DEPTH_ATTACHMENT+GL_STENCIL_ATTACHMENT calls
     //
     // available on desktop since OpenGL 3.0
     // or OpenGL 2.0 + GL_ARB_framebuffer_object (GL_EXT_framebuffer_object is unsupported by OCCT)
     return theCtx->GraphicsLibrary() != Aspect_GraphicsLibrary_OpenGLES
         || theCtx->IsGlGreaterEqual (3, 0);
-  #endif
   }
 }
 
