@@ -1221,6 +1221,13 @@ public: //! @name GL_ARB_bindless_texture
   PFNGLVERTEXATTRIBL1UI64VARBPROC          glVertexAttribL1ui64vARB;
   PFNGLGETVERTEXATTRIBLUI64VARBPROC        glGetVertexAttribLui64vARB;
 
+public: //! @name ANGLE extensions
+
+  // GL_ANGLE_request_extension
+  typedef void (APIENTRYP glRequestExtensionANGLE_t)(const char* name);
+  glRequestExtensionANGLE_t glRequestExtensionANGLE;
+  glRequestExtensionANGLE_t glDisableExtensionANGLE;
+
 #if defined(_WIN32)
 public: //! @name wgl extensions
 

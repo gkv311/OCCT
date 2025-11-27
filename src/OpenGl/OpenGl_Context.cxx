@@ -2041,7 +2041,14 @@ void OpenGl_Context::DiagnosticInformation (TColStd_IndexedDataMapOfStringString
     }
     else
     {
-      addInfo (theDict, "GLextensions", (const char*)core11fwd->glGetString (GL_EXTENSIONS));
+      const char* anExtList = (const char*)core11fwd->glGetString(GL_EXTENSIONS);
+      addInfo (theDict, "GLextensions", anExtList);
+      if (CheckExtension(anExtList, "GL_ANGLE_request_extension"))
+      {
+        // REQUESTABLE_EXTENSIONS_ANGLE
+        const char* aReqExtList = (const char*)core11fwd->glGetString(0x93A8);
+        addInfo (theDict, "GLrequestableExtensions", aReqExtList);
+      }
     }
   }
 }
