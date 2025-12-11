@@ -1,0 +1,13 @@
+puts "================================"
+puts "vtolshape - command displaying tolerances of edges and vertices in 3D Viewer"
+puts "================================"
+
+pload XDE VISUALIZATION
+testreadiges [locate_data_file bearing.iges] s
+vinit View1
+vdisplay s -dispMode 1
+vfit
+vtolshape s -min 1.e-7+1.e-8 -print
+vtolshape s -min 1.e-7+1.e-8
+
+vdump $imagedir/${casename}.png
