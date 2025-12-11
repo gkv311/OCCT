@@ -1,0 +1,18 @@
+puts "================================"
+puts "vtolvertex - command displaying vertex tolerances as shaded spheres in 3D Viewer"
+puts "================================"
+
+pload XDE MODELING VISUALIZATION
+testreadiges [locate_data_file bearing.iges] s
+vinit View1
+vdisplay s -dispMode 1
+vfit
+vtolvertex s -min 1.e-7+1.e-8 -print
+vtolvertex s -min 1.e-7+1.e-8
+
+vdump $imagedir/${casename}.png
+
+axo
+fit
+tolsphere s
+xwd $imagedir/${casename}_axo.png

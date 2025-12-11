@@ -120,6 +120,7 @@
 #include <SelectMgr_Selection.hxx>
 #include <StdFail_NotDone.hxx>
 #include <StdPrs_ShadedShape.hxx>
+#include <StdPrs_WFShape.hxx>
 #include <TopoDS_Wire.hxx>
 
 #include <AIS_MultipleConnectedInteractive.hxx>
@@ -7025,6 +7026,253 @@ static int VNormals (Draw_Interpretor& theDI,
 }
 
 //=======================================================================
+//function : VTolShape
+//purpose  : Displays shape tolerances
+//=======================================================================
+static int VTolShape (Draw_Interpretor& theDI,
+                      Standard_Integer  theNbArgs,
+                      const char**      theArgVec)
+{
+  static constexpr int aNbSlices = 10;
+
+  const Handle(AIS_InteractiveContext)& aCtx = ViewerTest::GetAISContext();
+  ViewerTest_AutoUpdater anUpdateTool(aCtx, ViewerTest::CurrentView());
+
+  Standard_Integer toShowEdges = -1;
+  Standard_Integer toShowVerts = -1;
+  {
+    TCollection_AsciiString aCmdName(theArgVec[0]);
+    aCmdName.LowerCase();
+    if (aCmdName == "vtoledge")
+    {
+      toShowEdges = 1;
+      toShowVerts = 0;
+    }
+    else if (aCmdName == "vtolvertex" || aCmdName == "vtolsphere")
+    {
+      toShowEdges = 0;
+      toShowVerts = 1;
+    }
+  }
+
+  TCollection_AsciiString aName;
+  TopoDS_Shape aS;
+  bool toPrint = false;
+  Standard_Real aTolMin = -RealLast();
+  Standard_Real aScale  = 1.0;
+  Standard_Real aTransparency = 0.5;
+  Quantity_Color aColor;
+  bool hasColor = false;
+  for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArgCase(theArgVec[anArgIter]);
+    anArgCase.LowerCase();
+    if (anUpdateTool.parseRedrawMode(theArgVec[anArgIter]))
+    {
+      //
+    }
+    else if (anArgCase == "-edges" || anArgCase == "-noedges")
+    {
+      toShowEdges = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter) ? 1 : 0;
+    }
+    else if (anArgCase == "-vertices" || anArgCase == "-novertices"
+          || anArgCase == "-vertexes" || anArgCase == "-novertexes")
+    {
+      toShowVerts = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter) ? 1 : 0;
+    }
+    else if (anArgCase == "-print")
+    {
+      toPrint = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter);
+    }
+    else if (anArgCase == "-min"
+          && anArgIter + 1 < theNbArgs
+          && Draw::ParseReal(theArgVec[anArgIter + 1], aTolMin))
+    {
+      ++anArgIter;
+    }
+    else if (anArgCase == "-scale"
+          && anArgIter + 1 < theNbArgs
+          && Draw::ParseReal(theArgVec[anArgIter + 1], aScale) && aScale > 0.0)
+    {
+      ++anArgIter;
+    }
+    else if (anArgCase == "-transparency"
+          && anArgIter + 1 < theNbArgs
+          && Draw::ParseReal(theArgVec[anArgIter + 1], aTransparency)
+          && (aTransparency >= 0.0 && aTransparency <= 1.0))
+    {
+      ++anArgIter;
+    }
+    else if (anArgCase == "-color")
+    {
+      const Standard_Integer aNbParsed = Draw::ParseColor(theNbArgs - anArgIter - 1,
+                                                          theArgVec + anArgIter + 1,
+                                                          aColor);
+      if (aNbParsed == 0)
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+      anArgIter += aNbParsed;
+      hasColor = true;
+    }
+    else if (aName.IsEmpty())
+    {
+      aName = theArgVec[anArgIter];
+      aS = DBRep::GetExisting(aName);
+      if (aS.IsNull())
+      {
+        theDI << "Syntax error: no such shape '" << aName << "'";
+        return 1;
+      }
+    }
+    else if (toShowVerts == -1 && toShowEdges == -1
+          && (anArgCase == "vertex" || anArgCase == "v"))
+    {
+      toShowVerts = 1;
+      toShowEdges = 0;
+    }
+    else if (toShowVerts == -1 && toShowEdges == -1
+          && (anArgCase == "edge" || anArgCase == "e"))
+    {
+      toShowVerts = 0;
+      toShowEdges = 1;
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
+  }
+  if (toShowVerts == -1)
+    toShowVerts = 1;
+
+  if (toShowEdges == -1)
+    toShowEdges = 1;
+
+  if (aS.IsNull())
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
+  else if (!toPrint && aCtx.IsNull())
+  {
+    theDI << "Error: no active viewer";
+    return 1;
+  }
+
+  if (toShowEdges == 1)
+  {
+    if (!hasColor)
+      aColor = Quantity_NOC_GREEN;
+
+    TopTools_IndexedMapOfShape aShapeMap;
+    TopExp::MapShapes(aS, TopAbs_EDGE, aShapeMap);
+    for (Standard_Integer i = 1; i <= aShapeMap.Extent(); ++i)
+    {
+      const TopoDS_Edge&  anEdge  = TopoDS::Edge(aShapeMap.FindKey(i));
+      const Standard_Real aTol    = BRep_Tool::Tolerance(anEdge);
+      const Standard_Real aRadius = aTol * aScale;
+      if (aTol <= aTolMin)
+        continue;
+
+      const TCollection_AsciiString anEdgeName = aName + "_e" + i;
+      if (toPrint)
+      {
+        theDI << anEdgeName << ": " << aTol << "\n";
+        continue;
+      }
+
+      if (BRep_Tool::Degenerated(anEdge))
+        continue;
+
+      Handle(Prs3d_Drawer) aDrawer = new Prs3d_Drawer();
+      aDrawer->Link(aCtx->DefaultDrawer());
+      const Standard_Real aDefl = StdPrs_ToolTriangulatedShape::GetDeflection(aS, aDrawer);
+
+      Prs3d_NListOfSequenceOfPnt aPolylines;
+      StdPrs_WFShape::AddEdges(anEdge, aDrawer, aDefl,
+                               &aPolylines, &aPolylines, &aPolylines, &aPolylines);
+      if (aPolylines.Size() != 1 || aPolylines.First()->Size() < 2)
+      {
+        Message::SendWarning() << "Error: '" << anEdgeName << "' computation failed";
+        continue;
+      }
+
+      const TColgp_SequenceOfPnt& aPnts = aPolylines.First()->Sequence();
+
+      const Standard_Integer aNbSegs  = aPnts.Size() - 1;
+      const Standard_Integer aNbVerts = Prs3d_ToolQuadric::VerticesNb (aNbSlices, aNbSlices) * aNbSegs;
+      const Standard_Integer aNbTris  = Prs3d_ToolQuadric::TrianglesNb(aNbSlices, aNbSlices) * aNbSegs;
+
+      Handle(Graphic3d_ArrayOfTriangles) aTris =
+        new Graphic3d_ArrayOfTriangles(aNbVerts, aNbTris * 3, Graphic3d_ArrayFlags_VertexNormal);
+
+      TColgp_SequenceOfPnt::Iterator aPntIter(aPnts), aPntIterNext(aPnts);
+      aPntIterNext.Next();
+      for (; aPntIterNext.More(); aPntIter.Next(), aPntIterNext.Next())
+      {
+        const gp_Pnt& aPnt1 = aPntIter.Value();
+        const gp_Pnt& aPnt2 = aPntIterNext.Value();
+
+        const Standard_Real aLen = aPnt2.Distance(aPnt1);
+        if (aLen <= gp::Resolution())
+          continue;
+
+        gp_Trsf aTrsf;
+        aTrsf.SetTransformation(gp_Ax3(aPnt1, gp_Dir(aPnt2.XYZ() - aPnt1.XYZ())), gp::XOY());
+
+        Prs3d_ToolCylinder aTool(aRadius, aRadius, aLen, aNbSlices, aNbSlices);
+        aTool.FillArray(aTris, aTrsf);
+      }
+
+      Handle(AIS_InteractiveObject) aPrs = new MyPArrayObject(aTris);
+      aPrs->SetColor(aColor);
+      aPrs->SetTransparency(aTransparency);
+
+      ViewerTest::Display(anEdgeName, aPrs, false);
+      theDI << anEdgeName << " ";
+    }
+  }
+  if (toShowVerts == 1)
+  {
+    if (!hasColor)
+      aColor = Quantity_NOC_RED;
+
+    TopTools_IndexedMapOfShape aShapeMap;
+    TopExp::MapShapes(aS, TopAbs_VERTEX, aShapeMap);
+    for (Standard_Integer i = 1; i <= aShapeMap.Extent(); ++i)
+    {
+      const TopoDS_Vertex& aV      = TopoDS::Vertex(aShapeMap.FindKey(i));
+      const Standard_Real  aTol    = BRep_Tool::Tolerance(aV);
+      const Standard_Real  aRadius = aTol * aScale;
+      if (aTol <= aTolMin)
+        continue;
+
+      const TCollection_AsciiString aVertName = aName + "_v" + i;
+      if (toPrint)
+      {
+        theDI << aVertName << ": " << aTol << "\n";
+        continue;
+      }
+
+      gp_Trsf aTrsf; aTrsf.SetTranslationPart(BRep_Tool::Pnt(aV).XYZ());
+
+      Handle(Graphic3d_ArrayOfTriangles) aTris = Prs3d_ToolSphere::Create(aRadius, aNbSlices, aNbSlices, gp_Trsf());
+      Handle(AIS_InteractiveObject)      aPrs  = new MyPArrayObject(aTris);
+      aPrs->SetColor(aColor);
+      aPrs->SetTransparency(aTransparency);
+      aPrs->SetLocalTransformation(aTrsf);
+
+      ViewerTest::Display(aVertName, aPrs, false);
+      theDI << aVertName << " ";
+    }
+  }
+
+  return 0;
+}
+
+//=======================================================================
 //function : ObjectsCommands
 //purpose  :
 //=======================================================================
@@ -7454,4 +7702,27 @@ vnormals Shape [{on|off}=on] [-length {10}] [-nbAlongU {1}] [-nbAlongV {1}] [-nb
                [-useMesh] [-oriented {0}1}=0]
 Displays/Hides normals calculated on shape geometry or retrieved from triangulation
 )" /* [vnormals] */);
+
+  addCmd("vtolshape", VTolShape, /* [vtolshape] */ R"(
+vtolshape shape [-edges {0|1}]=1 [-vertices {0|1}]=1
+          [-print] [-min Value]=0.0 [-scale Value]=1.0
+          [-color Color]=RED [-transparency Value]=0.5
+Visualizes shape tolerances.
+ -vertices display tolerances of vertices as shaded spheres
+ -edges display tolerances of edges as shaded cylinders
+ -print print values instead of displaying presentation
+ -min   minimal tolerance value to be displayed
+ -scale scale to apply to presentation
+ -color presentation color (by default - RED for vertices and GREEN for edges)
+ -transparency presentation transparency
+)" /* [vtolshape] */);
+  addCmd("vtolvertex", VTolShape, /* [vtolvertex] */ R"(
+Alias for vtolshape visualizing tolerances of vertices.
+)" /* [vtolvertex] */);
+  addCmd("vtoledge", VTolShape, /* [vtoledge] */ R"(
+Alias for vtolshape visualizing tolerances of edges.
+)" /* [vtoledge] */);
+  addCmd("vtolsphere", VTolShape, /* [vtolsphere] */ R"(
+Alias for vtolshape visualizing tolerances of vertices.
+)" /* [vtolsphere] */);
 }
