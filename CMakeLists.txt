@@ -1286,9 +1286,9 @@ if (CMAKE_BUILD_TYPE)
 endif()
 
 if (BUILD_SHARED_LIBS)
-  set (SET_OpenCASCADE_LINKER_FLAGS "set (OpenCASCADE_LINKER_FLAGS   \"${CMAKE_SHARED_LINKER_FLAGS}\")")
+  set (OpenCASCADE_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS})
 else()
-  set (SET_OpenCASCADE_LINKER_FLAGS "set (OpenCASCADE_LINKER_FLAGS   \"${CMAKE_STATIC_LINKER_FLAGS}\")")
+  set (OpenCASCADE_LINKER_FLAGS ${CMAKE_STATIC_LINKER_FLAGS})
 endif()
 
 if (WIN32)
@@ -1299,7 +1299,7 @@ if (APPLE)
 endif()
 
 # Configure and install cmake config file
-configure_file("${CMAKE_SOURCE_DIR}/adm/templates/OpenCASCADEConfig.cmake.in" "OpenCASCADEConfig.cmake" @ONLY)
+configure_file("${CMAKE_SOURCE_DIR}/adm/templates/OpenCASCADEConfig.cmake.in" "OpenCASCADEConfig.cmake" ESCAPE_QUOTES @ONLY)
 install(FILES "${CMAKE_BINARY_DIR}/OpenCASCADEConfig.cmake" DESTINATION  "${INSTALL_DIR_CMAKE}")
 
 # Configure cmake version file
