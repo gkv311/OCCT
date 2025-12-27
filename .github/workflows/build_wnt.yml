@@ -1,0 +1,92 @@
+name: Build (Windows/MSVC+MinGW)
+on:
+  workflow_call:
+
+jobs:
+  build-lin-mingw:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build \
+          mingw-w64 mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 g++-mingw-w64-x86-64 gcc-mingw-w64-x86-64
+    - name: Configure project
+      env:
+        CMAKE_C_FLAGS: -Werror -Wno-error=maybe-uninitialized
+        TOOLCHAIN_PREFIX: x86_64-w64-mingw32
+        CMAKE_TOOLCHAIN: ./build/x86_64-w64-mingw32.cmake
+      run: |
+        ${TOOLCHAIN_PREFIX}-g++ --version
+        mkdir "build"
+        # treat all warnings as error, but workaround a MinGW bug
+        # src/Image/Image_PixMap.cxx:396:22: error: ‘aColorIn’ may be used uninitialized [-Werror=maybe-uninitialized]
+        #    ColorToRawPixel(aRawPixelOut, myImgFormat, aColorIn, toLinearize);
+        echo "set(CMAKE_SYSTEM_NAME Windows)" > $CMAKE_TOOLCHAIN
+        echo "set(CMAKE_C_COMPILER   ${TOOLCHAIN_PREFIX}-gcc)" >> $CMAKE_TOOLCHAIN
+        echo "set(CMAKE_CXX_COMPILER ${TOOLCHAIN_PREFIX}-g++)" >> $CMAKE_TOOLCHAIN
+        echo "set(CMAKE_RC_COMPILER  ${TOOLCHAIN_PREFIX}-windres)" >> $CMAKE_TOOLCHAIN
+        echo "set(CMAKE_FIND_ROOT_PATH /usr/${TOOLCHAIN_PREFIX})" >> $CMAKE_TOOLCHAIN
+        echo "set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)" >> $CMAKE_TOOLCHAIN
+        echo "set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)" >> $CMAKE_TOOLCHAIN
+        echo "set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)" >> $CMAKE_TOOLCHAIN
+        cmake -G Ninja -S . -B "./build" \
+          -D CMAKE_TOOLCHAIN_FILE="$CMAKE_TOOLCHAIN" \
+          -D CMAKE_BUILD_TYPE="Release" \
+          -D CMAKE_C_FLAGS:STRING="$CMAKE_C_FLAGS" \
+          -D CMAKE_CXX_FLAGS:STRING="$CMAKE_C_FLAGS" \
+          -D INSTALL_DIR:PATH=install \
+          -D BUILD_RELEASE_DISABLE_EXCEPTIONS:BOOL=OFF \
+          -D BUILD_DOC_Overview:BOOL=OFF \
+          -D BUILD_Inspector:BOOL=OFF \
+          -D BUILD_MODULE_Draw:BOOL=OFF \
+          -D USE_FREETYPE:BOOL=OFF \
+          -D USE_FREEIMAGE:BOOL=OFF
+    - name: Build project
+      run: |
+        cmake --build "./build" --config Release
+    - name: Install build
+      run: |
+        cmake --build "./build" --config Release --target install
+
+  build-wnt-msvc:
+    runs-on: windows-latest
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 1
+    - name: Setup MSVC
+      uses: ilammy/msvc-dev-cmd@v1.13.0
+      with:
+        arch: x64
+    - name: Install dependencies
+      run: |
+        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+    - name: Configure project
+      shell: cmd
+      run: |
+        mkdir "build"
+        cmake -S . -B "./build" -T host=x64 ^
+          -D CMAKE_BUILD_TYPE="Release" ^
+          -D CMAKE_INSTALL_PREFIX="./build/install" ^
+          -D CMAKE_C_FLAGS:STRING="/WX" ^
+          -D CMAKE_CXX_FLAGS:STRING="/WX" ^
+          -D INSTALL_DIR:PATH=install ^
+          -D BUILD_RELEASE_DISABLE_EXCEPTIONS:BOOL=OFF ^
+          -D BUILD_DOC_Overview:BOOL=OFF ^
+          -D BUILD_Inspector:BOOL=OFF ^
+          -D BUILD_MODULE_Draw:BOOL=OFF ^
+          -D USE_FREETYPE:BOOL=OFF ^
+          -D USE_FREEIMAGE:BOOL=OFF
+    - name: Build project
+      run: |
+        cmake --build "./build" --config Release -- /m
+    - name: Install build
+      run: |
+        cmake --build "./build" --config Release --target install

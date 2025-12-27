@@ -1,0 +1,49 @@
+name: Build (Linux/Android)
+on:
+  workflow_call:
+
+jobs:
+  build-lin-ndk:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 1
+        path: occt.git
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build
+    - name: Configure project
+      env:
+        CMAKE_SYSTEM_VERSION: 21
+        CMAKE_ANDROID_ARCH_ABI: arm64-v8a
+        CMAKE_C_FLAGS: -Werror
+      run: |
+        mkdir -p "build"
+        echo "ANDROID_NDK=$ANDROID_NDK"
+        cmake -G Ninja -S ./occt.git -B "./build/occt-make" \
+          -D CMAKE_SYSTEM_NAME:STRING="Android" \
+          -D CMAKE_SYSTEM_VERSION:STRING="$CMAKE_SYSTEM_VERSION" \
+          -D CMAKE_ANDROID_NDK="$ANDROID_NDK" \
+          -D CMAKE_ANDROID_ARCH_ABI:STRING="$CMAKE_ANDROID_ARCH_ABI" \
+          -D CMAKE_ANDROID_STL_TYPE="c++_shared" \
+          -D CMAKE_BUILD_TYPE="Release" \
+          -D BUILD_LIBRARY_TYPE:STRING="Shared" \
+          -D CMAKE_C_FLAGS:STRING="$CMAKE_C_FLAGS" \
+          -D CMAKE_CXX_FLAGS:STRING="$CMAKE_C_FLAGS" \
+          -D INSTALL_DIR:PATH=$PWD/build/install \
+          -D BUILD_RELEASE_DISABLE_EXCEPTIONS:BOOL=OFF \
+          -D BUILD_DOC_Overview:BOOL=OFF \
+          -D BUILD_Inspector:BOOL=OFF \
+          -D BUILD_MODULE_Draw:BOOL=OFF \
+          -D USE_FREETYPE:BOOL=OFF \
+          -D USE_FREEIMAGE:BOOL=OFF
+    - name: Build project
+      run: |
+        cmake --build "./build/occt-make" --config Release
+    - name: Install build
+      run: |
+        cmake --build "./build/occt-make" --config Release --target install

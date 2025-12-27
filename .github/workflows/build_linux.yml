@@ -1,0 +1,232 @@
+name: Build (Linux/GCC+Clang)
+on:
+  workflow_call:
+
+jobs:
+  build-lin-gcc:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build \
+          libfontconfig-dev libfreetype-dev \
+          rapidjson-dev libdraco-dev \
+          libx11-dev \
+          libwayland-dev \
+          libfreeimage-dev \
+          libgl-dev libegl-dev libgles2-mesa-dev \
+          tcllib tklib tcl-dev tk-dev \
+          xvfb
+    - name: Configure project
+      env:
+        CMAKE_C_FLAGS: -Werror
+      run: |
+        g++ --version
+        mkdir "build"
+        cmake -G Ninja -S . -B "./build" \
+          -D CMAKE_BUILD_TYPE="Release"  \
+          -D CMAKE_C_FLAGS:STRING="$CMAKE_C_FLAGS" \
+          -D CMAKE_CXX_FLAGS:STRING="$CMAKE_C_FLAGS" \
+          -D INSTALL_DIR:PATH=install \
+          -D BUILD_RELEASE_DISABLE_EXCEPTIONS:BOOL=OFF \
+          -D BUILD_DOC_Overview:BOOL=OFF \
+          -D BUILD_Inspector:BOOL=OFF \
+          -D USE_XLIB:BOOL=ON \
+          -D USE_WAYLAND:BOOL=OFF \
+          -D USE_FREETYPE:BOOL=ON \
+          -D USE_FREEIMAGE:BOOL=ON \
+          -D USE_GLES2:BOOL=ON \
+          -D USE_RAPIDJSON:BOOL=ON \
+          -D USE_DRACO:BOOL=ON
+    - name: Build project
+      run: |
+        cmake --build "./build" --config Release
+    - name: Install build
+      run: |
+        cmake --build "./build" --config Release --target install
+    - name: Run DRAW
+      run: |
+        anCasRoot=$PWD/build/install
+        export LD_LIBRARY_PATH=$anCasRoot/lib
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "dversion"
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "pload ALL"
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "pload VISUALIZATION; vdriver -load GL;   vinit; vglinfo;"
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "pload VISUALIZATION; vdriver -load GLES; vinit; vglinfo;"
+    - name: Pack install
+      run: |
+        anArchName=occt-linux-gcc.tar
+        pushd "./build/install"
+        tar -cf ../${anArchName} *
+        popd
+    - name: Upload build
+      uses: actions/upload-artifact@v4
+      with:
+        name: occt-linux-gcc
+        path: build/occt-linux-gcc.tar
+
+  build-lin-clang:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          clang cmake ninja-build \
+          libfontconfig-dev libfreetype-dev \
+          rapidjson-dev libdraco-dev \
+          libx11-dev \
+          libwayland-dev \
+          libfreeimage-dev \
+          libgl-dev libegl-dev libgles2-mesa-dev \
+          tcllib tklib tcl-dev tk-dev \
+          xvfb
+    - name: Configure project
+      env:
+        CMAKE_C_FLAGS: -Werror
+        CC: /usr/bin/clang
+        CXX: /usr/bin/clang++
+      run: |
+        clang++ --version
+        mkdir "build"
+        cmake -G Ninja -S . -B "./build" \
+          -D CMAKE_BUILD_TYPE="Release"  \
+          -D CMAKE_C_FLAGS:STRING="$CMAKE_C_FLAGS" \
+          -D CMAKE_CXX_FLAGS:STRING="$CMAKE_C_FLAGS" \
+          -D INSTALL_DIR:PATH=install \
+          -D BUILD_RELEASE_DISABLE_EXCEPTIONS:BOOL=OFF \
+          -D BUILD_DOC_Overview:BOOL=OFF \
+          -D BUILD_Inspector:BOOL=OFF \
+          -D USE_XLIB:BOOL=ON \
+          -D USE_WAYLAND:BOOL=ON \
+          -D USE_FREETYPE:BOOL=ON \
+          -D USE_FREEIMAGE:BOOL=ON \
+          -D USE_GLES2:BOOL=ON \
+          -D USE_RAPIDJSON:BOOL=ON \
+          -D USE_DRACO:BOOL=ON
+    - name: Build project
+      run: |
+        cmake --build "./build" --config Release
+    - name: Install build
+      run: |
+        cmake --build "./build" --config Release --target install
+    - name: Run DRAW
+      run: |
+        anCasRoot=$PWD/build/install
+        export LD_LIBRARY_PATH=$anCasRoot/lib
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "dversion"
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "pload ALL"
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "pload VISUALIZATION; vdriver -load GL;   vinit; vglinfo;"
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "pload VISUALIZATION; vdriver -load GLES; vinit; vglinfo;"
+
+  genres-lin:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build \
+          flex bison libfl-dev \
+          libwayland-dev wayland-protocols \
+          xvfb
+    - name: Configure project
+      run: |
+        mkdir "build"
+        cmake -S . -B "./build" \
+          -D CMAKE_BUILD_TYPE="Release"  \
+          -D BUILD_RESOURCES:BOOL=ON \
+          -D BUILD_YACCLEX:BOOL=ON \
+          -D BUILD_MODULE_Draw:BOOL=OFF \
+          -D BUILD_DOC_Overview:BOOL=OFF \
+          -D BUILD_Inspector:BOOL=OFF \
+          -D USE_XLIB:BOOL=OFF \
+          -D USE_WAYLAND:BOOL=OFF \
+          -D USE_FREETYPE:BOOL=OFF \
+          -D USE_GLES2:BOOL=OFF
+    - name: Regenerete resources
+      run: |
+        cmake --build "./build" --config Release --target yacclex
+        nbChanged=`git diff --numstat -- src/ | wc -l`
+        if [ "$nbChanged" != 0 ]; then
+          echo "Error: regenerated source code files are different:"
+          git diff --numstat -- src/ | awk '{print $3}'
+          git diff > ./build/occt_genres_diff.patch
+          #cat ./build/occt_genres_diff.patch
+          #exit 1
+        fi
+    - name: Upload diff
+      uses: actions/upload-artifact@v4
+      with:
+        name: occt_genres_diff.patch
+        path: build/occt_genres_diff.patch
+        if-no-files-found: ignore
+    - name: Check results
+      run: |
+        nbChanged=`git diff --numstat -- src/ | wc -l`
+        if [ "$nbChanged" != 0 ]; then
+          echo "Error: regenerated source code files are different, see occt_genres_diff.patch."
+          exit 1
+        fi
+
+  test-lin-gcc:
+    runs-on: ubuntu-24.04
+    needs: build-lin-gcc
+    steps:
+    - name: Clone Tree
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libfontconfig1 libfreetype6 \
+          libdraco8 \
+          libfreeimage3 \
+          libgl1 libegl1 libglapi-mesa \
+          tcllib tklib tcl-thread  \
+          xvfb xwayland-run weston
+    - name: Download build
+      uses: actions/download-artifact@v5
+      with:
+        name: occt-linux-gcc
+        path: build/install
+    - name: Unpack build
+      run: |
+        pushd ./build/install
+        tar -xvf ./occt-linux-gcc.tar
+        popd
+    - name: Run DRAW
+      run: |
+        anCasRoot=$PWD/build/install
+        export LD_LIBRARY_PATH=$anCasRoot/lib
+        export PATH=$anCasRoot/bin:$PATH
+        export CASROOT=$PWD
+        export CSF_OCCTResourcePath=$CASROOT/src
+        export CSF_OCCTSamplesPath=$CASROOT/samples
+        export CSF_OCCTDataPath=$CASROOT/data
+        export DRAWDEFAULT=$CSF_OCCTResourcePath/DrawResources/DrawDefault
+        export DRAWHOME=$CSF_OCCTResourcePath/DrawResources
+        export CSF_DrawPluginDefaults=$DRAWHOME
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "dversion"
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "pload ALL"
+        xvfb-run -a $anCasRoot/bin/DRAWEXE -c "testgrid v3d"
+    - name: Upload test log
+      uses: actions/upload-artifact@v4
+      with:
+        name: occt-linux-gcc-test-results
+        path: results
