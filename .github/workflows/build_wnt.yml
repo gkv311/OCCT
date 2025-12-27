@@ -1,0 +1,325 @@
+name: Build (Windows/MSVC+MinGW)
+on:
+  workflow_call:
+
+jobs:
+  build-mingw:
+    runs-on: ubuntu-24.04
+    steps:
+    - name: Runner info
+      run: |
+        lscpu
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: occt.git
+        fetch-depth: 1
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          g++ cmake ninja-build \
+          mingw-w64-common mingw-w64-tools binutils-mingw-w64-x86-64 \
+          g++-mingw-w64-x86-64-posix gcc-mingw-w64-x86-64-posix
+    - name: Configure project
+      env:
+        # treat all warnings as error, but workaround a MinGW bug
+        # src/Image/Image_PixMap.cxx:396:22: error: ‘aColorIn’ may be used uninitialized [-Werror=maybe-uninitialized]
+        #    ColorToRawPixel(aRawPixelOut, myImgFormat, aColorIn, toLinearize);
+        TOOLCHAIN_PREFIX: x86_64-w64-mingw32
+        OCCT_CONFIG: |
+          set(BUILD_RELEASE_DISABLE_EXCEPTIONS OFF CACHE BOOL "")
+          set(BUILD_DOC_Overview OFF CACHE BOOL "")
+          set(BUILD_MODULE_Draw  OFF CACHE BOOL "")
+          set(USE_FREETYPE       OFF CACHE BOOL "")
+          set(USE_FREEIMAGE      OFF CACHE BOOL "")
+          set(CMAKE_SYSTEM_NAME  Windows)
+          set(CMAKE_C_COMPILER   x86_64-w64-mingw32-gcc-posix)
+          set(CMAKE_CXX_COMPILER x86_64-w64-mingw32-g++-posix)
+          set(CMAKE_RC_COMPILER  x86_64-w64-mingw32-windres)
+          set(CMAKE_FIND_ROOT_PATH /usr/x86_64-w64-mingw32)
+          set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+          set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+          set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+          set(CMAKE_BUILD_TYPE "Release")
+          set(CMAKE_C_FLAGS    "-Werror -Wno-error=maybe-uninitialized -Wno-error=array-bounds -Wno-error=deprecated-declarations")
+          set(CMAKE_CXX_FLAGS  "-Werror -Wno-error=maybe-uninitialized -Wno-error=array-bounds -Wno-error=deprecated-declarations")
+          set(INSTALL_DIR      "${CMAKE_CURRENT_LIST_DIR}/occt-install" CACHE PATH "")
+      run: |
+        ${TOOLCHAIN_PREFIX}-g++ --version
+        echo "${OCCT_CONFIG}" | tee ./occt-make.cmake
+        cmake -S ./occt.git -B ./occt-make -G Ninja --toolchain "$PWD/occt-make.cmake"
+    - name: Build project
+      run: |
+        cmake --build ./occt-make
+    - name: Install build
+      run: |
+        cmake --install ./occt-make --prefix ./occt-install
+
+  build-msvc:
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, arm64]
+        include:
+          - os: windows-latest
+            arch: x86_64
+            tarch: x64
+            vcvars: vcvars64.bat
+          - os: windows-11-arm
+            arch: arm64
+            tarch: arm64
+            vcvars: vcvarsarm64.bat
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Runner info
+      shell: pwsh
+      run: |
+        Get-ComputerInfo | Select WindowsProductName
+        Get-WMIObject win32_operatingsystem | select Caption, OSArchitecture, Version
+        $processor = Get-WmiObject Win32_Processor
+        Write-Output ("CPU Name:".PadRight(30) + "$($processor.Name)")
+        Write-Output ("CPU NumberOfCores:".PadRight(30) + "$($processor.NumberOfCores)")
+        Write-Output ("CPU NumberOfLogicalProcessors:".PadRight(30) + "$($processor.NumberOfLogicalProcessors)")
+        echo "PhysicalMemory:"
+        (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: occt.git
+        fetch-depth: 1
+    - name: Clone Tcl
+      uses: actions/checkout@v6
+      with:
+        repository: tcltk/tcl
+        path: tcl.git
+        ref: 'core-8-6-17'
+        fetch-depth: 1
+    # Helpful action finding and calling vcvars, and exporting %PATH%
+    #- name: Setup MSVC
+    #  uses: ilammy/msvc-dev-cmd@v1.13.0
+    #  with:
+    #    arch: '${{ matrix.arch }}'
+    # Build Tcl for Draw Harness module.
+    - name: Configure environment
+      id: cfg
+      shell: bash
+      run: |
+        vs2022="C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build"
+        vs2026="C:/Program Files/Microsoft Visual Studio/18/Enterprise/VC/Auxiliary/Build"
+        if [ -f "$vs2026/${{ matrix.vcvars }}" ]; then
+          echo "vcvars=$vs2026/${{ matrix.vcvars }}" >> $GITHUB_OUTPUT
+          echo "cmakegen=Visual Studio 18 2026" >> $GITHUB_OUTPUT
+        elif [ -f "$vs2022/${{ matrix.vcvars }}" ]; then
+          echo "vcvars=$vs2022/${{ matrix.vcvars }}" >> $GITHUB_OUTPUT
+          echo "cmakegen=Visual Studio 17 2022" >> $GITHUB_OUTPUT
+        else
+          echo "Error: unable to locate msvc"
+          return 1
+        fi
+    - name: Build Tcl
+      shell: cmd
+      run: |
+        set "aTcl="%CD%\tcl.git"
+        set "aTclMake="%CD%\tcl.git"
+        set "INSTALLDIR=%CD%\tcl-install"
+        call "${{ steps.cfg.outputs.vcvars }}"
+        pushd "%aTclMake%\win"
+        nmake -nologo -f makefile.vc release
+        nmake -nologo -f makefile.vc release install
+        rem Workaround tclsh executable installation
+        nmake -nologo -f makefile.vc release install
+        popd
+    - name: Generate config options
+      env:
+        OCCT_CONFIG: |
+          set(BUILD_RELEASE_DISABLE_EXCEPTIONS OFF CACHE BOOL "")
+          set(BUILD_DOC_Overview OFF CACHE BOOL "")
+          set(BUILD_MODULE_Draw  ON  CACHE BOOL "")
+          set(USE_FREETYPE       OFF CACHE BOOL "")
+          set(USE_FREEIMAGE      OFF CACHE BOOL "")
+          set(USE_TK             OFF CACHE BOOL "")
+          set(3RDPARTY_TCL_DIR         "${CMAKE_CURRENT_LIST_DIR}/tcl-install" CACHE PATH "")
+          set(3RDPARTY_TCL_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/tcl-install/include" CACHE PATH "")
+          set(3RDPARTY_TCL_LIBRARY_DIR "${CMAKE_CURRENT_LIST_DIR}/tcl-install/lib" CACHE PATH "")
+          set(3RDPARTY_TCL_LIBRARY     "${CMAKE_CURRENT_LIST_DIR}/tcl-install/lib/tcl86t.lib" CACHE FILEPATH "")
+          #set(CMAKE_BUILD_TYPE "Release")
+          set(CMAKE_C_FLAGS    "/WX")
+          set(CMAKE_CXX_FLAGS  "/WX")
+          set(INSTALL_DIR      "${CMAKE_CURRENT_LIST_DIR}/occt-install" CACHE PATH "")
+      shell: bash
+      run: |
+        echo "${OCCT_CONFIG}" | tee ./occt-make.cmake
+    - name: Configure project
+      shell: cmd
+      run: |
+        cmake -S ./occt.git -B ./occt-make -G "${{ steps.cfg.outputs.cmakegen }}" -A ${{ matrix.tarch }} --toolchain "%CD%/occt-make.cmake"
+    - name: Build project
+      run: |
+        cmake --build ./occt-make --config Release -- /m
+    - name: Install build
+      run: |
+        cmake --install ./occt-make --prefix ./occt-install --config Release
+    - name: Run DRAW
+      shell: cmd
+      run: |
+        set "PATH=${{ github.workspace }}\occt-install\win64\vc14\bin;${{ github.workspace }}\tcl-install\bin;%PATH%"
+        echo "::group::Draw Harness info"
+        DRAWEXE.exe -b -c "dversion"
+        echo "::endgroup::"
+        echo ""
+        echo "::group::Load ALL plugins"
+        DRAWEXE.exe -b -c "pload ALL"
+        echo "::endgroup::"
+        echo ""
+        echo "::group::Load 3D Viewer"
+        DRAWEXE.exe -b -c "pload VISUALIZATION; vdriver -load GL; vinit; vglinfo;"
+        echo "::endgroup::"
+        echo ""
+        echo "Run basic tests"
+        set "CASROOT=${{ github.workspace }}\occt.git"
+        set "CSF_OCCTTestsPath=%CASROOT%\tests"
+        DRAWEXE.exe -b -c "testgrid collections,bugs n,fclasses -outdir ./occt-results"
+        echo ""
+    - name: Check test results
+      id: draw
+      shell: bash
+      run: |
+        testslog=./occt-results/tests.log
+        nb_failed=`grep -o --count ': FAILED' ./occt-results/tests.log || echo -n`
+        nb_ok=`grep -o --count ': OK' $testslog || echo -n`
+        nb_bad=`grep -o --count ': BAD' $testslog || echo -n`
+        nb_failed=`grep -o --count ': FAILED' $testslog || echo -n`
+        nb_skipped=`grep -o --count ': SKIPPED' $testslog || echo -n`
+        nb_improved=`grep -o --count ': IMPROVED' $testslog || echo -n`
+        echo "nb_failed=$nb_failed" >> $GITHUB_OUTPUT
+        if [[ $nb_failed != '0' ]]; then
+          # find lines with failed cases, trim leading spaces, replace newlines into comma
+          if [[ $nb_skipped != '0' ]]; then
+            list_failed=`sed '/^Failed/,/^Skipped/!d;//d' $testslog | sed 's/^ *//g' | sed 's/^\|$/"/g'|paste -sd, -`
+          else
+            list_failed=`sed '/^Failed/,/^Total cases/!d;//d' $testslog | sed 's/^ *//g' | sed 's/^\|$/"/g'|paste -sd, -`
+          fi
+          echo "::warning:: $nb_failed FAILED test(s) ($list_failed). Please check regressions."
+        elif [[ $nb_improved != '0' ]]; then
+          echo "::warning:: $nb_improved IMPROVED test(s). Please validate results."
+        elif [[ $nb_ok == '0' ]]; then
+          echo "::error:: Invalid test results. Please check test grids."
+        fi
+    - name: Upload report with failed tests
+      if: (steps.draw.outputs.nb_failed != '0')
+      uses: actions/upload-artifact@v6
+      with:
+        name: occt-window-${{ matrix.arch }}-msvc-tests
+        path: occt-results
+        if-no-files-found: error
+
+  build-mingw-msys2:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+    - name: Runner info
+      shell: pwsh
+      run: |
+        Get-ComputerInfo | Select WindowsProductName
+        Get-WMIObject win32_operatingsystem | select Caption, OSArchitecture, Version
+        $processor = Get-WmiObject Win32_Processor
+        Write-Output ("CPU Name:".PadRight(30) + "$($processor.Name)")
+        Write-Output ("CPU NumberOfCores:".PadRight(30) + "$($processor.NumberOfCores)")
+        Write-Output ("CPU NumberOfLogicalProcessors:".PadRight(30) + "$($processor.NumberOfLogicalProcessors)")
+        echo "PhysicalMemory:"
+        (Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property capacity -Sum).sum /1gb
+    - name: Clone Tree
+      uses: actions/checkout@v6
+      with:
+        path: occt.git
+        fetch-depth: 1
+    - uses: msys2/setup-msys2@v2
+      id: msys2
+      with:
+        msystem: UCRT64
+        install: >
+          mingw-w64-ucrt-x86_64-gcc
+          mingw-w64-ucrt-x86_64-cmake
+          mingw-w64-ucrt-x86_64-ninja
+          mingw-w64-ucrt-x86_64-freetype
+          mingw-w64-ucrt-x86_64-tcl
+          mingw-w64-ucrt-x86_64-tk
+    - name: Configure project
+      env:
+        MSYS2_LOCATION: ${{ steps.msys2.outputs.msys2-location }}
+        OCCT_CONFIG: |
+          set(BUILD_RELEASE_DISABLE_EXCEPTIONS OFF CACHE BOOL "")
+          set(BUILD_DOC_Overview OFF CACHE BOOL "")
+          set(BUILD_MODULE_Draw  ON  CACHE BOOL "")
+          set(USE_FREETYPE       ON  CACHE BOOL "")
+          set(USE_FREEIMAGE      OFF CACHE BOOL "")
+          set(CMAKE_BUILD_TYPE "Release")
+          #set(CMAKE_C_FLAGS    "-Werror -Wno-error=maybe-uninitialized -Wno-error=array-bounds -Wno-error=deprecated-declarations")
+          #set(CMAKE_CXX_FLAGS  "-Werror -Wno-error=maybe-uninitialized -Wno-error=array-bounds -Wno-error=deprecated-declarations")
+          set(INSTALL_DIR      "${CMAKE_CURRENT_LIST_DIR}/occt-install" CACHE PATH "")
+      run: |
+        echo "${OCCT_CONFIG}" | tee ./occt-make.cmake
+        cmake -S ./occt.git -B ./occt-make -G Ninja --toolchain "$PWD/occt-make.cmake" \
+          -D 3RDPARTY_FREETYPE_INCLUDE_DIR_freetype2:FILEPATH="$MSYS2_LOCATION/ucrt64/include/freetype2" \
+          -D 3RDPARTY_FREETYPE_INCLUDE_DIR_ft2build:FILEPATH="$MSYS2_LOCATION/ucrt64/include/freetype2" \
+          -D 3RDPARTY_FREETYPE_LIBRARY_DIR:PATH="$MSYS2_LOCATION/ucrt64/lib" \
+          -D 3RDPARTY_FREETYPE_LIBRARY:FILEPATH="$MSYS2_LOCATION/ucrt64/lib/libfreetype.dll.a" \
+          -D 3RDPARTY_FREETYPE_DLL_DIR:PATH="$MSYS2_LOCATION/ucrt64/bin" \
+          -D 3RDPARTY_FREETYPE_DLL:FILEPATH="$MSYS2_LOCATION/ucrt64/bin/libfreetype-6.dll"
+    - name: Build project
+      run: |
+        cmake --build ./occt-make
+    - name: Install project
+      run: |
+        cmake --install ./occt-make --prefix ./occt-install
+    - name: Run DRAW
+      id: draw
+      run: |
+        export PATH="$PWD/occt-install/win64/gcc/bin:$PATH"
+        echo "::group::Draw Harness info"
+        DRAWEXE.exe -b -c "dversion"
+        echo "::endgroup::"
+        echo ""
+        echo "::group::Load ALL plugins"
+        DRAWEXE.exe -b -c "pload ALL"
+        echo "::endgroup::"
+        echo ""
+        echo "::group::Load 3D Viewer"
+        DRAWEXE.exe -b -c "pload VISUALIZATION; vdriver -load GL; vinit; vglinfo;"
+        echo "::endgroup::"
+        echo ""
+        echo "Run basic tests"
+        export CASROOT="${{ github.workspace }}/occt.git"
+        export CSF_OCCTTestsPath="$CASROOT/tests"
+        DRAWEXE.exe -b -c "testgrid collections,bugs n,fclasses -outdir ./occt-results"
+        echo ""
+        testslog=./occt-results/tests.log
+        nb_ok=`grep -o --count ': OK' $testslog || echo -n`
+        nb_bad=`grep -o --count ': BAD' $testslog || echo -n`
+        nb_failed=`grep -o --count ': FAILED' $testslog || echo -n`
+        nb_skipped=`grep -o --count ': SKIPPED' $testslog || echo -n`
+        nb_improved=`grep -o --count ': IMPROVED' $testslog || echo -n`
+        echo "nb_failed=$nb_failed" >> $GITHUB_OUTPUT
+        if [[ $nb_failed != '0' ]]; then
+          # find lines with failed cases, trim leading spaces, replace newlines into comma
+          if [[ $nb_skipped != '0' ]]; then
+            list_failed=`sed '/^Failed/,/^Skipped/!d;//d' $testslog | sed 's/^ *//g' | sed 's/^\|$/"/g'|paste -sd, -`
+          else
+            list_failed=`sed '/^Failed/,/^Total cases/!d;//d' $testslog | sed 's/^ *//g' | sed 's/^\|$/"/g'|paste -sd, -`
+          fi
+          echo "::warning:: $nb_failed FAILED test(s) ($list_failed). Please check regressions."
+        elif [[ $nb_improved != '0' ]]; then
+          echo "::warning:: $nb_improved IMPROVED test(s). Please validate results."
+        elif [[ $nb_ok == '0' ]]; then
+          echo "::error:: Invalid test results. Please check test grids."
+        fi
+    - name: Upload report with failed tests
+      if: (steps.draw.outputs.nb_failed != '0')
+      uses: actions/upload-artifact@v6
+      with:
+        name: occt-window-${{ matrix.arch }}-mingw-msys-tests
+        path: occt-results
+        if-no-files-found: error
