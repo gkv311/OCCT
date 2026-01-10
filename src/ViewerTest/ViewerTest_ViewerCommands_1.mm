@@ -187,7 +187,10 @@ static Aspect_VKeyFlags getMouseKeyFlags (NSEvent* theEvent)
 - (void )setFrameSize: (NSSize )theNewSize
 {
   [super setFrameSize: theNewSize];
-  ViewerTest::CurrentEventManager()->ProcessConfigure();
+  if (!ViewerTest::CurrentEventManager().IsNull())
+  {
+    ViewerTest::CurrentEventManager()->ProcessConfigure();
+  }
 }
 
 // =======================================================================
