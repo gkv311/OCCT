@@ -13,7 +13,9 @@
 
 #if defined(__APPLE__) && !defined(HAVE_XLIB)
 
+#include <Standard_WarningsDisable.hxx>
 #import <Cocoa/Cocoa.h>
+#include <Standard_WarningsRestore.hxx>
 
 #include <Cocoa_Window.hxx>
 #include <ViewerTest.hxx>

@@ -15,11 +15,13 @@
 
 #import <TargetConditionals.h>
 
+#include <Standard_WarningsDisable.hxx>
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
   #import <UIKit/UIKit.h>
 #else
   #import <Cocoa/Cocoa.h>
 #endif
+#include <Standard_WarningsRestore.hxx>
 
 #include <Cocoa_Window.hxx>
 

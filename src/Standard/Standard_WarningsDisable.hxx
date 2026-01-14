@@ -30,7 +30,17 @@
 #if defined(__clang__)
   #pragma clang diagnostic push
   #pragma clang diagnostic ignored "-Wall"
+  #if __has_warning("-Wavailability")
+    #pragma clang diagnostic ignored "-Wavailability"
+  #endif
+  #pragma clang diagnostic ignored "-Wdeprecated-declarations"
   #pragma clang diagnostic ignored "-Wextra"
+  #if __has_warning("-Wmissing-method-return-type")
+    #pragma clang diagnostic ignored "-Wmissing-method-return-type"
+  #endif
+  #if __has_warning("-Wnontrivial-memcall")
+    #pragma clang diagnostic ignored "-Wnontrivial-memcall"
+  #endif
   #pragma clang diagnostic ignored "-Wshorten-64-to-32"
 #elif defined(_MSC_VER)
   #pragma warning(push, 0)

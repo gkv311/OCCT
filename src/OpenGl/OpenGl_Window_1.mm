@@ -24,17 +24,21 @@
 
 #import <TargetConditionals.h>
 
+// Suppress warnings from macOS system headers
+#include <Standard_WarningsDisable.hxx>
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
   #import <UIKit/UIKit.h>
 #else
   #import <Cocoa/Cocoa.h>
+#endif
+#include <Standard_WarningsRestore.hxx>
 
+#if !defined(TARGET_OS_IPHONE) || !TARGET_OS_IPHONE
 #if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
 @interface NSView (LionAPI)
 - (NSSize )convertSizeToBacking: (NSSize )theSize;
 @end
 #endif
-
 #endif
 
 #include <OpenGl_Window.hxx>
