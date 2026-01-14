@@ -35,7 +35,7 @@ endif()
 # configuration file for doxygen
 set (OCCT_CONFIG_FOR_DOXYGEN "${OCCT_GENERATED_DOC_DIR}/occt.cfg")
 
-set (3RDPARTY_MATHJAX_RELATIVE_PATH "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1")
+set (3RDPARTY_MATHJAX_RELATIVE_PATH "/usr/share/javascript/mathjax/MathJax.js")
 
 configure_file ("${OCCT_OVERVIEW_RESOURCE_DIR}/occt_ug_html.doxyfile" "${OCCT_CONFIG_FOR_DOXYGEN}" COPYONLY)
 
