@@ -170,7 +170,8 @@ static Standard_Integer CommandCmd (ClientData theClientData, Tcl_Interp* interp
 
     Standard_SStream ss;
     ss << "An exception was caught " << anException << std::ends;
-    Tcl_SetResult(interp,(char*)(ss.str().c_str()),TCL_VOLATILE);
+    const std::string aStr = ss.str();
+    Tcl_SetResult(interp, const_cast<char*>(aStr.c_str()), TCL_VOLATILE);
     code = TCL_ERROR;
   }
   catch (std::exception const& theStdException)
@@ -188,7 +189,8 @@ static Standard_Integer CommandCmd (ClientData theClientData, Tcl_Interp* interp
 
     Standard_SStream ss;
     ss << "An exception was caught " << theStdException.what() << " [" << typeid(theStdException).name() << "]" << std::ends;
-    Tcl_SetResult(interp,(char*)(ss.str().c_str()),TCL_VOLATILE);
+    const std::string aStr = ss.str();
+    Tcl_SetResult(interp, const_cast<char*>(aStr.c_str()), TCL_VOLATILE);
     code = TCL_ERROR;
   }
   catch (...)
@@ -204,9 +206,8 @@ static Standard_Integer CommandCmd (ClientData theClientData, Tcl_Interp* interp
     #endif
     }
 
-    Standard_SStream ss;
-    ss << "UNKNOWN exception was caught " << std::ends;
-    Tcl_SetResult(interp,(char*)(ss.str().c_str()),TCL_VOLATILE);
+    const char* aStr = "UNKNOWN exception was caught ";
+    Tcl_SetResult(interp, const_cast<char*>(aStr), TCL_STATIC);
     code = TCL_ERROR;
   }
 

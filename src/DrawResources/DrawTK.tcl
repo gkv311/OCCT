@@ -70,6 +70,8 @@ proc addmenuitem {menu options} {
     } else {set m $theMenus($menu)}
 
     eval $m add $options
+    # suppress printing id of a new entry created by 'menu add' (since Tcl9)
+    return ""
 }
 
 proc addmenu {menu submenu {command ""}} {

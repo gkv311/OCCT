@@ -1365,6 +1365,10 @@ void Destroy_Appli()
   //XCloseDisplay(Draw_WindowDisplay);
 }
 
+#if (TCL_MAJOR_VERSION < 9) && !defined(Tcl_Size)
+  typedef int Tcl_Size; // ptrdiff_t since Tcl9, int before
+#endif
+
 //! This procedure is invoked by the event dispatcher whenever standard input becomes readable.
 //! It grabs the next line of input characters, adds them to a command being assembled,
 //! and executes the command if it's complete.
@@ -1379,16 +1383,16 @@ static void StdinProc (ClientData clientData, int theMask)
   // MSV Nov 2, 2001: patch for TCL 8.3: initialize line to avoid exception
   //                  when first user input is an empty string
   Tcl_DStringFree (&Draw_TclLine);
-  int count = Tcl_Gets(chan, &Draw_TclLine);
+  Tcl_Size count = Tcl_Gets(chan, &Draw_TclLine);
 
   // MKV 26.05.05
 #if ((TCL_MAJOR_VERSION > 8) || ((TCL_MAJOR_VERSION == 8) && (TCL_MINOR_VERSION >= 4)))
   Tcl_DString aLineTmp;
   Tcl_DStringInit (&aLineTmp);
   Tcl_UniChar* aUniCharString = Tcl_UtfToUniCharDString (Tcl_DStringValue (&Draw_TclLine), -1, &aLineTmp);
-  Standard_Integer l = Tcl_UniCharLen (aUniCharString);
+  Tcl_Size l = Tcl_UniCharLen (aUniCharString);
   TCollection_AsciiString anAsciiString;
-  for (Standard_Integer i = 0; i < l; ++i)
+  for (Tcl_Size i = 0; i < l; ++i)
   {
     Standard_Character aCharacter = aUniCharString[i];
     anAsciiString.AssignCat (aCharacter);
@@ -2000,7 +2004,9 @@ static DWORD WINAPI tkLoop (const LPVOID theThreadParameter)
   #endif
   }
   Tcl_Exit(0);
+#if !(defined(TCL_NORETURN) && (defined(__GNUC__) || defined(_MSC_VER)))
   return 0;
+#endif
 }
 
 /*--------------------------------------------------------*\
