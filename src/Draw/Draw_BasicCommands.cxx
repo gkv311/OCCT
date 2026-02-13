@@ -956,52 +956,51 @@ static int dmeminfo (Draw_Interpretor& theDI,
     return 0;
   }
 
-  NCollection_Map<OSD_MemInfo::Counter> aCounters;
+  bool aCounters[OSD_MemInfo::MemCounter_NB] = {};
   for (Standard_Integer anIter = 1; anIter < theArgNb; ++anIter)
   {
-    TCollection_AsciiString anArg (theArgVec[anIter]);
-    anArg.LowerCase();
-    if (anArg == "virt" || anArg == "v")
+    const char* anArg = theArgVec[anIter];
+    if (strcasecmp(anArg, "virt") == 0 || strcasecmp(anArg, "v") == 0)
     {
-      aCounters.Add (OSD_MemInfo::MemVirtual);
+      aCounters[(int)OSD_MemInfo::MemVirtual] = true;
     }
-    else if (anArg == "virtmax" || anArg == "vmax")
+    else if (strcasecmp(anArg, "virtmax") == 0 || strcasecmp(anArg, "vmax") == 0)
     {
-      aCounters.Add (OSD_MemInfo::MemVirtualMax);
+      aCounters[(int)OSD_MemInfo::MemVirtualMax] = true;
     }
-    else if (anArg == "heap" || anArg == "h")
+    else if (strcasecmp(anArg, "heap") == 0 || strcasecmp(anArg, "h") == 0)
     {
-      aCounters.Add (OSD_MemInfo::MemHeapUsage);
+      aCounters[(int)OSD_MemInfo::MemHeapUsage] = true;
     }
-    else if (anArg == "wset" || anArg == "w")
+    else if (strcasecmp(anArg, "wset") == 0 || strcasecmp(anArg, "w") == 0)
     {
-      aCounters.Add (OSD_MemInfo::MemWorkingSet);
+      aCounters[(int)OSD_MemInfo::MemWorkingSet] = true;
     }
-    else if (anArg == "wsetpeak")
+    else if (strcasecmp(anArg, "wsetpeak") == 0)
     {
-      aCounters.Add (OSD_MemInfo::MemWorkingSetPeak);
+      aCounters[(int)OSD_MemInfo::MemWorkingSetPeak] = true;
     }
-    else if (anArg == "swap")
+    else if (strcasecmp(anArg, "swap") == 0)
     {
-      aCounters.Add (OSD_MemInfo::MemSwapUsage);
+      aCounters[(int)OSD_MemInfo::MemSwapUsage] = true;
     }
-    else if (anArg == "swappeak")
+    else if (strcasecmp(anArg, "swappeak") == 0)
     {
-      aCounters.Add (OSD_MemInfo::MemSwapUsagePeak);
+      aCounters[(int)OSD_MemInfo::MemSwapUsagePeak] = true;
     }
-    else if (anArg == "private")
+    else if (strcasecmp(anArg, "private") == 0)
     {
-      aCounters.Add (OSD_MemInfo::MemPrivate);
+      aCounters[(int)OSD_MemInfo::MemPrivate] = true;
     }
-    else if (anArg == "stack")
+    else if (strcasecmp(anArg, "stack") == 0)
     {
-      aCounters.Add (OSD_MemInfo::MemStackSize);
+      aCounters[(int)OSD_MemInfo::MemStackSize] = true;
     }
 #if defined(__EMSCRIPTEN__)
-    else if ((anArg == "-resize" || anArg == "-wasmresize") && anIter + 1 < theArgNb)
+    else if (anIter + 1 < theArgNb && (strcasecmp(anArg, "-resize") == 0 || strcasecmp(anArg, "-wasmresize") == 0))
     {
-      aCounters.Add (OSD_MemInfo::MemVirtual);
-      aCounters.Add (OSD_MemInfo::MemVirtualMax);
+      aCounters[(int)OSD_MemInfo::MemVirtual] = true;
+      aCounters[(int)OSD_MemInfo::MemVirtualMax] = true;
 
       Standard_Integer aNewSizeMiB = 0;
       if (!Draw::ParseInteger(theArgVec[++anIter], aNewSizeMiB))
@@ -1032,15 +1031,15 @@ static int dmeminfo (Draw_Interpretor& theDI,
 
   OSD_MemInfo aMemInfo (Standard_False);
   aMemInfo.SetActive (Standard_False);
-  for (NCollection_Map<OSD_MemInfo::Counter>::Iterator aCountersIt (aCounters); aCountersIt.More(); aCountersIt.Next())
-  {
-    aMemInfo.SetActive (aCountersIt.Value(), Standard_True);
-  }
+  for (int aCountersIt = 0; aCountersIt < int(OSD_MemInfo::MemCounter_NB); ++aCountersIt)
+    aMemInfo.SetActive((OSD_MemInfo::Counter)aCountersIt, aCounters[aCountersIt]);
+
   aMemInfo.Update();
 
-  for (NCollection_Map<OSD_MemInfo::Counter>::Iterator aCountersIt (aCounters); aCountersIt.More(); aCountersIt.Next())
+  for (int aCountersIt = 0; aCountersIt < int(OSD_MemInfo::MemCounter_NB); ++aCountersIt)
   {
-    theDI << Standard_Real (aMemInfo.Value (aCountersIt.Value())) << " ";
+    if (aCounters[aCountersIt])
+      theDI << Standard_Real(aMemInfo.Value((OSD_MemInfo::Counter)aCountersIt)) << " ";
   }
   theDI << "\n";
   return 0;
