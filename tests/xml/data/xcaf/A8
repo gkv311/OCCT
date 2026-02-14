@@ -1,4 +1,4 @@
-set aTestName "xcaf200-L1"
+set aTestName "xcaf200-$casename"
 puts $aTestName
 
 # Add an attribute to a data framework
