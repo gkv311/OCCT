@@ -1,4 +1,4 @@
-set aTestName "caf001-A3"
+set aTestName "caf001-$casename"
 
 # Add an attribute to a data framework
 set aSetAttr1 100

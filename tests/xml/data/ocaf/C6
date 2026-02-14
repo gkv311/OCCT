@@ -1,4 +1,4 @@
-set aTestName "caf100-F1"
+set aTestName "caf100-$casename"
 puts ${aTestName}
 
 # Set a driver guid

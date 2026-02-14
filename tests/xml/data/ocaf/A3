@@ -1,4 +1,4 @@
-set aTestName "caf001-C3"
+set aTestName "caf001-$casename"
 puts $aTestName
 
 set QA_DUP 0

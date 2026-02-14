@@ -1,4 +1,4 @@
-set aTestName "caf001-E3"
+set aTestName "caf001-$casename"
 puts ${aTestName}
 set LabelsList { \
   { 0:11	"Tu sais je n'ai jamais t aussi hereux que ce matin-l" }		\

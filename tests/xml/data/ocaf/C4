@@ -1,4 +1,4 @@
-set aTestName "caf100-C1"
+set aTestName "caf100-$casename"
 puts ${aTestName}
 
 box ab 10 20 777

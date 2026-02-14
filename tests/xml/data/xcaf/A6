@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC16497
 
-set aTestName "xml001-D7"
+set aTestName "xml001-$casename"
 puts ${aTestName}
 
 # Add an attribute to a data framework
