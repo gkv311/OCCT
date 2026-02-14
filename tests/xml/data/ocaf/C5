@@ -1,4 +1,4 @@
-set aTestName "caf100-D1"
+set aTestName "caf100-$casename"
 puts ${aTestName}
 
 # Create a box

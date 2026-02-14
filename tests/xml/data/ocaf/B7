@@ -1,4 +1,4 @@
-set aTestName "caf004-B3"
+set aTestName "caf004-$casename"
 puts ${aTestName}
 
 # Create two new documents Doc1, Doc2

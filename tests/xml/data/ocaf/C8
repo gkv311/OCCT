@@ -1,4 +1,4 @@
-set aTestName "caf100-R1"
+set aTestName "caf100-$casename"
 puts ${aTestName}
 
 # Set a variables

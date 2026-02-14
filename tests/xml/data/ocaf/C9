@@ -1,4 +1,4 @@
-set aTestName "caf100-V1"
+set aTestName "caf100-$casename"
 puts ${aTestName}
 
 # Set isConstant

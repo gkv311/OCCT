@@ -1,4 +1,4 @@
-set aTestName "caf005-A3"
+set aTestName "caf005-$casename"
 puts ${aTestName}
 
 # Add an attribute to a data framework

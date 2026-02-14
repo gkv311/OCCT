@@ -1,4 +1,4 @@
-set aTestName "xcaf200-G1"
+set aTestName "xcaf200-$casename"
 puts $aTestName
 
 box aBox 10 20 30

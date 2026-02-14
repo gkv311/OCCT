@@ -1,4 +1,4 @@
-set aTestName "caf100-B1"
+set aTestName "caf100-$casename"
 puts ${aTestName}
 
 box aBox1 10 20 30 100 200 300

@@ -1,4 +1,4 @@
-set aTestName "caf001-G3"
+set aTestName "caf001-$casename"
 puts ${aTestName}
 
 set aTokList { :,}

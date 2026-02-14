@@ -1,4 +1,4 @@
-set aTestName "caf003-A4"
+set aTestName "caf003-$casename"
 puts ${aTestName}
 
 pload VISUALIZATION
