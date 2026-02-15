@@ -10,4 +10,11 @@ checkshape result
 
 checknbshapes result -solid 1 -shell 1 -face 156 -wire 201
 
-checkview -display result -2d -path ${imagedir}/${test_image}.png
+pload VISUALIZATION
+vinit View1
+vclear
+XDisplay D_First -dispMode 1
+XGetGDTPresentation D_First gdt
+vdisplay {*}[explode gdt] -dispMode 1
+vfit
+vdump "$::imagedir/${::casename}.png"

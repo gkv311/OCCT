@@ -47,8 +47,8 @@
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Vertex.hxx>
+#include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
-
 
 
 static Standard_Integer DumpDGTs (Draw_Interpretor& di, Standard_Integer argc, const char** argv)
@@ -2471,45 +2471,64 @@ static Standard_Integer addGDTPresentation (Draw_Interpretor& di, Standard_Integ
 
 static Standard_Integer getGDTPresentation (Draw_Interpretor& di, Standard_Integer argc, const char** argv)
 {
-  if (argc < 3) {
-    di << "Use: XGetGDTPresentation Doc GDT_Label Shape\n";
+  if (argc != 3 && argc != 4)
+  {
+    di << "Syntax error: wrong number of arguments";
     return 1;
   }
+
   Handle(TDocStd_Document) Doc;
   DDocStd::GetDocument(argv[1], Doc);
   if ( Doc.IsNull() ) { di << argv[1] << " is not a document\n"; return 1; }
 
-  TDF_Label aLabel;
-  TDF_Tool::Label(Doc->GetData(), argv[2], aLabel);
-  if ( aLabel.IsNull() ) 
+  if (argc == 4)
   {
-    di << "GDT " << argv[2] << " is absent in " << argv[1] << "\n";
-    return 1;
-  }
-  TopoDS_Shape aPresentation;
-  // Dimension
-  Handle(XCAFDoc_Dimension) aDimension;
-  if (aLabel.FindAttribute(XCAFDoc_Dimension::GetID(), aDimension))
-  {
-    Handle(XCAFDimTolObjects_DimensionObject) anObj = aDimension->GetObject();
-    aPresentation = anObj->GetPresentation();
-  }
-  // Geometric Tolerance
-  Handle(XCAFDoc_GeomTolerance) aGeomTolerance;
-  if (aLabel.FindAttribute(XCAFDoc_GeomTolerance::GetID(), aGeomTolerance))
-  {
-    Handle(XCAFDimTolObjects_GeomToleranceObject) anObj = aGeomTolerance->GetObject();
-    aPresentation = anObj->GetPresentation();
-  }
-  // Datum
-  Handle(XCAFDoc_Datum) aDatum;
-  if (aLabel.FindAttribute(XCAFDoc_Datum::GetID(), aDatum))
-  {
-    Handle(XCAFDimTolObjects_DatumObject) anObj = aDatum->GetObject();
-    aPresentation = anObj->GetPresentation();
+    TDF_Label aLabel;
+    TDF_Tool::Label(Doc->GetData(), argv[2], aLabel);
+    if (aLabel.IsNull())
+    {
+      di << "GDT " << argv[2] << " is absent in " << argv[1] << "\n";
+      return 1;
+    }
+
+    TopoDS_Shape aShape;
+    Handle(XCAFDoc_Dimension) aDimension;
+    if (aLabel.FindAttribute(XCAFDoc_Dimension::GetID(), aDimension))
+      aShape = aDimension->GetObject()->GetPresentation();
+
+    Handle(XCAFDoc_GeomTolerance) aGeomTolerance;
+    if (aLabel.FindAttribute(XCAFDoc_GeomTolerance::GetID(), aGeomTolerance))
+      aShape = aGeomTolerance->GetObject()->GetPresentation();
+
+    Handle(XCAFDoc_Datum) aDatum;
+    if (aLabel.FindAttribute(XCAFDoc_Datum::GetID(), aDatum))
+      aShape = aDatum->GetObject()->GetPresentation();
+
+    DBRep::Set(argv[3], aShape);
+    return 0;
   }
 
-  DBRep::Set (argv[3], aPresentation);
+  Handle(XCAFDoc_DimTolTool) aDimTool = XCAFDoc_DocumentTool::DimTolTool(Doc->Main());
+  NCollection_IndexedDataMap<TDF_Label, TopoDS_Shape, TDF_LabelMapHasher> aMap;
+  aDimTool->GetGDTPresentations(aMap);
+  di << "Number of GDT: " << aMap.Extent() << "\n";
+  if (aMap.IsEmpty())
+  {
+    DBRep::Set(argv[2], TopoDS_Shape());
+    return 0;
+  }
+  else if (aMap.Extent() == 1)
+  {
+    DBRep::Set(argv[2], aMap.FindFromIndex(1));
+    return 0;
+  }
+
+  TopoDS_Compound aComp;
+  BRep_Builder().MakeCompound(aComp);
+  for (Standard_Integer aMapIter = 1; aMapIter <= aMap.Extent(); ++aMapIter)
+    BRep_Builder().Add(aComp, aMap.FindFromIndex(aMapIter));
+
+  DBRep::Set(argv[2], aComp);
   return 0;
 }
 
@@ -3053,7 +3072,7 @@ void XDEDRAW_GDTs::InitCommands(Draw_Interpretor& di)
     "Set presentation with given name for dimension",
     __FILE__, addGDTPresentation, g);
 
-  di.Add ("XGetGDTPresentation","XGetGDTPresentation Doc GDT_Label Shape"
+  di.Add ("XGetGDTPresentation","XGetGDTPresentation Doc [GDT_Label] Shape"
     "Returns Presentation into Shape",
     __FILE__, getGDTPresentation, g);
   di.Add("XSetGDTAffectedPlane", "XSetGDTAffectedPlane Doc GDT_Label Plane type[1 - intersection/ 2 - orientation]"
