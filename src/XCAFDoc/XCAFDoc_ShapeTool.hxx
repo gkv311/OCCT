@@ -24,6 +24,7 @@
 #include <TDataStd_GenericEmpty.hxx>
 #include <TDF_LabelMap.hxx>
 #include <TDF_LabelSequence.hxx>
+#include <RWMesh_NameFormat.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_OStream.hxx>
 #include <TColStd_SequenceOfHAsciiString.hxx>
@@ -434,7 +435,21 @@ public:
   //! @param[in] theToCreate  create and assign attribute if it doesn't exist
   //! @return Handle to the NamedData attribute or Null if there is none
   Standard_EXPORT Handle(TDataStd_NamedData) GetNamedProperties(const TopoDS_Shape& theShape, const Standard_Boolean theToCreate = Standard_False) const;
-  
+
+  //! Generate name for specified label.
+  //! @param[in] theFormat   name format to apply
+  //! @param[in] theLabel    instance label
+  Standard_EXPORT static TCollection_AsciiString FormatName(RWMesh_NameFormat theFormat,
+                                                            const TDF_Label&  theLabel);
+
+  //! Generate name for specified labels.
+  //! @param[in] theFormat   name format to apply
+  //! @param[in] theLabel    instance label
+  //! @param[in] theRefLabel product label
+  Standard_EXPORT static TCollection_AsciiString FormatName(RWMesh_NameFormat theFormat,
+                                                            const TDF_Label&  theLabel,
+                                                            const TDF_Label&  theRefLabel);
+
   //! Dumps the content of me into the stream
   Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 

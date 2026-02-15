@@ -5305,15 +5305,11 @@ static int VDisplay2 (Draw_Interpretor& theDI,
       }
 
       // update the Shape in the AIS_Shape
-      TopoDS_Shape      aNewShape = DBRep::GetExisting (aName);
-      Handle(AIS_Shape) aShapePrs = Handle(AIS_Shape)::DownCast(aShape);
-      if (!aShapePrs.IsNull())
+      TopoDS_Shape aNewShape = DBRep::GetExisting (aName);
+      if (Handle(AIS_Shape) aShapePrs = Handle(AIS_Shape)::DownCast(aShape))
       {
-        if (!aShapePrs->Shape().IsEqual (aNewShape))
-        {
+        if (aShapePrs->SetShape(aNewShape))
           toReDisplay = Standard_True;
-        }
-        aShapePrs->Set (aNewShape);
       }
       if (toReDisplay)
       {

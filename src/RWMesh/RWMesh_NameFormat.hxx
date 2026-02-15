@@ -25,6 +25,9 @@ enum RWMesh_NameFormat
   RWMesh_NameFormat_ProductOrInstance,         //!< return Product name when available and Instance name otherwise
   RWMesh_NameFormat_ProductAndInstance,        //!< generate "Product [Instance]" name
   RWMesh_NameFormat_ProductAndInstanceAndOcaf, //!< generate name combining Product+Instance+Ocaf (useful for debugging purposes)
+  RWMesh_NameFormat_Ocaf,                      //!< return ocaf id
+  RWMesh_NameFormat_InstanceOrProductOrOcaf,   //!< the same as InstanceOrProduct, but return ocaf id if neither was found
+  RWMesh_NameFormat_ProductOrInstanceOrOcaf,   //!< the same as ProductAndInstance, but return ocaf id if neither was found
 };
 
 #endif // _RWMesh_NameFormat_HeaderFile

@@ -48,16 +48,20 @@ public:
 
   //! Checks whether the shape is properly triangulated for a given display settings.
   //! @param[in] theShape  the shape.
-  //! @param[in] theDrawer  the display settings.
+  //! @param[in] theDrawer the display settings
+  //! @param[in] theDefl   (optional) linear deflection
   Standard_EXPORT static Standard_Boolean IsTessellated (const TopoDS_Shape& theShape,
-                                                         const Handle(Prs3d_Drawer)& theDrawer);
+                                                         const Handle(Prs3d_Drawer)& theDrawer,
+                                                         const Standard_Real theDefl = -1.0);
 
   //! Validates triangulation within the shape and performs tessellation if necessary.
   //! @param[in] theShape  the shape.
-  //! @param[in] theDrawer  the display settings.
+  //! @param[in] theDrawer the display settings.
+  //! @param[in] theDefl   (optional) linear deflection
   //! @return true if tessellation was recomputed and false otherwise.
   Standard_EXPORT static Standard_Boolean Tessellate (const TopoDS_Shape& theShape,
-                                                      const Handle(Prs3d_Drawer)& theDrawer);
+                                                      const Handle(Prs3d_Drawer)& theDrawer,
+                                                      const Standard_Real theDefl = -1.0);
 
   //! If presentation has own deviation coefficient and IsAutoTriangulation() is true,
   //! function will compare actual coefficients with previous values and will clear triangulation on their change

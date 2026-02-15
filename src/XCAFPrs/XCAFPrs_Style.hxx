@@ -38,7 +38,8 @@ public:
     return !myHasColorSurf
         && !myHasColorCurv
         &&  myMaterial.IsNull()
-        &&  myIsVisible;
+        &&  myIsVisible
+        && !myIsHighlighted;
   }
 
   //! Return material.
@@ -83,6 +84,12 @@ public:
   //! Manage visibility.
   Standard_Boolean IsVisible() const { return myIsVisible; }
 
+  //! Assign highlight state.
+  void SetHighlighted (const Standard_Boolean theFlag) { myIsHighlighted = theFlag; }
+
+  //! Return highlight state.
+  Standard_Boolean IsHighlighted() const { return myIsHighlighted; }
+
   //! Return base color texture.
   const Handle(Image_Texture)& BaseColorTexture() const
   {
@@ -120,6 +127,7 @@ public:
     return myHasColorSurf == theOther.myHasColorSurf
         && myHasColorCurv == theOther.myHasColorCurv
         && myMaterial == theOther.myMaterial
+        && myIsHighlighted == theOther.myIsHighlighted
         && (!myHasColorSurf || myColorSurf == theOther.myColorSurf)
         && (!myHasColorCurv || myColorCurv == theOther.myColorCurv);
   }
@@ -174,6 +182,7 @@ protected:
   Standard_Boolean   myHasColorSurf;
   Standard_Boolean   myHasColorCurv;
   Standard_Boolean   myIsVisible;
+  Standard_Boolean   myIsHighlighted;
 
 };
 

@@ -113,6 +113,9 @@ public:
                                                     const Handle(PrsMgr_PresentationManager)& theManager,
                                                     const Standard_Integer theDispMode) Standard_OVERRIDE;
 
+  //! Return string description of the owner (for tracing purposes).
+  Standard_EXPORT virtual TCollection_AsciiString ToString() const Standard_OVERRIDE;
+
   //! Dumps the content of me into the stream
   Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 

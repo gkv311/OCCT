@@ -82,10 +82,14 @@ public:
   const TopoDS_Shape& Shape() const { return myshape; }
 
   //! Constructs an instance of the shape object theShape.
-  void SetShape (const TopoDS_Shape& theShape)
+  virtual bool SetShape (const TopoDS_Shape& theShape)
   {
+    if (myshape.IsEqual(theShape))
+      return false;
+
     myshape  = theShape;
     myCompBB = Standard_True;
+    return true;
   }
 
   //! Alias for ::SetShape().

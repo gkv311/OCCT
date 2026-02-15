@@ -426,6 +426,8 @@ void AIS_InteractiveContext::Display (const Handle(AIS_InteractiveObject)& theIO
     return;
   }
 
+  setContextToObject(theIObj);
+
   Standard_Integer aDispMode = 0, aHiMod = -1, aSelMode = -1;
   GetDefModes (theIObj, aDispMode, aHiMod, aSelMode);
   Display (theIObj, aDispMode, myIsAutoActivateSelMode ? aSelMode : -1, theToUpdateViewer);
@@ -940,11 +942,7 @@ Graphic3d_DisplayPriority AIS_InteractiveContext::DisplayPriority (const Handle(
    && (theIObj->DisplayStatus() == PrsMgr_DisplayStatus_Displayed
     || theIObj->DisplayStatus() == PrsMgr_DisplayStatus_Erased))
   {
-    Standard_Integer aDispMode = theIObj->HasDisplayMode()
-                               ? theIObj->DisplayMode()
-                               : (theIObj->AcceptDisplayMode (myDefaultDrawer->DisplayMode())
-                                ? myDefaultDrawer->DisplayMode()
-                                : 0);
+    const Standard_Integer aDispMode = theIObj->GetAcceptedDisplayMode();
     return myMainPM->DisplayPriority (theIObj, aDispMode);
   }
   return Graphic3d_DisplayPriority_INVALID;
@@ -968,11 +966,7 @@ void AIS_InteractiveContext::SetDisplayPriority (const Handle(AIS_InteractiveObj
    && (theIObj->DisplayStatus() == PrsMgr_DisplayStatus_Displayed
     || theIObj->DisplayStatus() == PrsMgr_DisplayStatus_Erased))
   {
-    Standard_Integer aDisplayMode = theIObj->HasDisplayMode()
-                                  ? theIObj->DisplayMode()
-                                  : (theIObj->AcceptDisplayMode (myDefaultDrawer->DisplayMode())
-                                    ? myDefaultDrawer->DisplayMode()
-                                    : 0);
+    const Standard_Integer aDisplayMode = theIObj->GetAcceptedDisplayMode();
     myMainPM->SetDisplayPriority (theIObj, aDisplayMode, thePriority);
   }
 }
@@ -1741,11 +1735,7 @@ void AIS_InteractiveContext::GetDefModes (const Handle(AIS_InteractiveObject)& t
     return;
   }
 
-  theDispMode = theIObj->HasDisplayMode()
-              ? theIObj->DisplayMode()
-              : (theIObj->AcceptDisplayMode (myDefaultDrawer->DisplayMode())
-               ? myDefaultDrawer->DisplayMode()
-               : 0);
+  theDispMode = theIObj->GetAcceptedDisplayMode();
   theHiMode  = theIObj->HasHilightMode()   ? theIObj->HilightMode()   : theDispMode;
   theSelMode = theIObj->GlobalSelectionMode();
 }

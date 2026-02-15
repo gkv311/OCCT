@@ -24,7 +24,8 @@
 XCAFPrs_Style::XCAFPrs_Style()
 : myHasColorSurf(Standard_False),
   myHasColorCurv(Standard_False),
-  myIsVisible   (Standard_True)
+  myIsVisible   (Standard_True),
+  myIsHighlighted(Standard_False)
 {
   //
 }
@@ -84,4 +85,5 @@ void XCAFPrs_Style::DumpJson (Standard_OStream& theOStream, Standard_Integer the
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myHasColorSurf)
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myHasColorCurv)
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myIsVisible)
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myIsHighlighted)
 }

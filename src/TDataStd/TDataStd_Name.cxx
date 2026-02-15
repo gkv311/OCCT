@@ -71,6 +71,20 @@ Handle(TDataStd_Name) TDataStd_Name::Set (const TDF_Label&    label,
 }
 
 //=======================================================================
+//function : GetString
+//purpose  :
+//=======================================================================
+const TCollection_ExtendedString& TDataStd_Name::GetString(const TDF_Label& theLabel)
+{
+  Handle(TDataStd_Name) aNodeName;
+  if (theLabel.FindAttribute(TDataStd_Name::GetID(), aNodeName))
+    return aNodeName->Get();
+
+  static const TCollection_ExtendedString anEmpty;
+  return anEmpty;
+}
+
+//=======================================================================
 //function : TDataStd_Name
 //purpose  :
 //=======================================================================

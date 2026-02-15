@@ -2241,6 +2241,142 @@ Handle(TDataStd_NamedData) XCAFDoc_ShapeTool::GetNamedProperties (const TopoDS_S
   return aNamedProperty;
 }
 
+// ================================================================
+// Function : FormatName
+// Purpose  :
+// ================================================================
+TCollection_AsciiString XCAFDoc_ShapeTool::FormatName(RWMesh_NameFormat theFormat, const TDF_Label& theLabel)
+{
+  if (theFormat == RWMesh_NameFormat_Empty)
+  {
+    return TCollection_AsciiString();
+  }
+  else if (theFormat == RWMesh_NameFormat_Instance || theFormat == RWMesh_NameFormat_Ocaf)
+  {
+    return FormatName(theFormat, theLabel, TDF_Label());
+  }
+  else if (theFormat == RWMesh_NameFormat_InstanceOrProduct || theFormat == RWMesh_NameFormat_InstanceOrProductOrOcaf)
+  {
+    Handle(TDataStd_Name) aName;
+    if (theLabel.FindAttribute(TDataStd_Name::GetID(), aName) && !aName->Get().IsEmpty())
+    {
+      return TCollection_AsciiString(aName->Get());
+    }
+  }
+
+  TDF_Label aRefLabel;
+  XCAFDoc_ShapeTool::GetReferredShape(theLabel, aRefLabel);
+  return FormatName(theFormat, theLabel, aRefLabel);
+}
+
+// ================================================================
+// Function : FormatName
+// Purpose  :
+// ================================================================
+TCollection_AsciiString XCAFDoc_ShapeTool::FormatName(RWMesh_NameFormat theFormat,
+                                                      const TDF_Label&  theLabel,
+                                                      const TDF_Label&  theRefLabel)
+{
+  switch (theFormat)
+  {
+    case RWMesh_NameFormat_Empty:
+    {
+      return TCollection_AsciiString();
+    }
+    case RWMesh_NameFormat_Ocaf:
+    {
+      TCollection_AsciiString anId;
+      TDF_Tool::Entry(theLabel, anId);
+      return anId;
+    }
+    case RWMesh_NameFormat_Product:
+    {
+      Handle(TDataStd_Name) aRefNodeName;
+      return theRefLabel.FindAttribute(TDataStd_Name::GetID(), aRefNodeName)
+             ? TCollection_AsciiString(aRefNodeName->Get())
+             : TCollection_AsciiString();
+    }
+    case RWMesh_NameFormat_Instance:
+    {
+      Handle(TDataStd_Name) aNodeName;
+      return theLabel.FindAttribute(TDataStd_Name::GetID(), aNodeName) ? TCollection_AsciiString(aNodeName->Get())
+                                                                       : TCollection_AsciiString();
+    }
+    case RWMesh_NameFormat_InstanceOrProduct:
+    case RWMesh_NameFormat_InstanceOrProductOrOcaf:
+    {
+      Handle(TDataStd_Name) aNodeName;
+      if (theLabel.FindAttribute(TDataStd_Name::GetID(), aNodeName) && !aNodeName->Get().IsEmpty())
+      {
+        return TCollection_AsciiString(aNodeName->Get());
+      }
+
+      Handle(TDataStd_Name) aRefNodeName;
+      if (theRefLabel.FindAttribute(TDataStd_Name::GetID(), aRefNodeName) && !aRefNodeName->Get().IsEmpty())
+      {
+        return TCollection_AsciiString(aRefNodeName->Get());
+      }
+
+      if (theFormat == RWMesh_NameFormat_InstanceOrProductOrOcaf)
+      {
+        TCollection_AsciiString anId;
+        TDF_Tool::Entry(theLabel, anId);
+        return anId;
+      }
+
+      return TCollection_AsciiString();
+    }
+    case RWMesh_NameFormat_ProductOrInstance:
+    case RWMesh_NameFormat_ProductOrInstanceOrOcaf:
+    {
+      Handle(TDataStd_Name) aRefNodeName;
+      if (theRefLabel.FindAttribute(TDataStd_Name::GetID(), aRefNodeName) && !aRefNodeName->Get().IsEmpty())
+      {
+        return TCollection_AsciiString(aRefNodeName->Get());
+      }
+
+      Handle(TDataStd_Name) aNodeName;
+      if (theLabel.FindAttribute(TDataStd_Name::GetID(), aNodeName) && !aNodeName->Get().IsEmpty())
+      {
+        return TCollection_AsciiString(aNodeName->Get());
+      }
+
+      if (theFormat == RWMesh_NameFormat_ProductOrInstanceOrOcaf)
+      {
+        TCollection_AsciiString anId;
+        TDF_Tool::Entry(theLabel, anId);
+        return anId;
+      }
+
+      return TCollection_AsciiString();
+    }
+    case RWMesh_NameFormat_ProductAndInstance:
+    {
+      const TCollection_ExtendedString& anInstName = TDataStd_Name::GetString(theLabel);
+      const TCollection_ExtendedString& aProdName  = TDataStd_Name::GetString(theRefLabel);
+      return !anInstName.IsEmpty()
+           && aProdName != anInstName
+            ? TCollection_AsciiString(aProdName) + " [" + TCollection_AsciiString(anInstName) + "]"
+            : (!aProdName.IsEmpty()
+              ? TCollection_AsciiString(aProdName)
+              : TCollection_AsciiString(""));
+    }
+    case RWMesh_NameFormat_ProductAndInstanceAndOcaf:
+    {
+      const TCollection_ExtendedString& anInstName = TDataStd_Name::GetString(theLabel);
+      const TCollection_ExtendedString& aProdName  = TDataStd_Name::GetString(theRefLabel);
+      TCollection_AsciiString anEntryId;
+      TDF_Tool::Entry (theLabel, anEntryId);
+      return !anInstName.IsEmpty()
+           && aProdName != anInstName
+            ? TCollection_AsciiString(aProdName) + " [" + TCollection_AsciiString(anInstName) + "]" + " [" + anEntryId + "]"
+            : TCollection_AsciiString(aProdName) + " [" + anEntryId + "]";
+    }
+  }
+
+  return TCollection_AsciiString();
+}
+
 //=======================================================================
 //function : DumpJson
 //purpose  : 
