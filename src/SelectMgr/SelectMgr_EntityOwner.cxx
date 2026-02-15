@@ -84,6 +84,15 @@ void SelectMgr_EntityOwner::HilightWithColor (const Handle(PrsMgr_PresentationMa
 }
 
 // =======================================================================
+// function : ToString
+// purpose  :
+// =======================================================================
+TCollection_AsciiString SelectMgr_EntityOwner::ToString() const
+{
+  return DynamicType()->Name();
+}
+
+// =======================================================================
 // function : DumpJson
 // purpose  :
 // =======================================================================

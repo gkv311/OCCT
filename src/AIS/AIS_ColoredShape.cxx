@@ -18,7 +18,6 @@
 #include <AIS_InteractiveContext.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepTools.hxx>
-#include <BRepMesh_IncrementalMesh.hxx>
 #include <Graphic3d_AspectFillArea3d.hxx>
 #include <Graphic3d_AspectLine3d.hxx>
 #include <Graphic3d_ArrayOfTriangles.hxx>
@@ -493,16 +492,13 @@ void AIS_ColoredShape::ComputeSelection (const Handle(SelectMgr_Selection)& theS
   const Standard_Real    aDeflection = StdPrs_ToolTriangulatedShape::GetDeflection (myshape, myDrawer);
   const Standard_Real    aDeviationAngle = myDrawer->DeviationAngle();
   const Standard_Integer aPriority   = StdSelect_BRepSelectionTool::GetStandardPriority (myshape, aTypOfSel);
-  if (myDrawer->IsAutoTriangulation()
-  && !BRepTools::Triangulation (myshape, Precision::Infinite()))
-  {
-    BRepMesh_IncrementalMesh aMesher (myshape, aDeflection, Standard_False, aDeviationAngle);
-  }
+  if (myDrawer->IsAutoTriangulation() && !BRepTools::Triangulation(myshape, Precision::Infinite()))
+    StdPrs_ToolTriangulatedShape::Tessellate(myshape, myDrawer, aDeflection);
 
   AIS_DataMapOfShapeDrawer aSubshapeDrawerMap;
   fillSubshapeDrawerMap (aSubshapeDrawerMap);
 
-  Handle(StdSelect_BRepOwner) aBrepOwner = new StdSelect_BRepOwner (myshape, aPriority);
+  Handle(StdSelect_BRepOwner) aBrepOwner;
   if (aTypOfSel == TopAbs_SHAPE)
   {
     aBrepOwner = new StdSelect_BRepOwner (myshape, aPriority);
@@ -514,9 +510,9 @@ void AIS_ColoredShape::ComputeSelection (const Handle(SelectMgr_Selection)& theS
                             aTypOfSel, aPriority, aDeflection, aDeviationAngle);
 
   Handle(SelectMgr_SelectableObject) aThis (this);
-  for (NCollection_Vector<Handle(SelectMgr_SensitiveEntity)>::Iterator aSelEntIter (theSelection->Entities()); aSelEntIter.More(); aSelEntIter.Next())
+  for (const Handle(SelectMgr_SensitiveEntity)& aSelEntIter : theSelection->Entities())
   {
-    const Handle(SelectMgr_EntityOwner)& anOwner = aSelEntIter.Value()->BaseSensitive()->OwnerId();
+    const Handle(SelectMgr_EntityOwner)& anOwner = aSelEntIter->BaseSensitive()->OwnerId();
     anOwner->SetSelectable (aThis);
   }
 }
