@@ -7,3 +7,12 @@ puts ""
 #######################################################################
 
 ReadStep D [locate_data_file bug25912_GDT_exc.stp]
+
+pload VISUALIZATION
+vinit View1
+vclear
+XDisplay D -dispMode 1
+XGetGDTPresentation D gdt
+vdisplay {*}[explode gdt] -dispMode 1
+vfit
+vdump "$::imagedir/${::casename}.png"
