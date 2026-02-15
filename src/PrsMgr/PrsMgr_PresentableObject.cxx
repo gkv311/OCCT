@@ -116,24 +116,24 @@ void PrsMgr_PresentableObject::computeHLR (const Handle(Graphic3d_Camera)& ,
 //=======================================================================
 Standard_Boolean PrsMgr_PresentableObject::ToBeUpdated (Standard_Boolean theToIncludeHidden) const
 {
-  for (PrsMgr_Presentations::Iterator aPrsIter (myPresentations); aPrsIter.More(); aPrsIter.Next())
+  for (const Handle(PrsMgr_Presentation)& aPrsIter : myPresentations)
   {
-    const Handle(PrsMgr_Presentation)& aModedPrs = aPrsIter.Value();
-    if (aModedPrs->MustBeUpdated())
-    {
-      if (theToIncludeHidden)
-      {
-        return Standard_True;
-      }
+    if (!aPrsIter->MustBeUpdated())
+      continue;
 
-      Handle(PrsMgr_PresentationManager) aPrsMgr = aModedPrs->PresentationManager();
-      if (aPrsMgr->IsDisplayed  (this, aModedPrs->Mode())
-       || aPrsMgr->IsHighlighted(this, aModedPrs->Mode()))
-      {
+    if (theToIncludeHidden || aPrsIter->IsDisplayed() || aPrsIter->IsHighlighted())
+      return Standard_True;
+  }
+
+  if (ToPropagateVisualState())
+  {
+    for (const Handle(PrsMgr_PresentableObject)& aChildIter : Children())
+    {
+      if (aChildIter->ToBeUpdated(theToIncludeHidden))
         return Standard_True;
-      }
     }
   }
+
   return Standard_False;
 }
 
@@ -149,7 +149,7 @@ Standard_Boolean PrsMgr_PresentableObject::UpdatePresentations (Standard_Boolean
     const Handle(PrsMgr_Presentation)& aModedPrs = aPrsIter.Value();
     if (aModedPrs->MustBeUpdated())
     {
-      Handle(PrsMgr_PresentationManager) aPrsMgr = aModedPrs->PresentationManager();
+      const Handle(PrsMgr_PresentationManager)& aPrsMgr = aModedPrs->PresentationManager();
       if (theToIncludeHidden
        || aPrsMgr->IsDisplayed  (this, aModedPrs->Mode())
        || aPrsMgr->IsHighlighted(this, aModedPrs->Mode()))
@@ -172,7 +172,7 @@ void PrsMgr_PresentableObject::Update (Standard_Integer theMode, Standard_Boolea
   {
     if (aPrsIter.Value()->Mode() == theMode)
     {
-      Handle(PrsMgr_PresentationManager) aPrsMgr = aPrsIter.Value()->PresentationManager();
+      const Handle(PrsMgr_PresentationManager)& aPrsMgr = aPrsIter.Value()->PresentationManager();
       if (aPrsMgr->IsDisplayed  (this, theMode)
        || aPrsMgr->IsHighlighted(this, theMode))
       {

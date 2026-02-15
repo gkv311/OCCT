@@ -208,14 +208,57 @@ Handle(V3d_View) AIS_InteractiveContext::LastActiveView() const
 }
 
 //=======================================================================
-//function : UpdateCurrentViewer
-//purpose  : 
+//function : updateObjectBeforeRedraw
+//purpose  :
 //=======================================================================
-
-void AIS_InteractiveContext::UpdateCurrentViewer()
+AIS_RedrawProgressResult AIS_InteractiveContext::updateObjectBeforeRedraw(const Handle(AIS_InteractiveContext)& theCtx,
+                                                                          const Handle(V3d_View)&               theView,
+                                                                          const Handle(AIS_InteractiveObject)&  theObj,
+                                                                          const AIS_RedrawProgress theStage)
 {
-  if (!myMainVwr.IsNull())
-    myMainVwr->Update();
+  if (theObj->DisplayStatus() != PrsMgr_DisplayStatus_Displayed)
+    return AIS_RedrawProgressResult_None;
+
+  const AIS_RedrawProgressResult aMask = theObj->ProcessRedraw(theCtx, theView, theStage);
+  if ((aMask & AIS_RedrawProgressResult_NeedRedisplay) != 0)
+    theCtx->Redisplay(theObj, false);
+
+  return aMask;
+}
+
+//=======================================================================
+//function : UpdateObjectsBeforeRedraw
+//purpose  :
+//=======================================================================
+AIS_RedrawProgressResult AIS_InteractiveContext::UpdateObjectsBeforeRedraw(const Handle(V3d_View)&              theView,
+                                                                           const Handle(AIS_InteractiveObject)& theObj,
+                                                                           const AIS_RedrawProgress theStage)
+{
+  Handle(AIS_InteractiveContext) aCtx(this);
+  if (!theObj.IsNull())
+    return updateObjectBeforeRedraw(aCtx, theView, theObj, theStage);
+
+  unsigned int aResMask = 0;
+  for (AIS_DataMapOfIOStatus::Iterator anObjIter = ObjectIterator(); anObjIter.More(); anObjIter.Next())
+    aResMask = (unsigned int)updateObjectBeforeRedraw(aCtx, theView, anObjIter.Key(), theStage) | aResMask;
+
+  return (AIS_RedrawProgressResult)aResMask;
+}
+
+//=======================================================================
+//function : UpdateCurrentViewer
+//purpose  :
+//=======================================================================
+void AIS_InteractiveContext::UpdateCurrentViewer(const Handle(V3d_View)&             theView,
+                                                 const Handle(AIS_InteractiveObject)& theObj)
+{
+  if (myMainVwr.IsNull())
+    return;
+
+  Handle(V3d_View) aView = !theView.IsNull() ? theView : LastActiveView();
+  UpdateObjectsBeforeRedraw(aView, theObj, AIS_RedrawProgress_BeforeUpdate);
+  UpdateObjectsBeforeRedraw(aView, theObj, AIS_RedrawProgress_BeforeRedraw);
+  myMainVwr->Update();
 }
 
 //=======================================================================
@@ -1013,27 +1056,20 @@ void AIS_InteractiveContext::RecomputeSelectionOnly (const Handle(AIS_Interactiv
     return;
   }
 
-  TColStd_ListOfInteger aModes;
-  ActivatedModes (theIO, aModes);
-
-  for (TColStd_ListIteratorOfListOfInteger aModesIter (aModes); aModesIter.More(); aModesIter.Next())
+  const Handle(AIS_GlobalStatus)* aStatus = myObjects.Seek(theIO);
+  if (aStatus != nullptr)
   {
-    mgrSelector->Deactivate (theIO, aModesIter.Value());
+    for (const Standard_Integer aModesIter : (*aStatus)->SelectionModes())
+      mgrSelector->Deactivate(theIO, aModesIter);
   }
 
   mgrSelector->RecomputeSelection (theIO);
 
-  const Handle(AIS_GlobalStatus)* aStatus = myObjects.Seek (theIO);
-  if (aStatus == NULL
-   || theIO->DisplayStatus() != PrsMgr_DisplayStatus_Displayed)
-  {
+  if (aStatus == nullptr || theIO->DisplayStatus() != PrsMgr_DisplayStatus_Displayed)
     return;
-  }
 
-  for (TColStd_ListIteratorOfListOfInteger aModesIter (aModes); aModesIter.More(); aModesIter.Next())
-  {
-    mgrSelector->Activate (theIO, aModesIter.Value());
-  }
+  for (const Standard_Integer aModesIter : (*aStatus)->SelectionModes())
+    mgrSelector->Activate (theIO, aModesIter);
 }
 
 //=======================================================================
@@ -1327,17 +1363,14 @@ void AIS_InteractiveContext::SetColor (const Handle(AIS_InteractiveObject)& theI
                                        const Standard_Boolean               theToUpdateViewer)
 {
   if (theIObj.IsNull())
-  {
     return;
-  }
 
-  setContextToObject (theIObj);
-  theIObj->SetColor (theColor);
-  theIObj->UpdatePresentations();
+  setContextToObject(theIObj);
+  theIObj->SetColor(theColor);
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, theIObj);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -1363,30 +1396,18 @@ void AIS_InteractiveContext::SetDeviationCoefficient (const Handle(AIS_Interacti
                                                       const Standard_Real                  theCoefficient,
                                                       const Standard_Boolean               theToUpdateViewer)
 {
-  if (theIObj.IsNull())
-  {
+  Handle(AIS_Shape) aShape = Handle(AIS_Shape)::DownCast(theIObj);
+  if (aShape.IsNull())
     return;
-  }
 
   // to be modified after the related methods of AIS_Shape are passed to InteractiveObject
   setContextToObject (theIObj);
-  if (theIObj->Type() != AIS_KindOfInteractive_Object
-   && theIObj->Type() != AIS_KindOfInteractive_Shape)
-  {
-    return;
-  }
-  else if (theIObj->Signature() != 0)
-  {
-    return;
-  }
 
-  Handle(AIS_Shape) aShape = Handle(AIS_Shape)::DownCast (theIObj);
   aShape->SetOwnDeviationCoefficient (theCoefficient);
-  aShape->UpdatePresentations();
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, aShape);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -1397,29 +1418,18 @@ void AIS_InteractiveContext::SetDeviationAngle (const Handle(AIS_InteractiveObje
                                                 const Standard_Real                  theAngle,
                                                 const Standard_Boolean               theToUpdateViewer)
 {
-  if (theIObj.IsNull())
-  {
+  Handle(AIS_Shape) aShape = Handle(AIS_Shape)::DownCast(theIObj);
+  if (aShape.IsNull())
     return;
-  }
 
   // To be modified after the related methods of AIS_Shape are passed to InteractiveObject
   setContextToObject (theIObj);
-  if (theIObj->Type() != AIS_KindOfInteractive_Shape)
-  {
-    return;
-  }
-  else if (theIObj->Signature() != 0)
-  {
-    return;
-  }
 
-  Handle(AIS_Shape) aShape = Handle(AIS_Shape)::DownCast (theIObj);
   aShape->SetOwnDeviationAngle (theAngle);
-  aShape->UpdatePresentations();
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, aShape);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -1430,29 +1440,19 @@ void AIS_InteractiveContext::SetAngleAndDeviation (const Handle(AIS_InteractiveO
                                                    const Standard_Real                  theAngle,
                                                    const Standard_Boolean               theToUpdateViewer)
 {
-  if (theIObj.IsNull())
-  {
+  Handle(AIS_Shape) aShape = Handle(AIS_Shape)::DownCast(theIObj);
+  if (aShape.IsNull())
     return;
-  }
 
   // To be modified after the related methods of AIS_Shape are passed to InteractiveObject
   setContextToObject (theIObj);
-  if (theIObj->Type() != AIS_KindOfInteractive_Shape)
-  {
-    return;
-  }
-  if (theIObj->Signature() != 0)
-  {
-    return;
-  }
 
-  Handle(AIS_Shape) aShape = Handle(AIS_Shape)::DownCast (theIObj);
   aShape->SetAngleAndDeviation (theAngle);
   aShape->UpdatePresentations();
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, aShape);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -1463,16 +1463,13 @@ void AIS_InteractiveContext::UnsetColor (const Handle(AIS_InteractiveObject)& th
                                          const Standard_Boolean               theToUpdateViewer)
 {
   if (theIObj.IsNull())
-  {
     return;
-  }
 
   theIObj->UnsetColor();
-  theIObj->UpdatePresentations();
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, theIObj);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -1512,13 +1509,13 @@ void AIS_InteractiveContext::SetWidth (const Handle(AIS_InteractiveObject)& theI
                                        const Standard_Boolean               theToUpdateViewer)
 {
   if (theIObj.IsNull())
-  {
     return;
-  }
 
   setContextToObject (theIObj);
   theIObj->SetWidth (theWidth);
-  theIObj->UpdatePresentations();
+  if (myIsImmediatePrsUpdate && !theToUpdateViewer)
+    theIObj->UpdatePresentations();
+
   if (!myLastPicked.IsNull() && myLastPicked->IsSameSelectable (theIObj))
   {
     if (myLastPicked->IsAutoHilight())
@@ -1536,9 +1533,7 @@ void AIS_InteractiveContext::SetWidth (const Handle(AIS_InteractiveObject)& theI
     }
   }
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer (nullptr, theIObj);
 }
 
 //=======================================================================
@@ -1549,16 +1544,13 @@ void AIS_InteractiveContext::UnsetWidth (const Handle(AIS_InteractiveObject)& th
                                          const Standard_Boolean               theToUpdateViewer)
 {
   if (theIObj.IsNull())
-  {
     return;
-  }
 
   theIObj->UnsetWidth();
-  theIObj->UpdatePresentations();
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, theIObj);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -1570,17 +1562,14 @@ void AIS_InteractiveContext::SetMaterial (const Handle(AIS_InteractiveObject)& t
                                           const Standard_Boolean               theToUpdateViewer)
 {
   if (theIObj.IsNull())
-  {
     return;
-  }
 
   setContextToObject (theIObj);
   theIObj->SetMaterial (theMaterial);
-  theIObj->UpdatePresentations();
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, theIObj);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -1591,15 +1580,13 @@ void AIS_InteractiveContext::UnsetMaterial (const Handle(AIS_InteractiveObject)&
                                             const Standard_Boolean               theToUpdateViewer)
 {
   if (theIObj.IsNull())
-  {
     return;
-  }
+
   theIObj->UnsetMaterial();
-  theIObj->UpdatePresentations();
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, theIObj);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -1611,16 +1598,11 @@ void AIS_InteractiveContext::SetTransparency (const Handle(AIS_InteractiveObject
                                               const Standard_Boolean               theToUpdateViewer)
 {
   if (theIObj.IsNull())
-  {
     return;
-  }
 
   setContextToObject (theIObj);
-  if (!theIObj->IsTransparent()
-    && theValue <= 0.005)
-  {
+  if (!theIObj->IsTransparent() && theValue <= 0.005)
     return;
-  }
 
   if (theValue <= 0.005)
   {
@@ -1629,11 +1611,10 @@ void AIS_InteractiveContext::SetTransparency (const Handle(AIS_InteractiveObject
   }
 
   theIObj->SetTransparency (theValue);
-  theIObj->UpdatePresentations();
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, theIObj);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -1644,16 +1625,13 @@ void AIS_InteractiveContext::UnsetTransparency (const Handle(AIS_InteractiveObje
                                                 const Standard_Boolean               theToUpdateViewer)
 {
   if (theIObj.IsNull())
-  {
     return;
-  }
 
   theIObj->UnsetTransparency();
-  theIObj->UpdatePresentations();
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, theIObj);
+  else if (myIsImmediatePrsUpdate)
+    theIObj->UpdatePresentations();
 }
 
 //=======================================================================
@@ -2966,9 +2944,8 @@ AIS_StatusOfPick AIS_InteractiveContext::Select (const Standard_Integer  theXPMi
                                               Graphic3d_Vec2i (theXPMax, theYPMax),
                                               theView);
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(theView);
+
   return aStatus;
 }
 
@@ -2982,9 +2959,8 @@ AIS_StatusOfPick AIS_InteractiveContext::Select (const TColgp_Array1OfPnt2d& the
 {
   AIS_StatusOfPick aStatus = SelectPolygon (thePolyline, theView);
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(theView);
+
   return aStatus;
 }
 
@@ -2996,9 +2972,8 @@ AIS_StatusOfPick AIS_InteractiveContext::Select (const Standard_Boolean theToUpd
 {
   AIS_StatusOfPick aStatus = SelectDetected();
   if (theToUpdateViewer)
-  {
     UpdateCurrentViewer();
-  }
+
   return aStatus;
 }
 
@@ -3010,9 +2985,8 @@ AIS_StatusOfPick AIS_InteractiveContext::ShiftSelect (const Standard_Boolean the
 {
   AIS_StatusOfPick aStatus = SelectDetected (AIS_SelectionScheme_XOR);
   if (theToUpdateViewer)
-  {
     UpdateCurrentViewer();
-  }
+
   return aStatus;
 }
 
@@ -3032,9 +3006,8 @@ AIS_StatusOfPick AIS_InteractiveContext::ShiftSelect (const Standard_Integer the
                                               theView,
                                               AIS_SelectionScheme_XOR);
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(theView);
+
   return aStatus;
 }
 
@@ -3048,9 +3021,8 @@ AIS_StatusOfPick AIS_InteractiveContext::ShiftSelect (const TColgp_Array1OfPnt2d
 {
   AIS_StatusOfPick aStatus = SelectPolygon (thePolyline, theView, AIS_SelectionScheme_XOR);
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(theView);
+
   return aStatus;
 }
 
@@ -3320,9 +3292,7 @@ void AIS_InteractiveContext::SetSelected (const Handle(AIS_InteractiveObject)& t
   }
 
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, theObject);
 }
 
 //=======================================================================
@@ -3375,9 +3345,7 @@ void AIS_InteractiveContext::SetSelected (const Handle(SelectMgr_EntityOwner)& t
   }
 
   if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
-  }
+    UpdateCurrentViewer(nullptr, anObject);
 }
 
 //=======================================================================
@@ -3442,11 +3410,9 @@ void AIS_InteractiveContext::AddOrRemoveSelected (const Handle(SelectMgr_EntityO
 
       (*aStatusPtr)->SetHilightStyle (Handle(Prs3d_Drawer)());
     }
-  }
 
-  if (theToUpdateViewer)
-  {
-    UpdateCurrentViewer();
+    if (theToUpdateViewer)
+      UpdateCurrentViewer(nullptr, anObj);
   }
 }
 
