@@ -67,6 +67,9 @@ public:
   Standard_EXPORT static Handle(TDataStd_Name) Set (const TDF_Label& label, const Standard_GUID& guid,
 	                            const TCollection_ExtendedString& string);
 
+  //! Return name attribute value from specified label.
+  Standard_EXPORT static const TCollection_ExtendedString& GetString(const TDF_Label& theLabel);
+
   Standard_EXPORT TDataStd_Name();
   
   //! Sets <S> as name. Raises if <S> is not a valid name.

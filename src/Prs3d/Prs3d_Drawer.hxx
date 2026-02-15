@@ -918,6 +918,15 @@ public:
   //! Sets theDrawer as a link to which the current object references.
   void SetLink (const Handle(Prs3d_Drawer)& theDrawer) { myLink = theDrawer; }
 
+  //! Returns linked display mode, 0 by default.
+  //! -1 means undefined (main display mode of presentation to be used).
+  Standard_Integer LinkedDisplayMode() const
+  {
+    return myDispMode != -1 || myLink.IsNull()
+         ? myDispMode
+         : myLink->LinkedDisplayMode();
+  }
+
   //! Removes local attributes. 
   Standard_EXPORT void ClearLocalAttributes();
 

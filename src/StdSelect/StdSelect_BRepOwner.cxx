@@ -175,6 +175,18 @@ void StdSelect_BRepOwner::UpdateHighlightTrsf (const Handle(V3d_Viewer)& theView
 }
 
 // =======================================================================
+// function : ToString
+// purpose  :
+// =======================================================================
+TCollection_AsciiString StdSelect_BRepOwner::ToString() const
+{
+  TCollection_AsciiString aName = TopAbs::ShapeTypeToString(myShape.ShapeType());
+  aName.Capitalize();
+  aName.RightJustify(9, ' ');
+  return aName;
+}
+
+// =======================================================================
 // function : DumpJson
 // purpose  :
 // =======================================================================

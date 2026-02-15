@@ -155,9 +155,11 @@ Standard_Real StdPrs_ToolTriangulatedShape::GetDeflection (const TopoDS_Shape& t
 //purpose  :
 //=======================================================================
 Standard_Boolean StdPrs_ToolTriangulatedShape::IsTessellated (const TopoDS_Shape&         theShape,
-                                                              const Handle(Prs3d_Drawer)& theDrawer)
+                                                              const Handle(Prs3d_Drawer)& theDrawer,
+                                                              const Standard_Real         theDefl)
 {
-  return BRepTools::Triangulation (theShape, GetDeflection (theShape, theDrawer), true);
+  const Standard_Real aDefl = theDefl > 0.0 ? theDefl : GetDeflection(theShape, theDrawer);
+  return BRepTools::Triangulation (theShape, aDefl, true);
 }
 
 // =======================================================================
@@ -165,16 +167,12 @@ Standard_Boolean StdPrs_ToolTriangulatedShape::IsTessellated (const TopoDS_Shape
 // purpose  :
 // =======================================================================
 Standard_Boolean StdPrs_ToolTriangulatedShape::Tessellate (const TopoDS_Shape&         theShape,
-                                                           const Handle(Prs3d_Drawer)& theDrawer)
+                                                           const Handle(Prs3d_Drawer)& theDrawer,
+                                                           const Standard_Real         theDefl)
 {
-  Standard_Boolean wasRecomputed = Standard_False;
-  // Check if it is possible to avoid unnecessary recomputation of shape triangulation
-  if (IsTessellated (theShape, theDrawer))
-  {
-    return wasRecomputed;
-  }
-
-  const Standard_Real aDeflection = GetDeflection (theShape, theDrawer);
+  const Standard_Real aDeflection = theDefl > 0.0 ? theDefl : GetDeflection(theShape, theDrawer);
+  if (IsTessellated (theShape, theDrawer, aDeflection))
+    return false; // skip recomputation
 
   // retrieve meshing tool from Factory
   Handle(BRepMesh_DiscretRoot) aMeshAlgo = BRepMesh_DiscretFactory::Get().Discret (theShape,
@@ -183,10 +181,10 @@ Standard_Boolean StdPrs_ToolTriangulatedShape::Tessellate (const TopoDS_Shape&  
   if (!aMeshAlgo.IsNull())
   {
     aMeshAlgo->Perform();
-    wasRecomputed = Standard_True;
+    return true;
   }
 
-  return wasRecomputed;
+  return false;
 }
 
 // =======================================================================
