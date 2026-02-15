@@ -6,3 +6,12 @@ puts ""
 param xstep.cascade.unit M
 
 ReadStep D [locate_data_file bug30616_nist_ctc_01_asme1_ap242.stp]
+
+pload VISUALIZATION
+vinit View1
+vclear
+XDisplay D -dispMode 1
+XGetGDTPresentation D gdt
+vdisplay {*}[explode gdt] -dispMode 1
+vfit
+vdump "$::imagedir/${::casename}.png"
