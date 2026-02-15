@@ -25,6 +25,21 @@ class AIS_InteractiveContext;
 class Prs3d_BasicAspect;
 class V3d_View;
 
+//! The stage at which the AIS_InteractiveObject::ProcessRedraw() is called.
+enum AIS_RedrawProgress
+{
+  AIS_RedrawProgress_BeforeUpdate = 0, //!< before processing user input
+  AIS_RedrawProgress_BeforeRedraw = 1  //!< after processing input, but before redrawing
+};
+
+//! Bit mask returned by AIS_InteractiveObject::ProcessRedraw() for the viewer action.
+enum AIS_RedrawProgressResult
+{
+  AIS_RedrawProgressResult_None = 0,                 //!< nothing to be done
+  AIS_RedrawProgressResult_NeedRedisplay = 1 << 0,   //!< object should be re-displayed
+  AIS_RedrawProgressResult_NeedAskNextFrame = 1 << 1 //!< object performs animation
+};
+
 //! Defines a class of objects with display and selection services.
 //! Entities which are visualized and selected are Interactive Objects.
 //! Specific attributes of entities such as arrow aspect for dimensions must be loaded in a Prs3d_Drawer.
@@ -117,6 +132,11 @@ public:
                                                             const Graphic3d_Vec2i& theDragFrom,
                                                             const Graphic3d_Vec2i& theDragTo,
                                                             const AIS_DragAction theAction);
+
+  //! Method to be called by AIS_ViewController before redrawing a frame.
+  Standard_EXPORT virtual AIS_RedrawProgressResult ProcessRedraw(const Handle(AIS_InteractiveContext)& theCtx,
+                                                                 const Handle(V3d_View)& theView,
+                                                                 const AIS_RedrawProgress theRedrawProgress);
 
 public:
 
