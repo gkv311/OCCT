@@ -298,7 +298,7 @@ void Graphic3d_ArrayOfPrimitives::AddTriangleFanEdges (Standard_Integer theVerte
     throw Standard_TypeMismatch ("Not array of triangles");
   }
 
-  for (Standard_Integer aNodeIter = theVertexLower + 1; aNodeIter <= theVertexUpper; ++aNodeIter)
+  for (Standard_Integer aNodeIter = theVertexLower + 2; aNodeIter <= theVertexUpper; ++aNodeIter)
   {
     AddTriangleEdges (theVertexLower, aNodeIter - 1, aNodeIter);
   }
