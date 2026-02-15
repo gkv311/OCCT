@@ -61,6 +61,12 @@ public:
   //! Sets the selectable object.
   virtual void SetSelectable (const Handle(SelectMgr_SelectableObject)& theSelObj) { mySelectable = theSelObj.get(); }
 
+  //! Returns a selectable object.
+  SelectMgr_SelectableObject* SelectablePointer() const { return mySelectable; }
+
+  //! Sets the selectable object.
+  void SetSelectablePointer (SelectMgr_SelectableObject* theSelObj) { mySelectable = theSelObj; }
+
   //! Handle mouse button click event.
   //! Does nothing by default and returns FALSE.
   //! @param thePoint      mouse cursor position
@@ -186,6 +192,9 @@ public:
 
   //! Sets flag indicating this owner points to a part of object (TRUE) or to entire object (FALSE).
   void SetComesFromDecomposition (const Standard_Boolean theIsFromDecomposition) { myFromDecomposition = theIsFromDecomposition; }
+
+  //! Return string description of the owner (for tracing purposes).
+  Standard_EXPORT virtual TCollection_AsciiString ToString() const;
 
   //! Dumps the content of me into the stream
   Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;

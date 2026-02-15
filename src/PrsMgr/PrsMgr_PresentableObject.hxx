@@ -136,6 +136,13 @@ public:
     return Standard_True;
   }
 
+  //! Deduce actual display mode.
+  Standard_Integer GetAcceptedDisplayMode() const
+  {
+    Standard_Integer aDispMode = myDrawer->LinkedDisplayMode();
+    return (aDispMode != -1 && AcceptDisplayMode(aDispMode)) ? aDispMode : DefaultDisplayMode();
+  }
+
   //! Returns the default display mode.
   virtual Standard_Integer DefaultDisplayMode() const { return 0; }
 
@@ -200,7 +207,7 @@ public: //! @name presentation attributes
   //!
   //! This method should be called after modifying primitive aspect properties (material, texture, shader)
   //! so that modifications will take effect on already computed presentation groups (thus avoiding re-displaying the object).
-  Standard_EXPORT void SynchronizeAspects();
+  Standard_EXPORT virtual void SynchronizeAspects();
 
 public: //! @name object transformation
 

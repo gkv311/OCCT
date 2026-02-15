@@ -19,6 +19,7 @@
 #include <AIS_InteractiveObject.hxx>
 #include <AIS_Trihedron.hxx>
 #include <Aspect_TypeOfLine.hxx>
+#include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
 #include <DBRep.hxx>
 #include <DDF_Browser.hxx>
@@ -41,6 +42,7 @@
 #include <RWPly_ConfigurationNode.hxx>
 #include <STEPCAFControl_Controller.hxx>
 #include <STEPCAFControl_ConfigurationNode.hxx>
+#include <StdPrs_ToolTriangulatedShape.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <TCollection_HAsciiString.hxx>
@@ -646,133 +648,125 @@ static Standard_Integer show (Draw_Interpretor& di, Standard_Integer argc, const
 class XDEDRAW_XDisplayTool
 {
 public:
+
   //! XDisplay command interface.
-  static Standard_Integer XDisplay (Draw_Interpretor& theDI,
-                                    Standard_Integer theNbArgs,
-                                    const char** theArgVec)
+  static Standard_Integer XDisplay(Draw_Interpretor& theDI, Standard_Integer theNbArgs, const char** theArgVec)
   {
     XDEDRAW_XDisplayTool aTool;
-    return aTool.xdisplay (theDI, theNbArgs, theArgVec);
+    return aTool.xdisplay(theDI, theNbArgs, theArgVec);
   }
 
 private:
+
   //! Constructor.
-  XDEDRAW_XDisplayTool()
-  : myDispMode(-2),
-    myHiMode  (-2),
-    myIsAutoTriang (-1),
-    myToPrefixDocName (Standard_True),
-    myToGetNames (Standard_True),
-    myToExplore  (Standard_False) {}
+  XDEDRAW_XDisplayTool() {}
 
   //! Display single label.
-  Standard_Integer displayLabel (Draw_Interpretor& theDI,
-                                 const TDF_Label& theLabel,
-                                 const TCollection_AsciiString& theNamePrefix,
-                                 const TopLoc_Location& theLoc,
-                                 TCollection_AsciiString& theOutDispList)
+  void displayLabel(Draw_Interpretor&              theDI,
+                    const XCAFPrs_LabelPath&       thePath,
+                    const TCollection_AsciiString& theNamePrefix,
+                    const TopLoc_Location&         theLoc,
+                    const XCAFPrs_Style&           theStyle)
   {
-    TCollection_AsciiString aName;
-    if (myToGetNames)
-    {
-      Handle(TDataStd_Name) aNodeName;
-      if (theLabel.FindAttribute (TDataStd_Name::GetID(), aNodeName))
-      {
-        aName = aNodeName->Get();
-      }
-      if (aName.IsEmpty())
-      {
-        TDF_Label aRefLabel;
-        if (XCAFDoc_ShapeTool::GetReferredShape (theLabel, aRefLabel)
-         && aRefLabel.FindAttribute (TDataStd_Name::GetID(), aNodeName))
-        {
-          aName = aNodeName->Get();
-        }
-      }
+    const TDF_Label& aLabel = thePath.back();
+    TDF_Label        aRefLabel = aLabel;
+    XCAFDoc_ShapeTool::GetReferredShape(aLabel, aRefLabel);
 
-      if (aName.IsEmpty())
-      {
-        TDF_Tool::Entry (theLabel, aName);
-      }
-      for (Standard_Integer aNameIndex = 1;; ++aNameIndex)
-      {
-        if (myNameMap.Add (aName))
-        {
-          break;
-        }
-        aName = aNodeName->Get() + "_" + aNameIndex;
-      }
-    }
-    else
+    const RWMesh_NameFormat aFormat = myToGetNames ? RWMesh_NameFormat_InstanceOrProductOrOcaf : RWMesh_NameFormat_Ocaf;
+    const TCollection_AsciiString aNameBase = XCAFDoc_ShapeTool::FormatName(aFormat, aLabel, aRefLabel);
+    TCollection_AsciiString       aName = theNamePrefix + aNameBase;
+    for (Standard_Integer aNameIndex = 1;; ++aNameIndex)
     {
-      TDF_Tool::Entry (theLabel, aName);
-    }
-    aName = theNamePrefix + aName;
+      if (myNameMap.Add(aName))
+        break;
 
+      aName = theNamePrefix + aNameBase + "_" + aNameIndex;
+    }
+
+    Handle(XCAFDoc_ColorTool) aColorTool = XCAFDoc_DocumentTool::ColorTool(aLabel.Root());
+
+    XCAFPrs_Style aStyle = theStyle;
+    aStyle.SetVisibility(aStyle.IsVisible() && aColorTool->IsVisible(aLabel));
     if (myToExplore)
     {
-      TDF_Label aRefLabel = theLabel;
-      XCAFDoc_ShapeTool::GetReferredShape (theLabel, aRefLabel);
-      if (XCAFDoc_ShapeTool::IsAssembly (aRefLabel))
+      if (XCAFDoc_ShapeTool::IsAssembly(aRefLabel))
       {
+        XCAFPrs_LabelPath aChildPath;
+        aChildPath.reserve(thePath.size() + 1);
+        aChildPath = thePath;
+        aChildPath.emplace_back(TDF_Label());
+
         aName += "/";
-        const TopLoc_Location aLoc = theLoc * XCAFDoc_ShapeTool::GetLocation (theLabel);
+        const TopLoc_Location aLoc = theLoc * XCAFDoc_ShapeTool::GetLocation(aLabel);
         for (const TDF_Label& aChildIter : aRefLabel)
         {
-          if (displayLabel (theDI, aChildIter, aName, aLoc, theOutDispList) == 1)
-          {
-            return 1;
-          }
+          aChildPath.back() = aChildIter;
+          displayLabel(theDI, aChildPath, aName, aLoc, aStyle);
         }
-        return 0;
+        return;
       }
     }
 
-    Handle(XCAFPrs_AISObject) aPrs = new XCAFPrs_AISObject (theLabel);
-    if (!theLoc.IsIdentity())
-    {
-      aPrs->SetLocalTransformation (theLoc);
-    }
+    // we may also display a reference label here
+    //const TopLoc_LocationaLoc = theLoc * XCAFDoc_ShapeTool::GetLocation (theLabel);
+    //Handle(XCAFPrs_BRepOwner)aPrsOwner = new XCAFPrs_BRepOwner (aRefLabel,aLoc);
+    Handle(XCAFPrs_BRepOwner) aPrsOwner = new XCAFPrs_BRepOwner(thePath, theLoc, aStyle);
+    if (myIsSinglePrs)
+      aPrsOwner->SetComesFromDecomposition(myToExplore);
+
+    aPrsOwner->SetName(aName);
+    myOwners.Append(aPrsOwner);
+  }
+
+  //! Display single presentation object.
+  bool displayPrs(Draw_Interpretor&                theDI,
+                  const Handle(XCAFPrs_AISObject)& thePrs,
+                  const TCollection_AsciiString&   theName)
+  {
+    thePrs->SetOwner(myDocName);
+    thePrs->Attributes()->SetAutoTriangulation(false);
+
+    if (myToFreezeStyles)
+      thePrs->DispatchStyles();
+
     if (myDispMode != -2)
     {
       if (myDispMode == -1)
+        thePrs->UnsetDisplayMode();
+
+      if (!thePrs->AcceptDisplayMode(myDispMode))
       {
-        aPrs->UnsetDisplayMode();
-      }
-      if (!aPrs->AcceptDisplayMode (myDispMode))
-      {
-        theDI << "Syntax error: " << aPrs->DynamicType()->Name() << " rejects " << myDispMode << " display mode";
-        return 1;
+        theDI << "Syntax error: " << thePrs->DynamicType()->Name() << " rejects " << myDispMode << " display mode";
+        return false;
       }
       else
       {
-        aPrs->SetDisplayMode (myDispMode);
+        thePrs->SetDisplayMode(myDispMode);
       }
     }
     if (myHiMode != -2)
     {
-      if (myHiMode != -1
-      && !aPrs->AcceptDisplayMode (myHiMode))
+      if (myHiMode != -1 && !thePrs->AcceptDisplayMode(myHiMode))
       {
-        theDI << "Syntax error: " << aPrs->DynamicType()->Name() << " rejects " << myHiMode << " display mode";
-        return 1;
+        theDI << "Syntax error: " << thePrs->DynamicType()->Name() << " rejects " << myHiMode << " display mode";
+        return false;
       }
-      aPrs->SetHilightMode (myHiMode);
+      thePrs->SetHilightMode(myHiMode);
     }
     if (myIsAutoTriang != -1)
-    {
-      aPrs->Attributes()->SetAutoTriangulation (myIsAutoTriang == 1);
-    }
+      thePrs->Attributes()->SetAutoTriangulation(myIsAutoTriang == 1);
 
-    ViewerTest::Display (aName, aPrs, false);
-    theOutDispList += aName + " ";
-    return 0;
+    ViewerTest::Display(theName, thePrs, false);
+    if (!thePrs->GlobalSelOwner().IsNull() && thePrs->GetLabels().Size() == 1
+        && !thePrs->GetLabels().First()->BaseStyle().IsVisible())
+    {
+      thePrs->InteractiveContext()->Erase(thePrs, false);
+    }
+    return true;
   }
 
   //! XDisplay command implementation.
-  Standard_Integer xdisplay (Draw_Interpretor& theDI,
-                             Standard_Integer theNbArgs,
-                             const char** theArgVec)
+  Standard_Integer xdisplay(Draw_Interpretor& theDI, Standard_Integer theNbArgs, const char** theArgVec)
   {
     Handle(AIS_InteractiveContext) aContext = ViewerTest::GetAISContext();
     if (aContext.IsNull())
@@ -781,120 +775,83 @@ private:
       return 1;
     }
 
-    ViewerTest_AutoUpdater anAutoUpdater (aContext, ViewerTest::CurrentView());
+    ViewerTest_AutoUpdater anAutoUpdater(aContext, ViewerTest::CurrentView());
     for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
     {
-      TCollection_AsciiString anArgCase (theArgVec[anArgIter]);
+      TCollection_AsciiString anArgCase(theArgVec[anArgIter]);
       anArgCase.LowerCase();
-      if (anAutoUpdater.parseRedrawMode (anArgCase))
+      if (anAutoUpdater.parseRedrawMode(anArgCase))
       {
         continue;
       }
-      else if (anArgIter + 1 < theNbArgs
-            && myDispMode == -2
-            && (anArgCase == "-dispmode"
-             || anArgCase == "-displaymode")
-            && TCollection_AsciiString (theArgVec[anArgIter + 1]).IsIntegerValue())
+      else if (anArgIter + 1 < theNbArgs && myDispMode == -2
+               && (anArgCase == "-dispmode" || anArgCase == "-displaymode")
+               && TCollection_AsciiString(theArgVec[anArgIter + 1]).IsIntegerValue())
       {
-        myDispMode = TCollection_AsciiString (theArgVec[++anArgIter]).IntegerValue();
+        myDispMode = TCollection_AsciiString(theArgVec[++anArgIter]).IntegerValue();
       }
-      else if (anArgIter + 1 < theNbArgs
-            && myHiMode == -2
-            && (anArgCase == "-himode"
-             || anArgCase == "-highmode"
-             || anArgCase == "-highlightmode")
-            && TCollection_AsciiString (theArgVec[anArgIter + 1]).IsIntegerValue())
+      else if (anArgIter + 1 < theNbArgs && myHiMode == -2
+               && (anArgCase == "-himode" || anArgCase == "-highmode" || anArgCase == "-highlightmode")
+               && TCollection_AsciiString(theArgVec[anArgIter + 1]).IsIntegerValue())
       {
-        myHiMode = TCollection_AsciiString (theArgVec[++anArgIter]).IntegerValue();
+        myHiMode = TCollection_AsciiString(theArgVec[++anArgIter]).IntegerValue();
       }
-      else if (anArgCase == "-autotr"
-            || anArgCase == "-autotrian"
-            || anArgCase == "-autotriang"
-            || anArgCase == "-autotriangulation"
-            || anArgCase == "-noautotr"
-            || anArgCase == "-noautotrian"
-            || anArgCase == "-noautotriang"
-            || anArgCase == "-noautotriangulation")
+      else if (anArgCase == "-autotr" || anArgCase == "-autotrian" || anArgCase == "-autotriang"
+               || anArgCase == "-autotriangulation" || anArgCase == "-noautotr" || anArgCase == "-noautotrian"
+               || anArgCase == "-noautotriang" || anArgCase == "-noautotriangulation")
       {
-        myIsAutoTriang = Draw::ParseOnOffNoIterator (theNbArgs, theArgVec, anArgIter) ? 1 : 0;
+        myIsAutoTriang = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter) ? 1 : 0;
       }
-      else if (anArgCase == "-docprefix"
-            || anArgCase == "-nodocprefix")
+      else if (anArgCase == "-docprefix" || anArgCase == "-nodocprefix")
       {
-        myToPrefixDocName = Standard_True;
-        if (anArgIter + 1 < theNbArgs
-         && Draw::ParseOnOff (theArgVec[anArgIter + 1], myToPrefixDocName))
-        {
-          ++anArgIter;
-        }
-        if (anArgCase.StartsWith ("-no"))
-        {
-          myToPrefixDocName = !myToPrefixDocName;
-        }
+        myToPrefixDocName = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter);
       }
-      else if (anArgCase == "-names"
-            || anArgCase == "-nonames")
+      else if (anArgCase == "-names" || anArgCase == "-nonames")
       {
-        myToGetNames = Standard_True;
-        if (anArgIter + 1 < theNbArgs
-         && Draw::ParseOnOff (theArgVec[anArgIter + 1], myToGetNames))
-        {
-          ++anArgIter;
-        }
-        if (anArgCase.StartsWith ("-no"))
-        {
-          myToGetNames = !myToGetNames;
-        }
+        myToGetNames = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter);
       }
-      else if (anArgCase == "-explore"
-            || anArgCase == "-noexplore")
+      else if (anArgCase == "-explore" || anArgCase == "-noexplore")
       {
-        myToExplore = Standard_True;
-        if (anArgIter + 1 < theNbArgs
-         && Draw::ParseOnOff (theArgVec[anArgIter + 1], myToExplore))
-        {
-          ++anArgIter;
-        }
-        if (anArgCase.StartsWith ("-no"))
-        {
-          myToExplore = !myToExplore;
-        }
+        myToExplore = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter);
       }
-      else if (anArgCase == "-outdisplist"
-            && anArgIter + 1 < theNbArgs)
+      else if (anArgCase == "-singleprs" || anArgCase == "-oneprs")
+      {
+        myIsSinglePrs = Draw::ParseOnOffIterator(theNbArgs, theArgVec, anArgIter);
+      }
+      else if (anArgCase == "-freeze" || anArgCase == "-freezestyles" || anArgCase == "-dispatchstyles")
+      {
+        myToFreezeStyles = Draw::ParseOnOffIterator(theNbArgs, theArgVec, anArgIter);
+      }
+      else if (anArgCase == "-outdisplist" && anArgIter + 1 < theNbArgs)
       {
         myOutDispListVar = theArgVec[++anArgIter];
         myOutDispList.Clear();
       }
       else
       {
-        if (myDoc.IsNull()
-         && DDocStd::GetDocument (theArgVec[anArgIter], myDoc, Standard_False))
+        if (myDoc.IsNull() && DDocStd::GetDocument(theArgVec[anArgIter], myDoc, Standard_False))
         {
-          myDocName = theArgVec[anArgIter];
+          myDocName = new TCollection_HAsciiString(theArgVec[anArgIter]);
           continue;
         }
 
-        TCollection_AsciiString aValue (theArgVec[anArgIter]);
-        const Standard_Integer aFirstSplit = aValue.Search (":");
-        if (!IsDigit (aValue.Value (1))
-          && aFirstSplit >= 2
-          && aFirstSplit < aValue.Length())
+        TCollection_AsciiString aValue(theArgVec[anArgIter]);
+        const Standard_Integer  aFirstSplit = aValue.Search(":");
+        if (!IsDigit(aValue.Value(1)) && aFirstSplit >= 2 && aFirstSplit < aValue.Length())
         {
-          TCollection_AsciiString aDocName = aValue.SubString (1, aFirstSplit - 1);
-          Standard_CString aDocNameStr = aDocName.ToCString();
+          TCollection_AsciiString  aDocName = aValue.SubString(1, aFirstSplit - 1);
+          Standard_CString         aDocNameStr = aDocName.ToCString();
           Handle(TDocStd_Document) aDoc;
-          if (DDocStd::GetDocument (aDocNameStr, aDoc, Standard_False))
+          if (DDocStd::GetDocument(aDocNameStr, aDoc, Standard_False))
           {
-            aValue = aValue.SubString (aFirstSplit + 1, aValue.Length());
-            if (!myDoc.IsNull()
-              && myDoc != aDoc)
+            aValue = aValue.SubString(aFirstSplit + 1, aValue.Length());
+            if (!myDoc.IsNull() && myDoc != aDoc)
             {
               theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
               return 1;
             }
             myDoc = aDoc;
-            myDocName = aDocName;
+            myDocName = new TCollection_HAsciiString(aDocName);
           }
         }
         if (myDoc.IsNull())
@@ -904,14 +861,15 @@ private:
         }
 
         TDF_Label aLabel;
-        TDF_Tool::Label (myDoc->GetData(), aValue.ToCString(), aLabel);
-        if (aLabel.IsNull()
-        || !XCAFDoc_ShapeTool::IsShape (aLabel))
+        TDF_Tool::Label(myDoc->GetData(), aValue.ToCString(), aLabel);
+        if (aLabel.IsNull() || !XCAFDoc_ShapeTool::IsShape(aLabel))
         {
           theDI << "Syntax error: " << aValue << " is not a valid shape label";
           return 1;
         }
-        myLabels.Append (aLabel);
+
+        XCAFPrs_LabelPath aLabPath = {aLabel};
+        myLabels.emplace_back(aLabPath);
       }
     }
     if (myDoc.IsNull())
@@ -919,45 +877,293 @@ private:
       theDI << "Syntax error: not enough arguments";
       return 1;
     }
-    if (myLabels.IsEmpty())
+    if (myLabels.empty())
     {
-      XCAFDoc_DocumentTool::ShapeTool (myDoc->Main())->GetFreeShapes (myLabels);
-    }
-
-    for (TDF_LabelSequence::Iterator aLabIter (myLabels); aLabIter.More(); aLabIter.Next())
-    {
-      const TDF_Label& aLabel = aLabIter.Value();
-      if (displayLabel (theDI, aLabel, myToPrefixDocName ? myDocName + ":" : "", TopLoc_Location(), myOutDispList) == 1)
+      TDF_LabelSequence aFreeLabels;
+      XCAFDoc_DocumentTool::ShapeTool(myDoc->Main())->GetFreeShapes(aFreeLabels);
+      for (const TDF_Label& aLabIter : aFreeLabels)
       {
-        return 1;
+        XCAFPrs_LabelPath aLabPath = {aLabIter};
+        myLabels.emplace_back(aLabPath);
       }
     }
-    if (myOutDispListVar.IsEmpty())
+    tessellate();
+
+    const XCAFPrs_Style aDefStyle;
+    for (const XCAFPrs_LabelPath& aLabIter : myLabels)
+      displayLabel(theDI, aLabIter, myToPrefixDocName ? myDocName->String() + ":" : "", TopLoc_Location(), aDefStyle);
+
+    if (myIsSinglePrs)
     {
-      theDI << myOutDispList;
+      const TCollection_AsciiString aName = myDocName->String();
+      if (myToExplore && myOwners.Size() == 1)
+        myOwners.First()->SetComesFromDecomposition(false); // just optimization
+
+      Handle(XCAFPrs_AISObject) aPrs = new XCAFPrs_AISObject(myOwners);
+      if (!displayPrs(theDI, aPrs, aName))
+        return 1;
+
+      myOutDispList += aName + " ";
     }
     else
     {
-      Draw::Set (myOutDispListVar.ToCString(), myOutDispList.ToCString());
+      NCollection_IndexedMap<Handle(XCAFPrs_AISObject)> aPrsObjects;
+      for (const Handle(XCAFPrs_BRepOwner)& aPrsOwner : myOwners)
+      {
+        NCollection_List<Handle(XCAFPrs_BRepOwner)> aList;
+        aList.Append(aPrsOwner);
+
+        Handle(XCAFPrs_AISObject) aPrs = new XCAFPrs_AISObject(aList);
+
+        aPrsOwner->SetSelectablePointer(aPrs.get());
+        aPrsObjects.Add(aPrs);
+      }
+
+      //const TCollection_AsciiString aBaseName = myDocName->String();
+      for (Standard_Integer aPrsIter = 1; aPrsIter <= aPrsObjects.Extent(); ++aPrsIter)
+      {
+        const Handle(XCAFPrs_AISObject)& aPrs = aPrsObjects.FindKey(aPrsIter);
+
+        TCollection_AsciiString aName = aPrs->GetLabels().First()->Name();
+        if (!displayPrs(theDI, aPrs, aName))
+          return 1;
+
+        myOutDispList += aName + " ";
+      }
     }
+
+    if (myOutDispListVar.IsEmpty())
+      theDI << myOutDispList;
+    else
+      Draw::Set(myOutDispListVar.ToCString(), myOutDispList.ToCString());
+
     return 0;
   }
 
+  //! Prepare triangulation.
+  void tessellate()
+  {
+    Handle(AIS_InteractiveContext) aContext = ViewerTest::GetAISContext();
+    if (!aContext->DefaultDrawer()->IsAutoTriangulation())
+      return;
+
+    TopoDS_Compound aComp;
+    BRep_Builder().MakeCompound(aComp);
+    for (const XCAFPrs_LabelPath& aLabIter : myLabels)
+    {
+      TopoDS_Shape aShape = XCAFDoc_ShapeTool::GetShape(aLabIter.back());
+      if (!aShape.IsNull())
+        BRep_Builder().Add(aComp, aShape);
+    }
+
+    Handle(Prs3d_Drawer) aDrawer = new Prs3d_Drawer();
+    aDrawer->SetLink(aContext->DefaultDrawer());
+    StdPrs_ToolTriangulatedShape::Tessellate(aComp, aDrawer);
+  }
+
 private:
-  NCollection_Map<TCollection_AsciiString, TCollection_AsciiString>
-                           myNameMap;         //!< names map to handle collisions
-  Handle(TDocStd_Document) myDoc;             //!< document
-  TCollection_AsciiString  myDocName;         //!< document name
-  TCollection_AsciiString  myOutDispListVar;  //!< tcl variable to print the result objects
-  TCollection_AsciiString  myOutDispList;     //!< string with list of all displayed object names
-  TDF_LabelSequence        myLabels;          //!< labels to display
-  Standard_Integer         myDispMode;        //!< shape display mode
-  Standard_Integer         myHiMode;          //!< shape highlight mode
-  Standard_Integer         myIsAutoTriang;    //!< auto-triangulation mode
-  Standard_Boolean         myToPrefixDocName; //!< flag to prefix objects with document name
-  Standard_Boolean         myToGetNames;      //!< flag to use label names or tags
-  Standard_Boolean         myToExplore;       //!< flag to explore assembles
+
+  NCollection_Map<TCollection_AsciiString, TCollection_AsciiString> myNameMap; //!< names map to handle collisions
+
+  Handle(TDocStd_Document)         myDoc;            //!< document
+  Handle(TCollection_HAsciiString) myDocName;        //!< document name
+  TCollection_AsciiString          myOutDispListVar; //!< tcl variable to print the result objects
+  TCollection_AsciiString          myOutDispList;    //!< string with list of all displayed object names
+
+  //! labels to display
+  std::list<XCAFPrs_LabelPath, NCollection_StdAllocator<XCAFPrs_LabelPath>> myLabels;
+
+  NCollection_List<Handle(XCAFPrs_BRepOwner)> myOwners;
+
+  Standard_Integer myDispMode = -2;          //!< shape display mode
+  Standard_Integer myHiMode = -2;            //!< shape highlight mode
+  Standard_Integer myIsAutoTriang = -1;      //!< auto-triangulation mode
+  Standard_Boolean myToPrefixDocName = true; //!< flag to prefix objects with document name
+  Standard_Boolean myToGetNames = true;      //!< flag to use label names or tags
+  Standard_Boolean myToExplore = false;      //!< flag to explore assembles
+  Standard_Boolean myIsSinglePrs = true;     //!< flag to create a single presentation object
+  Standard_Boolean myToFreezeStyles = false; //!< flag to dispatch styles from document once
 };
+
+//! Parse RWMesh_NameFormat enumeration.
+static bool parseNameFormat(const char* theArg, RWMesh_NameFormat& theFormat)
+{
+  TCollection_AsciiString aName(theArg);
+  aName.LowerCase();
+  if (aName == "empty" || aName == "off" || aName == "0")
+    theFormat = RWMesh_NameFormat_Empty;
+  else if (aName == "product" || aName == "prod")
+    theFormat = RWMesh_NameFormat_Product;
+  else if (aName == "instance" || aName == "inst")
+    theFormat = RWMesh_NameFormat_Instance;
+  else if (aName == "ocaf")
+    theFormat = RWMesh_NameFormat_Ocaf;
+  else if (aName == "instanceorproduct" || aName == "instance||product" || aName == "instance|product"
+           || aName == "instorprod" || aName == "inst||prod" || aName == "inst|prod")
+    theFormat = RWMesh_NameFormat_InstanceOrProduct;
+  else if (aName == "productorinstance" || aName == "product||instance" || aName == "product|instance"
+           || aName == "prodorinst" || aName == "prod||inst" || aName == "prod|inst")
+    theFormat = RWMesh_NameFormat_ProductOrInstance;
+  else if (aName == "productandinstance" || aName == "prodandinst" || aName == "product&instance"
+           || aName == "prod&inst")
+    theFormat = RWMesh_NameFormat_ProductAndInstance;
+  else if (aName == "productandinstanceandocaf" || aName == "verbose" || aName == "debug")
+    theFormat = RWMesh_NameFormat_ProductAndInstanceAndOcaf;
+  else if (aName == "on" || aName == "1")
+    theFormat = RWMesh_NameFormat_InstanceOrProductOrOcaf;
+  else
+    return false;
+
+  return true;
+}
+
+//! XDisplay command interface.
+static Standard_Integer XVState(Draw_Interpretor& theDI, Standard_Integer theNbArgs, const char** theArgVec)
+{
+  const Handle(AIS_InteractiveContext)& aCtx = ViewerTest::GetAISContext();
+  if (aCtx.IsNull())
+  {
+    theDI << "Error: no active view";
+    return 1;
+  }
+
+  bool isSelection = false;
+  bool toListDocs = false;
+  bool isSingleOnly = false;
+  bool isFirstOnly = false;
+  RWMesh_NameFormat aNameFormat = RWMesh_NameFormat_Empty;
+  RWMesh_NameFormat aPathFormat = RWMesh_NameFormat_Empty;
+  for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArg(theArgVec[anArgIter]);
+    anArg.LowerCase();
+    if (anArg == "-selected" || anArg == "-selection")
+    {
+      isSelection = Draw::ParseOnOffIterator(theNbArgs, theArgVec, anArgIter);
+    }
+    else if (anArg == "-label" || anArg == "-labels")
+    {
+      if (anArg == "-label")
+        isSingleOnly = true;
+
+      aNameFormat = Draw::ParseOnOffIterator(theNbArgs, theArgVec, anArgIter) ? RWMesh_NameFormat_Ocaf
+                                                                              : RWMesh_NameFormat_Empty;
+    }
+    else if (anArg == "-name" || anArg == "-names")
+    {
+      if (anArg == "-name")
+        isSingleOnly = true;
+
+      aNameFormat = RWMesh_NameFormat_InstanceOrProductOrOcaf;
+      if (anArgIter + 1 < theNbArgs && parseNameFormat(theArgVec[anArgIter + 1], aNameFormat))
+        ++anArgIter;
+    }
+    else if (anArg == "-path" || anArg == "-paths")
+    {
+      if (anArg == "-path")
+      {
+        isSingleOnly = true;
+      }
+      aPathFormat = RWMesh_NameFormat_InstanceOrProductOrOcaf;
+      if (anArgIter + 1 < theNbArgs && parseNameFormat(theArgVec[anArgIter + 1], aPathFormat))
+        ++anArgIter;
+    }
+    else if (anArg == "-documents" || anArg == "-docs" || anArg == "-document" || anArg == "-doc")
+    {
+      if (anArg == "-document" || anArg == "-doc")
+      {
+        isSingleOnly = true;
+      }
+      toListDocs = Draw::ParseOnOffIterator(theNbArgs, theArgVec, anArgIter);
+    }
+    else if (anArg == "-single")
+    {
+      isSingleOnly = Draw::ParseOnOffIterator(theNbArgs, theArgVec, anArgIter);
+    }
+    else if (anArg == "-first")
+    {
+      isFirstOnly = Draw::ParseOnOffIterator(theNbArgs, theArgVec, anArgIter);
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
+  }
+
+  NCollection_List<Handle(XCAFPrs_BRepOwner)> aLabels;
+  if (isSelection)
+  {
+    for (const Handle(SelectMgr_EntityOwner)& anOwnerIter : aCtx->Selection()->Objects())
+    {
+      if (Handle(XCAFPrs_BRepOwner) anOwner = Handle(XCAFPrs_BRepOwner)::DownCast(anOwnerIter))
+        aLabels.Append(anOwner);
+    }
+  }
+  else
+  {
+    for (AIS_DataMapOfIOStatus::Iterator anObjIter(aCtx->ObjectIterator()); anObjIter.More(); anObjIter.Next())
+    {
+      Handle(XCAFPrs_AISObject) aPrs = Handle(XCAFPrs_AISObject)::DownCast(anObjIter.Key());
+      if (aPrs.IsNull())
+        continue;
+
+      for (const Handle(XCAFPrs_BRepOwner)& aLabIter : aPrs->GetLabels())
+        aLabels.Append(aLabIter);
+    }
+  }
+
+  if (isSingleOnly && aLabels.Size() != 1)
+  {
+    theDI << "Error: no single object to return";
+    return 1;
+  }
+
+  bool isFirst = true;
+
+  NCollection_Map<Handle(TCollection_HAsciiString)> aDocMap;
+  for (const Handle(XCAFPrs_BRepOwner)& aLabIter : aLabels)
+  {
+    if (toListDocs)
+    {
+      Handle(AIS_InteractiveObject)    aPrs = Handle(AIS_InteractiveObject)::DownCast(aLabIter->Selectable());
+      Handle(TCollection_HAsciiString) aDocName = Handle(TCollection_HAsciiString)::DownCast(aPrs->GetOwner());
+      if (aDocMap.Add(aDocName))
+      {
+        if (isFirst)
+          isFirst = false;
+        else
+          theDI << " ";
+
+        theDI << aDocName->String();
+      }
+    }
+    else if (aPathFormat != RWMesh_NameFormat_Empty || aNameFormat != RWMesh_NameFormat_Empty)
+    {
+      if (isFirst)
+        isFirst = false;
+      else
+        theDI << " ";
+
+      theDI << aLabIter->FormatName(aPathFormat != RWMesh_NameFormat_Empty ? aPathFormat : aNameFormat,
+                                    aPathFormat != RWMesh_NameFormat_Empty);
+    }
+    else
+    {
+      if (isFirst)
+        isFirst = false;
+      else
+        theDI << " ";
+
+      theDI << aLabIter->Name();
+    }
+
+    if (isFirstOnly)
+      return 0;
+  }
+
+  return 0;
+}
 
 //=======================================================================
 //function : xwd
@@ -1780,19 +1986,38 @@ void XDEDRAW::Init(Draw_Interpretor& di)
   di.Add ("XShow","Doc [label1 lavbel2 ...] \t: Display document (or some labels) in a graphical window",
 		   __FILE__, show, g);
 
-  di.Add ("XDisplay",
-          "XDisplay Doc [label1 [label2 [...]]] [-explore {on|off}] [-docPrefix {on|off}] [-names {on|off}]"
-          "\n\t\t:      [-noupdate] [-dispMode Mode] [-highMode Mode] [-autoTriangulation {0|1}]"
-          "\n\t\t: Displays document (parts) in 3D Viewer."
-          "\n\t\t:  -dispMode    Presentation display mode."
-          "\n\t\t:  -highMode    Presentation highlight mode."
-          "\n\t\t:  -docPrefix   Prepend document name to object names; TRUE by default."
-          "\n\t\t:  -names       Use object names instead of label tag; TRUE by default."
-          "\n\t\t:  -explore     Explode labels to leaves; FALSE by default."
-          "\n\t\t:  -outDispList Set the TCL variable to the list of displayed object names."
-          "\n\t\t:               (instead of printing them to draw interpreter)"
-          "\n\t\t:  -autoTriang  Enable/disable auto-triangulation for displayed shapes.",
-          __FILE__, XDEDRAW_XDisplayTool::XDisplay, g);
+  di.Add ("XDisplay", R"(
+XDisplay Doc [label1 [label2 [...]]] [-explore {0|1}]=0 [-docPrefix {0|1}]=1 [-names {0|1}]=1
+             [-singlePrs {0|1}]=1 [-freezeStyles {0|1}]=0
+             [-noupdate] [-dispMode Mode] [-highMode Mode] [-autoTriangulation {0|1}]
+Displays document (parts) in 3D Viewer.
+ -dispMode     presentation display mode;
+ -highMode     presentation highlight mode;
+ -docPrefix    prepend document name to object names; TRUE by default;
+ -names        use object names instead of label tag; TRUE by default;
+ -explore      explode labels to leaves; FALSE by default;
+ -singlePrs    create a single presentation object;
+ -freezeStyles dispatch styles on creation and prevent further updates;
+ -outDispList  set the TCL variable to the list of displayed object names;
+               (instead of printing them to draw interpreter);
+ -autoTriang   enable/disable auto-triangulation for displayed shapes.
+)", __FILE__, XDEDRAW_XDisplayTool::XDisplay, g);
+
+  di.Add ("XVState", R"(
+XVState [-selection] [-documents|-labels|-paths|-names] [-first|-single]
+        [-path|-name {product|instance|instOrProd|prodOrInst|prodAndInst|verbose|ocaf}]
+Print viewer selection state for XCAF document.
+ -selection list only selected parts;
+ -documents list document names;
+ -paths     list assembly paths;
+ -names     list leave names;
+ -labels    list XCAF labels instead of names;
+ -path      combination of -single and -paths;
+ -name      combination of -single and -names;
+ -label     combination of -single and -labels;
+ -first     print only first object;
+ -single    print only single object or nothing in case of multi-selection.
+)", __FILE__, XVState, g);
 
   di.Add ("XWdump","Doc filename.{gif|xwd|bmp} \t: Dump contents of viewer window to XWD, GIF or BMP file",
 		   __FILE__, xwd, g);
