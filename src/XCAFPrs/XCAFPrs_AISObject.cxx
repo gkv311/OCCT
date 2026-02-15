@@ -17,6 +17,7 @@
 
 #include <BRep_Builder.hxx>
 #include <BRepBndLib.hxx>
+#include <BRepTools.hxx>
 #include <gp_Pnt.hxx>
 #include <Graphic3d_AspectFillArea3d.hxx>
 #include <Prs3d_Drawer.hxx>
@@ -25,6 +26,8 @@
 #include <Prs3d_LineAspect.hxx>
 #include <Prs3d_ShadingAspect.hxx>
 #include <Prs3d_Text.hxx>
+#include <StdPrs_ToolTriangulatedShape.hxx>
+#include <StdSelect_BRepSelectionTool.hxx>
 #include <TDataStd_Name.hxx>
 #include <TPrsStd_AISPresentation.hxx>
 #include <TopoDS_Iterator.hxx>
@@ -34,21 +37,71 @@
 #include <XCAFPrs_Style.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(XCAFPrs_AISObject,AIS_ColoredShape)
+IMPLEMENT_STANDARD_RTTIEXT(XCAFPrs_AISDrawer,AIS_ColoredDrawer)
+IMPLEMENT_STANDARD_RTTIEXT(XCAFPrs_BRepOwner,StdSelect_BRepOwner)
 
 //=======================================================================
 //function : XCAFPrs_AISObject
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-XCAFPrs_AISObject::XCAFPrs_AISObject (const TDF_Label& theLabel)
-: AIS_ColoredShape(TopoDS_Shape()),
-  myToSyncStyles (Standard_True)
+XCAFPrs_AISObject::XCAFPrs_AISObject() : AIS_ColoredShape(TopoDS_Shape())
 {
   // define plastic material by default for proper color reproduction
-  setMaterial (myDrawer, Graphic3d_NameOfMaterial_Plastified, Standard_False, Standard_False);
+  setMaterial(myDrawer, Graphic3d_NameOfMaterial_Plastified, Standard_False, Standard_False);
   hasOwnMaterial = Standard_True;
+}
 
-  myLabel = theLabel;
+//=======================================================================
+//function : XCAFPrs_AISObject
+//purpose  :
+//=======================================================================
+XCAFPrs_AISObject::XCAFPrs_AISObject(const TDF_Label& theLabel) : XCAFPrs_AISObject()
+{
+  SetLabel(theLabel);
+}
+
+//=======================================================================
+//function : XCAFPrs_AISObject
+//purpose  :
+//=======================================================================
+XCAFPrs_AISObject::XCAFPrs_AISObject(const NCollection_List<Handle(XCAFPrs_BRepOwner)>& theLabels) : XCAFPrs_AISObject()
+{
+  myLabels = theLabels;
+}
+
+//=======================================================================
+//function : GetLabel
+//purpose  :
+//=======================================================================
+const TDF_Label& XCAFPrs_AISObject::GetLabel() const
+{
+  if (myLabels.Size() != 1)
+  {
+    static const TDF_Label aNullLab;
+    return aNullLab;
+  }
+  return myLabels.First()->ShapeLabel();
+}
+
+//=======================================================================
+//function : SetLabels
+//purpose  :
+//=======================================================================
+void XCAFPrs_AISObject::SetLabels(const NCollection_List<Handle(XCAFPrs_BRepOwner)>& theLabels)
+{
+  myLabels = theLabels;
+}
+
+//=======================================================================
+//function : SetLabel
+//purpose  :
+//=======================================================================
+void XCAFPrs_AISObject::SetLabel(const TDF_Label& theLabel)
+{
+  myLabels.Clear();
+
+  Handle(XCAFPrs_BRepOwner) aBrepOwner = new XCAFPrs_BRepOwner(theLabel, TopLoc_Location());
+  myLabels.Append(aBrepOwner);
 }
 
 //=======================================================================
@@ -109,6 +162,91 @@ static void DisplayText (const TDF_Label& aLabel,
   }
 }
 
+// =======================================================================
+// function : XCAFPrs_AISDrawer
+// purpose  :
+// =======================================================================
+XCAFPrs_AISDrawer::XCAFPrs_AISDrawer(const Handle(Prs3d_Drawer)& theLink,
+                                     const XCAFPrs_Style&        theStyle,
+                                     const XCAFPrs_Style&        theDefStyle)
+: AIS_ColoredDrawer(theLink),
+  myStyle(theStyle)
+{
+  if (myStyle.Material().IsNull() && !theDefStyle.Material().IsNull())
+    myStyle.SetMaterial(theDefStyle.Material());
+
+  if (myStyle.Material().IsNull() && !myStyle.IsSetColorSurf() && theDefStyle.IsSetColorSurf())
+    myStyle.SetColorSurf(theDefStyle.GetColorSurfRGBA());
+
+  if (myStyle.Material().IsNull() && !myStyle.IsSetColorCurv() && theDefStyle.IsSetColorCurv())
+    myStyle.SetColorCurv(theDefStyle.GetColorCurv());
+}
+
+// =======================================================================
+// function : UpdateStyle
+// purpose  :
+// =======================================================================
+void XCAFPrs_AISDrawer::UpdateStyle(Prs3d_Drawer&               theDrawer,
+                                    const XCAFPrs_Style&        theStyle,
+                                    const Handle(Prs3d_Drawer)& theHiDrawer)
+{
+  if (AIS_ColoredDrawer* aColDrawer = dynamic_cast<AIS_ColoredDrawer*>(&theDrawer))
+  {
+    aColDrawer->SetHidden(!theStyle.IsVisible());
+    if (!theStyle.Material().IsNull() && !theStyle.Material()->IsEmpty())
+    {
+      aColDrawer->SetOwnMaterial();
+    }
+    if (theStyle.IsSetColorSurf() || theStyle.IsSetColorCurv())
+    {
+      aColDrawer->SetOwnColor(Quantity_Color());
+    }
+  }
+
+  theDrawer.SetupOwnShadingAspect();
+  theDrawer.SetOwnLineAspects();
+
+  Quantity_ColorRGBA       aSurfColor = Quantity_ColorRGBA(Quantity_NOC_WHITE, 1.0f);
+  Quantity_Color           aCurvColor = Quantity_NOC_WHITE;
+  Graphic3d_MaterialAspect aMatFront = theDrawer.ShadingAspect()->Aspect()->FrontMaterial();
+
+  const Handle(XCAFDoc_VisMaterial)& anXMat = theStyle.Material();
+  if (!anXMat.IsNull() && !anXMat->IsEmpty())
+  {
+    anXMat->FillAspect(theDrawer.ShadingAspect()->Aspect());
+    aMatFront = theDrawer.ShadingAspect()->Aspect()->FrontMaterial();
+    aSurfColor = Quantity_ColorRGBA(aMatFront.Color(), aMatFront.Alpha());
+    aCurvColor = aMatFront.Color();
+  }
+  if (theStyle.IsSetColorSurf())
+  {
+    aSurfColor = theStyle.GetColorSurfRGBA();
+    aMatFront.SetColor(aSurfColor.GetRGB());
+    aMatFront.SetAlpha(aSurfColor.Alpha());
+  }
+  if (theStyle.IsSetColorCurv())
+    aCurvColor = theStyle.GetColorCurv();
+
+  if (theStyle.IsHighlighted() && !theHiDrawer.IsNull())
+  {
+    aSurfColor = theHiDrawer->ColorRGBA();
+    aCurvColor = theHiDrawer->Color();
+    if (!theHiDrawer->BasicFillAreaAspect().IsNull())
+      aMatFront = theHiDrawer->BasicFillAreaAspect()->FrontMaterial();
+    else
+      aMatFront.SetColor(aSurfColor.GetRGB());
+  }
+
+  theDrawer.UnFreeBoundaryAspect()->SetColor(aCurvColor);
+  theDrawer.FreeBoundaryAspect()->SetColor(aCurvColor);
+  theDrawer.WireAspect()->SetColor(aCurvColor);
+
+  theDrawer.ShadingAspect()->Aspect()->SetInteriorColor(aSurfColor);
+  theDrawer.ShadingAspect()->Aspect()->SetFrontMaterial(aMatFront);
+  theDrawer.UIsoAspect()->SetColor(aSurfColor.GetRGB());
+  theDrawer.VIsoAspect()->SetColor(aSurfColor.GetRGB());
+}
+
 //=======================================================================
 //function : DispatchStyles
 //purpose  :
@@ -118,77 +256,113 @@ void XCAFPrs_AISObject::DispatchStyles (const Standard_Boolean theToSyncStyles)
   myToSyncStyles = theToSyncStyles;
   myShapeColors.Clear();
 
-  TopoDS_Shape aShape;
-  if (!XCAFDoc_ShapeTool::GetShape (myLabel, aShape) || aShape.IsNull())
-  {
-    Set (TopoDS_Shape());
-    return;
-  }
-  Set (aShape);
-
-  // Collecting information on colored subshapes
-  TopLoc_Location aLoc;
-  XCAFPrs_IndexedDataMapOfShapeStyle aSettings;
-  XCAFPrs::CollectStyleSettings (myLabel, aLoc, aSettings);
-
   // Getting default colors
   XCAFPrs_Style aDefStyle;
-  DefaultStyle (aDefStyle);
-  setStyleToDrawer (myDrawer, aDefStyle, aDefStyle, myDrawer->ShadingAspect()->Aspect()->FrontMaterial());
+  DefaultStyle(aDefStyle);
+  XCAFPrs_AISDrawer::UpdateStyle(*myDrawer, aDefStyle, Handle(Prs3d_Drawer)());
 
-  // collect sub-shapes with the same style into compounds
-  BRep_Builder aBuilder;
   NCollection_IndexedDataMap<XCAFPrs_Style, TopoDS_Compound, XCAFPrs_Style> aStyleGroups;
-  for (XCAFPrs_DataMapIteratorOfIndexedDataMapOfShapeStyle aStyledShapeIter (aSettings);
-       aStyledShapeIter.More(); aStyledShapeIter.Next())
-  {
-    TopoDS_Compound aComp;
-    if (aStyleGroups.FindFromKey (aStyledShapeIter.Value(), aComp))
-    {
-      aBuilder.Add (aComp, aStyledShapeIter.Key());
-      continue;
-    }
 
-    aBuilder.MakeCompound (aComp);
-    aBuilder.Add (aComp, aStyledShapeIter.Key());
-    TopoDS_Compound* aMapShape = aStyleGroups.ChangeSeek (aStyledShapeIter.Value());
-    if (aMapShape == NULL)
-      aStyleGroups.Add (aStyledShapeIter.Value(), aComp);
-    else
-      *aMapShape = aComp;
+  TopoDS_Compound aWholeComp;
+  BRep_Builder().MakeCompound(aWholeComp);
+  XCAFPrs_IndexedDataMapOfShapeStyle aSettings;
+  for (const Handle(XCAFPrs_BRepOwner)& aLabIter : myLabels)
+  {
+    aLabIter->UpdateShape();
+    if (aLabIter->Shape().IsNull())
+      continue;
+
+    BRep_Builder().Add(aWholeComp, aLabIter->Shape());
+
+    // collect information on colored subshapes
+    XCAFPrs::CollectStyleSettings(aLabIter->ShapeLabel(), aLabIter->ParentLocation(), aSettings);
+
+    // collect sub-shapes with the same style into compounds
+    bool hasLabStyle = false;
+    for (const std::pair<const TopoDS_Shape, XCAFPrs_Style>& aStyledShapeIter : aSettings)
+    {
+      const TopoDS_Shape& aSubshape = aStyledShapeIter.first;
+      hasLabStyle = hasLabStyle || aSubshape == aLabIter->Shape();
+
+      XCAFPrs_Style aSubStyle = aStyledShapeIter.second;
+      aSubStyle.SetHighlighted(aLabIter->IsSelected());
+
+      TopoDS_Compound aComp;
+      if (aStyleGroups.FindFromKey(aSubStyle, aComp))
+      {
+        BRep_Builder().Add(aComp, aSubshape);
+        continue;
+      }
+
+      BRep_Builder().MakeCompound(aComp);
+      BRep_Builder().Add(aComp, aSubshape);
+      TopoDS_Compound* aMapShape = aStyleGroups.ChangeSeek(aSubStyle);
+      if (aMapShape == nullptr)
+        aStyleGroups.Add(aSubStyle, aComp);
+      else
+        *aMapShape = aComp;
+    }
+    aSettings.Clear(false);
+
+    // map label to default style
+    if (!hasLabStyle)
+    {
+      XCAFPrs_Style aLabStyle;
+      aLabStyle.SetHighlighted(aLabIter->IsSelected());
+
+      TopoDS_Compound aComp;
+      if (aStyleGroups.FindFromKey(aLabStyle, aComp))
+      {
+        BRep_Builder().Add(aComp, aLabIter->Shape());
+      }
+      else
+      {
+        BRep_Builder().MakeCompound(aComp);
+        BRep_Builder().Add(aComp, aLabIter->Shape());
+        TopoDS_Compound* aMapShape = aStyleGroups.ChangeSeek(aLabStyle);
+        if (aMapShape == nullptr)
+          aStyleGroups.Add(aLabStyle, aComp);
+        else
+          *aMapShape = aComp;
+      }
+    }
   }
-  aSettings.Clear();
 
   // assign custom aspects
-  for (NCollection_IndexedDataMap<XCAFPrs_Style, TopoDS_Compound, XCAFPrs_Style>::Iterator aStyleGroupIter (aStyleGroups);
-       aStyleGroupIter.More(); aStyleGroupIter.Next())
+  for (const std::pair<const XCAFPrs_Style, TopoDS_Compound>& aStyleGroupIter : aStyleGroups)
   {
-    const TopoDS_Compound& aComp = aStyleGroupIter.Value();
-    TopoDS_Iterator aShapeIter (aComp);
-    TopoDS_Shape aShapeCur = aShapeIter.Value();
+    const TopoDS_Compound& aComp = aStyleGroupIter.second;
+    TopoDS_Iterator        aShapeIter(aComp);
+    TopoDS_Shape           aShapeCur = aShapeIter.Value();
     aShapeIter.Next();
     if (aShapeIter.More())
-    {
       aShapeCur = aComp;
-    }
 
-    Handle(AIS_ColoredDrawer) aDrawer = new AIS_ColoredDrawer (myDrawer);
-    myShapeColors.Bind (aShapeCur, aDrawer);
-    const XCAFPrs_Style& aStyle = aStyleGroupIter.Key();
-    aDrawer->SetHidden (!aStyle.IsVisible());
-    if (!aStyle.Material().IsNull()
-     && !aStyle.Material()->IsEmpty())
-    {
-      aDrawer->SetOwnMaterial();
-    }
-    if (aStyle.IsSetColorSurf()
-     || aStyle.IsSetColorCurv())
-    {
-      aDrawer->SetOwnColor (Quantity_Color());
-    }
-    setStyleToDrawer (aDrawer, aStyle, aDefStyle, myDrawer->ShadingAspect()->Aspect()->FrontMaterial());
+    Handle(XCAFPrs_AISDrawer) aDrawer = new XCAFPrs_AISDrawer(myDrawer, aStyleGroupIter.first, aDefStyle);
+    myShapeColors.Bind(aShapeCur, aDrawer);
   }
   aStyleGroups.Clear();
+
+  if (aWholeComp.NbChildren() == 0)
+  {
+    myshape = TopoDS_Shape();
+    myCompBB = true;
+    return;
+  }
+  else if (aWholeComp.NbChildren() == 1)
+  {
+    myshape = TopoDS_Iterator(aWholeComp).Value();
+    myCompBB = true;
+  }
+  else
+  {
+    myshape = aWholeComp;
+    myCompBB = true;
+  }
+
+  // synchronize highlighting state
+  for (const Handle(XCAFPrs_BRepOwner)& aLabIter : myLabels)
+    aLabIter->SetHighlightedInPrs(aLabIter->IsSelected());
 }
 
 //=======================================================================
@@ -205,84 +379,151 @@ void XCAFPrs_AISObject::Compute (const Handle(PrsMgr_PresentationManager)& thePr
     Standard_Boolean toMapStyles = myToSyncStyles;
     for (PrsMgr_Presentations::Iterator aPrsIter (myPresentations); aPrsIter.More(); aPrsIter.Next())
     {
-      if (aPrsIter.Value() != thePrs
-      && !aPrsIter.Value()->MustBeUpdated())
+      if (aPrsIter.Value() != thePrs && !aPrsIter.Value()->MustBeUpdated())
       {
         toMapStyles = Standard_False;
         break;
       }
     }
     if (toMapStyles)
-    {
       DispatchStyles (Standard_True);
-    }
   }
   if (myshape.IsNull())
-  {
     return;
-  }
+  else if (myshape.ShapeType() == TopAbs_COMPOUND && myshape.NbChildren() == 0)
+    return;
 
-  if (myshape.ShapeType() == TopAbs_COMPOUND)
-  {
-    if (myshape.NbChildren() == 0)
-    {
-      return;
-    }
-  }
-
+  SynchronizeAspects();
   AIS_ColoredShape::Compute (thePresentationManager, thePrs, theMode);
 
   if (XCAFPrs::GetViewNameMode())
   {
     // Displaying Name attributes
     thePrs->SetDisplayPriority (Graphic3d_DisplayPriority_Topmost);
-    DisplayText (myLabel, thePrs, Attributes()->DimensionAspect()->TextAspect(), TopLoc_Location());//no location
+    for (const Handle(XCAFPrs_BRepOwner)& aLabIter : myLabels)
+      DisplayText (aLabIter->ShapeLabel(), thePrs, Attributes()->DimensionAspect()->TextAspect(), TopLoc_Location());//no location
   }
 }
 
+// ================================================================
+// Function : ProcessRedraw
+// ================================================================
+AIS_RedrawProgressResult XCAFPrs_AISObject::ProcessRedraw(const Handle(AIS_InteractiveContext)& theCtx,
+                                                          const Handle(V3d_View)&               theView,
+                                                          const AIS_RedrawProgress              theRedrawProgress)
+{
+  AIS_RedrawProgressResult aRes = base_type::ProcessRedraw(theCtx, theView, theRedrawProgress);
+  if (theRedrawProgress != AIS_RedrawProgress_BeforeRedraw)
+    return aRes;
+  else if (!myToRehighlight)
+    return aRes;
+
+  myToRehighlight = false;
+  int  aNbSel = 0;
+  bool toReHighlight = false;
+  for (const Handle(XCAFPrs_BRepOwner)& aLabIter : myLabels)
+  {
+    if (aLabIter->IsSelected())
+      ++aNbSel;
+
+    if (aLabIter->IsSelected() != aLabIter->IsHighlightedInPrs())
+    {
+      aLabIter->SetHighlightedInPrs(aLabIter->IsSelected());
+      toReHighlight = true;
+    }
+  }
+  if (!toReHighlight)
+    return aRes;
+
+  if (aNbSel == 0 || aNbSel == myLabels.Size())
+  {
+    for (AIS_DataMapOfShapeDrawer::Iterator anIter(myShapeColors); anIter.More(); anIter.Next())
+    {
+      if (XCAFPrs_AISDrawer* aDrawer = dynamic_cast<XCAFPrs_AISDrawer*>(anIter.Value().get()))
+        aDrawer->SetHighlighted(aNbSel != 0);
+    }
+    for (const Handle(XCAFPrs_BRepOwner)& aLabIter : myLabels)
+      aLabIter->SetHighlightedInPrs(aLabIter->IsSelected());
+
+    SynchronizeAspects();
+    return aRes;
+  }
+
+  DispatchStyles(myToSyncStyles);
+  return AIS_RedrawProgressResult_NeedRedisplay;
+}
+
 //=======================================================================
-//function : setStyleToDrawer
+//function : GlobalSelOwner
 //purpose  :
 //=======================================================================
-void XCAFPrs_AISObject::setStyleToDrawer (const Handle(Prs3d_Drawer)& theDrawer,
-                                          const XCAFPrs_Style& theStyle,
-                                          const XCAFPrs_Style& theDefStyle,
-                                          const Graphic3d_MaterialAspect& theDefMaterial)
+Handle(SelectMgr_EntityOwner) XCAFPrs_AISObject::GlobalSelOwner() const
 {
-  theDrawer->SetupOwnShadingAspect();
-  theDrawer->SetOwnLineAspects();
-
-  Quantity_ColorRGBA aSurfColor = theDefStyle.GetColorSurfRGBA();
-  Quantity_Color     aCurvColor = theDefStyle.GetColorCurv();
-  Graphic3d_MaterialAspect aMaterial = theDefMaterial;
-  const Handle(XCAFDoc_VisMaterial)& anXMat = !theStyle.Material().IsNull() ? theStyle.Material() : theDefStyle.Material();
-  if (!anXMat.IsNull()
-   && !anXMat->IsEmpty())
+  if (myLabels.Size() == 1)
   {
-    anXMat->FillAspect (theDrawer->ShadingAspect()->Aspect());
-    aMaterial = theDrawer->ShadingAspect()->Aspect()->FrontMaterial();
-    aSurfColor = Quantity_ColorRGBA (aMaterial.Color(), aMaterial.Alpha());
-    aCurvColor = aMaterial.Color();
+    Handle(XCAFPrs_BRepOwner) anOwner = myLabels.First();
+    return anOwner;
   }
-  if (theStyle.IsSetColorSurf())
+  if (!myLabels.IsEmpty() && !myLabels.First()->ComesFromDecomposition())
+    return base_type::GlobalSelOwner();
+
+  return Handle(SelectMgr_EntityOwner)();
+}
+
+//=======================================================================
+//function : ComputeSelection
+//purpose  :
+//=======================================================================
+void XCAFPrs_AISObject::ComputeSelection(const Handle(SelectMgr_Selection)& theSel, const Standard_Integer theMode)
+{
+  if (myshape.IsNull())
+    return;
+
+  const TopAbs_ShapeEnum aTypOfSel = AIS_Shape::SelectionType(theMode);
+  const Standard_Integer aPriority = StdSelect_BRepSelectionTool::GetStandardPriority(myshape, aTypOfSel);
+  if (aTypOfSel != TopAbs_SHAPE)
   {
-    aSurfColor = theStyle.GetColorSurfRGBA();
-    aMaterial.SetColor (aSurfColor.GetRGB());
-    aMaterial.SetAlpha (aSurfColor.Alpha());
-  }
-  if (theStyle.IsSetColorCurv())
-  {
-    aCurvColor = theStyle.GetColorCurv();
+    base_type::ComputeSelection(theSel, theMode);
+    return;
   }
 
-  theDrawer->UnFreeBoundaryAspect()->SetColor (aCurvColor);
-  theDrawer->FreeBoundaryAspect()->SetColor (aCurvColor);
-  theDrawer->WireAspect()->SetColor (aCurvColor);
+  if (myLabels.IsEmpty() || (myLabels.Size() != 1 && !myLabels.First()->ComesFromDecomposition()))
+  {
+    base_type::ComputeSelection(theSel, theMode);
+    return;
+  }
 
-  theDrawer->ShadingAspect()->Aspect()->SetInteriorColor (aSurfColor);
-  theDrawer->ShadingAspect()->Aspect()->SetFrontMaterial (aMaterial);
-  theDrawer->UIsoAspect()->SetColor (aSurfColor.GetRGB());
-  theDrawer->VIsoAspect()->SetColor (aSurfColor.GetRGB());
+  const Standard_Real aDeflection = StdPrs_ToolTriangulatedShape::GetDeflection(myshape, myDrawer);
+  const Standard_Real aDeviationAngle = myDrawer->DeviationAngle();
+  if (myDrawer->IsAutoTriangulation() && !BRepTools::Triangulation(myshape, Precision::Infinite()))
+    StdPrs_ToolTriangulatedShape::Tessellate(myshape, myDrawer, aDeflection);
+
+  AIS_DataMapOfShapeDrawer aSubshapeDrawerMap;
+  fillSubshapeDrawerMap(aSubshapeDrawerMap);
+
+  Handle(AIS_ColoredDrawer) aBaseDrawer;
+  myShapeColors.Find(myshape, aBaseDrawer);
+  for (const Handle(XCAFPrs_BRepOwner)& aLabIter : myLabels)
+  {
+    if (aLabIter->Shape().IsNull())
+      continue;
+
+    computeSubshapeSelection(aBaseDrawer,
+                             aSubshapeDrawerMap,
+                             aLabIter->Shape(),
+                             aLabIter,
+                             theSel,
+                             aTypOfSel,
+                             aPriority,
+                             aDeflection,
+                             aDeviationAngle);
+  }
+
+  for (const Handle(SelectMgr_SensitiveEntity)& aSelEntIter : theSel->Entities())
+  {
+    const Handle(SelectMgr_EntityOwner)& anOwner = aSelEntIter->BaseSensitive()->OwnerId();
+    anOwner->SetSelectablePointer(this);
+  }
 }
 
 //=======================================================================
@@ -304,7 +545,7 @@ void XCAFPrs_AISObject::SetMaterial (const Graphic3d_MaterialAspect& theMaterial
   XCAFPrs_Style aDefStyle;
   DefaultStyle (aDefStyle);
   setMaterial (myDrawer, theMaterial, HasColor(), IsTransparent());
-  setStyleToDrawer (myDrawer, aDefStyle, aDefStyle, myDrawer->ShadingAspect()->Aspect()->FrontMaterial());
+  XCAFPrs_AISDrawer::UpdateStyle(*myDrawer, aDefStyle, Handle(Prs3d_Drawer)());
   for (AIS_DataMapOfShapeDrawer::Iterator anIter (myShapeColors); anIter.More(); anIter.Next())
   {
     const Handle(AIS_ColoredDrawer)& aDrawer = anIter.Value();
@@ -325,4 +566,160 @@ void XCAFPrs_AISObject::SetMaterial (const Graphic3d_MaterialAspect& theMaterial
     }
   }
   SynchronizeAspects();
+}
+
+// =======================================================================
+// function : ToHighlightInMainPrs
+// purpose  :
+// =======================================================================
+bool XCAFPrs_AISObject::ToHighlightInMainPrs() const
+{
+  const Handle(Prs3d_Drawer)& aSelDrawer = !myHilightDrawer.IsNull() || !HasInteractiveContext()
+                                           ? myHilightDrawer
+                                           : InteractiveContext()->HighlightStyle(Prs3d_TypeOfHighlight_Selected);
+  const Standard_Integer      aDispMode = GetAcceptedDisplayMode();
+  return !aSelDrawer.IsNull() && (aSelDrawer->DisplayMode() == -1 || aSelDrawer->DisplayMode() == aDispMode);
+}
+
+// =======================================================================
+// function : SynchronizeAspects
+// purpose  :
+// =======================================================================
+void XCAFPrs_AISObject::SynchronizeAspects()
+{
+  Handle(Prs3d_Drawer) aSelDrawer;
+  if (ToHighlightInMainPrs())
+    aSelDrawer = !myHilightDrawer.IsNull() || !HasInteractiveContext()
+                 ? myHilightDrawer
+                 : InteractiveContext()->HighlightStyle(Prs3d_TypeOfHighlight_Selected);
+
+  for (AIS_DataMapOfShapeDrawer::Iterator anIter(myShapeColors); anIter.More(); anIter.Next())
+  {
+    if (XCAFPrs_AISDrawer* aDrawer = dynamic_cast<XCAFPrs_AISDrawer*>(anIter.Value().get()))
+      aDrawer->UpdateStyle(aSelDrawer);
+  }
+  base_type::SynchronizeAspects();
+}
+
+// =======================================================================
+// function : XCAFPrs_BRepOwner
+// purpose :
+// =======================================================================
+XCAFPrs_BRepOwner::XCAFPrs_BRepOwner(const TDF_Label&       theLabel,
+                                     const TopLoc_Location& theLoc,
+                                     const XCAFPrs_Style&   theStyle)
+: XCAFPrs_BRepOwner(XCAFPrs_LabelPath{theLabel}, theLoc, theStyle)
+{
+  //
+}
+
+// =======================================================================
+// function : XCAFPrs_BRepOwner
+// purpose :
+// =======================================================================
+XCAFPrs_BRepOwner::XCAFPrs_BRepOwner(const XCAFPrs_LabelPath& thePath,
+                                     const TopLoc_Location&   theLoc,
+                                     const XCAFPrs_Style&     theStyle)
+: StdSelect_BRepOwner(0),
+  myShapePath(thePath),
+  myParentLoc(theLoc),
+  myStyle(theStyle)
+{
+  UpdateShape();
+  if (!myShape.IsNull())
+    mypriority = StdSelect_BRepSelectionTool::GetStandardPriority(myShape, TopAbs_SHAPE);
+}
+
+// =======================================================================
+// function : UpdateShape
+// purpose :
+// =======================================================================
+void XCAFPrs_BRepOwner::UpdateShape()
+{
+  TopoDS_Shape aShape;
+  if (!myShapePath.empty() && !myShapePath.back().IsNull())
+    XCAFDoc_ShapeTool::GetShape(myShapePath.back(), aShape);
+
+  if (!aShape.IsNull() && !myParentLoc.IsIdentity())
+    aShape.Move(myParentLoc, false);
+
+  myShape = aShape;
+}
+
+// =======================================================================
+// function : HilightWithColor
+// purpose :
+// =======================================================================
+void XCAFPrs_BRepOwner::HilightWithColor(const Handle(PrsMgr_PresentationManager)& thePrsMgr,
+                                         const Handle(Prs3d_Drawer)& theStyle,
+                                         const Standard_Integer theMode)
+{
+  if (XCAFPrs_AISObject* aPrsObj = dynamic_cast<XCAFPrs_AISObject*>(mySelectable))
+  {
+    if (!thePrsMgr->IsImmediateModeOn() && aPrsObj->ToHighlightInMainPrs())
+    {
+      aPrsObj->InvalidateHighlightInMainPrs();
+      return;
+    }
+  }
+
+  base_type::HilightWithColor(thePrsMgr, theStyle, theMode);
+}
+
+// =======================================================================
+// function : Unhilight
+// purpose :
+// =======================================================================
+void XCAFPrs_BRepOwner::Unhilight(const Handle(PrsMgr_PresentationManager)& thePrsMgr, const Standard_Integer theMode)
+{
+  if (XCAFPrs_AISObject* aPrsObj = dynamic_cast<XCAFPrs_AISObject*>(mySelectable))
+  {
+    if (!thePrsMgr->IsImmediateModeOn() && aPrsObj->ToHighlightInMainPrs())
+      aPrsObj->InvalidateHighlightInMainPrs();
+  }
+  base_type::Unhilight(thePrsMgr, theMode);
+}
+
+// =======================================================================
+// function : Clear
+// purpose :
+// =======================================================================
+void XCAFPrs_BRepOwner::Clear(const Handle(PrsMgr_PresentationManager)& thePrsMgr, const Standard_Integer theMode)
+{
+  if (XCAFPrs_AISObject* aPrsObj = dynamic_cast<XCAFPrs_AISObject*>(mySelectable))
+  {
+    if (!thePrsMgr->IsImmediateModeOn() && aPrsObj->ToHighlightInMainPrs())
+      aPrsObj->InvalidateHighlightInMainPrs();
+  }
+  base_type::Clear(thePrsMgr, theMode);
+}
+
+// =======================================================================
+// function : FormatName
+// purpose :
+// =======================================================================
+TCollection_AsciiString XCAFPrs_BRepOwner::FormatName(RWMesh_NameFormat theFormat, bool theFullPath) const
+{
+  if (myShapePath.empty())
+    return TCollection_AsciiString();
+
+  TCollection_AsciiString aPath;
+  for (size_t aLabIter = theFullPath ? 0 : myShapePath.size() - 1; aLabIter < myShapePath.size(); ++aLabIter)
+  {
+    const TDF_Label&        aLabel = myShapePath[aLabIter];
+    TCollection_AsciiString aName = XCAFDoc_ShapeTool::FormatName(theFormat, aLabel);
+    aPath += aName;
+    if (aLabIter + 1 < myShapePath.size())
+      aPath += "/";
+  }
+  return aPath;
+}
+
+// =======================================================================
+// function : ToString
+// purpose :
+// =======================================================================
+TCollection_AsciiString XCAFPrs_BRepOwner::ToString() const
+{
+  return !myName.IsEmpty() ? myName : base_type::ToString();
 }
