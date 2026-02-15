@@ -359,7 +359,7 @@ void AIS_ViewCube::createRoundRectangleTriangles (const Handle(Graphic3d_ArrayOf
   {
     const Standard_Integer aNbNodes = (THE_NB_ROUND_SPLITS + 1) * 4 + 1;
     theNbNodes += aNbNodes;
-    theNbTris  += aNbNodes;
+    theNbTris  += aNbNodes - 1;
     if (theTris.IsNull())
     {
       return;
