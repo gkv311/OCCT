@@ -107,7 +107,7 @@ void ViewerTest_AutoUpdater::Update()
     {
       if (!myContext.IsNull())
       {
-        myContext->UpdateCurrentViewer();
+        myContext->UpdateCurrentViewer (myView);
         if (!myView.IsNull()
           && myView->IsSubview()
           && myView->ParentView()->Viewer() != myContext->CurrentViewer())

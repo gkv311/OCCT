@@ -18,6 +18,7 @@
 #include <Aspect_XRHapticActionData.hxx>
 #include <Aspect_XRTrackedDeviceRole.hxx>
 #include <AIS_DragAction.hxx>
+#include <AIS_InteractiveObject.hxx>
 #include <AIS_MouseGesture.hxx>
 #include <AIS_NavigationMode.hxx>
 #include <AIS_ViewInputBuffer.hxx>
@@ -34,7 +35,6 @@
 
 class AIS_Animation;
 class AIS_AnimationCamera;
-class AIS_InteractiveObject;
 class AIS_InteractiveContext;
 class AIS_Point;
 class AIS_RubberBand;
@@ -718,6 +718,11 @@ protected:
   Standard_EXPORT virtual void contextLazyMoveTo (const Handle(AIS_InteractiveContext)& theCtx,
                                                   const Handle(V3d_View)& theView,
                                                   const Graphic3d_Vec2i& thePnt);
+
+  //! Handle objects before redrawing new frame (e.g. AIS_InteractiveObject::ProcessRedraw()).
+  Standard_EXPORT virtual void updateObjectsBeforeRedraw(const Handle(AIS_InteractiveContext)& theCtx,
+                                                         const Handle(V3d_View)&               theView,
+                                                         AIS_RedrawProgress                    theStage);
 
 protected:
 

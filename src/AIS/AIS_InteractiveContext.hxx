@@ -810,7 +810,19 @@ public: //! @name common properties
   const Handle(StdSelect_ViewerSelector3d)& MainSelector() const { return mgrSelector->Selector(); }
 
   //! Updates the current viewer.
-  Standard_EXPORT void UpdateCurrentViewer();
+  //! @param[in] theView active view or NULL
+  //! @param[in] theObj active object to update or NULL to update all objects
+  Standard_EXPORT void UpdateCurrentViewer(const Handle(V3d_View)&             theView = Handle(V3d_View)(),
+                                           const Handle(AIS_InteractiveObject)& theObj = Handle(AIS_InteractiveObject)());
+
+  //! Updates objects on various stages of the event loop.
+  //! @param[in] theView active view
+  //! @param[in] theObj active object to update or NULL to update all objects
+  //! @param[in] theStage updating stage
+  //! @return update mask
+  Standard_EXPORT AIS_RedrawProgressResult UpdateObjectsBeforeRedraw(const Handle(V3d_View)&              theView,
+                                                                     const Handle(AIS_InteractiveObject)& theObj,
+                                                                     const AIS_RedrawProgress             theStage);
 
   //! Returns the list of displayed objects of a particular Type WhichKind and Signature WhichSignature.
   //! By Default, WhichSignature equals -1. This means that there is a check on type only.
@@ -879,6 +891,15 @@ public: //! @name debug visualization
   Standard_EXPORT void DisplayActiveSensitive (const Handle(AIS_InteractiveObject)& anObject, const Handle(V3d_View)& aView);
 
 public: //! @name common object display attributes
+
+  //! Flag to recompute invalidated presentations within SetColor(), SetWidth()
+  //! and other methods immediately to maintain legacy behavior; FALSE by default.
+  Standard_DEPRECATED("This flag is to maintain compatibility with legacy code")
+  bool IsImmediatePrsUpdate() const { return myIsImmediatePrsUpdate; }
+
+  //! Set flag to recompute invalidated presentations within SetColor(), SetWidth() and other methods immediately.
+  Standard_DEPRECATED("This flag is to maintain compatibility with legacy code")
+  void SetImmediatePrsUpdate (bool theIsImmediate) { myIsImmediatePrsUpdate = theIsImmediate; }
 
   //! Sets the graphic attributes of the interactive object, such as visualization mode, color, and material.
   Standard_EXPORT void SetLocalAttributes (const Handle(AIS_InteractiveObject)& theIObj,
@@ -1445,6 +1466,17 @@ protected: //! @name internal methods
                                         const Standard_Integer theDispyMode,
                                         const Standard_Integer theSelectionMode);
 
+  //! Updates object on various stages of the event loop.
+  //! @param[in] theCtx interactive context
+  //! @param[in] theView active view
+  //! @param[in] theObj active object to update
+  //! @param[in] theStage updating stage
+  //! @return update mask
+  Standard_EXPORT static AIS_RedrawProgressResult updateObjectBeforeRedraw(const Handle(AIS_InteractiveContext)& theCtx,
+                                                                           const Handle(V3d_View)&              theView,
+                                                                           const Handle(AIS_InteractiveObject)& theObj,
+                                                                           const AIS_RedrawProgress theStage);
+
 protected: //! @name internal fields
 
   AIS_DataMapOfIOStatus myObjects;
@@ -1465,6 +1497,8 @@ protected: //! @name internal fields
   SelectMgr_PickingStrategy myPickingStrategy; //!< picking strategy to be applied within MoveTo()
   Standard_Boolean myAutoHilight;
   Standard_Boolean myIsAutoActivateSelMode;
+
+  Standard_Boolean myIsImmediatePrsUpdate = Standard_False;
 
 };
 

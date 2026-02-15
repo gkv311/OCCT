@@ -3139,10 +3139,12 @@ void AIS_ViewController::handleMoveTo (const Handle(AIS_InteractiveContext)& the
 // function : handleViewRedraw
 // purpose  :
 // =======================================================================
-void AIS_ViewController::handleViewRedraw (const Handle(AIS_InteractiveContext)& ,
+void AIS_ViewController::handleViewRedraw (const Handle(AIS_InteractiveContext)& theCtx,
                                            const Handle(V3d_View)& theView)
 {
   Handle(V3d_View) aParentView = theView->IsSubview() ? theView->ParentView() : theView;
+
+  updateObjectsBeforeRedraw(theCtx, theView, AIS_RedrawProgress_BeforeRedraw);
 
   // manage animation state
   if (!myViewAnimation.IsNull()
@@ -3248,6 +3250,19 @@ void AIS_ViewController::handleViewRedraw (const Handle(AIS_InteractiveContext)&
     // ask more frames
     aParentView->Window()->InvalidateContent (Handle(Aspect_DisplayConnection)());
   }
+}
+
+// =======================================================================
+// function : updateObjectsBeforeRedraw
+// purpose  :
+// =======================================================================
+void AIS_ViewController::updateObjectsBeforeRedraw(const Handle(AIS_InteractiveContext)& theCtx,
+                                                   const Handle(V3d_View)& theView,
+                                                   AIS_RedrawProgress theStage)
+{
+  const unsigned int aMask = theCtx->UpdateObjectsBeforeRedraw(theView, Handle(AIS_InteractiveObject)(), theStage);
+  if ((aMask & AIS_RedrawProgressResult_NeedAskNextFrame) != 0)
+    setAskNextFrame();
 }
 
 // =======================================================================
@@ -3520,6 +3535,8 @@ void AIS_ViewController::HandleViewEvents (const Handle(AIS_InteractiveContext)&
       aPickedView = aParent->PickSubview (aClickPoint);
     }
   }
+
+  updateObjectsBeforeRedraw(theCtx, !aPickedView.IsNull() ? aPickedView : theView, AIS_RedrawProgress_BeforeUpdate);
 
   handleViewOrientationKeys (theCtx, theView);
   const AIS_WalkDelta aWalk = handleNavigationKeys (theCtx, theView);

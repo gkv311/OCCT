@@ -67,6 +67,17 @@ Standard_Boolean AIS_InteractiveObject::ProcessDragging (const Handle(AIS_Intera
 }
 
 //=======================================================================
+//function : ProcessRedraw
+//purpose  :
+//=======================================================================
+AIS_RedrawProgressResult AIS_InteractiveObject::ProcessRedraw(const Handle(AIS_InteractiveContext)&,
+                                                              const Handle(V3d_View)&,
+                                                              const AIS_RedrawProgress)
+{
+  return ToBeUpdated() ? AIS_RedrawProgressResult_NeedRedisplay : AIS_RedrawProgressResult_None;
+}
+
+//=======================================================================
 //function : 
 //purpose  : 
 //=======================================================================
