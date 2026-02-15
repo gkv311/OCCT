@@ -24,3 +24,11 @@ if {[expr abs($dir_x - 1)] > $prec || [expr abs($dir_y)] > $prec || [expr abs($d
 if {$isOK == 0} {
   puts "Error: wrong Annotation plane"
 }
+
+vinit View1
+vclear
+XDisplay Doc -dispMode 1
+XGetGDTPresentation Doc gdt
+vdisplay {*}[explode gdt] -dispMode 1
+vfit
+vdump "$::imagedir/${::casename}.png"
