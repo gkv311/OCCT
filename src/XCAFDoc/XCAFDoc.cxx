@@ -379,15 +379,15 @@ TCollection_AsciiString XCAFDoc::AttributeInfo (const Handle(TDF_Attribute)& the
   }
   else if ( theAtt->IsKind(STANDARD_TYPE(TDataStd_Name)) ) {
     Handle(TDataStd_Name) val = Handle(TDataStd_Name)::DownCast ( theAtt );
-    anInfo = TCollection_AsciiString ( val->Get(), '?' );
+    anInfo = TCollection_AsciiString ( val->Get() );
   }
   else if ( theAtt->IsKind(STANDARD_TYPE(TDataStd_Comment)) ) {
     Handle(TDataStd_Comment) val = Handle(TDataStd_Comment)::DownCast ( theAtt );
-    anInfo = TCollection_AsciiString ( val->Get(), '?' );
+    anInfo = TCollection_AsciiString ( val->Get() );
   }
   else if ( theAtt->IsKind(STANDARD_TYPE(TDataStd_AsciiString)) ) {
     Handle(TDataStd_AsciiString) val = Handle(TDataStd_AsciiString)::DownCast ( theAtt );
-    anInfo = TCollection_AsciiString ( val->Get(), '?' );
+    anInfo = val->Get();
   }
   else if (theAtt->IsKind(STANDARD_TYPE(XCAFDoc_LengthUnit))) {
     Handle(XCAFDoc_LengthUnit) aVal = Handle(XCAFDoc_LengthUnit)::DownCast(theAtt);
