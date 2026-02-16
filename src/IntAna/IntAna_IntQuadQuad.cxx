@@ -1167,19 +1167,12 @@ Standard_Boolean IntAna_IntQuadQuad::HasNextCurve(const Standard_Integer I) cons
 Standard_Integer IntAna_IntQuadQuad::PreviousCurve  (const Standard_Integer I,
 						     Standard_Boolean& theOpposite) const
 {
-  if(HasPreviousCurve(I)) {
-    if(previouscurve[I-1]>0) {
-      theOpposite = Standard_False;
-      return(previouscurve[I-1]);
-    }
-    else {
-      theOpposite = Standard_True;
-      return( - previouscurve[I-1]);
-    }
+  if (HasPreviousCurve(I))
+  {
+    theOpposite = previouscurve[I - 1] <= 0;
+    return Abs(previouscurve[I - 1]);
   }
-  else {
-    throw Standard_DomainError("Incorrect Curve Number 'PreviousCurve'");
-  }
+  throw Standard_DomainError("Incorrect Curve Number 'PreviousCurve'");
 }
 //=======================================================================
 //function :NextCurve
@@ -1188,19 +1181,12 @@ Standard_Integer IntAna_IntQuadQuad::PreviousCurve  (const Standard_Integer I,
 Standard_Integer IntAna_IntQuadQuad::NextCurve (const Standard_Integer I,
 						Standard_Boolean& theOpposite) const
 {
-  if(HasNextCurve(I)) {
-    if(nextcurve[I]>0) {
-      theOpposite = Standard_False;
-      return(nextcurve[I-1]);
-    }
-    else {
-      theOpposite = Standard_True;
-      return( - nextcurve[I-1]);
-    }
+  if (HasNextCurve(I))
+  {
+    theOpposite = nextcurve[I - 1] <= 0;
+    return Abs(nextcurve[I - 1]);
   }
-  else {
-    throw Standard_DomainError("Incorrect Curve Number 'NextCurve'");
-  }
+  throw Standard_DomainError("Incorrect Curve Number 'NextCurve'");
 }
 //=======================================================================
 //function :Curve
