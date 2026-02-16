@@ -37,6 +37,7 @@
 #include <XCAFDoc_Material.hxx>
 #include <XCAFDoc_ShapeMapTool.hxx>
 #include <XCAFDoc_Volume.hxx>
+#include <XCAFDoc_VisMaterial.hxx>
 
 //=======================================================================
 //function : ShapeRefGUID
@@ -322,6 +323,33 @@ const Standard_GUID& XCAFDoc::LockGUID()
   return ID;
 }
 
+//! Convert alpha mode into string.
+static const char* alphaModeToString(Graphic3d_AlphaMode theMode)
+{
+  switch (theMode)
+  {
+    case Graphic3d_AlphaMode_Opaque:    return "Opaque";
+    case Graphic3d_AlphaMode_Mask:      return "Mask";
+    case Graphic3d_AlphaMode_Blend:     return "Blend";
+    case Graphic3d_AlphaMode_MaskBlend: return "MaskBlend";
+    case Graphic3d_AlphaMode_BlendAuto: return "BlendAuto";
+  }
+  return "";
+}
+
+//! Convert back face culling mode into string.
+static const char* faceCullToString(Graphic3d_TypeOfBackfacingModel theMode)
+{
+  switch (theMode)
+  {
+    case Graphic3d_TypeOfBackfacingModel_Auto:        return "Auto";
+    case Graphic3d_TypeOfBackfacingModel_BackCulled:  return "BackCulled";
+    case Graphic3d_TypeOfBackfacingModel_FrontCulled: return "FrontCulled";
+    case Graphic3d_TypeOfBackfacingModel_DoubleSided: return "DoubleSided";
+  }
+  return "";
+}
+
 //=======================================================================
 //function : AttributeInfo
 //purpose  :
@@ -339,6 +367,7 @@ TCollection_AsciiString XCAFDoc::AttributeInfo (const Handle(TDF_Attribute)& the
     else if ( theAtt->ID() == XCAFDoc::DimTolRefGUID() ) type = "DGT Link";
     else if ( theAtt->ID() == XCAFDoc::DatumRefGUID() ) type = "Datum Link";
     else if ( theAtt->ID() == XCAFDoc::MaterialRefGUID() ) type = "Material Link";
+    else if ( theAtt->ID() == XCAFDoc::VisMaterialRefGUID() ) type = "VisMaterial Link";
     Handle(TDataStd_TreeNode) TN = Handle(TDataStd_TreeNode)::DownCast(theAtt);
     TCollection_AsciiString ref;
     if ( TN->HasFather() ) {
@@ -500,6 +529,54 @@ TCollection_AsciiString XCAFDoc::AttributeInfo (const Handle(TDF_Attribute)& the
         anInfo += TCollection_AsciiString (HAR->Value (1));
         anInfo += ")";
       }
+    }
+  }
+  else if ( theAtt->IsKind(STANDARD_TYPE(XCAFDoc_VisMaterial)) ) {
+    const Handle(XCAFDoc_VisMaterial)val = Handle(XCAFDoc_VisMaterial)::DownCast(theAtt);
+    anInfo +=TCollection_AsciiString("AlphaMode(") + alphaModeToString(val->AlphaMode()) + ")";
+    anInfo +=TCollection_AsciiString(",AlphaCutOff(") + val->AlphaCutOff() + ")";
+    anInfo +=TCollection_AsciiString(",FaceCulling(") + faceCullToString(val->FaceCulling()) + ")";
+    if (val->HasPbrMaterial())
+    {
+      anInfo += ",PBR(";
+
+      anInfo +=TCollection_AsciiString("BaseColor=") + Quantity_ColorRGBA::ColorToHex(val->PbrMaterial().BaseColor);
+      anInfo +=TCollection_AsciiString(",Metallic=") + val->PbrMaterial().Metallic;
+      anInfo +=TCollection_AsciiString(",Roughness=") + val->PbrMaterial().Roughness;
+      anInfo +=TCollection_AsciiString(",RefractionIndex=") +val->PbrMaterial().RefractionIndex;
+      anInfo +=TCollection_AsciiString(",EmissiveFactor=") + Quantity_Color::ColorToHex(Quantity_Color(val->PbrMaterial().EmissiveFactor));
+
+      if (!val->PbrMaterial().BaseColorTexture.IsNull())
+        anInfo +=TCollection_AsciiString(",BaseColorTexture=") + val->PbrMaterial().BaseColorTexture->TextureId();
+
+      if (!val->PbrMaterial().MetallicRoughnessTexture.IsNull())
+        anInfo +=TCollection_AsciiString(",MetallicRoughnessTexture=") + val->PbrMaterial().MetallicRoughnessTexture->TextureId();
+
+      if (!val->PbrMaterial().EmissiveTexture.IsNull())
+        anInfo +=TCollection_AsciiString(",EmissiveTexture=") + val->PbrMaterial().EmissiveTexture->TextureId();
+
+      if (!val->PbrMaterial().OcclusionTexture.IsNull())
+        anInfo +=TCollection_AsciiString(",OcclusionTexture=") + val->PbrMaterial().OcclusionTexture->TextureId();
+
+      if (!val->PbrMaterial().NormalTexture.IsNull())
+        anInfo +=TCollection_AsciiString(",NormalTexture=") + val->PbrMaterial().NormalTexture->TextureId();
+
+      anInfo += ")";
+    }
+    if (val->HasCommonMaterial())
+    {
+      anInfo += ",Common(";
+
+      anInfo +=TCollection_AsciiString("DiffuseColor=")   + Quantity_Color::ColorToHex(val->CommonMaterial().DiffuseColor);
+      anInfo +=TCollection_AsciiString(",AmbientColor=")  + Quantity_Color::ColorToHex(val->CommonMaterial().AmbientColor);
+      anInfo +=TCollection_AsciiString(",SpecularColor=") + Quantity_Color::ColorToHex(val->CommonMaterial().SpecularColor);
+      anInfo +=TCollection_AsciiString(",EmissiveColor=") + Quantity_Color::ColorToHex(val->CommonMaterial().EmissiveColor);
+      anInfo +=TCollection_AsciiString(",Transparency=")  + val->CommonMaterial().Transparency;
+      anInfo +=TCollection_AsciiString(",Shininess=")     + val->CommonMaterial().Shininess;
+      if (!val->CommonMaterial().DiffuseTexture.IsNull())
+        anInfo +=TCollection_AsciiString(",DiffuseTexture=") + val->CommonMaterial().DiffuseTexture->TextureId();
+
+      anInfo += ")";
     }
   }
   else if ( theAtt->IsKind(STANDARD_TYPE(XCAFDoc_Material)) ) {
