@@ -3176,15 +3176,22 @@ static Standard_Integer OCC29745(Draw_Interpretor& theDI, Standard_Integer theAr
 #include <OSD_Environment.hxx>
 typedef NCollection_Sequence <TCollection_AsciiString> SequenceOfDocNames;
 
-typedef struct
+struct Args
 {
-  Standard_ThreadId ID;
-  int iThread;  
+  Standard_ThreadId ID = 0;
+  int iThread = 0;
   TCollection_AsciiString inFile[3];
   TCollection_AsciiString outFile[2];
-  bool finished;
-  int* res;
-} Args;
+  bool finished = false;
+  int* res = nullptr;
+
+  Args() : res(new int()) {}
+
+  ~Args()
+  {
+    delete res;
+  }
+};
 
 static void printMsg(const char* msg)
 {
@@ -3198,6 +3205,7 @@ void* threadFunction(void* theArgs)
   Args* args = (Args*)theArgs;
   try
   {
+    OCC_CATCH_SIGNALS;
     if(args->inFile[0].IsEmpty())
     {
       *(args->res) = -1;
@@ -3205,7 +3213,6 @@ void* threadFunction(void* theArgs)
     }
 
     Handle(TDocStd_Application) anApp = new TDocStd_Application();
-    OCC_CATCH_SIGNALS;
     BinLDrivers::DefineFormat(anApp);
     BinDrivers::DefineFormat(anApp);
     XmlLDrivers::DefineFormat(anApp);
@@ -3292,8 +3299,8 @@ static Standard_Integer OCC29195(Draw_Interpretor&, Standard_Integer theArgC, co
     nbThreads = aNbFiles;
   }
   // Allocate data
-  Args* args = new Args[nbThreads];
-  OSD_Thread* threads = new OSD_Thread[nbThreads];
+  NCollection_Array1<Args> args(0, nbThreads - 1);
+  NCollection_Array1<OSD_Thread> threads(0, nbThreads - 1);
   while (iThread < nbThreads)
   {
     if (iThread < aNbFiles)
@@ -3307,7 +3314,7 @@ static Standard_Integer OCC29195(Draw_Interpretor&, Standard_Integer theArgC, co
     args[iThread].iThread = iThread;
     args[iThread].ID = threads[iThread].GetId();
     args[iThread].finished = false;
-    args[iThread].res = new int;
+    *args[iThread].res = 0;
     threads[iThread].SetFunction(&threadFunction);
     iThread++;
   }
