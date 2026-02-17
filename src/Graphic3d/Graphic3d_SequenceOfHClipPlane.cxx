@@ -26,6 +26,20 @@ Graphic3d_SequenceOfHClipPlane::Graphic3d_SequenceOfHClipPlane()
 }
 
 // =======================================================================
+// function : Contains
+// purpose  :
+// =======================================================================
+bool Graphic3d_SequenceOfHClipPlane::Contains(const Handle(Graphic3d_ClipPlane)& theItem) const
+{
+  for (const Handle(Graphic3d_ClipPlane)& anItemIter : myItems)
+  {
+    if (anItemIter == theItem)
+      return true;
+  }
+  return false;
+}
+
+// =======================================================================
 // function : Append
 // purpose  :
 // =======================================================================

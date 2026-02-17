@@ -18,6 +18,8 @@ AIS_CameraFrustum.cxx
 AIS_CameraFrustum.hxx
 AIS_Circle.cxx
 AIS_Circle.hxx
+AIS_ClippingPlanes.cxx
+AIS_ClippingPlanes.hxx
 AIS_ColoredDrawer.hxx
 AIS_ColoredShape.cxx
 AIS_ColoredShape.hxx
