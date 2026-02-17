@@ -93,3 +93,6 @@ vdump $::imagedir/${::casename}_6.png
 
 vsettransparency b0 b1 b2 b3 b4 b5 0.5
 vdump $::imagedir/${::casename}_6transp.png
+
+vclipplane pln -displayAll pln
+vdump $::imagedir/${::casename}_7prs.png
