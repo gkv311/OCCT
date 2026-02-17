@@ -30,6 +30,7 @@
 #include <AIS_ListOfInteractive.hxx>
 #include <AIS_Manipulator.hxx>
 #include <AIS_ViewCube.hxx>
+#include <AIS_ScaleRuler.hxx>
 #include <AIS_Shape.hxx>
 #include <AIS_Point.hxx>
 #include <Aspect_DisplayConnection.hxx>
@@ -91,7 +92,7 @@
 #include <V3d_SpotLight.hxx>
 #include <V3d_Trihedron.hxx>
 #include <V3d_Viewer.hxx>
-#include <UnitsAPI.hxx>
+#include <Units.hxx>
 
 #include <tcl.h>
 
@@ -9667,6 +9668,50 @@ static int VCamera (Draw_Interpretor& theDI,
   return 0;
 }
 
+//===============================================================================================
+//function : VScaleRuler
+//purpose  :
+//===============================================================================================
+static int VScaleRuler (Draw_Interpretor& theDI,
+                        Standard_Integer  theArgsNb,
+                        const char**      theArgVec)
+{
+  const char* aPrsName = nullptr;
+
+  ViewerTest_AutoUpdater anUpdateTool (ViewerTest::GetAISContext(), ViewerTest::CurrentView());
+  for (int anArgIter = 1; anArgIter < theArgsNb; ++anArgIter)
+  {
+    if (anUpdateTool.parseRedrawMode(theArgVec[anArgIter]))
+    {
+      //
+    }
+    else if (aPrsName == nullptr)
+    {
+      aPrsName = theArgVec[anArgIter];
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
+  }
+  if (aPrsName == nullptr)
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
+
+  Handle(AIS_ScaleRuler) aRuler;
+  if (const Handle(AIS_InteractiveObject)* aPrsObject = GetMapOfAIS().Seek2(aPrsName))
+    aRuler = Handle(AIS_ScaleRuler)::DownCast(*aPrsObject);
+
+  if (aRuler.IsNull())
+    aRuler = new AIS_ScaleRuler();
+
+  ViewerTest::Display(aPrsName, aRuler, false);
+  return 0;
+}
+
 //! Parse stereo output mode
 inline Standard_Boolean parseStereoMode (Standard_CString      theArg,
                                          Graphic3d_StereoMode& theMode)
@@ -10077,6 +10122,26 @@ static int VDefaults (Draw_Interpretor& theDi,
         return 1;
       }
       aDefParams->SetAutoTriangulation (toTurnOn);
+    }
+    else if (anArg == "-MODELUNITS" && anArgIter + 1 < theArgsNb)
+    {
+      TCollection_AsciiString aUnit(theArgVec[++anArgIter]);
+      try
+      {
+        double aScaled = Units::Convert(1.0, "m", aUnit.ToCString());
+        if (aScaled == 1.0 && aUnit != "m")
+        {
+          theDi << "Syntax error: wrong length unit '" << aUnit << "'";
+          return 1;
+        }
+      }
+      catch (const Standard_Failure& )
+      {
+        theDi << "Syntax error: wrong length unit '" << aUnit << "'";
+        return 1;
+      }
+
+      aDefParams->SetDimLengthModelUnits(aUnit);
     }
     else
     {
@@ -14744,6 +14809,11 @@ Stereoscopic camera:
  -zfocusType focus type, absolute or relative.
 )" /* [vcamera] */);
 
+  addCmd ("vscaleruler", VScaleRuler, /* [vscaleruler] */ R"(
+vscaleruler prsName
+Display scale ruler at the view corner for measuring distances.
+)" /* [vscaleruler] */);
+
   addCmd ("vautozfit", VAutoZFit, /* [vautozfit] */ R"(
 vautozfit [on={1|0}] [scale]
 Prints or changes parameters of automatic z-fit mode:
@@ -14839,6 +14909,13 @@ Capping options:
   addCmd ("vdefaults", VDefaults, /* [vdefaults] */ R"(
 vdefaults [-absDefl value] [-devCoeff value] [-angDefl value]
           [-autoTriang {off/on | 0/1}]
+          [-modelUnits units]
+Define default presentation attributes for objects in Interactive Context.
+ -autoTriang disable/enable auto-triangulation when displaying shapes;
+ -absDefl    linear deflection for tessellating shapes, in model units;
+ -devCoeff   linear deflection for tessellating shapes, relative to model size;
+ -angDefl    angular deflection for tessellating shapes;
+ -modelUnits length units of the model for displaying measurements.
 )" /* [vdefaults] */);
 
   addCmd ("vlight", VLight, /* [vlight] */ R"(
