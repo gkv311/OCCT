@@ -44,6 +44,12 @@ public:
   //! Indicates that the type of Interactive Object is a datum.
   virtual AIS_KindOfInteractive Type() const Standard_OVERRIDE { return AIS_KindOfInteractive_Datum; }
 
+  //! Accept display mode 0.
+  virtual Standard_Boolean AcceptDisplayMode (const Standard_Integer theMode) const Standard_OVERRIDE
+  {
+    return theMode == 0;
+  }
+
   //! Returns the circle component defined in SetCircle.
   const Handle(Geom_Circle)& Circle() const { return myComponent; }
 

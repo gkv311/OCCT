@@ -7,7 +7,7 @@ pload VISUALIZATION MODELING
 
 box b 1 1 1
 vinit View1
-vdisplay b
+vdisplay b -dispMode 0
 vfit
 
 # select box in 0 selection mode

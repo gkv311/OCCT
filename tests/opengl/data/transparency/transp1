@@ -11,6 +11,7 @@ if { $::tcl_platform(os) == "Darwin" } { vcaps -core }
 vclear
 vclose ALL
 vinit View1 -width 912 -height 912
+vaspects -defaults -faceBoundaryDraw 0
 
 # define spheres with a rough triangulation to easily distinguish Shading Models
 psphere p0 10

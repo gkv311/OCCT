@@ -7,7 +7,7 @@ pload MODELING VISUALIZATION
 
 box b 10 10 10
 vinit View1
-vdisplay b
+vdisplay b -dispMode 0
 vfit
 vscale 1 1 1
 

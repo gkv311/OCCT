@@ -4,6 +4,7 @@ puts "========"
 
 pload MODELING VISUALIZATION
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vclear
 vrenderparams -rasterization
 vsetdispmode 1

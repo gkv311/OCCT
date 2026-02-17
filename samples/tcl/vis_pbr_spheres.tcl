@@ -86,6 +86,7 @@ if { $::tcl_platform(os) == "Darwin" } { vcaps -core }
 
 vclear
 vinit View1 -width 768 -height 768
+vaspects -defaults -faceBoundaryDraw 0
 vfront
 vrenderparams -shadingModel PBR
 vlight -change 0 -intensity 2.5

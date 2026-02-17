@@ -8,7 +8,7 @@ vclear
 vinit View1
 
 box b 10 20 30
-vdisplay b
+vdisplay b -dispMode 0
 vfit
 
 set shift 1

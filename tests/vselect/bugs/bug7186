@@ -9,8 +9,8 @@ set BugNumber OCC7186
 set mistake 0
 
 box b 10 10 10
-vinit
-vdisplay b
+vinit View1
+vdisplay b -dispMode 0
 vfit
 vselmode 2 1
 

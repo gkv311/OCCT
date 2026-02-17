@@ -11,6 +11,7 @@ box b 0 0.4 0 1 0.1 1
 
 vclear
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vaxo
 vdisplay -noupdate -dispMode 1 -top r g b
 vsetcolor -noupdate r RED

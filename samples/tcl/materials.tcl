@@ -53,6 +53,7 @@ pload MODELING VISUALIZATION
 vclear
 vclose ALL
 vinit View1 w=768 h=768
+vaspects -defaults -faceBoundaryDraw 0
 vtop
 vglinfo
 vbackground -gradient B4C8FF B4B4B4 -gradientMode VERTICAL

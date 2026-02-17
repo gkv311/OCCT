@@ -13,6 +13,7 @@ compound c12 b3 c
 
 vclear
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vaxo
 vdisplay -dispMode 1 c
 vfit

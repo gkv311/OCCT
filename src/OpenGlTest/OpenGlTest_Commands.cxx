@@ -103,6 +103,12 @@ public:
     DEFINE_STANDARD_ALLOC
   };
 
+  //! Accept display mode 0.
+  virtual Standard_Boolean AcceptDisplayMode (const Standard_Integer theMode) const Standard_OVERRIDE
+  {
+    return theMode == 0;
+  }
+
 private:
   // Virtual methods implementation
   virtual void Compute (const Handle(PrsMgr_PresentationManager)& thePrsMgr,

@@ -6,6 +6,7 @@ puts ""
 pload MODELING VISUALIZATION
 vclear
 vinit View1 -width 512 -height 512
+vaspects -defaults -faceBoundaryDraw 0
 vbackground -gradient GRAY20 GRAY80
 restore [locate_data_file Ball.brep] b
 vdisplay -dispMode 1 b

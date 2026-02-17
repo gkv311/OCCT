@@ -31,12 +31,12 @@ checkview -screenshot -2d -path ${imagedir}/${test_image}-2d.png
 
 mkface face result
 
-vinit
+vinit View1
 vtop
 vclear
-vdisplay bound1
-vdisplay bound2
-vdisplay face
+vdisplay bound1 -dispMode 0
+vdisplay bound2 -dispMode 0
+vdisplay face   -dispMode 0
 vfit
 checkview -screenshot -3d -path ${imagedir}/${test_image}-3d.png
 

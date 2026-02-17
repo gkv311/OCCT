@@ -8,7 +8,7 @@ vclear
 vinit View1
 
 pcylinder c 15 30
-vdisplay c
+vdisplay c -dispMode 0
 vfit
 
 # Create relation from 1 selected circled edge.

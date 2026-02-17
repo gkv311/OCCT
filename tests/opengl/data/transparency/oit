@@ -13,6 +13,7 @@ box b3 -1  0 -0.5 1 1 1
 
 vclear
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vdisplay -dispMode 1 c b1 b2 b3
 vaspects c  -color yellow -transparency 0.4
 vaspects b1 -color blue   -transparency 0.8

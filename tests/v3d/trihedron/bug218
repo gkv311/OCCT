@@ -7,7 +7,7 @@ pload MODELING VISUALIZATION QAcommands
 vinit View1
 box b 10 10 10
 explode b f
-vdisplay b_1
+vdisplay b_1 -dispMode 0
 vfit
 
 set scale    7674.87317785833

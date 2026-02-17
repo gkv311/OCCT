@@ -6,10 +6,10 @@ puts ""
 pload MODELING VISUALIZATION
 vinit View1
 box b1 200 200 200
-vdisplay b1
+vdisplay b1 -dispMode 0
 vfit
 box b2 2 2 2
-vdisplay b2
+vdisplay b2 -dispMode 0
 set color_1 [vreadpixel 32 305]
 verase b1
 vfit

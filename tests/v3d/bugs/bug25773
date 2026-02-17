@@ -12,7 +12,8 @@ vaspects -defaults -setfreeboundarycolor 0 0 1
 
 pcone c 0 5 10
 explode c F
-vdisplay c_1; vfit
+vdisplay c_1 -dispMode 0
+vfit
 
 set x 80
 set y 103

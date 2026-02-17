@@ -1981,6 +1981,12 @@ public:
                 const Standard_Real theUStart,
                 const Standard_Real theUEnd);
 
+  //! Accept display mode 0.
+  virtual Standard_Boolean AcceptDisplayMode (const Standard_Integer theMode) const Standard_OVERRIDE
+  {
+    return theMode == 0;
+  }
+
 private:
   TopoDS_Face ComputeFace();
 

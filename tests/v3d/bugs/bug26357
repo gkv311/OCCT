@@ -10,6 +10,7 @@ vclear
 vinit View1 w=400 h=400
 vinit View2 w=200 h=400
 vinit View3 w=400 h=200
+vaspects -defaults -faceBoundaryDraw 0
 
 vdisplay -dispMode 1 -highMode 1 b
 

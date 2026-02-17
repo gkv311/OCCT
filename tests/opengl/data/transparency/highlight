@@ -5,6 +5,7 @@ puts "========"
 pload MODELING VISUALIZATION
 psphere s 1
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vdisplay -dispMode 1 s
 vfit
 vsettransparency s 0.5

@@ -7,10 +7,10 @@ pload MODELING VISUALIZATION
 restore [locate_data_file bug4894_face_cyl] result
 
 vinit View1
-vdisplay result
+vdisplay result -dispMode 0
 tclean result
 trinfo result
-vsetdispmode 1
+vdisplay result -dispMode 1
 vfit
 
 checktrinfo result -tri -nod

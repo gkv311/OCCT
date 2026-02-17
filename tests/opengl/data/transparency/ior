@@ -27,6 +27,7 @@ XSetVisMaterial D $l3 m3
 
 vclear
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vcamera -persp
 vfront
 XDisplay -dispMode 1 D

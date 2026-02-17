@@ -6,6 +6,7 @@ puts ""
 pload VISUALIZATION MODELING
 
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vsetdispmode 1
 
 restore [locate_data_file face1.brep] f

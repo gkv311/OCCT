@@ -23,11 +23,12 @@ set at_Y     3.30626448080767
 set at_Z     3.11631746104816
 
 # Display two face
-vinit
+vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 box b 10 10 10
 explode b f
-vdisplay b_1
-vdisplay b_2
+vdisplay b_1 -dispMode 0
+vdisplay b_2 -dispMode 0
 vfit
 
 # Check face color

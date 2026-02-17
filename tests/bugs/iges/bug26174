@@ -23,8 +23,9 @@ ReadIges D1 $imagedir/${casename}_comp.igs
 XGetOneShape res1 D1
 
 vinit view1
+vaspects -defaults -faceBoundaryDraw 0
 vclear
-XDisplay D1 0:1:1:1
+XDisplay D1 0:1:1:1 -dispMode 0
 vfit
 set ColorD1 [string trim [vreadpixel 204 204 name]]
 if {$ColorD1 != "RED 1"} {

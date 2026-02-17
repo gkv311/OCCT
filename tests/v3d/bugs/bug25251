@@ -11,6 +11,7 @@ set y 100
 
 pload MODELING VISUALIZATION
 vinit View1
+vsetdispmode 0
 
 vertex v 0 0 0
 vdisplay v

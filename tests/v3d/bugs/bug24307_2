@@ -57,7 +57,7 @@ puts ""
 
 puts "Start displaying boxes without clipping..."
 for {set i 0} {$i < $BOXES_NUM} {incr i} {
-  vdisplay -noupdate $aBoxNames($i)
+  vdisplay -noupdate -dispMode 0 $aBoxNames($i)
 }
 puts [vfps]
 vrenderparams -perfCounters none
@@ -72,7 +72,7 @@ verase
 vrenderparams -frustumculling on
 puts "Start displaying boxes with clipping..."
 for {set i 0} {$i < $BOXES_NUM} {incr i} {
-  vdisplay -noupdate $aBoxNames($i)
+  vdisplay -noupdate -dispMode 0 $aBoxNames($i)
 }
 puts [vfps]
 vrenderparams -perfCounters none
