@@ -8,6 +8,7 @@ box bb 3 0 0 2 3 1
 
 # prepare view
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vclear
 vglinfo
 vsetdispmode 1

@@ -876,7 +876,7 @@ proc checkview {args} {
     set isBAD 1
   }
   if { ${3dviewer} } {
-    vinit
+    vinit View1
     vclear
   } elseif { ([string is boolean ${2dviewer}] && ${2dviewer}) || ${2dviewer} == "smallview"} {
     smallview

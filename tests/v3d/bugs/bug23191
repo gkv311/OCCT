@@ -16,6 +16,7 @@ ttranslate i2  0.006 0 0
 ttranslate i3  0.006 0 0
 
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vclear
 vsetdispmode 1
 vdisplay i_2 i2 i3
