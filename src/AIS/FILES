@@ -70,8 +70,10 @@ AIS_Point.hxx
 AIS_PointCloud.cxx
 AIS_PointCloud.hxx
 AIS_RotationMode.hxx
-AIS_RubberBand.hxx
 AIS_RubberBand.cxx
+AIS_RubberBand.hxx
+AIS_ScaleRuler.cxx
+AIS_ScaleRuler.hxx
 AIS_Selection.cxx
 AIS_Selection.hxx
 AIS_SelectStatus.hxx

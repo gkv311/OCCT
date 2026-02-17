@@ -1,0 +1,26 @@
+puts "===================================================================="
+puts "Display scale ruler presentation"
+puts "===================================================================="
+
+pload MODELING VISUALIZATION
+vclear
+vinit View1
+vfront
+
+box b 100 200 300
+vdisplay b
+vfit
+
+vdefaults -modelUnits m
+vscaleruler r
+vmoveto 200 200
+
+# should be '100 m'
+vdump $imagedir/${casename}_m.png
+
+vdefaults -modelUnits mm
+vdisplay r -redisplay
+vmoveto 200 200
+
+# should be '10 cm'
+vdump $imagedir/${casename}_cm.png
