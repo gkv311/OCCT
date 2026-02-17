@@ -73,6 +73,9 @@ public:
   //! Return the number of items in sequence.
   Standard_Integer Size() const { return myItems.Size(); }
 
+  //! Return TRUE if list of planes contains specified item.
+  Standard_EXPORT bool Contains(const Handle(Graphic3d_ClipPlane)& theItem) const;
+
   //! Append a plane.
   //! @return TRUE if new item has been added (FALSE if item already existed)
   Standard_EXPORT bool Append (const Handle(Graphic3d_ClipPlane)& theItem);

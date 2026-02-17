@@ -24,6 +24,7 @@
 #include <AIS_AnimationObject.hxx>
 #include <AIS_Axis.hxx>
 #include <AIS_CameraFrustum.hxx>
+#include <AIS_ClippingPlanes.hxx>
 #include <AIS_ColorScale.hxx>
 #include <AIS_InteractiveContext.hxx>
 #include <AIS_LightSource.hxx>
@@ -8745,6 +8746,10 @@ static int VClipPlane (Draw_Interpretor& theDi, Standard_Integer theArgsNb, cons
     return 1;
   }
 
+  TCollection_AsciiString aDispName;
+  Handle(AIS_InteractiveObject) aIObj;
+  bool toDisplayAll = false;
+  int isPrsShaded = -1;
   for (; anArgIter < theArgsNb; ++anArgIter)
   {
     const char**     aChangeArgs   = theArgVec + anArgIter;
@@ -9103,15 +9108,15 @@ static int VClipPlane (Draw_Interpretor& theDi, Standard_Integer theArgsNb, cons
       for (; anIt < aNbChangeArgs; ++anIt)
       {
         TCollection_AsciiString anEntityName (aChangeArgs[anIt]);
+        Handle(V3d_View) aView;
         if (anEntityName.IsEmpty()
          || anEntityName.Value (1) == '-')
         {
           break;
         }
         else if (!toOverrideGlobal
-               && ViewerTest_myViews.IsBound1 (anEntityName))
+               && ViewerTest_myViews.Find1 (anEntityName, aView))
         {
-          const Handle(V3d_View)& aView = ViewerTest_myViews.Find1 (anEntityName);
           if (toSet)
           {
             aView->AddClipPlane (aClipPlane);
@@ -9122,9 +9127,8 @@ static int VClipPlane (Draw_Interpretor& theDi, Standard_Integer theArgsNb, cons
           }
           continue;
         }
-        else if (GetMapOfAIS().IsBound2 (anEntityName))
+        else if (GetMapOfAIS().Find2 (anEntityName, aIObj))
         {
-          Handle(AIS_InteractiveObject) aIObj = GetMapOfAIS().Find2 (anEntityName);
           if (toSet)
           {
             aIObj->AddClipPlane (aClipPlane);
@@ -9162,11 +9166,73 @@ static int VClipPlane (Draw_Interpretor& theDi, Standard_Integer theArgsNb, cons
         anArgIter = anArgIter + anIt - 1;
       }
     }
+    else if ((aChangeArg == "-displayall")
+             && anArgIter + 1 < theArgsNb)
+    {
+      toDisplayAll = true;
+      aDispName = theArgVec[++anArgIter];
+    }
+    else if (aChangeArg == "-display"
+             || aChangeArg == "-disp"
+             || aChangeArg == "-prs"
+             || aChangeArg == "-presentation")
+    {
+      aDispName = aPlaneName;
+    }
+    else if (aChangeArg == "-prsshaded")
+    {
+      isPrsShaded = Draw::ParseOnOffIterator (theArgsNb, theArgVec, anArgIter) ? 1 : 0;
+    }
     else
     {
       Message::SendFail() << "Syntax error: unknown argument '" << aChangeArg << "'";
       return 1;
     }
+  }
+
+  if (!aDispName.IsEmpty())
+  {
+    Handle(AIS_ClippingPlanes) aPrs;
+    if (GetMapOfAIS().IsBound2 (aDispName))
+      aPrs = Handle(AIS_ClippingPlanes)::DownCast (GetMapOfAIS().Find2 (aDispName));
+
+    if (aPrs.IsNull())
+      aPrs = new AIS_ClippingPlanes();
+
+    Handle(Graphic3d_SequenceOfHClipPlane) aPlaneSeq;
+    if (!anActiveView.IsNull()
+        && !anActiveView->ClipPlanes().IsNull()
+        &&  anActiveView->ClipPlanes()->Contains (aClipPlane))
+    {
+      aPlaneSeq = anActiveView->ClipPlanes();
+    }
+    else if (!aIObj.IsNull()
+             && !aIObj->ClipPlanes().IsNull()
+             &&  aIObj->ClipPlanes()->Contains (aClipPlane))
+    {
+      aPlaneSeq = aIObj->ClipPlanes();
+    }
+    else
+    {
+      Message::SendFail() << "Syntax error: unable to display clipping plane";
+      return 1;
+    }
+
+    aPrs->SetManagedPlanes (aPlaneSeq);
+    aPrs->SetDisplayedPlane (!toDisplayAll ? aClipPlane : Handle(Graphic3d_ClipPlane)());
+    if (isPrsShaded != -1)
+      aPrs->SetDatumDisplayMode (isPrsShaded == 1 ? Prs3d_DM_Shaded : Prs3d_DM_WireFrame);
+
+    if (!anActiveView.IsNull())
+    {
+      aPrs->ViewAffinity()->SetVisible (false);
+      aPrs->ViewAffinity()->SetVisible (anActiveView->View()->Identification(), true);
+    }
+
+    if (aPrs->DisplayStatus() != PrsMgr_DisplayStatus_None)
+      ViewerTest::GetAISContext()->Redisplay (aPrs, false);
+    else
+      ViewerTest::Display (aDispName, aPrs);
   }
 
   ViewerTest::RedrawAllViews();
@@ -14875,6 +14941,7 @@ vclipplane planeName [{0|1}]
     [-equation2 A B C D]
     [-boxInterior MinX MinY MinZ MaxX MaxY MaxZ]
     [-set|-unset|-setOverrideGlobal [objects|views]]
+    [-display] [-displayAll prsName] [-prsShaded {0|1}]=1
     [-maxPlanes]
     [-capping {0|1}]
       [-color R G B] [-transparency Value] [-hatch {on|off|ID}]
@@ -14891,6 +14958,10 @@ Clipping planes management:
               applied to active View when list is omitted;
  -equation A B C D change plane equation;
  -clone SourcePlane NewPlane clone the plane definition.
+
+Clipping planes presentation:
+ -display    show a single plane using the same name for presentation;
+ -displayAll show all clipping planes with specified name.
 
 Capping options:
  -capping {off|on|0|1} turn capping on/off;
