@@ -1105,30 +1105,15 @@ void AIS_InteractiveContext::Update (const Handle(AIS_InteractiveObject)& theIOb
 void AIS_InteractiveContext::SetLocation (const Handle(AIS_InteractiveObject)& theIObj,
                                           const TopLoc_Location&               theLoc)
 {
-  if (theIObj.IsNull())
-  {
+  if (theIObj.IsNull() || (!theIObj->HasTransformation() && theLoc.IsIdentity()))
     return;
-  }
 
-  if (theIObj->HasTransformation()
-   && theLoc.IsIdentity())
-  {
-    theIObj->ResetTransformation();
-    mgrSelector->Update (theIObj, Standard_False);
-    return;
-  }
-  else if (theLoc.IsIdentity())
-  {
-    return;
-  }
-
-  // first reset the previous location to properly clean everything...
+  // reset the previous location to properly clean everything...
   if (theIObj->HasTransformation())
-  {
     theIObj->ResetTransformation();
-  }
 
-  theIObj->SetLocalTransformation (theLoc.Transformation());
+  if (!theLoc.IsIdentity())
+    theIObj->SetLocalTransformation (theLoc.Transformation());
 
   mgrSelector->Update (theIObj, Standard_False);
 
