@@ -6,6 +6,7 @@ puts "==========================================================================
 pload MODELING VISUALIZATION
 vclear
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vaxo
 vrotate 3 0 0
 vcamera -persp

@@ -31,7 +31,7 @@ set Solid_Y ${Shape_Y}
 # Display box
 vinit View1
 box b 10 10 10
-vdisplay b
+vdisplay b -dispMode 0
 vfit
 vaspects -setwidth 5
 

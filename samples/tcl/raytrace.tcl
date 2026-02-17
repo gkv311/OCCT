@@ -20,6 +20,7 @@ ttranslate glass -30 -30 0
 
 # show table and glass
 vinit w=1024 h=1024
+vaspects -defaults -faceBoundaryDraw 0
 vsetmaterial bottle aluminium
 vdisplay table
 vsetmaterial table bronze

@@ -8,6 +8,7 @@ set aShape2 [locate_data_file occ/Bottom.brep]
 
 pload MODELING VISUALIZATION
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vsetdispmode 1
 vbackground -gradient B4B4B4 WHITE -gradientMode VERTICAL
 restore $aShape1 s1

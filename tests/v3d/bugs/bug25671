@@ -17,7 +17,7 @@ set cylinder_xyz {100 0 0}
 vgrid -type circular -mode points -origin -10 0 -step 5 5 -rotAngle 45
 pcylinder c $cylinder_r $cylinder_h
 ttranslate c {*}$cylinder_xyz
-vdisplay c
+vdisplay c -dispMode 0
 vfit
 vmoveto $detect_x $detect_y
 checkcolor $detect_x $detect_y 0 1 1

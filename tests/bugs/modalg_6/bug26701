@@ -32,4 +32,6 @@ Number of shapes in shape
  SHAPE     : 46561
 "
 checknbshapes result -ref ${nbshapes_expected} -t -m "result obtained by Common operator"
+vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 checkview -display result -3d -path ${imagedir}/${test_image}.png

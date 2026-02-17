@@ -11,6 +11,7 @@ if { $::tcl_platform(os) == "Darwin" } { vcaps -core }
 # setup 3D viewer content
 vclear
 vinit name=View1 w=512 h=512
+vaspects -defaults -faceBoundaryDraw 0
 vglinfo
 
 # setup light sources

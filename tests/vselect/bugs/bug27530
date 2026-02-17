@@ -36,7 +36,7 @@ lappend coords 2
 
 vinit View1
 vclear
-vdisplay b0 b1 b2
+vdisplay b0 b1 b2 -dispMode 0
 vleft
 vfit
 
