@@ -8,6 +8,7 @@ pload MODELING VISUALIZATION
 vclear
 vclose ALL
 vinit View1 w=409 h=409
+vaspects -defaults -faceBoundaryDraw 0
 vtrihedron tri
 vpan 50 50
 

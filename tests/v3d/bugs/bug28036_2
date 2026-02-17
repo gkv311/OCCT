@@ -18,6 +18,7 @@ for {set i 1} {$i <= 3} {incr i} { tcopy b${i} b3_${i}; ttranslate b3_${i} 0  30
 # make a reference scene with per-object colors
 vclear
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vsetdispmode 1
 vaxo
 

@@ -747,6 +747,9 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
       !(ViewerTest_myContexts.IsBound1(aViewNames.GetViewerName())))
   {
     Handle(AIS_InteractiveContext) aContext = new AIS_InteractiveContext (a3DViewer);
+    // set default display mode for AIS_Shape to shaded with face boundaries
+    aContext->SetDisplayMode (AIS_Shaded, false);
+    aContext->DefaultDrawer()->SetFaceBoundaryDraw (true);
     ViewerTest::SetAISContext (aContext);
     ViewerTest_myContexts.Bind (aViewNames.GetViewerName(), ViewerTest::GetAISContext());
   }

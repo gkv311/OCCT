@@ -45,7 +45,7 @@ vdrawtext N1 _.0123456789._ -pos 200 200 200 -color RED  -halign center -valign 
 vdrawtext SS _.~!@#$%^&*:?|+-._ -pos -200 000 400 -color RED -halign left -valign bottom -angle 0 -zoom 1 -height 50 -aspect regular -font Times-Roman
 
 box atextbox -100 -100 -100 -200 -200 -200
-vdisplay atextbox
+vdisplay atextbox -dispMode 0
 
 vdrawtext OC9  OpenCascade -pos -300 -300 -300 -color GREEN -halign left -valign bottom -angle 000 -zoom 0 -height 15 -aspect regular -font Courier
 vdrawtext OC10 OpenCascade -pos -300 -300 -100 -color GREEN -halign left -valign bottom -angle 000 -zoom 0 -height 15 -aspect regular -font Courier

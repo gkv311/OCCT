@@ -7,6 +7,7 @@ puts ""
 pload MODELING VISUALIZATION
 box b 15 0 0 10 10 10
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vdisplay b
 vrotate 35 0 0
 vfit

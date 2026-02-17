@@ -38,7 +38,7 @@ foreach e ${edges} {
 
 # make image in HLR mode as illustration
 pload VISUALIZATION
-vdisplay r
+vdisplay r -dispMode 0
 vfit
 vhlr on
 vdump ${imagedir}/${test_image}.png

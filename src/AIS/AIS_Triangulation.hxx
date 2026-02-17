@@ -34,7 +34,6 @@ public:
 
   //! Constructs the Triangulation display object
   Standard_EXPORT AIS_Triangulation(const Handle(Poly_Triangulation)& aTriangulation);
-  
 
   //! Set the color for each node.
   //! Each 32-bit color is Alpha << 24 + Blue << 16 + Green << 8 + Red
@@ -56,6 +55,12 @@ public:
   
   //! Returns Poly_Triangulation .
   Standard_EXPORT Handle(Poly_Triangulation) GetTriangulation() const;
+
+  //! Accept display mode 0.
+  virtual Standard_Boolean AcceptDisplayMode (const Standard_Integer theMode) const Standard_OVERRIDE
+  {
+    return theMode == 0;
+  }
 
   //! Sets the value aValue for transparency in the reconstructed compound shape.
   Standard_EXPORT virtual void SetTransparency (const Standard_Real aValue = 0.6) Standard_OVERRIDE;

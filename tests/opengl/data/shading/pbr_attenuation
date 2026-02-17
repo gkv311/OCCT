@@ -13,6 +13,7 @@ Close D -silent
 vclear
 vclose ALL
 vinit View1 -w 512 -h 512
+vaspects -defaults -faceBoundaryDraw 0
 
 vtop
 vrenderparams -shadingmodel pbr
