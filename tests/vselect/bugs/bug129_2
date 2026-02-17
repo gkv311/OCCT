@@ -12,11 +12,11 @@ cylinder c 0 0 1 10
 trimv ct c -1e+9 1e+9
 mkface ft ct
 
-vinit
+vinit View1
 # change maximum uv parameter value in drawer to display
 # isolines correctly
 vaspects -defaults -setMaxParamValue 1e+9
-vdisplay ft
+vdisplay ft -dispMode 0
 
 set x1 207
 set y1 184

@@ -12,7 +12,7 @@ vselmode m 8 1
 
 # create an object with auto-highlight enabled
 box b 100 100 100
-vdisplay b
+vdisplay b -dispMode 0
 
 vfit
 
