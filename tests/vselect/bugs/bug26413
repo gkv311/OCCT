@@ -7,7 +7,7 @@ pload VISUALIZATION MODELING
 
 vinit View1
 box b 1 1 1
-vdisplay b
+vdisplay b -dispMode 0
 vfit
 
 set x_on_edge 320

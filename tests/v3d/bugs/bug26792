@@ -10,7 +10,7 @@ vclear
 vaxo
 
 box b 50 50 50
-vdisplay b -trsfPers zoom
+vdisplay b -trsfPers zoom -dispMode 0
 vzoom 0.01
 vzfit
 

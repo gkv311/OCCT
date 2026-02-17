@@ -6,6 +6,7 @@ pload MODELING VISUALIZATION
 
 vclear
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 
 box b 1 2 3
 vdisplay b -dispMode 1

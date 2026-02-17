@@ -6,6 +6,7 @@ puts ""
 pload MODELING VISUALIZATION
 vclear
 vinit View1
+vaspects -defaults -faceBoundaryDraw 0
 vaxo
 
 box b 1 1 1
