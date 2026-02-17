@@ -576,7 +576,17 @@ Standard_Boolean AIS_Manipulator::ProcessDragging (const Handle(AIS_InteractiveC
       return Standard_True;
     }
     case AIS_DragAction_Stop:
+    {
+      Handle(AIS_ManipulatorObjectSequence) anObjects = Objects();
+      if (!myHasStartedTransformation || anObjects.IsNull())
+        break;
+
+      // update selection manager for moved objects
+      for (const Handle(AIS_InteractiveObject)& anObjIter : *anObjects)
+        anObjIter->InteractiveContext()->SetLocation(anObjIter, anObjIter->LocalTransformation());
+
       break;
+    }
   }
   return Standard_False;
 }
@@ -611,7 +621,7 @@ void AIS_Manipulator::StopTransform (const Standard_Boolean theToApply)
   AIS_ManipulatorObjectSequence::Iterator anObjIter (*anObjects);
   NCollection_Sequence<gp_Trsf>::Iterator aTrsfIter (myStartTrsfs);
   for (; anObjIter.More(); anObjIter.Next(), aTrsfIter.Next())
-    anObjIter.ChangeValue()->SetLocalTransformation (aTrsfIter.Value());
+    anObjIter.Value()->InteractiveContext()->SetLocation(anObjIter.Value(), aTrsfIter.Value());
 
   SetPosition (myStartPosition);
 }
@@ -634,6 +644,8 @@ void AIS_Manipulator::Transform (const gp_Trsf& theTrsf)
       const Handle(AIS_InteractiveObject)& anObj = anObjIter.ChangeValue();
       const gp_Trsf& anOldTrsf = aTrsfIter.Value();
       const Handle(TopLoc_Datum3D)& aParentTrsf = anObj->CombinedParentTransformation();
+      // intentionally avoid calling AIS_InteractiveConext::SetLocation()
+      // to postpone invalidation of selection manager
       if (!aParentTrsf.IsNull()
         && aParentTrsf->Form() != gp_Identity)
       {
