@@ -2,6 +2,12 @@ puts "========"
 puts "0029283: Visualization - allow defining more than 8 light sources"
 puts "========"
 
+if { [string match "*WebGL*" [vcaps]] } {
+  puts "TODO ALL: Error: multiple light sources"
+  puts "TEST COMPLETED"
+  return -code 1 "Error: multiple light sources are not supported within WebGL"
+}
+
 pload MODELING VISUALIZATION
 
 # display objects

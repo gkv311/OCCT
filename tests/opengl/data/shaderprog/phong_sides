@@ -2,6 +2,12 @@ puts "========"
 puts "Per-pixel lighting using GLSL program (Phong shading), check lighting of back faces"
 puts "========"
 
+if { [string match "*WebGL*" [vcaps]] } {
+  puts "TODO ALL: Error: multiple light sources"
+  puts "TEST COMPLETED"
+  return -code 1 "Error: multiple light sources are not supported within WebGL"
+}
+
 pload MODELING VISUALIZATION
 
 # create box

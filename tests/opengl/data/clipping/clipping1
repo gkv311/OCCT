@@ -2,6 +2,12 @@ puts "========"
 puts "0029729: Visualization, Graphic3d_ClipPlane - add support of clipping plane chains"
 puts "========"
 
+if { [string match "*WebGL*" [vcaps]] } {
+  puts "TODO ALL: Error: too many clipping planes"
+  puts "TEST COMPLETED"
+  return -code 1 "Error: too many clipping planes are not supported within WebGL"
+}
+
 pload MODELING VISUALIZATION
 vclear
 vclose ALL

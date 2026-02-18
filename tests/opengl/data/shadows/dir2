@@ -3,6 +3,12 @@ puts "0032039: Visualization, TKOpenGl - implement simple shadow mapping for a d
 puts "Test shadow map from two directional light sources on a box geometry."
 puts "========"
 
+if { [string match "*WebGL*" [vcaps]] } {
+  puts "TODO ALL: Error: multiple light sources"
+  puts "TEST COMPLETED"
+  return -code 1 "Error: multiple light sources are not supported within WebGL"
+}
+
 pload MODELING VISUALIZATION
 if { $::tcl_platform(os) == "Darwin" } { vcaps -core }
 box b 1 2 3

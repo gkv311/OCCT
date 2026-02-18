@@ -4,6 +4,12 @@ puts "OCC25052: Visualization - activation of all Clipping Planes within driver 
 puts "==========="
 puts ""
 
+if { [string match "*WebGL*" [vcaps]] } {
+  puts "TODO ALL: Error: too many clipping planes"
+  puts "TEST COMPLETED"
+  return -code 1 "Error: too many clipping planes are not supported within WebGL"
+}
+
 set Image1 ${imagedir}/${casename}_1.png
 set Image9 ${imagedir}/${casename}_9.png
 

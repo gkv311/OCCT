@@ -3,6 +3,12 @@ puts "Per-fragment lighting using built-in GLSL program, two directional light s
 puts "Visual comparison with the reference snapshot should be performed for this test case."
 puts "========"
 
+if { [string match "*WebGL*" [vcaps]] } {
+  puts "TODO ALL: Error: multiple light sources"
+  puts "TEST COMPLETED"
+  return -code 1 "Error: multiple light sources are not supported within WebGL"
+}
+
 pload MODELING VISUALIZATION
 
 # setup viewer

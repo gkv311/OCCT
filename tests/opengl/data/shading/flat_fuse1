@@ -16,7 +16,13 @@ vdisplay -dispMode 1 f
 vlight -clear
 vlight amblight  -type AMBIENT                 -color WHITE
 vlight dirlight1 -type DIRECTIONAL -dir  1 0 0 -color GREEN -headlight 1
-vlight dirlight2 -type DIRECTIONAL -dir -1 0 0 -color RED1  -headlight 1
+
+if { [string match "*WebGL*" [vcaps]] } {
+  puts "TODO ALL: Error: multiple light sources"
+  puts "Error: multiple light sources are not supported within WebGL"
+} else {
+  vlight dirlight2 -type DIRECTIONAL -dir -1 0 0 -color RED1  -headlight 1
+}
 
 vrenderparams -shadingModel flat
 vdump $::imagedir/${::casename}.png
