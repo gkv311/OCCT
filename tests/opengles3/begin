@@ -1,10 +1,5 @@
 cpulimit 300
 
-if { $::tcl_platform(os) == "Darwin" } {
-  puts "TEST COMPLETED"
-  return -code 1 "Skipping testgrid 'opengles3': not configured for macOS"
-}
-
 if { ![regexp HAVE_GLES2 [dversion]] } {
   error "OCCT is built without Open GL ES support"
 }
