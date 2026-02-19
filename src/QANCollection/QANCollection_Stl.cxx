@@ -461,6 +461,8 @@ Standard_Boolean TestSetIteration()
     aResult = Standard_False;
   }
 
+  // workaround for internal error on MSVC within optimized build
+#if !defined(_MSC_VER) || (_MSC_VER > 1900)
   // test range-based loop iterator
   aStlIter = aCollec->begin();
   for (const auto& anIter : *aCollec)
@@ -470,6 +472,7 @@ Standard_Boolean TestSetIteration()
 
     ++aStlIter;
   }
+#endif
 
   delete aCollec;
 
