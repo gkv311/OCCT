@@ -378,8 +378,10 @@ Standard_Boolean OpenGl_ShaderProgram::Initialize (const Handle(OpenGl_Context)&
     if (theCtx->hasSampleVariables == OpenGl_FeatureInExtensions)
     {
       if (theCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGLES
-       && theCtx->oesSampleVariables)
+       && theCtx->oesSampleVariables
+       && !aHeaderVer.IsEmpty())
       {
+        // extension requres at least GLSL ES 3.00
         anExtensions += "#extension GL_OES_sample_variables : enable\n";
       }
       else if (theCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGL
