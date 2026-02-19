@@ -1209,6 +1209,7 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
     aFrameBuffer = aCtx->DefaultFrameBuffer().operator->();
   }
 
+  GLint anFboColorFormat = myFboColorFormat;
   if (myHasFboBlit
    && (myTransientDrawToFront
     || theProj == Graphic3d_Camera::Projection_Stereo
@@ -1216,8 +1217,13 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
     || toUseOit
     || aSizeX != aRendSize.x()))
   {
+    // ensure to use consistent FBO color format when dumping image
+    if (aFrameBuffer != nullptr && aFrameBuffer->ColorFormat() != 0)
+      anFboColorFormat = aFrameBuffer->ColorFormat();
+
     if (myMainSceneFbos[0]->GetVPSize() != aRendSize
-     || myMainSceneFbos[0]->NbSamples() != aNbSamples)
+     || myMainSceneFbos[0]->NbSamples() != aNbSamples
+     || myMainSceneFbos[0]->ColorFormat() != anFboColorFormat)
     {
       if (!myTransientDrawToFront)
       {
@@ -1232,7 +1238,7 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
       if (aCtx->core20fwd != NULL)
       {
         const bool wasFailedMain0 = checkWasFailedFbo (myMainSceneFbos[0], aRendSize.x(), aRendSize.y(), aNbSamples);
-        if (!myMainSceneFbos[0]->Init (aCtx, aRendSize, myFboColorFormat, myFboDepthFormat, aNbSamples)
+        if (!myMainSceneFbos[0]->Init (aCtx, aRendSize, anFboColorFormat, myFboDepthFormat, aNbSamples)
          && !wasFailedMain0)
         {
           TCollection_ExtendedString aMsg = TCollection_ExtendedString() + "Error! Main FBO "
@@ -1274,9 +1280,10 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
    && myMainSceneFbos[0]->IsValid())
   {
     if (aNbSamples != 0
-     || aSizeX != aRendSize.x())
+     || aSizeX != aRendSize.x()
+     || myXrSceneFbo->ColorFormat() != anFboColorFormat)
     {
-      hasXRBlitFbo = myXrSceneFbo->InitLazy (aCtx, Graphic3d_Vec2i (aSizeX, aSizeY), myFboColorFormat, myFboDepthFormat, 0);
+      hasXRBlitFbo = myXrSceneFbo->InitLazy (aCtx, Graphic3d_Vec2i (aSizeX, aSizeY), anFboColorFormat, myFboDepthFormat, 0);
       if (!hasXRBlitFbo)
       {
         TCollection_ExtendedString aMsg = TCollection_ExtendedString() + "Error! VR FBO "
@@ -3010,8 +3017,8 @@ void OpenGl_View::drawStereoPair (OpenGl_FrameBuffer* theDrawFbo)
   if (aPair[0]->NbSamples() != 0)
   {
     // resolve MSAA buffers before drawing
-    if (!myOpenGlFBO ->InitLazy (aCtx, aPair[0]->GetVPSize(), myFboColorFormat, myFboDepthFormat, 0)
-     || !myOpenGlFBO2->InitLazy (aCtx, aPair[0]->GetVPSize(), myFboColorFormat, 0, 0))
+    if (!myOpenGlFBO ->InitLazy (aCtx, aPair[0]->GetVPSize(), aPair[0]->ColorFormat(), myFboDepthFormat, 0)
+     || !myOpenGlFBO2->InitLazy (aCtx, aPair[0]->GetVPSize(), aPair[0]->ColorFormat(), 0, 0))
     {
       aCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH,
                          "Error! Unable to allocate FBO for blitting stereo pair");
