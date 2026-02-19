@@ -71,6 +71,12 @@ public:
   //! Number of color buffers.
   Standard_Integer NbColorBuffers() const { return myColorTextures.Length(); }
 
+  //! Return sized format for color texture, GL_RGBA8 by default.
+  Standard_Integer ColorFormat() const { return !myColorFormats.IsEmpty() ? myColorFormats.First() : 0; }
+
+  //! Return sized format for depth-stencil texture, GL_DEPTH24_STENCIL8 by default.
+  Standard_Integer DepthFormat() const { return myDepthFormat; }
+
   //! Return true if FBO has been created with color attachment.
   bool HasColor() const { return !myColorFormats.IsEmpty(); }
 
