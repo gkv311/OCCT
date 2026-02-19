@@ -26,13 +26,13 @@ IMPLEMENT_STANDARD_RTTIEXT(OpenGl_FrameBuffer, OpenGl_NamedResource)
 namespace
 {
   //! Checks whether two format arrays are equal or not.
-  static bool operator== (const OpenGl_ColorFormats& theFmt1,
-                          const OpenGl_ColorFormats& theFmt2)
+  static bool AreEqual (const OpenGl_ColorFormats& theFmt1,
+                        const OpenGl_ColorFormats& theFmt2)
   {
     if (theFmt1.Length() != theFmt2.Length())
       return false;
     OpenGl_ColorFormats::Iterator anIt1 (theFmt1);
-    OpenGl_ColorFormats::Iterator anIt2 (theFmt1);
+    OpenGl_ColorFormats::Iterator anIt2 (theFmt2);
     for (; anIt1.More(); anIt1.Next(), anIt2.Next())
     {
       if (anIt1.Value() != anIt2.Value())
@@ -544,7 +544,7 @@ Standard_Boolean OpenGl_FrameBuffer::InitLazy (const Handle(OpenGl_Context)& the
 {
   if (myVPSizeX      == theViewportSize.x()
    && myVPSizeY      == theViewportSize.y()
-   && myColorFormats == theColorFormats
+   && AreEqual(myColorFormats, theColorFormats)
    && myDepthFormat  == theDepthFormat
    && myNbSamples    == theNbSamples)
   {
