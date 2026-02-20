@@ -6932,11 +6932,6 @@ namespace
                                 const Standard_Boolean theIsFreeView)
     : AIS_AnimationCamera ("ViewerTest_AnimationHolder", Handle(V3d_View)())
     {
-      if (theAnim->Timer().IsNull())
-      {
-        theAnim->SetTimer (new Media_Timer());
-      }
-      myTimer = theAnim->Timer();
       myView = theView;
       if (theIsFreeView)
       {
@@ -6951,6 +6946,13 @@ namespace
                              const Standard_Boolean theToUpdate,
                              const Standard_Boolean theToStopTimer) Standard_OVERRIDE
     {
+      if (myTimer.IsNull())
+      {
+        // keep only one timer at root animation object
+        myTimer = myAnimations.First()->Timer();
+        myAnimations.First()->SetTimer(Handle(Media_Timer)());
+      }
+
       base_type::StartTimer (theStartPts, thePlaySpeed, theToUpdate, theToStopTimer);
       if (theToStopTimer)
       {
@@ -6994,6 +6996,9 @@ namespace
   private:
     void abortPlayback()
     {
+      if (!myTimer.IsNull())
+        myAnimations.First()->SetTimer(myTimer); // move timer back
+
       if (!myView.IsNull())
       {
         myView.Nullify();
