@@ -18,12 +18,52 @@
 #include <OpenGl_TextureSet.hxx>
 
 #include <Image_PixMap.hxx>
+#include <Image_SupportedFormats.hxx>
 #include <Graphic3d_MarkerImage.hxx>
 #include <TColStd_HArray1OfByte.hxx>
 
 namespace
 {
-  static const TCollection_AsciiString THE_EMPTY_KEY;
+  //! Return empty string
+  static const TCollection_AsciiString& THE_EMPTY_KEY()
+  {
+    static const TCollection_AsciiString anEmpty;
+    return anEmpty;
+  }
+
+  //! Convert pixmap to compatbile format.
+  //! Similar to Graphic3d_TextureRoot::convertToCompatible().
+  static Handle(Image_PixMap) convertToCompatible(const Handle(Image_SupportedFormats)& theSupported,
+                                                  const Handle(Image_PixMap)& theImage)
+  {
+    if (theImage.IsNull()
+     || theSupported.IsNull()
+     || theSupported->IsSupported(theImage->Format()))
+    {
+      return theImage;
+    }
+
+    Handle(Image_PixMap) anImageCopy = new Image_PixMap();
+    anImageCopy->InitCopy(*theImage);
+    switch (theImage->Format())
+    {
+      // BGR formats are unsupported in OpenGL ES, only RGB
+      case Image_Format_BGR:
+        Image_PixMap::SwapRgbaBgra(*anImageCopy);
+        anImageCopy->SetFormat(Image_Format_RGB);
+        break;
+      case Image_Format_BGRA:
+      case Image_Format_BGR32:
+        Image_PixMap::SwapRgbaBgra(*anImageCopy);
+        anImageCopy->SetFormat(anImageCopy->Format() == Image_Format_BGR32
+                             ? Image_Format_RGB32
+                             : Image_Format_RGBA);
+        break;
+      default:
+        break;
+    }
+    return anImageCopy;
+  }
 }
 
 // =======================================================================
@@ -102,8 +142,8 @@ void OpenGl_AspectsSprite::UpdateRediness (const Handle(Graphic3d_Aspects)& theA
   // update sprite resource bindings
   TCollection_AsciiString aSpriteKeyNew, aSpriteAKeyNew;
   spriteKeys (theAspect->MarkerImage(), theAspect->MarkerType(), theAspect->MarkerScale(), theAspect->ColorRGBA(), aSpriteKeyNew, aSpriteAKeyNew);
-  const TCollection_AsciiString& aSpriteKeyOld  = !mySprite.IsNull()  ? mySprite ->ResourceId() : THE_EMPTY_KEY;
-  const TCollection_AsciiString& aSpriteAKeyOld = !mySpriteA.IsNull() ? mySpriteA->ResourceId() : THE_EMPTY_KEY;
+  const TCollection_AsciiString& aSpriteKeyOld  = !mySprite.IsNull()  ? mySprite ->ResourceId() : THE_EMPTY_KEY();
+  const TCollection_AsciiString& aSpriteAKeyOld = !mySpriteA.IsNull() ? mySpriteA->ResourceId() : THE_EMPTY_KEY();
   if (aSpriteKeyNew.IsEmpty()  || aSpriteKeyOld  != aSpriteKeyNew
    || aSpriteAKeyNew.IsEmpty() || aSpriteAKeyOld != aSpriteAKeyNew)
   {
@@ -145,8 +185,8 @@ void OpenGl_AspectsSprite::build (const Handle(OpenGl_Context)& theCtx,
   TCollection_AsciiString aNewKey, aNewKeyA;
   spriteKeys (theMarkerImage, theType, theScale, theColor, aNewKey, aNewKeyA);
 
-  const TCollection_AsciiString& aSpriteKeyOld  = !mySprite.IsNull()  ? mySprite ->ResourceId() : THE_EMPTY_KEY;
-  const TCollection_AsciiString& aSpriteAKeyOld = !mySpriteA.IsNull() ? mySpriteA->ResourceId() : THE_EMPTY_KEY;
+  const TCollection_AsciiString& aSpriteKeyOld  = !mySprite.IsNull()  ? mySprite ->ResourceId() : THE_EMPTY_KEY();
+  const TCollection_AsciiString& aSpriteAKeyOld = !mySpriteA.IsNull() ? mySpriteA->ResourceId() : THE_EMPTY_KEY();
 
   // release old shared resources
   const Standard_Boolean aNewResource = aNewKey.IsEmpty()
@@ -261,6 +301,7 @@ void OpenGl_AspectsSprite::build (const Handle(OpenGl_Context)& theCtx,
 
     if (!hadAlreadyRGBA)
     {
+      anImage = convertToCompatible(theCtx->SupportedTextureFormats(), anImage);
       aSprite->Init (theCtx, *anImage, Graphic3d_TypeOfTexture_2D, true);
     }
     if (!hadAlreadyAlpha)
