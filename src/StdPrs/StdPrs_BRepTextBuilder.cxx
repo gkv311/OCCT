@@ -16,6 +16,7 @@
 #include <StdPrs_BRepTextBuilder.hxx>
 
 #include <Font_TextFormatter.hxx>
+#include <Message.hxx>
 
 // =======================================================================
 // Function : Perform
@@ -33,13 +34,22 @@ TopoDS_Shape StdPrs_BRepTextBuilder::Perform (StdPrs_BRepFont&          theFont,
 
   myBuilder.MakeCompound (aResult);
 
-  Standard_Real aScaleUnits    = theFont.Scale();
+  float aScale = 1.0f;
+  if (!theFormatter->ResultLines().IsEmpty()
+      && Abs(theFont.Scale() * theFormatter->ResultLines().First().LineSpacing - theFont.LineSpacing())
+           < Precision::Confusion())
+  {
+    aScale = (float)theFont.Scale();
+    Message::SendTrace() << "StdPrs_BRepTextBuilder::Perform() seems to be called using legacy syntax; "
+                            "please pass StdPrs_BRepFont::Scale() to Font_TextFormatter";
+  }
+
   for (Font_TextFormatter::Iterator aFormatterIt (*theFormatter, Font_TextFormatter::IterationFilter_ExcludeInvisible);
        aFormatterIt.More(); aFormatterIt.Next())
   {
     const NCollection_Vec2<Standard_ShortReal>& aCorner = theFormatter->BottomLeft (aFormatterIt.SymbolPosition());
 
-    aPen.SetCoord (aCorner.x() * aScaleUnits, aCorner.y() * aScaleUnits, 0.0);
+    aPen.SetCoord (aCorner.x() * aScale, aCorner.y() * aScale, 0.0);
     aGlyphShape = theFont.RenderGlyph (aFormatterIt.Symbol());
     if (!aGlyphShape.IsNull())
     {
@@ -70,7 +80,9 @@ TopoDS_Shape StdPrs_BRepTextBuilder::Perform (StdPrs_BRepFont&                  
   aFormatter->Reset();
   aFormatter->SetupAlignment (theHAlign, theVAlign);
 
-  aFormatter->Append (theString, *theFont.FTFont());
+  Font_TextFormatter::FontScaling aScaling;
+  aScaling.SizeScaling = (float)theFont.Scale();
+  aFormatter->Append (theString, *theFont.FTFont(), theHAlign, aScaling);
   aFormatter->Format();
 
   return Perform (theFont, aFormatter, thePenLoc);

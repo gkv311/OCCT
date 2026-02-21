@@ -19,7 +19,6 @@
 #include <Font_Rect.hxx>
 #include <Graphic3d_HorizontalTextAlignment.hxx>
 #include <Graphic3d_VerticalTextAlignment.hxx>
-#include <NCollection_DataMap.hxx>
 #include <NCollection_Vector.hxx>
 #include <NCollection_String.hxx>
 
@@ -27,32 +26,53 @@ class Font_FTFont;
 
 DEFINE_STANDARD_HANDLE(Font_TextFormatter, Standard_Transient)
 
-//! This class is intended to prepare formatted text by using:<br>
-//! - font to string combination,<br>
-//! - alignment,<br>
-//! - wrapping.<br>
+//! This class is intended to prepare formatted text by using:
+//! - font to string combination,
+//! - alignment,
+//! - wrapping.
 //!
-//! After text formatting, each symbol of formatted text is placed in some position.
+//! After formatting, each symbol of formatted text is placed in some position.
 //! Further work with the formatter is using an iterator.
 //! The iterator gives an access to each symbol inside the initial row.
-//! Also it's possible to get only significant/writable symbols of the text.<br>
-//! Formatter gives an access to geometrical position of a symbol by the symbol index in the text.<br>
-//! Example of correspondence of some text symbol to an index in "row_1\n\nrow_2\n":<br>
-//! "row_1\n"  - 0-5 indices;<br>
-//! "\n"       - 6 index;<br>
-//! "\n"       - 7 index;<br>
-//! "row_2\n"  - 8-13 indices.<br>
-//! Pay attention that fonts should have the same LineSpacing value for correct formatting.<br>
+//! Also it's possible to get only significant/writable symbols of the text.
+//! Formatter gives an access to geometrical position of a symbol by the symbol index in the text.
+//!
+//! Example of correspondence of some text symbol to an index in "row_1\n\nrow_2\n":
+//! - "row_1\n"  - 0-5 indices;
+//! - "\n"       - 6 index;
+//! - "\n"       - 7 index;
+//! - "row_2\n"  - 8-13 indices.
+//!
 //! Example of the formatter using:
 //! @code
 //!   Handle(Font_TextFormatter) aFormatter = new Font_TextFormatter();
-//!   aFormatter->Append(text_1, aFont1);
-//!   aFormatter->Append(text_2, aFont2);
-//!   // setting of additional properties such as wrapping or alignment
+//!   ... // setting of additional properties such as wrapping or alignment
+//!   aFormatter->Append("text_1", aFont1);
+//!   aFormatter->Append("text_2", aFont2);
 //!   aFormatter->Format();
 //! @endcode
 class Font_TextFormatter : public Standard_Transient
 {
+public:
+
+  //! Returns true if the symbol is CR, BEL, FF, NP, BS or VT
+  static bool IsCommandSymbol(Standard_Utf32Char theSymbol)
+  {
+    return theSymbol == '\x0D' // CR  (carriage return)
+        || theSymbol == '\a'   // BEL (alarm)
+        || theSymbol == '\f'   // FF  (form feed) NP (new page)
+        || theSymbol == '\b'   // BS  (backspace)
+        || theSymbol == '\v';  // VT  (vertical tab)
+  }
+
+  //! Returns true if the symbol separates words when wrapping is enabled
+  static bool IsSeparatorSymbol(Standard_Utf32Char theSymbol)
+  {
+    return theSymbol == '\x0A' // new line
+        || theSymbol == ' '    // space
+        || theSymbol == '\t';  // tab
+  }
+
 public:
   //! Iteration filter flags. Command symbols are skipped with any filter.
   enum IterationFilter
@@ -76,10 +96,10 @@ public:
     }
 
     //! Returns TRUE if iterator points to a valid item.
-    Standard_Boolean More() const { return mySymbolPosition >= 0; }
+    bool More() const { return mySymbolPosition >= 0; }
 
     //! Returns TRUE if next item exists
-    Standard_Boolean HasNext() const { return mySymbolNext >= 0; }
+    bool HasNext() const { return mySymbolNext >= 0; }
 
     //! Returns current symbol.
     Standard_Utf32Char Symbol() const { return mySymbolChar; }
@@ -88,10 +108,10 @@ public:
     Standard_Utf32Char SymbolNext() const { return mySymbolCharNext; }
 
     //! Returns current symbol position.
-    Standard_Integer SymbolPosition() const { return mySymbolPosition; }
+    int SymbolPosition() const { return mySymbolPosition; }
 
     //! Returns the next symbol position.
-    Standard_Integer SymbolPositionNext() const { return mySymbolNext; }
+    int SymbolPositionNext() const { return mySymbolNext; }
 
     //! Moves to the next item.
     void Next()
@@ -103,233 +123,240 @@ public:
 
   protected:
     //! Finds index of the next symbol
-    Standard_Integer readNextSymbol (const Standard_Integer theSymbolStartingFrom,
-                                     Standard_Utf32Char& theSymbolChar)
-    {
-      Standard_Integer aNextSymbol = theSymbolStartingFrom;
-      for (; *myIter != 0; ++myIter)
-      {
-        const Standard_Utf32Char aCharCurr = *myIter;
-        if (Font_TextFormatter::IsCommandSymbol (aCharCurr))
-        {
-          continue; // skip unsupported carriage control codes
-        }
-        aNextSymbol++;
-        if ((myFilter & IterationFilter_ExcludeInvisible) != 0)
-        {
-          if (aCharCurr == '\x0A'|| // LF (line feed, new line)
-              aCharCurr == ' ' ||
-              aCharCurr == '\t')
-          {
-            continue;
-          }
-        }
-        ++myIter;
-        theSymbolChar = aCharCurr;
-        return aNextSymbol; // found the first next, not command and not filtered symbol
-      }
-      return -1; // the next symbol is not found
-    }
+    inline int readNextSymbol(const int theSymbolStartingFrom, Standard_Utf32Char& theSymbolChar);
 
   protected:
-    IterationFilter      myFilter; //!< possibility to filter not-necessary symbols
-    NCollection_Utf8Iter myIter; //!< the next symbol iterator value over the text formatter string
-    Standard_Integer     mySymbolPosition; //!< the current position
-    Standard_Utf32Char   mySymbolChar; //!< the current symbol
-    Standard_Integer     mySymbolNext; //!< position of the next symbol in iterator, if zero, the iterator is finished
+    IterationFilter      myFilter;         //!< possibility to filter not-necessary symbols
+    NCollection_Utf8Iter myIter;           //!< the next symbol iterator value over the text formatter string
+    int                  mySymbolPosition; //!< the current position
+    Standard_Utf32Char   mySymbolChar;     //!< the current symbol
+    int                  mySymbolNext;     //!< position of the next symbol in iterator, if zero, the iterator is finished
     Standard_Utf32Char   mySymbolCharNext; //!< the current symbol
   };
+
+  //! Scaling parameters.
+  struct FontScaling
+  {
+    float SizeScaling  = 1.0f; //!< size scaling
+    float SpaceScaling = 1.0f; //!< scale space between glyphs along X-axis
+    float LineScaling  = 1.0f; //!< scale line space between glyphs along Y-axis
+  };
+
+  //! Text glyph definition.
+  struct TextGlyph
+  {
+    //! The bottom left corner of a glyph on baseline.
+    NCollection_Vec2<float> Pos;
+    //! Character code.
+    Standard_Utf32Char Char = 0;
+    //! Width of a character
+    float Width = 0.0f;
+
+    TextGlyph() = default;
+    TextGlyph(Standard_Utf32Char theChar, const NCollection_Vec2<float>& thePos, float theWidth)
+    : Pos(thePos),
+      Char(theChar),
+      Width(theWidth)
+    {
+    }
+  };
+
+  //! Text line definition.
+  struct TextLine
+  {
+    NCollection_Vec2<float> Pen; //!< position of the next symbol to put in the line
+
+    float LineSpacing = 0.0f; //!< line spacing (the distance to the next line)
+    float Ascender = 0.0f;
+    float Descender = 0.0f;
+
+    Graphic3d_HorizontalTextAlignment AlignX = Graphic3d_HTA_LEFT; //!< horizontal alignment style
+
+    int GlyphLower = 0; //!< index of the first glyph in the line
+    int GlyphUpper = -1; //!< index of the last glyph  in the line
+    int NbIndentSymbols = 0; //!< counter to process tabulation symbols
+    int NbGraphSymbols = 0; //!< counter to graphical symbols in the line (to process wrapping)
+    int LastWordStart = 0; //!< index of the beginning of the last word in the line (for word wrapping)
+
+    //! Update font parameters.
+    Standard_EXPORT void Update(const Font_FTFont& theFont,
+                                const Graphic3d_HorizontalTextAlignment theAlignX,
+                                const FontScaling& theFontScale);
+
+    //! Tighten up the right boundary - drop whitespaces.
+    Standard_EXPORT void TrimRight(const NCollection_Vector<TextGlyph>& theGlyphs, const float theMaxWidth);
+  };
+
+public:
 
   //! Default constructor.
   Standard_EXPORT Font_TextFormatter();
 
-  //! Setup alignment style.
-  Standard_EXPORT void SetupAlignment (const Graphic3d_HorizontalTextAlignment theAlignX,
-                                       const Graphic3d_VerticalTextAlignment   theAlignY);
-
-  //! Reset current progress.
-  Standard_EXPORT void Reset();
-
-  //! Render specified text to inner buffer.
-  Standard_EXPORT void Append (const NCollection_String& theString,
-                               Font_FTFont&              theFont);
-
-  //! Perform formatting on the buffered text.
-  //! Should not be called more than once after initialization!
-  Standard_EXPORT void Format();
-
-  Standard_DEPRECATED("BottomLeft should be used instead")
-  const NCollection_Vec2<Standard_ShortReal>& TopLeft (const Standard_Integer theIndex) const
-  {
-    return BottomLeft (theIndex);
-  }
-
-  //! Returns specific glyph rectangle.
-  const NCollection_Vec2<Standard_ShortReal>& BottomLeft (const Standard_Integer theIndex) const
-  { return myCorners.Value (theIndex); }
-
-  //! Returns current rendering string.
-  inline const NCollection_String& String() const
-  {
-    return myString;
-  }
-
-  //! Returns symbol bounding box
-  //! @param bounding box.
-  Standard_EXPORT Standard_Boolean GlyphBoundingBox (const Standard_Integer theIndex,
-                                                     Font_Rect& theBndBox) const;
-
-  //! Returns the line height
-  //! @param theIndex a line index, obtained by LineIndex()
-  Standard_ShortReal LineHeight (const Standard_Integer theIndex) const
-  { return theIndex == 0 ? myAscender : myLineSpacing; }
-
-  //! Returns width of a line
-  Standard_EXPORT Standard_ShortReal LineWidth (const Standard_Integer theIndex) const;
-
-  //! Returns true if the symbol by the index is '\n'. The width of the symbol is zero.
-  Standard_EXPORT Standard_Boolean IsLFSymbol (const Standard_Integer theIndex) const;
-
-  //! Returns position of the first symbol in a line using alignment
-  Standard_EXPORT Standard_ShortReal FirstPosition() const;
-
-  //! Returns column index of the corner index in the current line
-  Standard_EXPORT Standard_Integer LinePositionIndex (const Standard_Integer theIndex) const;
-
-  //! Returns row index of the corner index among text lines
-  Standard_EXPORT Standard_Integer LineIndex (const Standard_Integer theIndex) const;
-
-  //! Returns tab size.
-  inline Standard_Integer TabSize() const
-  {
-    return myTabSize;
-  }
-
   //! Returns horizontal alignment style
   Graphic3d_HorizontalTextAlignment HorizontalTextAlignment() const { return myAlignX; }
 
-  //! Returns vertical   alignment style
+  //! Returns vertical alignment style
   Graphic3d_VerticalTextAlignment VerticalTextAlignment() const { return myAlignY; }
 
-  //! Sets text wrapping width, zero means that the text is not bounded by width
-  void SetWrapping (const Standard_ShortReal theWidth) { myWrappingWidth = theWidth; }
-
-  //! Returns text maximum width, zero means that the text is not bounded by width
-  Standard_Boolean HasWrapping() const { return myWrappingWidth > 0; }
-
-  //! Returns text maximum width, zero means that the text is not bounded by width
-  Standard_ShortReal Wrapping() const { return myWrappingWidth; }
-
-  //! returns TRUE when trying not to break words when wrapping text
-  Standard_Boolean WordWrapping () const { return myIsWordWrapping; }
-
-  //! returns TRUE when trying not to break words when wrapping text
-  void SetWordWrapping (const Standard_Boolean theIsWordWrapping)  { myIsWordWrapping = theIsWordWrapping; }
-
-  //! @return width of formatted text.
-  inline Standard_ShortReal ResultWidth() const
+  //! Sets alignment style.
+  void SetupAlignment(Graphic3d_HorizontalTextAlignment theAlignX,
+                      Graphic3d_VerticalTextAlignment   theAlignY)
   {
-    return myBndWidth;
+    myAlignX = theAlignX;
+    myAlignY = theAlignY;
   }
 
-  //! @return height of formatted text.
-  inline Standard_ShortReal ResultHeight() const
+  //! Returns tab size.
+  int TabSize() const { return myTabSize; }
+
+  //! Sets tab size.
+  void SetTabSize(int theSize) { myTabSize = theSize; }
+
+  //! Returns text maximum width, zero means that the text is not bounded by width.
+  float Wrapping() const { return myWrappingWidth; }
+
+  //! Sets text wrapping width, zero means that the text is not bounded by width.
+  void SetWrapping(float theWidth) { myWrappingWidth = theWidth; }
+
+  //! Returns TRUE wrapping width is set.
+  bool HasWrapping() const { return myWrappingWidth > 0.0f; }
+
+  //! Returns TRUE when trying not to break words when wrapping text.
+  bool WordWrapping() const { return myIsWordWrapping; }
+
+  //! Sets flag to avoid breaking words when wrapping text.
+  void SetWordWrapping(bool theIsWordWrapping) { myIsWordWrapping = theIsWordWrapping; }
+
+public:
+
+  //! Resets input buffer and formatting results.
+  Standard_EXPORT virtual void Reset();
+
+  //! Adds text to the buffer.
+  //!
+  //! At this step, the tool collects horizontal offsets of each glyph on a baseline (advances),
+  //! arranges input text into lines, handles wrapping.
+  //!
+  //! @param[in] theString text to add
+  //! @param[in] theFont   font for text properties
+  //! @throw Standard_ProgramError if text has been already formatted by Format()
+  void Append (const NCollection_String& theString,
+               Font_FTFont&              theFont)
   {
-    return myLineSpacing * Standard_ShortReal(myLinesNb);
+    Append (theString, theFont, myAlignX, FontScaling());
   }
 
-  //! @return maximum width of the text symbol
-  Standard_ShortReal MaximumSymbolWidth() const { return myMaxSymbolWidth; }
+  //! Adds text to the buffer.
+  //!
+  //! At this step, the tool collects horizontal offsets of each glyphs on a baseline (advances),
+  //! arranges input text into lines, handles wrapping.
+  //!
+  //! @param[in] theString text to add
+  //! @param[in] theFont   font for text properties
+  //! @param[in] theAlignX horizontal alignment style
+  //! @param[in] theFontScale font scale factors
+  //! @throw Standard_ProgramError if text has been already formatted by Format(
+  Standard_EXPORT virtual void Append (const NCollection_String& theString,
+                                       Font_FTFont& theFont,
+                                       const Graphic3d_HorizontalTextAlignment theAlignX,
+                                       const FontScaling& theFontScale);
 
-  //! @param bounding box.
-  inline void BndBox (Font_Rect& theBndBox) const
-  {
-    theBndBox.Left = 0.0f;
-    switch (myAlignX)
-    {
-      default:
-      case Graphic3d_HTA_LEFT:  theBndBox.Right  =  myBndWidth; break;
-      case Graphic3d_HTA_RIGHT: theBndBox.Right  = -myBndWidth; break;
-      case Graphic3d_HTA_CENTER:
-      {
-        theBndBox.Left  = -0.5f * myBndWidth;
-        theBndBox.Right =  0.5f * myBndWidth;
-        break;
-      }
-    }
-    theBndBox.Top    = myBndTop;
-    theBndBox.Bottom = theBndBox.Top - myLineSpacing * Standard_ShortReal(myLinesNb);
-  }
+  //! Performs formatting of the buffered text - apply horizontal and vertical alignment.
+  Standard_EXPORT virtual void Format();
 
-  //! Returns internal container of the top left corners of a formatted rectangles.
-  const NCollection_Vector < NCollection_Vec2<Standard_ShortReal> >& Corners() const { return myCorners; }
+  //! Return formatting state.
+  bool IsDone() const { return myIsFormatted; }
 
-  //! Returns container of each line position at LF in formatted text
-  const NCollection_Vector<Standard_ShortReal>& NewLines() const { return myNewLines; }
+public:
 
-  //! Returns true if the symbol is CR, BEL, FF, NP, BS or VT
-  static inline Standard_Boolean IsCommandSymbol (const Standard_Utf32Char& theSymbol)
-  {
-    if (theSymbol == '\x0D' // CR  (carriage return)
-     || theSymbol == '\a'   // BEL (alarm)
-     || theSymbol == '\f'   // FF  (form feed) NP (new page)
-     || theSymbol == '\b'   // BS  (backspace)
-     || theSymbol == '\v')  // VT  (vertical tab)
-      return Standard_True;
+  //! Returns specific glyph rectangle.
+  const NCollection_Vec2<float>& BottomLeft (int theIndex) const
+  { return myGlyphs[theIndex].Pos; }
 
-    return Standard_False;
-  }
+  //! Returns buffered text.
+  const NCollection_String& String() const { return myString; }
 
-  //! Returns true if the symbol separates words when wrapping is enabled
-  static Standard_Boolean IsSeparatorSymbol (const Standard_Utf32Char& theSymbol)
-  {
-    return theSymbol == '\x0A'    // new line
-        || theSymbol == ' '       // space
-        || theSymbol == '\x09';   // tab
-  }
+  //! Returns width of formatted text.
+  float ResultWidth() const { return myBndSize.x(); }
+
+  //! Returns height of formatted text.
+  float ResultHeight() const { return myBndSize.y(); }
+
+  //! Return bounding box
+  Standard_EXPORT virtual Font_Rect BoundingBox() const;
+
+  //! Returns maximum width of the text symbol
+  float MaximumSymbolWidth() const { return myMaxSymbolWidth; }
+
+  //! Return list of lines.
+  const NCollection_List<TextLine>& ResultLines() const { return myLines; }
+
+  //! Return formatted glyphs.
+  const NCollection_Vector<TextGlyph>& ResultGlyphs() const { return myGlyphs; }
+
+public:
+
+  Standard_DEPRECATED("BoundingBox() should be used instead")
+  void BndBox(Font_Rect& theBndBox) const { theBndBox = BoundingBox(); }
 
   DEFINE_STANDARD_RTTIEXT (Font_TextFormatter, Standard_Transient)
 
-protected: //! @name class auxiliary methods
-
-  //! Move glyphs on the current line to correct position.
-  Standard_EXPORT void newLine (const Standard_Integer theLastRect,
-                                const Standard_ShortReal theMaxLineWidth);
-
 protected: //! @name configuration
 
-  Graphic3d_HorizontalTextAlignment myAlignX;  //!< horizontal alignment style
-  Graphic3d_VerticalTextAlignment   myAlignY;  //!< vertical   alignment style
-  Standard_Integer                  myTabSize; //!< horizontal tabulation width (number of space symbols)
-  Standard_ShortReal                myWrappingWidth; //!< text is wrapped by the width if defined (more 0)
-  Standard_Boolean                  myIsWordWrapping;  //!< if TRUE try not to break words when wrapping text (true by default)
-  Standard_ShortReal                myLastSymbolWidth; //!< width of the last symbol
-  Standard_ShortReal                myMaxSymbolWidth; //!< maximum symbol width of the formatter string
+  //! Horizontal alignment style.
+  Graphic3d_HorizontalTextAlignment myAlignX = Graphic3d_HTA_LEFT;
+  //! Vertical alignment style.
+  Graphic3d_VerticalTextAlignment myAlignY = Graphic3d_VTA_TOP;
+  //! Horizontal tabulation width (number of space symbols).
+  int myTabSize = 8;
+  //! Wrapping width.
+  float myWrappingWidth = 0.0f;
+  //! Avoid breaking words when wrapping (true by default).
+  bool myIsWordWrapping = true;
 
 protected: //! @name input data
 
-  NCollection_String myString;        //!< currently rendered text
-  NCollection_Vec2<Standard_ShortReal>
-                     myPen;           //!< current pen position
-  NCollection_Vector < NCollection_Vec2<Standard_ShortReal> >
-                     myCorners;       //!< The bottom left corners of a formatted rectangles.
-  NCollection_Vector<Standard_ShortReal>
-                     myNewLines;      //!< position at LF
-  Standard_ShortReal myLineSpacing;   //!< line spacing (computed as maximum of all fonts involved in text formatting)
-  Standard_ShortReal myAscender;      //!< line spacing for the first line
-  bool               myIsFormatted;   //!< formatting state
+  //! List of lines.
+  NCollection_List<TextLine> myLines;
+  //! The list of formatted glyphs.
+  NCollection_Vector<TextGlyph> myGlyphs;
+  //! Buffered text.
+  NCollection_String myString;
 
-protected: //! @name temporary variables for formatting routines
+  //! Text width and size.
+  NCollection_Vec2<float> myBndSize;
+  //! Maximum symbol width within formatted text.
+  float myMaxSymbolWidth = 0.0f;
+  //! Formatting state.
+  bool  myIsFormatted = false;
 
-  Standard_Integer   myLinesNb;       //!< overall (new)lines number (including splitting by width limit)
-  Standard_Integer   myRectLineStart; //!< id of first rectangle on the current line
-  Standard_Integer   myNewLineNb;
-
-  Standard_ShortReal myPenCurrLine;   //!< current baseline position
-  Standard_ShortReal myBndTop;
-  Standard_ShortReal myBndWidth;
-  NCollection_Vec2<Standard_ShortReal>
-                     myMoveVec;       //!< local variable
 };
+
+// =======================================================================
+// function : Iterator::readNextSymbol
+// purpose :
+// =======================================================================
+inline int Font_TextFormatter::Iterator::readNextSymbol (const int theSymbolStartingFrom,
+                                                         Standard_Utf32Char& theSymbolChar)
+{
+  int aNextSymbol = theSymbolStartingFrom;
+  for (; *myIter != 0; ++myIter)
+  {
+    const Standard_Utf32Char aCharCurr = *myIter;
+    if (Font_TextFormatter::IsCommandSymbol (aCharCurr))
+      continue; // skip unsupported carriage control codes
+
+    ++aNextSymbol;
+    if ((myFilter & IterationFilter_ExcludeInvisible) != 0)
+    {
+      if (IsSeparatorSymbol(aCharCurr))
+        continue;
+    }
+    ++myIter;
+    theSymbolChar = aCharCurr;
+    return aNextSymbol; // found the first next, not command and not filtered symbol
+  }
+  return -1; // the next symbol is not found
+}
 
 #endif // Font_TextFormatter_Header
