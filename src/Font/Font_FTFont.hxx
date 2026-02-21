@@ -241,6 +241,12 @@ public:
   //! @return default line spacing (the baseline-to-baseline distance).
   Standard_EXPORT float LineSpacing() const;
 
+  //! Return underline position.
+  Standard_EXPORT float UnderlinePosition() const;
+
+  //! Return underline thickness.
+  Standard_EXPORT float UnderlineThickness() const;
+
   //! Configured point size
   unsigned int PointSize() const
   {
@@ -280,37 +286,8 @@ public:
     }
   }
 
-  //! Return space scaling along X-axis; 1.0 by default.
-  float SpaceScaling() const { return mySpaceScaling; }
-
-  //! Setup space scaling along X-axis.
-  void SetSpaceScaling(const float theScale)
-  {
-    if (theScale <= 0.0f)
-      throw Standard_OutOfRange("Font_FTFont::SetSpaceScaling() invalid value");
-
-    mySpaceScaling = theScale;
-  }
-
-  //! Return newline space scaling; 1.0 by default.
-  float LineScaling() const { return myLineScaling; }
-
-  //! Setup newline space scaling.
-  void SetLineScaling(const float theScale)
-  {
-    if (theScale <= 0.0f)
-      throw Standard_OutOfRange("Font_FTFont::SetLineScaling() invalid value");
-
-    myLineScaling = theScale;
-  }
-
   //! Return TRUE if font contains specified symbol (excluding fallback list).
   Standard_EXPORT bool HasSymbol (Standard_Utf32Char theUChar) const;
-
-  //! Compute horizontal advance to the next character with kerning applied when applicable.
-  //! Assuming text rendered horizontally.
-  //! @param theUCharNext the next character to compute advance from current one
-  Standard_EXPORT float AdvanceX (Standard_Utf32Char theUCharNext) const;
 
   //! Compute horizontal advance to the next character with kerning applied when applicable.
   //! Assuming text rendered horizontally.
@@ -321,22 +298,22 @@ public:
 
   //! Compute vertical advance to the next character with kerning applied when applicable.
   //! Assuming text rendered vertically.
-  //! @param theUCharNext the next character to compute advance from current one
-  Standard_EXPORT float AdvanceY (Standard_Utf32Char theUCharNext) const;
-
-  //! Compute vertical advance to the next character with kerning applied when applicable.
-  //! Assuming text rendered vertically.
   //! @param theUChar     the character to be loaded as current one
   //! @param theUCharNext the next character to compute advance from current one
   Standard_EXPORT float AdvanceY (Standard_Utf32Char theUChar,
                                   Standard_Utf32Char theUCharNext);
 
+  //! Return width of a single glyph from metrics.
+  //! @param theUChar the character to be loaded as current one
+  Standard_EXPORT float GlyphWidth (Standard_Utf32Char theUChar);
+
+  //! Return height of a single glyph from metrics.
+  //! @param theUChar the character to be loaded as current one
+  Standard_EXPORT float GlyphHeight (Standard_Utf32Char theUChar);
+
   //! Return glyphs number in this font.
   //! @param theToIncludeFallback if TRUE then the number will include fallback list
   Standard_EXPORT Standard_Integer GlyphsNumber (bool theToIncludeFallback = false) const;
-
-  //! Retrieve glyph bitmap rectangle
-  Standard_EXPORT void GlyphRect (Font_Rect& theRect) const;
 
   //! Computes bounding box of the given text using plain-text formatter (Font_TextFormatter).
   //! Note that bounding box takes into account the text alignment options.
@@ -344,6 +321,21 @@ public:
   Standard_EXPORT Font_Rect BoundingBox (const NCollection_String&               theString,
                                          const Graphic3d_HorizontalTextAlignment theAlignX,
                                          const Graphic3d_VerticalTextAlignment   theAlignY);
+
+public:
+
+  //! Compute horizontal advance to the next character with kerning applied when applicable.
+  //! Assuming text rendered horizontally.
+  //! @param theUCharNext the next character to compute advance from current one
+  Standard_EXPORT float AdvanceX (Standard_Utf32Char theUCharNext) const;
+
+  //! Compute vertical advance to the next character with kerning applied when applicable.
+  //! Assuming text rendered vertically.
+  //! @param theUCharNext the next character to compute advance from current one
+  Standard_EXPORT float AdvanceY (Standard_Utf32Char theUCharNext) const;
+
+  //! Retrieve glyph bitmap rectangle
+  Standard_EXPORT void GlyphRect (Font_Rect& theRect) const;
 
 public:
 
@@ -446,8 +438,6 @@ protected:
   Font_FontAspect            myFontAspect;   //!< font initialization aspect
   float                      myShearAngle;   //!< shear transformation angle
   float                      myWidthScaling; //!< scale glyphs along X-axis
-  float                      mySpaceScaling; //!< scale space between glyphs along X-axis
-  float                      myLineScaling;  //!< scale line space between glyphs along Y-axis
   int32_t                    myLoadFlags;    //!< default load flags
 
   Image_PixMap               myGlyphImg;     //!< cached glyph plane

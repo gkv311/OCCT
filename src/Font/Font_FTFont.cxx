@@ -42,8 +42,6 @@ Font_FTFont::Font_FTFont (const Handle(Font_FTLibrary)& theFTLib)
   myFontAspect  (Font_FontAspect_Regular),
   myShearAngle  (0.0f),
   myWidthScaling(1.0f),
-  mySpaceScaling(1.0f),
-  myLineScaling (1.0f),
 #ifdef HAVE_FREETYPE
   myLoadFlags   (FT_LOAD_NO_HINTING | FT_LOAD_TARGET_NORMAL),
 #else
@@ -605,7 +603,33 @@ float Font_FTFont::Descender() const
 float Font_FTFont::LineSpacing() const
 {
 #ifdef HAVE_FREETYPE
-  return myLineScaling * float(myFTFace->height) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+  return float(myFTFace->height) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+#else
+  return 0.0f;
+#endif
+}
+
+// =======================================================================
+// function : UnderlinePosition
+// purpose  :
+// =======================================================================
+float Font_FTFont::UnderlinePosition() const
+{
+#ifdef HAVE_FREETYPE
+  return float(myFTFace->underline_position) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+#else
+  return 0.0f;
+#endif
+}
+
+// =======================================================================
+// function : UnderlineThickness
+// purpose  :
+// =======================================================================
+float Font_FTFont::UnderlineThickness() const
+{
+#ifdef HAVE_FREETYPE
+  return float(myFTFace->underline_thickness) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
 #else
   return 0.0f;
 #endif
@@ -631,6 +655,40 @@ float Font_FTFont::AdvanceY (Standard_Utf32Char theUChar,
 {
   loadGlyph (theUChar);
   return AdvanceY (theUCharNext);
+}
+
+// =======================================================================
+// function : GlyphWidth
+// purpose  :
+// =======================================================================
+float Font_FTFont::GlyphWidth (Standard_Utf32Char theUChar)
+{
+  loadGlyph (theUChar);
+  if (myUChar == 0)
+    return 0.0f;
+
+#ifdef HAVE_FREETYPE
+  return fromFTPoints<float> (myActiveFTFace->glyph->metrics.width);
+#else
+  return 0.0f;
+#endif
+}
+
+// =======================================================================
+// function : GlyphHeight
+// purpose  :
+// =======================================================================
+float Font_FTFont::GlyphHeight (Standard_Utf32Char theUChar)
+{
+  loadGlyph (theUChar);
+  if (myUChar == 0)
+    return 0.0f;
+
+#ifdef HAVE_FREETYPE
+  return fromFTPoints<float> (myActiveFTFace->glyph->metrics.height);
+#else
+  return 0.0f;
+#endif
 }
 
 // =======================================================================
@@ -679,8 +737,8 @@ float Font_FTFont::AdvanceX (Standard_Utf32Char theUCharNext) const
 #ifdef HAVE_FREETYPE
   FT_Vector aKern;
   getKerning (aKern, myUChar, theUCharNext);
-  return mySpaceScaling * fromFTPoints<float> (myActiveFTFace->glyph->advance.x + aKern.x
-                                             + myActiveFTFace->glyph->lsb_delta - myActiveFTFace->glyph->rsb_delta);
+  return fromFTPoints<float> (myActiveFTFace->glyph->advance.x + aKern.x
+                            + myActiveFTFace->glyph->lsb_delta - myActiveFTFace->glyph->rsb_delta);
 #else
   (void )theUCharNext;
   return 0.0f;
@@ -762,13 +820,9 @@ Font_Rect Font_FTFont::BoundingBox (const NCollection_String&               theS
   Font_TextFormatter aFormatter;
   aFormatter.SetupAlignment (theAlignX, theAlignY);
   aFormatter.Reset();
-
   aFormatter.Append (theString, *this);
   aFormatter.Format();
-
-  Font_Rect aBndBox;
-  aFormatter.BndBox (aBndBox);
-  return aBndBox;
+  return aFormatter.BoundingBox();
 }
 
 // =======================================================================

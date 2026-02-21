@@ -2472,7 +2472,7 @@ static int VDrawText (Draw_Interpretor& theDI,
         if (aParam == "-valign"
          || aParam == "-align")
         {
-          aTextPrs->SetVJustification (Graphic3d_VTA_CENTER);
+          aTextPrs->SetVJustification (Graphic3d_VerticalTextAlignment_Center);
         }
       }
       else if (aType == "right")
@@ -2486,25 +2486,34 @@ static int VDrawText (Draw_Interpretor& theDI,
       }
       else if (aType == "top")
       {
-        aTextPrs->SetVJustification (Graphic3d_VTA_TOP);
+        aTextPrs->SetVJustification (Graphic3d_VerticalTextAlignment_TopAscender);
         if (aParam == "-halign")
         {
           Message::SendFail() << "Syntax error at '" << aParam << "'";
           return 1;
         }
       }
-      else if (aType == "bottom")
+      else if (aType == "bottom" || aType == "bottomdescender")
       {
-        aTextPrs->SetVJustification (Graphic3d_VTA_BOTTOM);
+        aTextPrs->SetVJustification (Graphic3d_VerticalTextAlignment_BottomDescender);
         if (aParam == "-halign")
         {
           Message::SendFail() << "Syntax error at '" << aParam << "'";
           return 1;
         }
       }
-      else if (aType == "topfirstline")
+      else if (aType == "bottombaseline" || aType == "bottomlastline")
       {
-        aTextPrs->SetVJustification (Graphic3d_VTA_TOPFIRSTLINE);
+        aTextPrs->SetVJustification (Graphic3d_VerticalTextAlignment_BottomBaseline);
+        if (aParam == "-halign")
+        {
+          Message::SendFail() << "Syntax error at '" << aParam << "'";
+          return 1;
+        }
+      }
+      else if (aType == "topfirstline" || aType == "topbaseline")
+      {
+        aTextPrs->SetVJustification (Graphic3d_VerticalTextAlignment_TopBaseline);
         if (aParam == "-halign")
         {
           Message::SendFail() << "Syntax error at '" << aParam << "'";
@@ -5709,7 +5718,7 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
   gp_Pnt aPenLoc;
 
   Graphic3d_HorizontalTextAlignment aHJustification = Graphic3d_HTA_LEFT;
-  Graphic3d_VerticalTextAlignment   aVJustification = Graphic3d_VTA_BOTTOM;
+  Graphic3d_VerticalTextAlignment   aVJustification = Graphic3d_VerticalTextAlignment_BottomBaseline;
   Font_StrictLevel aStrictLevel = Font_StrictLevel_Any;
   for (; anArgIt < theArgNb; ++anArgIt)
   {
@@ -5751,19 +5760,23 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
       aType.LowerCase();
       if (aType == "top")
       {
-        aVJustification = Graphic3d_VTA_TOP;
+        aVJustification = Graphic3d_VerticalTextAlignment_TopAscender;
       }
       else if (aType == "center")
       {
-        aVJustification = Graphic3d_VTA_CENTER;
+        aVJustification = Graphic3d_VerticalTextAlignment_Center;
       }
       else if (aType == "bottom")
       {
-        aVJustification = Graphic3d_VTA_BOTTOM;
+        aVJustification = Graphic3d_VerticalTextAlignment_BottomDescender;
       }
-      else if (aType == "topfirstline")
+      else if (aType == "bottomlastline" || aType == "bottombaseline")
       {
-        aVJustification = Graphic3d_VTA_TOPFIRSTLINE;
+        aVJustification = Graphic3d_VerticalTextAlignment_BottomBaseline;
+      }
+      else if (aType == "topfirstline" || aType == "topbaseline")
+      {
+        aVJustification = Graphic3d_VerticalTextAlignment_TopBaseline;
       }
       else
       {
@@ -5856,12 +5869,6 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
   if (aWidthScale != RealLast())
     aFont.SetWidthScaling((float)aWidthScale);
 
-  if (aSpaceScale != RealLast())
-    aFont.SetSpaceScaling((float)aSpaceScale);
-
-  if (aLineScale != RealLast())
-    aFont.SetLineScaling((float)aLineScale);
-
   aFont.SetCompositeCurveMode (anIsCompositeCurve);
   if (!aFont.FindAndInit (aFontName.ToCString(), aFontAspect, aTextHeight, aStrictLevel))
   {
@@ -5869,10 +5876,23 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
     return 1;
   }
 
-  gp_Ax3 aPenAx3(aPenLoc, aNormal, aDirection);
+  Font_TextFormatter::FontScaling aScaling;
+  aScaling.SizeScaling = (float)aFont.Scale();
+  if (aSpaceScale != RealLast())
+    aScaling.SpaceScaling = (float)aSpaceScale;
 
+  if (aLineScale != RealLast())
+    aScaling.LineScaling = (float)aLineScale;
+
+  Handle(Font_TextFormatter) aFormatter = new Font_TextFormatter();
+  aFormatter->SetupAlignment (aHJustification, aVJustification);
+  aFormatter->Append (aText, *aFont.FTFont(), aHJustification, aScaling);
+  aFormatter->Format();
+
+  gp_Ax3 aPenAx3(aPenLoc, aNormal, aDirection);
   Font_BRepTextBuilder aBuilder;
-  DBRep::Set (aName, aBuilder.Perform (aFont, aText, aPenAx3, aHJustification, aVJustification));
+  TopoDS_Shape aResShape = aBuilder.Perform (aFont, aFormatter, aPenAx3);
+  DBRep::Set (aName, aResShape);
   return 0;
 }
 
@@ -7042,7 +7062,7 @@ vdrawtext name text
           [-pos X Y Z]={0 0 0}
           [-color {R G B|name}]=yellow
           [-halign {left|center|right}]=left
-          [-valign {top|center|bottom|topfirstline}}]=bottom
+          [-valign {top|center|bottom|topFirstLine|bottomLastLine}}]=bottom
           [-angle angle]=0
           [-zoom {0|1}]=0
           [-height height]=16
@@ -7244,7 +7264,7 @@ text2brep name text
           [-font font]=Courier [-strict {strict|aliases|any}]=any
           [-pos X=0 Y=0 Z=0] [-plane NormX NormY NormZ DirX DirY DirZ]
           [-halign {left|center|right}]=left
-          [-valign {top|center|bottom|topfirstline}]=bottom
+          [-valign {top|center|bottom|topFirstLine|bottomLastLine}]=bottom
           [-composite {on|off}]=off
 Create shape from the given text.
 )" /* [text2brep] */);
