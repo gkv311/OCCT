@@ -711,7 +711,7 @@ void OpenGl_Text::render (const Handle(OpenGl_Context)& theCtx,
                       myVertsVbo,
                       myTCrdsVbo);
 
-    aFormatter->BndBox (myBndBox);
+    myBndBox = aFormatter->BoundingBox();
     if (!myBndVertsVbo.IsNull())
     {
       myBndVertsVbo->Release (theCtx.get());

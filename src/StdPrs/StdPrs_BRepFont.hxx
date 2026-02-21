@@ -131,18 +131,6 @@ public:
   //! Setup glyph scaling along X-axis.
   void SetWidthScaling (const float theScaleFactor) { myFTFont->SetWidthScaling (theScaleFactor); }
 
-  //! Return space scaling along X-axis; 1.0 be default.
-  float SpaceScaling() const { return myFTFont->SpaceScaling(); }
-
-  //! Setup space scaling along X-axis.
-  void SetSpaceScaling(const float theScaleFactor) { myFTFont->SetSpaceScaling(theScaleFactor); }
-
-  //! Return newline space scaling; 1.0 be default.
-  float LineScaling() const { return myFTFont->LineScaling(); }
-
-  //! Setup newline space scaling.
-  void SetLineScaling(const float theScaleFactor) { myFTFont->SetLineScaling(theScaleFactor); }
-
 public:
 
   //! @return vertical distance from the horizontal baseline to the highest character coordinate.

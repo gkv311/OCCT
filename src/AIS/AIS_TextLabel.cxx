@@ -424,19 +424,42 @@ Standard_Boolean AIS_TextLabel::calculateLabelParams (const gp_Pnt& thePosition,
   }
 
   const NCollection_String aText (myText.ToExtString());
-  Font_Rect aBndBox = aFont->BoundingBox (aText, anAsp->HorizontalJustification(), anAsp->VerticalJustification());
+
+  Handle(Font_TextFormatter) aFormatter = myFormatter;
+  if (aFormatter.IsNull())
+    aFormatter = new Font_TextFormatter();
+
+  aFormatter->SetupAlignment(anAsp->HorizontalJustification(), anAsp->VerticalJustification());
+  aFormatter->Reset();
+  aFormatter->Append(aText, *aFont);
+  aFormatter->Format();
+
+  const Font_Rect aBndBox = aFormatter->BoundingBox();
   theWidth = Abs (aBndBox.Width());
   theHeight = Abs (aBndBox.Height());
 
   theCenterOfLabel = thePosition;
-  if (anAsp->VerticalJustification() == Graphic3d_VTA_BOTTOM)
+  double aDYOffset = 0.0f;
+  switch (anAsp->VerticalJustification())
   {
-    theCenterOfLabel.ChangeCoord() += myOrientation3D.YDirection().XYZ() * theHeight * 0.5;
+    case Graphic3d_VerticalTextAlignment_BottomBaseline:
+      aDYOffset = theHeight * 0.5 + aFont->Descender();
+      break;
+    case Graphic3d_VerticalTextAlignment_BottomDescender:
+      aDYOffset = theHeight * 0.5;
+      break;
+    case Graphic3d_VerticalTextAlignment_TopBaseline:
+      aDYOffset = -theHeight * 0.5 + aFont->Ascender();
+      break;
+    case Graphic3d_VerticalTextAlignment_TopAscender:
+      aDYOffset = -theHeight * 0.5;
+      break;
+    default:
+    case Graphic3d_VerticalTextAlignment_Center:
+      break;
   }
-  else if (anAsp->VerticalJustification() == Graphic3d_VTA_TOP)
-  {
-    theCenterOfLabel.ChangeCoord() -= myOrientation3D.YDirection().XYZ() * theHeight * 0.5;
-  }
+  theCenterOfLabel.ChangeCoord() += myOrientation3D.YDirection().XYZ() * aDYOffset;
+
   if (anAsp->HorizontalJustification() == Graphic3d_HTA_LEFT)
   {
     theCenterOfLabel.ChangeCoord() += myOrientation3D.XDirection().XYZ() * theWidth * 0.5;
