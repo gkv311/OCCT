@@ -306,12 +306,59 @@ static Standard_Integer VShaderProg (Draw_Interpretor& ,
     TCollection_AsciiString anArg (theArgVec[anArgIter]);
     anArg.LowerCase();
     Graphic3d_TypeOfShaderObject aShaderTypeArg = Graphic3d_TypeOfShaderObject(-1);
-    if (!aProgram.IsNull()
-      && anArg == "-uniform"
-      && anArgIter + 2 < theArgNb)
+    if (!aProgram.IsNull() && anArg == "-uniform" && anArgIter + 1 + 1 < theArgNb)
     {
       TCollection_AsciiString aName = theArgVec[++anArgIter];
       aProgram->PushVariableFloat (aName, float (Draw::Atof (theArgVec[++anArgIter])));
+    }
+    else if (!aProgram.IsNull() && anArg == "-vec2" && anArgIter + 1 + Graphic3d_Vec2::Length() < theArgNb)
+    {
+      TCollection_AsciiString  aName = theArgVec[++anArgIter];
+      Graphic3d_Vec2 aVec;
+      for (int aVal = 0; aVal < aVec.Length(); ++aVal)
+        aVec[aVal] = (float)Draw::Atof(theArgVec[++anArgIter]);
+
+      aProgram->PushVariableVec2 (aName, aVec);
+    }
+    else if (!aProgram.IsNull() && anArg == "-vec3" && anArgIter + 1 + Graphic3d_Vec3::Length() < theArgNb)
+    {
+      TCollection_AsciiString  aName = theArgVec[++anArgIter];
+      Graphic3d_Vec3 aVec;
+      for (int aVal = 0; aVal < aVec.Length(); ++aVal)
+        aVec[aVal] = (float)Draw::Atof(theArgVec[++anArgIter]);
+
+      aProgram->PushVariableVec3 (aName, aVec);
+    }
+    else if (!aProgram.IsNull() && anArg == "-vec4" && anArgIter + 1 + Graphic3d_Vec4::Length() < theArgNb)
+    {
+      TCollection_AsciiString  aName = theArgVec[++anArgIter];
+      Graphic3d_Vec4 aVec;
+      for (int aVal = 0; aVal < aVec.Length(); ++aVal)
+        aVec[aVal] = (float)Draw::Atof(theArgVec[++anArgIter]);
+
+      aProgram->PushVariableVec4 (aName, aVec);
+    }
+    else if (!aProgram.IsNull() && anArg == "-mat3"
+             && anArgIter + 1 + Graphic3d_Vec3::Length() * Graphic3d_Vec3::Length() < theArgNb)
+    {
+      TCollection_AsciiString  aName = theArgVec[++anArgIter];
+      NCollection_Mat3<float> aMat;
+      for (int aRow = 0; aRow < Graphic3d_Vec3::Length(); ++aRow)
+        for (int aCol = 0; aCol < Graphic3d_Vec3::Length(); ++aCol)
+          aMat.ChangeValue(aRow, aCol) = (float)Draw::Atof(theArgVec[++anArgIter]);
+
+      aProgram->PushVariableMat3 (aName, aMat);
+    }
+    else if (!aProgram.IsNull() && anArg == "-mat4"
+             && anArgIter + 1 + Graphic3d_Vec4::Length() * Graphic3d_Vec4::Length() < theArgNb)
+    {
+      TCollection_AsciiString aName = theArgVec[++anArgIter];
+      Graphic3d_Mat4 aMat;
+      for (size_t aRow = 0; aRow < aMat.Rows(); ++aRow)
+        for (size_t aCol = 0; aCol < aMat.Cols(); ++aCol)
+          aMat.ChangeValue(aRow, aCol) = (float)Draw::Atof(theArgVec[++anArgIter]);
+
+      aProgram->PushVariableMat4 (aName, aMat);
     }
     else if (!aProgram.IsNull()
           &&  aProgram->ShaderObjects().IsEmpty()
@@ -1198,7 +1245,9 @@ vshader name -vert VertexShader -frag FragmentShader [-geom GeometryShader]
         [-off] [-phong] [-aspect {shading|line|point|text}=shading]
         [-header VersionHeader]
         [-tessControl TessControlShader -tessEval TessEvaluationShader]
-        [-uniform Name FloatValue]
+        [-uniform Name FloatValue] [-vec2 Name X Y] [-vec3 Name X Y Z]
+          [-vec4 Name X Y Z W] [-mat3 Name X1 Y1 Z1 X2 Y2 Z2 X3 Y3 Z3]
+          [-mat4 Name X1 Y1 Z1 W1 ... X4 Y4 Z4 W4]
         [-defaultSampler {0|1}]=1
 Assign custom GLSL program to presentation aspects.
 )" /* [vshader] */);

@@ -24,6 +24,8 @@ template struct Graphic3d_UniformValue<Standard_ShortReal>;
 template struct Graphic3d_UniformValue<Graphic3d_Vec2>;
 template struct Graphic3d_UniformValue<Graphic3d_Vec3>;
 template struct Graphic3d_UniformValue<Graphic3d_Vec4>;
+template struct Graphic3d_UniformValue<NCollection_Mat3<float>>;
+template struct Graphic3d_UniformValue<Graphic3d_Mat4>;
 template struct Graphic3d_UniformValue<Graphic3d_Vec2i>;
 template struct Graphic3d_UniformValue<Graphic3d_Vec3i>;
 template struct Graphic3d_UniformValue<Graphic3d_Vec4i>;
