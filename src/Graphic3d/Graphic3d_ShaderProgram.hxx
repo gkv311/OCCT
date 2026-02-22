@@ -194,6 +194,12 @@ public:
   //! Pushes vec4 uniform.
   Standard_Boolean PushVariableVec4  (const TCollection_AsciiString& theName, const Graphic3d_Vec4& theValue)  { return PushVariable (theName, theValue); }
 
+  //! Pushes mat3 uniform.
+  Standard_Boolean PushVariableMat3  (const TCollection_AsciiString& theName, const NCollection_Mat3<float>& theValue) { return PushVariable (theName, theValue); }
+
+  //! Pushes mat4 uniform.
+  Standard_Boolean PushVariableMat4  (const TCollection_AsciiString& theName, const Graphic3d_Mat4& theValue)  { return PushVariable (theName, theValue); }
+
   //! Pushes int uniform.
   Standard_Boolean PushVariableInt   (const TCollection_AsciiString& theName, const int theValue)              { return PushVariable (theName, theValue); }
 

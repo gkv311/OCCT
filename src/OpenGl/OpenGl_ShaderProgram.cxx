@@ -120,6 +120,8 @@ OpenGl_VariableSetterSelector::OpenGl_VariableSetterSelector()
     (Graphic3d_UniformValueTypeID<OpenGl_Vec2>::ID,  new OpenGl_VariableSetter<OpenGl_Vec2>())
     (Graphic3d_UniformValueTypeID<OpenGl_Vec3>::ID,  new OpenGl_VariableSetter<OpenGl_Vec3>())
     (Graphic3d_UniformValueTypeID<OpenGl_Vec4>::ID,  new OpenGl_VariableSetter<OpenGl_Vec4>())
+    (Graphic3d_UniformValueTypeID<NCollection_Mat3<float>>::ID, new OpenGl_VariableSetter<NCollection_Mat3<float>>())
+    (Graphic3d_UniformValueTypeID<OpenGl_Mat4>::ID,  new OpenGl_VariableSetter<OpenGl_Mat4>())
     (Graphic3d_UniformValueTypeID<OpenGl_Vec2i>::ID, new OpenGl_VariableSetter<OpenGl_Vec2i>())
     (Graphic3d_UniformValueTypeID<OpenGl_Vec3i>::ID, new OpenGl_VariableSetter<OpenGl_Vec3i>())
     (Graphic3d_UniformValueTypeID<OpenGl_Vec4i>::ID, new OpenGl_VariableSetter<OpenGl_Vec4i>());
@@ -1195,6 +1197,22 @@ Standard_Boolean OpenGl_ShaderProgram::SetUniform (const Handle(OpenGl_Context)&
   }
 
   theCtx->core20fwd->glUniformMatrix3fv (theLocation, theCount, GL_FALSE, theData->GetData());
+  return Standard_True;
+}
+
+// =======================================================================
+// function : SetUniform
+// purpose  : Specifies the value of the floating-point uniform 3x3 matrix
+// =======================================================================
+Standard_Boolean OpenGl_ShaderProgram::SetUniform (const Handle(OpenGl_Context)&  theCtx,
+                                                   GLint                          theLocation,
+                                                   const NCollection_Mat3<float>& theValue,
+                                                   GLboolean                      theTranspose)
+{
+  if (myProgramID == NO_PROGRAM || theLocation == INVALID_LOCATION)
+    return Standard_False;
+
+  theCtx->core20fwd->glUniformMatrix3fv (theLocation, 1, GL_FALSE, theTranspose ? theValue.Transposed().GetData() : theValue.GetData());
   return Standard_True;
 }
 
