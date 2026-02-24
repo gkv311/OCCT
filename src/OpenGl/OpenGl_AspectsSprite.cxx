@@ -406,7 +406,7 @@ void OpenGl_AspectsSprite::spriteKeys (const Handle(Graphic3d_MarkerImage)& theM
         (unsigned int )(255.0f * theColor.b())
       };
       char aBytes[8];
-      sprintf (aBytes, "%02X%02X%02X", aColor[0], aColor[1], aColor[2]);
+      Sprintf (aBytes, "%02X%02X%02X", aColor[0], aColor[1], aColor[2]);
       theKey += aBytes;
     }
   }
