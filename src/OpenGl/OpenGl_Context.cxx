@@ -1012,9 +1012,9 @@ Standard_Boolean OpenGl_Context::Init (const Aspect_Drawable         theSurface,
 TCollection_AsciiString OpenGl_Context::FormatGlEnumHex (int theGlEnum)
 {
   char aBuff[16];
-  Sprintf (aBuff, theGlEnum < (int )std::numeric_limits<uint16_t>::max()
-                ? "0x%04X"
-                : "0x%08X", theGlEnum);
+  Snprintf (aBuff, theGlEnum < (int )std::numeric_limits<uint16_t>::max()
+                 ? "0x%04X"
+                 : "0x%08X", theGlEnum);
   return aBuff;
 }
 
@@ -1025,7 +1025,7 @@ TCollection_AsciiString OpenGl_Context::FormatGlEnumHex (int theGlEnum)
 TCollection_AsciiString OpenGl_Context::FormatSize (Standard_Size theSize)
 {
   char aBuff[32];
-  Sprintf (aBuff, "%" PRIu64, (uint64_t )theSize);
+  Snprintf (aBuff, "%" PRIu64, (uint64_t )theSize);
   return aBuff;
 }
 
@@ -1036,7 +1036,7 @@ TCollection_AsciiString OpenGl_Context::FormatSize (Standard_Size theSize)
 TCollection_AsciiString OpenGl_Context::FormatPointer (const void* thePtr)
 {
   char aBuff[32];
-  Sprintf (aBuff, "0x%" PRIXPTR, (uintptr_t )thePtr);
+  Snprintf (aBuff, "0x%" PRIXPTR, (uintptr_t )thePtr);
   return aBuff;
 }
 

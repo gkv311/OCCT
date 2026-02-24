@@ -121,6 +121,7 @@ public:
   //! Converts aReal into aCstring in exponential format with a period as decimal point,
   //! no thousand separator and no grouping of digits.
   //! The conversion is independent from the current locale
+  Standard_DEPRECATED("Snprintf should be used instead")
   Standard_EXPORT static Standard_Boolean RealToCString (const Standard_Real aReal, Standard_PCharacter& aString);
 
   //! Converts aCstring representing a real with a period as decimal point,

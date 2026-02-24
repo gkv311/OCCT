@@ -415,7 +415,7 @@ int Graphic3d_ShaderManager::defaultGlslVersion (const Handle(Graphic3d_ShaderPr
 
   // should fit Graphic3d_ShaderFlags_NB
   char aBitsStr[64];
-  Sprintf (aBitsStr, "%04x", aBits);
+  Snprintf (aBitsStr, "%04x", aBits);
   theProgram->SetId (TCollection_AsciiString ("occt_") + theName + aBitsStr);
   return aBits;
 }

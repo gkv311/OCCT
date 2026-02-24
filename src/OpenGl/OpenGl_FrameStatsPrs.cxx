@@ -35,7 +35,7 @@ namespace
   {
     const Standard_Real aFpsVal = theSeconds != 0.0 ? 1.0 / theSeconds : 0.0;
     char aFps[50];
-    Sprintf (aFps, "%.1f", aFpsVal);
+    Snprintf (aFps, "%.1f", aFpsVal);
     return TCollection_AsciiString() + Standard_Integer(theSeconds * 1000.0) + " ms (" + aFps + " FPS)";
   }
 }

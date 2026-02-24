@@ -171,8 +171,9 @@ void OSD_Environment::Build ()
   }
    
   // create a new entry in the buffer and add it to environment
-  buffer[index] = (char *) malloc ( len + myValue.Length() + 2 );
-  sprintf(buffer[index], "%s=%s", myName.ToCString(), myValue.ToCString());
+  const size_t aBuffLen = len + myValue.Length() + 2;
+  buffer[index] = (char*) malloc (aBuffLen);
+  Snprintf(buffer[index], aBuffLen, "%s=%s", myName.ToCString(), myValue.ToCString());
   putenv(buffer[index]);
 
   // then (and only then!) free old entry, if existed

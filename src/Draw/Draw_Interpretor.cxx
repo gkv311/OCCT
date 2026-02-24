@@ -435,7 +435,7 @@ Draw_Interpretor& Draw_Interpretor::Append(const TCollection_ExtendedString& the
 Draw_Interpretor& Draw_Interpretor::Append(const Standard_Integer i)
 {
   char c[100];
-  Sprintf(c,"%d",i);
+  Snprintf(c,"%d",i);
   Tcl_AppendResult(myInterp,c,(Standard_CString)0);
   return *this;
 }
@@ -448,7 +448,7 @@ Draw_Interpretor& Draw_Interpretor::Append(const Standard_Integer i)
 Draw_Interpretor& Draw_Interpretor::Append(const Standard_Real r)
 {
   char s[100];
-  Sprintf(s,"%.17g",r);
+  Snprintf(s,"%.17g",r);
   Tcl_AppendResult(myInterp,s,(Standard_CString)0);
   return *this;
 }
