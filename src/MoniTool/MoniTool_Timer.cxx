@@ -37,7 +37,7 @@ void MoniTool_Timer::Dump(Standard_OStream &ostr)
   Standard_Real elapsed = seconds + minutes*60 + hours*3600;
   
   char buff[1024];
-  Sprintf ( buff, "Elapsed:%6.1f sec, CPU User:%9.4f sec, CPU Sys:%9.4f sec, hits: %d",
+  Snprintf ( buff, "Elapsed:%6.1f sec, CPU User:%9.4f sec, CPU Sys:%9.4f sec, hits: %d",
                    elapsed, user, system, myCount );
     
   ostr << buff << std::endl;
@@ -110,7 +110,7 @@ void MoniTool_Timer::DumpTimers (Standard_OStream &ostr)
     }
     //Handle(MoniTool_Timer) MT = iter.Value();    
     char buff[1024];
-    Sprintf ( buff, "%-20s\t", stmp );
+    Snprintf ( buff, "%-20s\t", stmp );
     ostr << "TIMER: " << buff;
     //iter.Value()->Dump ( ostr );
     Timer(stmp)->Dump(ostr);

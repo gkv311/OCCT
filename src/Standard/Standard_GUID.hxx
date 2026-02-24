@@ -63,15 +63,27 @@ public:
   //! the guid have the following format:
   //!
   //! "00000000-0000-0000-0000-000000000000"
-  Standard_EXPORT void ToCString (const Standard_PCharacter aStrGuid) const;
-  
+  Standard_EXPORT void ToCString (char* theBuffer, const size_t theSize) const;
+
   //! translate the GUID into unicode string
   //! the aStrGuid is allocated by user.
   //! the guid have the following format:
   //!
   //! "00000000-0000-0000-0000-000000000000"
-  Standard_EXPORT void ToExtString (const Standard_PExtCharacter aStrGuid) const;
+  Standard_EXPORT void ToExtString (Standard_ExtCharacter* theBuffer, const size_t theSize) const;
   
+  Standard_DEPRECATED("The size of a buffer should be provided")
+  void ToCString (const Standard_PCharacter theBuffer) const
+  {
+    ToCString (theBuffer, Standard_GUID_SIZE_ALLOC);
+  }
+
+  Standard_DEPRECATED("The size of a buffer should be provided")
+  Standard_EXPORT void ToExtString (const Standard_PExtCharacter theBuffer) const
+  {
+    ToExtString(theBuffer, Standard_GUID_SIZE_ALLOC);
+  }
+
   Standard_EXPORT Standard_Boolean IsSame (const Standard_GUID& uid) const;
 Standard_Boolean operator == (const Standard_GUID& uid) const
 {

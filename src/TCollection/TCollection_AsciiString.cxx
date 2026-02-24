@@ -131,7 +131,7 @@ TCollection_AsciiString::TCollection_AsciiString(const Standard_Integer aValue)
      : mystring(0)
 {
   char t [13];
-  mylength = Sprintf( t,"%d",aValue);
+  mylength = Snprintf(t, "%d", aValue);
   mystring = Allocate(mylength+1);
   memcpy (mystring, t, mylength);
   mystring[mylength] = '\0';
@@ -144,7 +144,7 @@ TCollection_AsciiString::TCollection_AsciiString(const Standard_Real aValue)
      : mystring(0)
 {
   char t [50];
-  mylength = Sprintf( t,"%g",aValue);
+  mylength = Snprintf(t, "%g", aValue);
   mystring = Allocate(mylength+1);
   memcpy (mystring, t, mylength);
   mystring[mylength] = '\0';

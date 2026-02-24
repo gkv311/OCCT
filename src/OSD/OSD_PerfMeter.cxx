@@ -239,7 +239,7 @@ void perf_sprint_all_meters (char *buffer, int length, int reset)
   for (i=0; i<nb_meters; i++) {
     const t_TimeCounter * const ptc = &MeterTable[i];
     if (ptc && ptc->nb_enter) {
-      int n = sprintf (string, "          Perf meter results               :   enters  seconds  microsec/enter\n");
+      int n = Snprintf (string, "          Perf meter results               :   enters  seconds  microsec/enter\n");
       if (n < length)
       {
         memcpy (buffer, string, n);
@@ -258,9 +258,9 @@ void perf_sprint_all_meters (char *buffer, int length, int reset)
 
       int n = 0;
       if (ptc->start_time)
-        n = sprintf (string, "Warning : meter %42s has not been stopped\n", ptc->name);
+        n = Snprintf (string, "Warning : meter %42s has not been stopped\n", ptc->name);
 
-      n += sprintf (string + n, "%-42s : %7d %8.2f %10.2f\n",
+      n += Snprintf (string + n, sizeof(string) - n, "%-42s : %7d %8.2f %10.2f\n",
                     ptc->name, ptc->nb_enter, secs,
                     (secs>0. ? 1000000 * secs/ptc->nb_enter : 0.));
       if (n < length)

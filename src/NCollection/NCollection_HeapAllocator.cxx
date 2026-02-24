@@ -33,7 +33,7 @@ void * NCollection_HeapAllocator::Allocate (const Standard_Size theSize)
   if (aResult == NULL)
   {
     char aBuffer[96];
-    Sprintf (aBuffer, "Failed to allocate %" PRIuPTR " bytes in global dynamic heap", theSize);
+    Snprintf (aBuffer, "Failed to allocate %" PRIuPTR " bytes in global dynamic heap", theSize);
     throw Standard_OutOfMemory(aBuffer);
   }
   return aResult;

@@ -128,8 +128,8 @@ public:
     NCollection_Vec4<Standard_ShortReal> anSRgb = Convert_LinearRGB_To_sRGB ((NCollection_Vec4<Standard_ShortReal> )theColor);
     NCollection_Vec4<Standard_Integer> anSRgbInt (anSRgb * 255.0f + NCollection_Vec4<Standard_ShortReal> (0.5f));
     char aBuff[12];
-    Sprintf (aBuff, theToPrefixHash ? "#%02X%02X%02X%02X" : "%02X%02X%02X%02X",
-             anSRgbInt.r(), anSRgbInt.g(), anSRgbInt.b(), anSRgbInt.a());
+    Snprintf (aBuff, theToPrefixHash ? "#%02X%02X%02X%02X" : "%02X%02X%02X%02X",
+              anSRgbInt.r(), anSRgbInt.g(), anSRgbInt.b(), anSRgbInt.a());
     return aBuff;
   }
 

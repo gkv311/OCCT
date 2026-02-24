@@ -542,11 +542,11 @@ TCollection_AsciiString OpenGl_Text::FontKey (const OpenGl_Aspects& theAspect,
   const TCollection_AsciiString& aFont = !theAspect.Aspect()->TextFont().IsNull() ? theAspect.Aspect()->TextFont()->String() : THE_DEFAULT_FONT;
 
   char aSuff[64];
-  Sprintf (aSuff, ":%d:%d:%d:%d",
-           Standard_Integer(anAspect),
-           Standard_Integer(theResolution),
-           theHeight,
-           Standard_Integer(theFontHinting));
+  Snprintf (aSuff, ":%d:%d:%d:%d",
+            Standard_Integer(anAspect),
+            Standard_Integer(theResolution),
+            theHeight,
+            Standard_Integer(theFontHinting));
   return aFont + aSuff;
 }
 
