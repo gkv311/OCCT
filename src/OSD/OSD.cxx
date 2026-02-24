@@ -22,10 +22,11 @@ Standard_Boolean OSD::RealToCString(const Standard_Real aReal,
 				    Standard_PCharacter& aString)
 {
   char *p, *q ;
-  
+  Standard_DISABLE_DEPRECATION_WARNINGS
   if (Sprintf(aString,"%.17e",aReal)  <= 0) //BUC60808
     return Standard_False ;
 
+  Standard_ENABLE_DEPRECATION_WARNINGS
   // Suppress "e+00" and insignificant 0's 
 
   p = strchr(aString,'e');

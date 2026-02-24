@@ -116,7 +116,7 @@ void DrawTrSurf_Triangulation::DrawOn (Draw_Display& dis) const
     dis.SetColor(Draw_jaune);
     n = myTriangulation->NbNodes();
     for (i = 1; i <= n; i++) {
-      Sprintf(text,"%d",i);
+      Snprintf(text,"%d",i);
       dis.DrawString (myTriangulation->Node (i), text);
     }
   }
@@ -133,7 +133,7 @@ void DrawTrSurf_Triangulation::DrawOn (Draw_Display& dis) const
 	bary.Add (myTriangulation->Node (t[j]).Coord());
       bary.Multiply(1./3.);
 
-      Sprintf(text,"%d",i);
+      Snprintf(text,"%d",i);
       dis.DrawString(P,text);
     }
   }

@@ -78,7 +78,7 @@ static void SetTitle(const Standard_Integer id)
 {
   if (dout.HasView(id)) {
     char title[255];
-    Sprintf(title,"%d : %s - Zoom %f",id,dout.GetType(id),dout.Zoom(id));
+    Snprintf(title,"%d : %s - Zoom %f",id,dout.GetType(id),dout.Zoom(id));
     dout.SetTitle(id,title);
   }
 }

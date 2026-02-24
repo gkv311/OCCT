@@ -951,7 +951,7 @@ static void SegvHandler(const int theSignal,
     void* anAddress = theSigInfo->si_addr;
     {
       char aMsg[100];
-      sprintf (aMsg, "SIGSEGV 'segmentation violation' detected. Address %lx.", (long )anAddress);
+      Snprintf (aMsg, "SIGSEGV 'segmentation violation' detected. Address %lx.", (long )anAddress);
 
       const int aStackLength = OSD_SignalStackTraceLength;
       const int aStackBufLen = Max (aStackLength * 200, 2048);
@@ -988,7 +988,7 @@ static void SegvHandler(const int theSignal,
     unsigned long anOffset = ((struct sigcontext *)theContext)->sc_sl.sl_ss.ss_cr21;
     {
       char aMsg[100];
-      sprintf (aMsg, "SIGSEGV 'segmentation violation' detected. Address %lx", anOffset);
+      Snprintf (aMsg, "SIGSEGV 'segmentation violation' detected. Address %lx", anOffset);
       OSD_SIGSEGV::NewInstance (aMsg)->Jump();
     }
   }

@@ -146,17 +146,17 @@ namespace
     theStream << std::setfill(' ') << std::setw (theWidth);
     if (aHours > 0)
     {
-      Sprintf (aBuffer, "%02u:%02u:%02u", aHours, aMinutes, aSeconds);
+      Snprintf (aBuffer, "%02u:%02u:%02u", aHours, aMinutes, aSeconds);
       theStream << aBuffer;
     }
     else if (aMinutes > 0)
     {
-      Sprintf (aBuffer, "%02u:%02u", aMinutes, aSeconds);
+      Snprintf (aBuffer, "%02u:%02u", aMinutes, aSeconds);
       theStream << aBuffer;
     }
     else if (aSeconds > 0)
     {
-      Sprintf (aBuffer, "%2u s", aSeconds);
+      Snprintf (aBuffer, "%2u s", aSeconds);
       theStream << aBuffer;
     }
     else
@@ -186,7 +186,7 @@ namespace
                        const Standard_Real                   theValue)
   {
     char aTmp[50];
-    Sprintf (aTmp, "%.1g", theValue);
+    Snprintf (aTmp, "%.1g", theValue);
     addInfo (theDict, theKey, aTmp);
   }
 
@@ -196,7 +196,7 @@ namespace
                        const Standard_Size                   theValue)
   {
     char aTmp[50];
-    Sprintf (aTmp, "%zu", theValue);
+    Snprintf (aTmp, "%zu", theValue);
     addInfo (theDict, theKey, aTmp);
   }
 
@@ -217,15 +217,15 @@ namespace
     char aBuffer[64];
     if (aHours > 0)
     {
-      Sprintf (aBuffer, "%02u:%02u:%02u", aHours, aMinutes, aSeconds);
+      Snprintf (aBuffer, "%02u:%02u:%02u", aHours, aMinutes, aSeconds);
     }
     else if (aMinutes > 0)
     {
-      Sprintf (aBuffer, "%02u:%02u", aMinutes, aSeconds);
+      Snprintf (aBuffer, "%02u:%02u", aMinutes, aSeconds);
     }
     else if (aSeconds > 0)
     {
-      Sprintf (aBuffer, "%2u", aSeconds);
+      Snprintf (aBuffer, "%2u", aSeconds);
     }
     else
     {

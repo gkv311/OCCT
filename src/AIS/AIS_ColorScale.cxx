@@ -154,7 +154,7 @@ TCollection_ExtendedString AIS_ColorScale::GetLabel (const Standard_Integer theI
                            : (0.5 * (GetIntervalValue (theIndex - 1) + GetIntervalValue (theIndex)));
 
   char aBuf[1024];
-  sprintf (aBuf, myFormat.ToCString(), aVal);
+  snprintf (aBuf, sizeof(aBuf), myFormat.ToCString(), aVal);
   return TCollection_ExtendedString (aBuf);
 }
 

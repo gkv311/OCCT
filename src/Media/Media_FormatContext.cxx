@@ -54,19 +54,19 @@ namespace
     char aBuff[256];
     if(aVal == 0)
     {
-      Sprintf (aBuff, "%1.4f", theVal);
+      Snprintf (aBuff, "%1.4f", theVal);
     }
     else if (aVal % 100)
     {
-      Sprintf (aBuff, "%3.2f", theVal);
+      Snprintf (aBuff, "%3.2f", theVal);
     }
     else if (aVal % (100 * 1000))
     {
-      Sprintf (aBuff, "%1.0f", theVal);
+      Snprintf (aBuff, "%1.0f", theVal);
     }
     else
     {
-      Sprintf (aBuff, "%1.0fk", theVal / 1000);
+      Snprintf (aBuff, "%1.0fk", theVal / 1000);
     }
     return aBuff;
   }
@@ -590,17 +590,17 @@ TCollection_AsciiString Media_FormatContext::FormatTime (double theSeconds)
   char aBuffer[64];
   if (aHours > 0)
   {
-    Sprintf (aBuffer, "%02u:%02u:%02u", aHours, aMinutes, aSeconds);
+    Snprintf (aBuffer, "%02u:%02u:%02u", aHours, aMinutes, aSeconds);
     return aBuffer;
   }
   else if (aMinutes > 0)
   {
-    Sprintf (aBuffer, "%02u:%02u", aMinutes, aSeconds);
+    Snprintf (aBuffer, "%02u:%02u", aMinutes, aSeconds);
     return aBuffer;
   }
   else if (aSeconds > 0)
   {
-    Sprintf (aBuffer, "%2u s", aSeconds);
+    Snprintf (aBuffer, "%2u s", aSeconds);
     return aBuffer;
   }
 
@@ -634,10 +634,10 @@ TCollection_AsciiString Media_FormatContext::FormatTimeProgress (double theProgr
   if (aHours1 > 0
    || aHours2 > 0)
   {
-    Sprintf (aBuffer, "%02u:%02u:%02u / %02u:%02u:%02u", aHours1, aMinutes1, aSeconds1, aHours2, aMinutes2, aSeconds2);
+    Snprintf (aBuffer, "%02u:%02u:%02u / %02u:%02u:%02u", aHours1, aMinutes1, aSeconds1, aHours2, aMinutes2, aSeconds2);
     return aBuffer;
   }
-  Sprintf (aBuffer, "%02u:%02u / %02u:%02u", aMinutes1, aSeconds1, aMinutes2, aSeconds2);
+  Snprintf (aBuffer, "%02u:%02u / %02u:%02u", aMinutes1, aSeconds1, aMinutes2, aSeconds2);
   return aBuffer;
 }
 

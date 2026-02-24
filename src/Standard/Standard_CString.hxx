@@ -89,7 +89,11 @@ Standard_EXPORT int Printf (const char* theFormat, ...);
 Standard_EXPORT int Fprintf (FILE* theFile, const char* theFormat, ...);
 
 //! Equivalent of standard C function sprintf() that always uses C locale
+Standard_DEPRECATED("Snprintf should be used instead")
 Standard_EXPORT int Sprintf (char* theBuffer, const char* theFormat, ...);
+
+//! Equivalent of standard C function snprintf() that always uses C locale
+Standard_EXPORT int Snprintf(char* theBuffer, const size_t theSize, const char* theFormat, ...);
 
 //! Equivalent of standard C function vsprintf() that always uses C locale.
 //! Note that this function does not check buffer bounds and should be used with precaution measures
@@ -98,10 +102,32 @@ Standard_EXPORT int Sprintf (char* theBuffer, const char* theFormat, ...);
 //! @param[in] theFormat   format to apply
 //! @param[in] theArgList  argument list for specified format
 //! @return the total number of characters written, or a negative number on error
+Standard_DEPRECATED("Vsnprintf should be used instead")
 Standard_EXPORT int Vsprintf (char* theBuffer, const char* theFormat, va_list theArgList);
+
+//! Equivalent of standard C function vsnprintf() that always uses C locale.
+//! The function truncates the text when it doesn't fits into buffer bounds.
+//! @param[in][out] theBuffer   string buffer to fill
+//! @param[in]      theSize     the buffer size
+//! @param[in]      theFormat   format to apply
+//! @param[in]      theArgList  argument list for specified format
+//! @return the total number of characters written, or a negative number on error
+Standard_EXPORT int Vsnprintf(char* theBuffer, const size_t theSize, const char* theFormat, va_list theArgList);
 
 #ifdef __cplusplus
 }
+
+//! Helper C++ template for fixed-size buffers.
+template<size_t theSize>
+inline int Snprintf(char(&theBuffer)[theSize], const char* theFormat, ...)
+{
+  va_list argp;
+  va_start(argp, theFormat);
+  const int aResult = Vsnprintf(theBuffer, theSize, theFormat, argp);
+  va_end(argp);
+  return aResult;
+}
+
 #endif /* __cplusplus */
 
 #endif

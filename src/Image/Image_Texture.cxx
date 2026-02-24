@@ -54,7 +54,7 @@ Image_Texture::Image_Texture (const TCollection_AsciiString& theFileName,
   if (!theFileName.IsEmpty())
   {
     char aBuff[60];
-    Sprintf (aBuff, ";%" PRId64 ",%" PRId64, theOffset, theLength);
+    Snprintf (aBuff, ";%" PRId64 ",%" PRId64, theOffset, theLength);
     myTextureId = TCollection_AsciiString ("texture://") + theFileName + aBuff;
   }
 }

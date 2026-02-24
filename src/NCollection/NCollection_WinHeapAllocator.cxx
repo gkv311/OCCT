@@ -73,7 +73,7 @@ void* NCollection_WinHeapAllocator::Allocate (const Standard_Size theSize)
   if (aResult == NULL)
   {
     char aBuf[128];
-    Sprintf (aBuf, "Failed to allocate %" PRIuPTR " bytes in local dynamic heap", theSize);
+    Snprintf (aBuf, "Failed to allocate %" PRIuPTR " bytes in local dynamic heap", theSize);
     throw Standard_OutOfMemory(aBuf);
   }
   return aResult;
