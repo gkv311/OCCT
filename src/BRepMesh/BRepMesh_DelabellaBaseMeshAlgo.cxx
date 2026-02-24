@@ -36,7 +36,7 @@ namespace
 
     va_list anArgList;
     va_start(anArgList, theFormat);
-    Vsprintf(aBuffer, theFormat, anArgList);
+    Vsnprintf(aBuffer, sizeof(aBuffer), theFormat, anArgList);
     va_end(anArgList);
 
     Message_Gravity aGravity = Message_Warning;

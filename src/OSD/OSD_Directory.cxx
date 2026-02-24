@@ -136,7 +136,7 @@ void OSD_Directory::Build (const OSD_Protection& theProtect)
   if (aStatus == -1 && errno != EEXIST)
   {
     char anErrMsg[2048];
-    Sprintf (anErrMsg, "OSD_Directory::Build Directory \"%.2000s\"", aBuffer.ToCString());
+    Snprintf (anErrMsg, "OSD_Directory::Build Directory \"%.2000s\"", aBuffer.ToCString());
     myError.SetValue (errno, Iam, anErrMsg);
   }
 #endif

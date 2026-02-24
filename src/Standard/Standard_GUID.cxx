@@ -295,9 +295,12 @@ void Standard_GUID::Assign (const Standard_UUID& theUUID)
 //function : ToCString
 //purpose  : 
 //=======================================================================
-void Standard_GUID::ToCString(const Standard_PCharacter aStrGuid) const
+void Standard_GUID::ToCString(char* aStrGuid, const size_t theSize) const
 {
-  sprintf(aStrGuid,"%.8x-%.4x-%.4x-%.4x-%.2x%.2x%.2x%.2x%.2x%.2x",
+  if (theSize < Standard_GUID_SIZE_ALLOC)
+    throw Standard_RangeError ("Standard_GUID::ToCString() buffer of insufficient size");
+
+  Snprintf(aStrGuid, theSize,"%.8x-%.4x-%.4x-%.4x-%.2x%.2x%.2x%.2x%.2x%.2x",
 	  my32b,
 	  (unsigned short) my16b1,
 	  (unsigned short) my16b2,
@@ -314,16 +317,20 @@ void Standard_GUID::ToCString(const Standard_PCharacter aStrGuid) const
 //function : ToExtString
 //purpose  : 
 //=======================================================================
-void Standard_GUID::ToExtString(const Standard_PExtCharacter aStrGuid) const
+void Standard_GUID::ToExtString(Standard_ExtCharacter* theBuf, const size_t theSize) const
 {
-  Standard_Character sguid[Standard_GUID_SIZE_ALLOC];
-  ToCString(sguid);
+  if (theSize < Standard_GUID_SIZE_ALLOC)
+    throw Standard_RangeError("Standard_GUID::ToExtString() buffer of insufficient size");
 
-  for(Standard_Integer i = 0; i < Standard_GUID_SIZE; i++) {
-    aStrGuid[i] = (Standard_ExtCharacter)sguid[i];
+  char sguid[Standard_GUID_SIZE_ALLOC];
+  ToCString(sguid, Standard_GUID_SIZE_ALLOC);
+
+  for (Standard_Integer i = 0; i < Standard_GUID_SIZE; i++)
+  {
+    theBuf[i] = (Standard_ExtCharacter)sguid[i];
   }
 
-  aStrGuid[Standard_GUID_SIZE] = (Standard_ExtCharacter)0;
+  theBuf[Standard_GUID_SIZE] = (Standard_ExtCharacter)0;
 }
 
 Standard_UUID Standard_GUID::ToUUID() const
@@ -383,8 +390,8 @@ void Standard_GUID::Assign(const Standard_GUID& uid)
 
 void Standard_GUID::ShallowDump(Standard_OStream& aStream) const
 {
-  Standard_Character sguid[Standard_GUID_SIZE_ALLOC];
-  ToCString(sguid);
+  char sguid[Standard_GUID_SIZE_ALLOC];
+  ToCString(sguid, Standard_GUID_SIZE_ALLOC);
   aStream << sguid;
 }
 
@@ -404,7 +411,7 @@ Standard_Integer Standard_GUID::Hash(const Standard_Integer Upper) const
   }
 
   char sguid[Standard_GUID_SIZE_ALLOC];
-  ToCString(sguid);
+  ToCString(sguid, Standard_GUID_SIZE_ALLOC);
 
   return ::HashCode(sguid,Upper);
 }

@@ -150,7 +150,7 @@
   TCollection_AsciiString aName = Standard_Dump::DumpFieldToName (#theField); \
   Standard_Dump::AddValuesSeparator (theOStream); \
   char aStr[Standard_GUID_SIZE_ALLOC]; \
-  theField.ToCString (aStr); \
+  theField.ToCString (aStr, sizeof(aStr)); \
   theOStream << "\"" << aName << "\": \"" << aStr << "\""; \
 }
 
