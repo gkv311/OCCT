@@ -213,7 +213,7 @@ TCollection_ExtendedString::TCollection_ExtendedString
 {
   union {int bid ;
          char t [13];} CHN ;
-  Sprintf(&CHN.t[0],"%d",aValue);
+  Snprintf(CHN.t, "%d", aValue);
   mylength = (int)strlen(CHN.t);
   mystring = allocateExtChars (mylength);
   for (int i = 0 ; i < mylength ; i++) mystring[i] = ToExtCharacter(CHN.t[i]);
@@ -228,7 +228,7 @@ TCollection_ExtendedString::TCollection_ExtendedString
 {
   union {int bid ;
          char t [50];} CHN ;
-  Sprintf(&CHN.t[0],"%g",aValue);
+  Snprintf(CHN.t, "%g", aValue);
   mylength = (int)strlen( CHN.t );
   mystring = allocateExtChars (mylength);
   for (int i = 0 ; i < mylength ; i++) mystring[i] = ToExtCharacter(CHN.t[i]);

@@ -151,11 +151,11 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
       def.AssignCat("Integer");
       Standard_Integer ilim;
       if (IntegerLimit(Standard_False, ilim)) {
-	Sprintf(mess,"  >= %d",ilim);
+	Snprintf(mess,"  >= %d",ilim);
 	def.AssignCat(mess);
       }
       if (IntegerLimit(Standard_True,  ilim)) {
-	Sprintf(mess,"  <= %d",ilim);
+	Snprintf(mess,"  <= %d",ilim);
 	def.AssignCat(mess);
       }
     }
@@ -164,11 +164,11 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
       def.AssignCat("Real");
       Standard_Real rlim;
       if (RealLimit(Standard_False, rlim)) {
-	Sprintf(mess,"  >= %f",rlim);
+	Snprintf(mess,"  >= %f",rlim);
 	def.AssignCat(mess);
       }
       if (RealLimit(Standard_True,  rlim)) {
-	Sprintf(mess,"  <= %f",rlim);
+	Snprintf(mess,"  <= %f",rlim);
 	def.AssignCat(mess);
       }
       if (theunidef.Length() > 0)
@@ -180,12 +180,12 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
       Standard_Integer startcase=0, endcase=0;
       Standard_Boolean match=0;
       EnumDef (startcase,endcase,match);
-      Sprintf(mess," [%s%d-%d]",(match ? "in " : ""),startcase,endcase);
+      Snprintf(mess," [%s%d-%d]",(match ? "in " : ""),startcase,endcase);
       def.AssignCat(mess);
       for (Standard_Integer i = startcase; i <= endcase; i ++) {
 	Standard_CString enva = EnumVal(i);
 	if (enva[0] == '?' || enva[0] == '\0') continue;
-	Sprintf(mess," %d:%s",i,enva);
+	Snprintf(mess," %d:%s",i,enva);
 	def.AssignCat (mess);
       }
       if (!theeadds.IsEmpty()) {
@@ -195,7 +195,7 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
           const TCollection_AsciiString& aName = listadd.Key();
           Standard_CString enva = aName.ToCString();
           if (enva[0] == '?') continue;
-          Sprintf(mess,":%d ",listadd.Value());
+          Snprintf(mess,":%d ",listadd.Value());
           def.AssignCat (enva);
           def.AssignCat (mess);
         }
@@ -213,7 +213,7 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
     case MoniTool_ValueText    : {
       def.AssignCat("Text");
       if (themaxlen > 0) {
-	Sprintf (mess," <= %d C.",themaxlen);
+	Snprintf (mess," <= %d C.",themaxlen);
 	def.AssignCat (mess);
       }
       break;

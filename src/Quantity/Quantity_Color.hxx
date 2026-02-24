@@ -196,8 +196,8 @@ public:
     NCollection_Vec3<Standard_ShortReal> anSRgb = Convert_LinearRGB_To_sRGB ((NCollection_Vec3<Standard_ShortReal> )theColor);
     NCollection_Vec3<Standard_Integer> anSRgbInt (anSRgb * 255.0f + NCollection_Vec3<Standard_ShortReal> (0.5f));
     char aBuff[10];
-    Sprintf (aBuff, theToPrefixHash ? "#%02X%02X%02X" : "%02X%02X%02X",
-             anSRgbInt.r(), anSRgbInt.g(), anSRgbInt.b());
+    Snprintf (aBuff, theToPrefixHash ? "#%02X%02X%02X" : "%02X%02X%02X",
+              anSRgbInt.r(), anSRgbInt.g(), anSRgbInt.b());
     return aBuff;
   }
 

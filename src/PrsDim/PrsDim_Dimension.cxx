@@ -273,11 +273,11 @@ TCollection_ExtendedString PrsDim_Dimension::GetValueString (Standard_Real& theW
   }
   else
   {
-    // format value string using "sprintf"
+    // format value string using "snprintf"
     TCollection_AsciiString aFormatStr = myDrawer->DimensionAspect()->ValueStringFormat();
 
     char aFmtBuffer[256];
-    sprintf (aFmtBuffer, aFormatStr.ToCString(), ValueToDisplayUnits());
+    snprintf (aFmtBuffer, sizeof(aFmtBuffer), aFormatStr.ToCString(), ValueToDisplayUnits());
     aValueStr = TCollection_ExtendedString (aFmtBuffer);
   }
 

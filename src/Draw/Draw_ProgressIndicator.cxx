@@ -195,7 +195,7 @@ void Draw_ProgressIndicator::Show (const Message_ProgressScope& theScope, const 
     const TCollection_AsciiString aTclResStr (myDraw->Result());
     if ( ! myShown ) {
       char command[1024];
-      Sprintf ( command, "toplevel .xprogress -height 100 -width 410;"
+      Snprintf (command, "toplevel .xprogress -height 100 -width 410;"
                          "wm title .xprogress \"Progress\";"
                          "set xprogress_stop 0;"
                          "canvas .xprogress.bar -width 402 -height 22;"
