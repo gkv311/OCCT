@@ -18,7 +18,7 @@
 #include <gp_Dir.hxx>
 #include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
-#include <gp_Trsf.hxx>
+#include <gp_GTrsf.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_Dump.hxx>
 
@@ -302,10 +302,28 @@ Standard_Boolean Bnd_Box::IsThin (const Standard_Real tol) const
 
 //=======================================================================
 //function : Transformed
-//purpose  : 
+//purpose  :
 //=======================================================================
+Bnd_Box Bnd_Box::Transformed(const gp_Trsf& T) const
+{
+  return transformed(T);
+}
 
-Bnd_Box Bnd_Box::Transformed (const gp_Trsf& T) const
+//=======================================================================
+//function : Transformed
+//purpose  :
+//=======================================================================
+Bnd_Box Bnd_Box::Transformed(const gp_GTrsf& T) const
+{
+  return transformed(T);
+}
+
+//=======================================================================
+//function : transformed
+//purpose  :
+//=======================================================================
+template<class Trsf_t>
+Bnd_Box Bnd_Box::transformed(const Trsf_t& T) const
 {
   if (IsVoid())
   {

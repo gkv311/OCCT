@@ -108,9 +108,8 @@ Standard_Boolean BRepTools_GTrsfModification::NewSurface
     Handle(Geom_BSplineSurface) S2 = Handle(Geom_BSplineSurface)::DownCast(S);
     for(Standard_Integer i = 1; i <= S2->NbUPoles(); i++) 
       for(Standard_Integer j = 1; j <= S2->NbVPoles(); j++) {
-	gp_XYZ coor(S2->Pole(i, j).Coord());
-	gtrsf.Transforms(coor);
-	gp_Pnt P(coor);
+	gp_Pnt P(S2->Pole(i, j));
+	P.Transform(gtrsf);
 	S2->SetPole(i, j, P);
       }
   }
@@ -119,9 +118,8 @@ Standard_Boolean BRepTools_GTrsfModification::NewSurface
       Handle(Geom_BezierSurface) S2 = Handle(Geom_BezierSurface)::DownCast(S);
       for(Standard_Integer i = 1; i <= S2->NbUPoles(); i++) 
 	for(Standard_Integer j = 1; j <= S2->NbVPoles(); j++) {
-	  gp_XYZ coor(S2->Pole(i, j).Coord());
-	  gtrsf.Transforms(coor);
-	  gp_Pnt P(coor);
+	  gp_Pnt P(S2->Pole(i, j));
+	  P.Transform(gtrsf);
 	  S2->SetPole(i, j, P);
 	}
     }
@@ -158,9 +156,8 @@ Standard_Boolean BRepTools_GTrsfModification::NewCurve
     if (TheTypeC == STANDARD_TYPE(Geom_BSplineCurve)) {
       Handle(Geom_BSplineCurve) C2 = Handle(Geom_BSplineCurve)::DownCast(C);
       for(Standard_Integer i = 1; i <= C2->NbPoles(); i++) {
-	gp_XYZ coor(C2->Pole(i).Coord());
-	gtrsf.Transforms(coor);
-	gp_Pnt P(coor);
+	gp_Pnt P(C2->Pole(i));
+	P.Transform(gtrsf);
 	C2->SetPole(i, P);
       }
     }
@@ -168,9 +165,8 @@ Standard_Boolean BRepTools_GTrsfModification::NewCurve
       if(TheTypeC == STANDARD_TYPE(Geom_BezierCurve)) {
 	Handle(Geom_BezierCurve) C2 = Handle(Geom_BezierCurve)::DownCast(C);
 	for(Standard_Integer i = 1; i <= C2->NbPoles(); i++) {
-	  gp_XYZ coor(C2->Pole(i).Coord());
-	  gtrsf.Transforms(coor);
-	  gp_Pnt P(coor);
+	  gp_Pnt P(C2->Pole(i));
+	  P.Transform(gtrsf);
 	  C2->SetPole(i, P);
 	}
       }
@@ -193,13 +189,10 @@ Standard_Boolean BRepTools_GTrsfModification::NewPoint
  gp_Pnt& P, 
  Standard_Real& Tol)
 {
-  gp_Pnt Pnt = BRep_Tool::Pnt(V);
+  P = BRep_Tool::Pnt(V);
+  P.Transform(myGTrsf);
   Tol = BRep_Tool::Tolerance(V);
   Tol *= myGScale;
-  gp_XYZ coor(Pnt.Coord());
-  myGTrsf.Transforms(coor);
-  P.SetXYZ(coor);
-
   return Standard_True;
 }
 
@@ -290,7 +283,7 @@ Standard_Boolean BRepTools_GTrsfModification::NewTriangulation(const TopoDS_Face
   for (Standard_Integer anInd = 1; anInd <= theTriangulation->NbNodes(); ++anInd)
   {
     gp_Pnt aP = theTriangulation->Node(anInd);
-    aGTrsf.Transforms(aP.ChangeCoord());
+    aP.Transform(aGTrsf);
     theTriangulation->SetNode(anInd, aP);
   }
   // modify triangles orientation in case of mirror transformation
@@ -311,12 +304,8 @@ Standard_Boolean BRepTools_GTrsfModification::NewTriangulation(const TopoDS_Face
     for (Standard_Integer anInd = 1; anInd <= theTriangulation->NbNodes(); ++anInd)
     {
       gp_Dir aNormal = theTriangulation->Normal(anInd);
-      // Normal is transformed by transposed inverse of the applied matrix,
-      // see the OpenGL Red Book, Appendix F
-      gp_Mat aMat = aGTrsf.VectorialPart();
-      aMat.Invert();
-      aMat.Transpose();
-      theTriangulation->SetNormal(anInd, aNormal.XYZ().Multiplied(aMat));
+      aNormal.Transform(aGTrsf);
+      theTriangulation->SetNormal(anInd, aNormal);
     }
   }
 
@@ -350,7 +339,7 @@ Standard_Boolean BRepTools_GTrsfModification::NewPolygon(const TopoDS_Edge&     
   for (Standard_Integer anId = aNodesArray.Lower(); anId <= aNodesArray.Upper(); ++anId)
   {
     gp_Pnt& aP = aNodesArray.ChangeValue(anId);
-    aGTrsf.Transforms(aP.ChangeCoord());
+    aP.Transform(aGTrsf);
   }
   return Standard_True;
 }

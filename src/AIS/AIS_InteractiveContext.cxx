@@ -3515,6 +3515,9 @@ TopoDS_Shape AIS_InteractiveContext::SelectedShape() const
     return TopoDS_Shape();
   }
 
+  if (!anOwner->HasLocation())
+    return anOwner->Shape();
+
   return anOwner->Shape().Located (anOwner->Location() * anOwner->Shape().Location());
 }
 
