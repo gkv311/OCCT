@@ -405,21 +405,14 @@ Handle(SelectMgr_BaseIntersector) SelectMgr_RectangularFrustum::ScaleAndTransfor
   {
     const Standard_Real aRefScale = aRef->myFarPickedPnt.SquareDistance (aRef->myNearPickedPnt);
 
-    gp_Pnt aPoint = aRef->myNearPickedPnt;
-    theTrsf.Transforms (aPoint.ChangeCoord());
-    aRes->myNearPickedPnt = aPoint;
-
-    aPoint.SetXYZ (aRef->myFarPickedPnt.XYZ());
-    theTrsf.Transforms (aPoint.ChangeCoord());
-    aRes->myFarPickedPnt = aPoint;
+    aRes->myNearPickedPnt = aRef->myNearPickedPnt.Transformed (theTrsf);
+    aRes->myFarPickedPnt = aRef->myFarPickedPnt.Transformed (theTrsf);
 
     aRes->myViewRayDir = aRes->myFarPickedPnt.XYZ() - aRes->myNearPickedPnt.XYZ();
 
     for (Standard_Integer anIt = 0; anIt < 8; anIt++)
     {
-      aPoint = aRef->myVertices[anIt];
-      theTrsf.Transforms (aPoint.ChangeCoord());
-      aRes->myVertices[anIt] = aPoint;
+      aRes->myVertices[anIt] = aRef->myVertices[anIt].Transformed (theTrsf);
     }
 
     // Horizontal

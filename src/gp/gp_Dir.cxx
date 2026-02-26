@@ -17,7 +17,7 @@
 #include <gp_Dir.hxx>
 
 #include <gp_Ax2.hxx>
-#include <gp_Trsf.hxx>
+#include <gp_GTrsf.hxx>
 #include <gp_XYZ.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_DomainError.hxx>
@@ -116,6 +116,42 @@ void gp_Dir::Transform (const gp_Trsf& T)
     coord.Divide(D);
     if (T.ScaleFactor() < 0.0) { coord.Reverse(); }
   } 
+}
+
+void gp_Dir::Transform(const gp_GTrsf& T)
+{
+  if (T.Form() == gp_Identity || T.Form() == gp_Translation)
+  {
+    //
+  }
+  else if (T.Form() == gp_PntMirror)
+  {
+    coord.Reverse();
+  }
+  else if (T.Form() == gp_Scale)
+  {
+    if (T.ScaleFactor() < 0.0) { coord.Reverse(); }
+  }
+  else if (T.Form() == gp_Other)
+  {
+    // Normal is transformed by transposed inverse of the applied matrix,
+    // see the OpenGL Red Book, Appendix F
+    gp_Mat aMat = T.VectorialPart();
+    aMat.Invert();
+    aMat.Transpose();
+    coord.Multiply(aMat);
+    Standard_Real D = coord.Modulus();
+    coord.Divide(D);
+    if (T.ScaleFactor() < 0.0) { coord.Reverse(); }
+  }
+  else
+  {
+    // should be like gp_Trsf::HVectorialPart() in this case
+    coord.Multiply(T.VectorialPart());
+    Standard_Real D = coord.Modulus();
+    coord.Divide(D);
+    if (T.ScaleFactor() < 0.0) { coord.Reverse(); }
+  }
 }
 
 gp_Dir gp_Dir::Mirrored (const gp_Dir& V) const
