@@ -139,9 +139,7 @@ void OpenGl_Structure::SetTransformation (const Handle(TopLoc_Datum3D)& theTrsf)
   {
     // Determinant of transform matrix less then 0 means that mirror transform applied.
     const gp_Trsf& aTrsf = myTrsf->Transformation();
-    const Standard_Real aDet = aTrsf.Value(1, 1) * (aTrsf.Value (2, 2) * aTrsf.Value (3, 3) - aTrsf.Value (3, 2) * aTrsf.Value (2, 3))
-                             - aTrsf.Value(1, 2) * (aTrsf.Value (2, 1) * aTrsf.Value (3, 3) - aTrsf.Value (3, 1) * aTrsf.Value (2, 3))
-                             + aTrsf.Value(1, 3) * (aTrsf.Value (2, 1) * aTrsf.Value (3, 2) - aTrsf.Value (3, 1) * aTrsf.Value (2, 2));
+    const Standard_Real aDet = aTrsf.HVectorialPart().Determinant() * aTrsf.ScaleFactor();
     myIsMirrored = aDet < 0.0;
   }
 

@@ -162,9 +162,7 @@ Handle(SelectMgr_BaseIntersector) SelectMgr_TriangularFrustum::ScaleAndTransform
 
   for (Standard_Integer anIt = 0; anIt < 6; anIt++)
   {
-    gp_Pnt aPoint = myVertices[anIt];
-    theTrsf.Transforms (aPoint.ChangeCoord());
-    aRes->myVertices[anIt] = aPoint;
+    aRes->myVertices[anIt] = myVertices[anIt].Transformed (theTrsf);
   }
 
   // V0_Near - V0_Far

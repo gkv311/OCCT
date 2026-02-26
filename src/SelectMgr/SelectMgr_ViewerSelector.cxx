@@ -115,7 +115,7 @@ void SelectMgr_ViewerSelector::updatePoint3d (SelectMgr_SortCriterion& theCriter
   if (anInvTrsf.Form() != gp_Identity)
   {
     const gp_GTrsf anInvInvTrsd = anInvTrsf.Inverted();
-    anInvInvTrsd.Transforms (theCriterion.Point.ChangeCoord());
+    theCriterion.Point.Transform (anInvInvTrsd);
     if (hasNormal)
     {
       Graphic3d_Mat4d aMat4;

@@ -21,25 +21,38 @@
 #include <gp_Pnt.hxx>
 
 #include <gp_Ax2.hxx>
-#include <gp_Trsf.hxx>
+#include <gp_GTrsf.hxx>
 #include <gp_Vec.hxx>
 #include <gp_XYZ.hxx>
 #include <Standard_Dump.hxx>
 #include <Standard_OutOfRange.hxx>
 
-void gp_Pnt::Transform (const gp_Trsf& T)
+template<class Trsf_t>
+static void transform(gp_XYZ& theCoord, const Trsf_t& T)
 {
-  if (T.Form() == gp_Identity) { }
-  else if (T.Form() == gp_Translation) { coord.Add (T.TranslationPart ()); }
-  else if (T.Form() == gp_Scale) {
-    coord.Multiply (T.ScaleFactor ());
-    coord.Add      (T.TranslationPart ());
+  if (T.Form() == gp_Identity) {}
+  else if (T.Form() == gp_Translation) { theCoord.Add(T.TranslationPart()); }
+  else if (T.Form() == gp_Scale)
+  {
+    theCoord.Multiply(T.ScaleFactor());
+    theCoord.Add(T.TranslationPart());
   }
-  else if(T.Form() == gp_PntMirror) {
-    coord.Reverse ();
-    coord.Add     (T.TranslationPart ());
+  else if (T.Form() == gp_PntMirror)
+  {
+    theCoord.Reverse();
+    theCoord.Add(T.TranslationPart());
   }
-  else { T.Transforms(coord); }
+  else { T.Transforms(theCoord); }
+}
+
+void gp_Pnt::Transform(const gp_Trsf& T)
+{
+  transform(coord, T);
+}
+
+void gp_Pnt::Transform(const gp_GTrsf& T)
+{
+  transform(coord, T);
 }
 
 void gp_Pnt::Mirror (const gp_Pnt& P)
