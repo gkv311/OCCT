@@ -23,6 +23,7 @@
 class gp_Vec;
 class gp_Ax1;
 class gp_Ax2;
+class gp_GTrsf;
 class gp_Trsf;
 
 //! Describes a unit vector in 3D space. This unit vector is also called "Direction".
@@ -265,6 +266,17 @@ public:
   {
     gp_Dir aV = *this;
     aV.Transform (theT);
+    return aV;
+  }
+
+  //! Transforms this direction with the given transformation.
+  Standard_EXPORT void Transform(const gp_GTrsf& theT);
+
+  //! Transforms a direction with the given transformation.
+  Standard_NODISCARD gp_Dir Transformed(const gp_GTrsf& theT) const
+  {
+    gp_Dir aV = *this;
+    aV.Transform(theT);
     return aV;
   }
 

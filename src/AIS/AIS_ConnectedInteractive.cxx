@@ -210,9 +210,7 @@ void AIS_ConnectedInteractive::ComputeSelection (const Handle(SelectMgr_Selectio
 
   const Handle(SelectMgr_Selection)& TheRefSel = myReference->Selection (theMode);
   Handle(SelectMgr_EntityOwner) anOwner = new SelectMgr_EntityOwner (this);
-
-  TopLoc_Location aLocation (Transformation());
-  anOwner->SetLocation (aLocation);
+  anOwner->SetLocation (!TransformationGeom().IsNull() ? TopLoc_Location(TransformationGeom()) : TopLoc_Location());
 
   if (TheRefSel->IsEmpty())
   {

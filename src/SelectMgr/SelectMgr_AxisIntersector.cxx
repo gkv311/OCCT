@@ -81,14 +81,12 @@ Handle(SelectMgr_BaseIntersector) SelectMgr_AxisIntersector::ScaleAndTransform (
   }
 
   gp_Pnt aTransformedLoc = myAxis.Location();
-  theTrsf.Transforms (aTransformedLoc.ChangeCoord());
-  gp_XYZ aTransformedDir = myAxis.Direction().XYZ();
-  gp_GTrsf aTrsf = theTrsf;
-  aTrsf.SetTranslationPart (gp_XYZ(0., 0., 0.));
-  aTrsf.Transforms (aTransformedDir);
+  aTransformedLoc.Transform(theTrsf);
+  gp_Dir aTransformedDir = myAxis.Direction();
+  aTransformedDir.Transform(theTrsf);
 
   Handle(SelectMgr_AxisIntersector) aRes = new SelectMgr_AxisIntersector();
-  aRes->myAxis = gp_Ax1(aTransformedLoc, gp_Dir(aTransformedDir));
+  aRes->myAxis = gp_Ax1(aTransformedLoc, aTransformedDir);
   aRes->mySelectionType = mySelectionType;
   return aRes;
 }
