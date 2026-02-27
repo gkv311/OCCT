@@ -216,10 +216,15 @@ void IVtkOCC_ShapeMesher::addEdges()
     {
       aType = MT_BoundaryEdge;
     }
+    else if (aNbFaces == 2)
+    {
+      const TopoDS_Face& aFace1 = TopoDS::Face (aFaceList.First());
+      const TopoDS_Face& aFace2 = TopoDS::Face (aFaceList.Last());
+      aType = (BRep_Tool::Continuity(anOcctEdge, aFace1, aFace2) > GeomAbs_G2) ? MT_SeamEdge : MT_SharedEdge;
+    }
     else
     {
-      aType = (aNbFaces >= 2) && (BRep_Tool::MaxContinuity(anOcctEdge) > GeomAbs_G2) ?
-        MT_SeamEdge : MT_SharedEdge;
+      aType = MT_SharedEdge;
     }
     addEdge (anOcctEdge, GetShapeObj()->GetSubShapeId (anOcctEdge), aType);
     myEdgesTypes.Bind (anOcctEdge, aType);

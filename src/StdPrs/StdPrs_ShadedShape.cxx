@@ -330,8 +330,8 @@ namespace
       }
 
       // take one of the shared edges and get edge triangulation
-      const TopoDS_Face& aFace = TopoDS::Face (anEdgeIter.Value().First());
-      Handle(Poly_Triangulation) aTriangulation = BRep_Tool::Triangulation (aFace, aTrsf);
+      const TopoDS_Face& aFace1 = TopoDS::Face (anEdgeIter.Value().First());
+      Handle(Poly_Triangulation) aTriangulation = BRep_Tool::Triangulation (aFace1, aTrsf);
       if (aTriangulation.IsNull())
       {
         continue;
@@ -339,10 +339,11 @@ namespace
 
       const TopoDS_Edge& anEdge = TopoDS::Edge (anEdgeIter.Key());
       if (theUpperContinuity < GeomAbs_CN
-       && anEdgeIter.Value().Extent() >= 2
-       && BRep_Tool::MaxContinuity (anEdge) > theUpperContinuity)
+       && anEdgeIter.Value().Extent() == 2)
       {
-        continue;
+        const TopoDS_Face& aFace2 = TopoDS::Face (anEdgeIter.Value().Last());
+        if (BRep_Tool::Continuity (anEdge, aFace1, aFace2) > theUpperContinuity)
+          continue;
       }
 
       Handle(Poly_PolygonOnTriangulation) anEdgePoly = BRep_Tool::PolygonOnTriangulation (anEdge, aTriangulation, aTrsf);
@@ -379,8 +380,8 @@ namespace
         continue;
       }
 
-      const TopoDS_Face& aFace = TopoDS::Face (anEdgeIter.Value().First());
-      Handle(Poly_Triangulation) aTriangulation = BRep_Tool::Triangulation (aFace, aTrsf);
+      const TopoDS_Face& aFace1 = TopoDS::Face (anEdgeIter.Value().First());
+      Handle(Poly_Triangulation) aTriangulation = BRep_Tool::Triangulation (aFace1, aTrsf);
       if (aTriangulation.IsNull())
       {
         continue;
@@ -388,10 +389,11 @@ namespace
 
       const TopoDS_Edge& anEdge = TopoDS::Edge (anEdgeIter.Key());
       if (theUpperContinuity < GeomAbs_CN
-       && anEdgeIter.Value().Extent() >= 2
-       && BRep_Tool::MaxContinuity (anEdge) > theUpperContinuity)
+       && anEdgeIter.Value().Extent() == 2)
       {
-        continue;
+        const TopoDS_Face& aFace2 = TopoDS::Face (anEdgeIter.Value().Last());
+        if (BRep_Tool::Continuity (anEdge, aFace1, aFace2) > theUpperContinuity)
+          continue;
       }
 
       Handle(Poly_PolygonOnTriangulation) anEdgePoly = BRep_Tool::PolygonOnTriangulation (anEdge, aTriangulation, aTrsf);

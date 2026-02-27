@@ -1,0 +1,30 @@
+puts "========"
+puts "0029787: Visualization - Avoid in presentation edges of certain continuity class"
+puts "Test case creating an edge mistreated as smooth."
+puts "========"
+puts ""
+
+pload MODELING VISUALIZATION
+
+box     b1 -30 0 0 10 10 10
+psphere s1 10
+ttranslate s1 -30 0 0
+bfuse   r1 b1 s1
+
+box     b2 0 0 0 10 10 10
+psphere s2 10
+bfuse   r2 b2 s2
+
+box     b3 30 0 0 10 10 10
+psphere s3 10
+ttranslate s3 30 0 0
+bfuse   r3 b3 s3
+
+vinit View1
+vdisplay r1    -dispMode 0
+vdisplay r2 r3 -dispMode 1
+vfit
+vaspects r2 -faceBoundaryDraw 1 -faceBoundaryColor RED
+vaspects r3 -faceBoundaryDraw 1 -faceBoundaryColor RED -mostContinuity c2
+
+vdump $::imagedir/${::casename}.png
