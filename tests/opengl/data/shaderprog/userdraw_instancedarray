@@ -1,0 +1,12 @@
+puts "==========="
+puts "Extend vuserdraw with instanced array sample shader"
+puts "==========="
+puts ""
+
+pload VISUALIZATION
+
+vinit View1
+vuserdraw a -instanced
+vfit
+
+vdump $imagedir/${casename}.png
