@@ -927,7 +927,7 @@ void OpenGl_PrimitiveArray::Render (const Handle(OpenGl_Workspace)& theWorkspace
       case GL_POINTS:
       {
         aShadingModel = aCtx->ShaderManager()->ChooseMarkerShadingModel (anAspectFace->ShadingModel(), hasVertNorm);
-        aCtx->ShaderManager()->BindMarkerProgram (aTextureSet,
+        aCtx->ShaderManager()->BindMarkerProgram (!toEnableEnvMap ? aTextureSet : Handle(OpenGl_TextureSet)(),
                                                   aShadingModel, Graphic3d_AlphaMode_Opaque,
                                                   hasVertColor, anAspectFace->ShaderProgramRes (aCtx));
         break;
@@ -936,7 +936,7 @@ void OpenGl_PrimitiveArray::Render (const Handle(OpenGl_Workspace)& theWorkspace
       case GL_LINE_STRIP:
       {
         aShadingModel = aCtx->ShaderManager()->ChooseLineShadingModel (anAspectFace->ShadingModel(), hasVertNorm);
-        aCtx->ShaderManager()->BindLineProgram (Handle(OpenGl_TextureSet)(),
+        aCtx->ShaderManager()->BindLineProgram (!toEnableEnvMap ? aTextureSet : Handle(OpenGl_TextureSet)(),
                                                 anAspectFace->Aspect()->LineType(),
                                                 aShadingModel,
                                                 Graphic3d_AlphaMode_Opaque,

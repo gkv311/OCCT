@@ -1,0 +1,15 @@
+puts "========"
+puts "Visualization - allow texture mapping on line primitives"
+puts "========"
+puts ""
+
+pload MODELING VISUALIZATION
+vinit View1
+vclear
+vaxo
+
+vdrawparray p polylines v 0 0 0 t 0.0 0.0 v 1 1 1 t 0.5 0.5 v 2 2 2 t 1.0 1.0
+vfit
+vtexture p 3
+vaspects p -width 10
+vdump $::imagedir/${::casename}.png
