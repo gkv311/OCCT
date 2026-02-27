@@ -260,6 +260,10 @@ public:
   Standard_EXPORT static Standard_Boolean HasContinuity (const TopoDS_Edge& E);
 
   //! Returns the max continuity of edge between some surfaces or GeomAbs_C0 if there no such surfaces.
+  //! This method provides misleading information as without specifying Faces
+  //! it is unclear which continuity should be returned.
+  //! For this reason the method has been marked deprecated.
+  Standard_DEPRECATED("Continuity() with two faces on input should be used")
   Standard_EXPORT static GeomAbs_Shape MaxContinuity (const TopoDS_Edge& theEdge);
   
   //! Returns the 3d point.
