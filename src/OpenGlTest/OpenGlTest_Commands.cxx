@@ -18,6 +18,7 @@
 #include <Draw.hxx>
 #include <Draw_Interpretor.hxx>
 
+#include <OpenGl_ArbIns.hxx>
 #include <OpenGl_GlCore20.hxx>
 #include <OpenGl_GraphicDriver.hxx>
 #include <OpenGl_GraphicDriverFactory.hxx>
@@ -204,6 +205,253 @@ void VUserDrawRenderer::Render(const Handle(OpenGl_Workspace)& theView)const
 
 } // end of anonymous namespace
 
+namespace
+{
+static const char VUserDrawInstanced_ID[] = "VUserDrawInstancedShader";
+static Handle(Graphic3d_ShaderProgram) VUserDrawInstancedShader(Aspect_GraphicsLibrary theGapi)
+{
+  TCollection_AsciiString aSrcVert =
+    "in vec3 userInstPos;\n"
+    "void main()\n"
+    "{\n"
+    "  vec4 aPnt = occVertex + vec4(userInstPos, 0.0);\n"
+    "  gl_Position = occProjectionMatrix * occWorldViewMatrix * occModelWorldMatrix * aPnt;\n"
+    "}\n";
+  TCollection_AsciiString aSrcFrag =
+    "void main()\n"
+    "{\n"
+    "  vec4 aColor = occColor;\n"
+    "  occSetFragColor(aColor);\n"
+    "}\n";
+
+  Graphic3d_ShaderObject::ShaderVariableList aUniforms, aStageInOuts;
+  Graphic3d_ShaderAttributeList aVertAttribs;
+  aVertAttribs.Append(new Graphic3d_ShaderAttribute("userInstPos", Graphic3d_TOA_CUSTOM));
+
+  Handle(Graphic3d_ShaderProgram) aProgSrc = new Graphic3d_ShaderProgram();
+  aProgSrc->SetId(VUserDrawInstanced_ID);
+  aProgSrc->SetVertexAttributes(aVertAttribs);
+  aProgSrc->AttachShader(Graphic3d_ShaderObject::CreateFromSource(aSrcVert, Graphic3d_TOS_VERTEX, aUniforms, aStageInOuts));
+  aProgSrc->AttachShader(Graphic3d_ShaderObject::CreateFromSource(aSrcFrag, Graphic3d_TOS_FRAGMENT, aUniforms, aStageInOuts));
+  aProgSrc->SetHeader(theGapi == Aspect_GraphicsLibrary_OpenGLES ? "#version 300 es" : "#version 150");
+  return aProgSrc;
+}
+
+class VUserDrawInstancedRenderer
+{
+public:
+  DEFINE_STANDARD_ALLOC
+
+  //! Main constructor.
+  VUserDrawInstancedRenderer()
+  : myGlVertBuffer(new OpenGl_VertexBuffer()),
+    myGlInstBuffer(new OpenGl_VertexBuffer())
+  {
+    myVertData[0].SetValues(-10.0f, -20.0f, -30.0f);
+    myVertData[1].SetValues( 10.0f,  20.0f, -30.0f);
+    myVertData[2].SetValues( 10.0f,  20.0f,  30.0f);
+    myVertData[3].SetValues(-10.0f, -20.0f,  30.0f);
+
+    for (int aRow = 0; aRow < 5; ++aRow)
+    {
+      for (int aCol = 0; aCol < 5; ++aCol)
+      {
+        myInstData[aRow * 5 + aCol].SetValues(aCol * 30.0f, aRow * 30.0f, 0.0f);
+      }
+    }
+  }
+
+  //! Return coordinates.
+  const std::array<OpenGl_Vec3, 4>& Vertices() const { return myVertData; }
+
+  //! Return instance positions.
+  const std::array<OpenGl_Vec3, 25>& Instances() const { return myInstData; }
+
+  //! Calculate bounding box.
+  BVH_Box<float, 3> BoundingBox() const
+  {
+    BVH_Box<float, 3> aBoxRef;
+    for (const OpenGl_Vec3& aPntIter : myVertData)
+      aBoxRef.Add(aPntIter);
+
+    BVH_Box<float, 3> aBox;
+    for (const OpenGl_Vec3& aPosIter : myInstData)
+    {
+      aBox.Add(aBoxRef.CornerMin() + aPosIter);
+      aBox.Add(aBoxRef.CornerMax() + aPosIter);
+    }
+
+    return aBox;
+  }
+
+public:
+
+  //! Render element.
+  void Render(const Handle(OpenGl_Workspace)& theWorkspace) const;
+
+  //! Release OpenGL data.
+  void Release(OpenGl_Context* theCtx)
+  {
+    myGlVertBuffer->Release(theCtx);
+    myGlInstBuffer->Release(theCtx);
+  }
+
+private:
+  std::array<OpenGl_Vec3, 4>  myVertData;     //!< Vertex data array
+  std::array<OpenGl_Vec3, 25> myInstData;     //!< Instance data array
+  Handle(OpenGl_VertexBuffer) myGlVertBuffer; //!< Vertex buffer - OpenGL object
+  Handle(OpenGl_VertexBuffer) myGlInstBuffer; //!< Instance buffer - OpenGL object
+};
+
+//! Custom AIS interactive object implementing User Draw functionality.
+class VUserDrawInstancedObj : public AIS_InteractiveObject
+{
+  DEFINE_STANDARD_RTTI_INLINE(VUserDrawInstancedObj, AIS_InteractiveObject);
+public:
+  //! Main constructor.
+  VUserDrawInstancedObj() : myRenderer(new VUserDrawInstancedRenderer()) {}
+
+  //! Accept only display mode 0.
+  virtual Standard_Boolean AcceptDisplayMode(const Standard_Integer theMode) const override
+  {
+    return theMode == 0;
+  }
+
+  //! Compute presentation.
+  virtual void Compute(const Handle(PrsMgr_PresentationManager)& thePrsMgr,
+                       const Handle(Prs3d_Presentation)& thePrs,
+                       const Standard_Integer theMode) override;
+
+  //! Compute selection.
+  virtual void ComputeSelection(const Handle(SelectMgr_Selection)& theSel,
+                                const Standard_Integer theMode) override;
+
+private:
+  std::shared_ptr<VUserDrawInstancedRenderer> myRenderer;
+};
+
+// =======================================================================
+// function : VUserDrawInstancedObj::Compute
+// =======================================================================
+void VUserDrawInstancedObj::Compute(const Handle(PrsMgr_PresentationManager)& thePrsMgr,
+                                    const Handle(Prs3d_Presentation)& thePrs,
+                                    const Standard_Integer theMode)
+{
+  //! Proxy element redirecting to renderer class.
+  class GlElement : public OpenGl_Element
+  {
+  public:
+    //! Main constructor.
+    GlElement(const std::shared_ptr<VUserDrawInstancedRenderer>& theRend) : myRenderer(theRend) {}
+
+    //! Render element - proxy.
+    virtual void Render(const Handle(OpenGl_Workspace)& theView) const override { myRenderer->Render(theView); }
+
+    //! Release OpenGL data - proxy.
+    virtual void Release(OpenGl_Context* theCtx) override { myRenderer->Release(theCtx); }
+
+  private:
+    std::shared_ptr<VUserDrawInstancedRenderer> myRenderer;
+  };
+
+  if (theMode != 0)
+    return;
+
+  Handle(OpenGl_GraphicDriver) aDriver =
+    Handle(OpenGl_GraphicDriver)::DownCast(InteractiveContext()->CurrentViewer()->Driver());
+  if (aDriver.IsNull())
+  {
+    Message::SendFail("Error: OpenGl_GraphicDriver is unavailable");
+    return;
+  }
+  const Handle(OpenGl_Context)& aGlCtx = aDriver->GetSharedContext();
+  if (aGlCtx.IsNull())
+  {
+    Message::SendFail("Error: OpenGl_Context is unavailable");
+    return;
+  }
+
+  myDrawer->SetLineAspect(new Prs3d_LineAspect(Quantity_NOC_ALICEBLUE, Aspect_TOL_SOLID, 2.0f));
+  myDrawer->LineAspect()->Aspect()->SetShaderProgram(VUserDrawInstancedShader(aGlCtx->GraphicsLibrary()));
+
+  Handle(OpenGl_Group) aGroup = Handle(OpenGl_Group)::DownCast(thePrs->NewGroup());
+  aGroup->SetGroupPrimitivesAspect(myDrawer->LineAspect()->Aspect());
+
+  // we need to set proper bounding box of the group for culling and fitall operations
+  const BVH_Box<float, 3> aBnd = myRenderer->BoundingBox();
+  const Graphic3d_Vec3 aBndMin = aBnd.CornerMin();
+  const Graphic3d_Vec3 aBndMax = aBnd.CornerMax();
+  aGroup->SetMinMaxValues(aBndMin.x(), aBndMin.y(), aBndMin.z(),
+                          aBndMax.x(), aBndMax.y(), aBndMax.z());
+
+  // create and add custom OpenGL element (passed as a raw pointer - will be released by graphic driver)
+  aGroup->AddElement(new GlElement(myRenderer));
+
+  // invalidate bounding box of the scene
+  thePrsMgr->StructureManager()->Update();
+}
+
+// =======================================================================
+// function : VUserDrawInstancedObj::ComputeSelection
+// =======================================================================
+void VUserDrawInstancedObj::ComputeSelection(const Handle(SelectMgr_Selection)& theSel,
+                                             const Standard_Integer theMode)
+{
+  if (theMode != 0)
+    return;
+
+  for (const OpenGl_Vec3& aPosInst : myRenderer->Instances())
+  {
+    Handle(TColgp_HArray1OfPnt) aPnts = new TColgp_HArray1OfPnt(1, 5);
+
+    const std::array<OpenGl_Vec3, 4>& aVerts = myRenderer->Vertices();
+    for (int aPntIter = 0; aPntIter < 5; ++aPntIter)
+    {
+      const OpenGl_Vec3 aPnt = aVerts[aPntIter % 4] + aPosInst;
+      aPnts->SetValue(aPntIter + 1, gp_Pnt(aPnt.x(), aPnt.y(), aPnt.z()));
+    }
+
+    Handle(SelectMgr_EntityOwner)   anEntityOwner = new SelectMgr_EntityOwner(this);
+    Handle(Select3D_SensitiveCurve) aSensitive    = new Select3D_SensitiveCurve(anEntityOwner, aPnts);
+    theSel->Add(aSensitive);
+  }
+}
+
+// =======================================================================
+// function : VUserDrawInstancedRenderer::Render
+// =======================================================================
+void VUserDrawInstancedRenderer::Render(const Handle(OpenGl_Workspace)& theView)const
+{
+  const Handle(OpenGl_Context)& aCtx = theView->GetGlContext();
+
+  const OpenGl_Aspects* anAspects = theView->ApplyAspects(false);
+
+  aCtx->ShaderManager()->BindLineProgram(Handle(OpenGl_TextureSet)(), Aspect_TOL_SOLID,
+                                         Graphic3d_TypeOfShadingModel_Unlit, Graphic3d_AlphaMode_Opaque, false,
+                                         anAspects->ShaderProgramRes(aCtx));
+  OpenGl_Vec4 aColor = theView->InteriorColor();
+  aCtx->SetColor4fv(aColor);
+
+  // initialize VBO once and reuse on next frames
+  if (!myGlVertBuffer->IsValid())
+    myGlVertBuffer->Init(aCtx, myVertData[0].Length(), (int)myVertData.size(), myVertData[0].GetData());
+
+  if (!myGlInstBuffer->IsValid())
+    myGlInstBuffer->Init(aCtx, myInstData[0].Length(), (int)myInstData.size(), myInstData[0].GetData());
+
+  // Finally draw something to make sureUserDraw really works
+  myGlVertBuffer->BindAttribute(aCtx, Graphic3d_TOA_POS);
+  myGlInstBuffer->BindAttribute(aCtx, Graphic3d_TOA_CUSTOM);
+  aCtx->Functions()->glVertexAttribDivisor(Graphic3d_TOA_CUSTOM, 1);
+
+  aCtx->arbIns->glDrawArraysInstanced(GL_LINE_LOOP, 0, myGlVertBuffer->GetElemsNb(), myGlInstBuffer->GetElemsNb());
+
+  aCtx->Functions()->glVertexAttribDivisor(Graphic3d_TOA_CUSTOM, 0);
+  myGlInstBuffer->UnbindAttribute(aCtx, Graphic3d_TOA_CUSTOM);
+  myGlVertBuffer->UnbindAttribute(aCtx, Graphic3d_TOA_POS);
+}
+}
+
 //=======================================================================
 //function : VUserDraw
 //purpose  : Checks availability and operation of UserDraw feature
@@ -226,7 +474,12 @@ static Standard_Integer VUserDraw (Draw_Interpretor& ,
     return 1;
   }
 
-  if (argc > 2)
+  bool isInstanced = false;
+  if (argc == 3 && TCollection_AsciiString(argv[2]) == "-instanced")
+  {
+    isInstanced = true;
+  }
+  else if (argc != 2)
   {
     Message::SendFail ("Syntax error: wrong number of arguments");
     return 1;
@@ -235,9 +488,13 @@ static Standard_Integer VUserDraw (Draw_Interpretor& ,
   TCollection_AsciiString aName (argv[1]);
   ViewerTest::Display (aName, Handle(AIS_InteractiveObject)());
 
-  Handle(VUserDrawObj) anIObj = new VUserDrawObj();
-  ViewerTest::Display (aName, anIObj);
+  Handle(AIS_InteractiveObject) anIObj;
+  if (isInstanced)
+    anIObj = new VUserDrawInstancedObj();
+  else
+    anIObj = new VUserDrawObj();
 
+  ViewerTest::Display (aName, anIObj);
   return 0;
 }
 
@@ -806,7 +1063,8 @@ void OpenGlTest::Commands (Draw_Interpretor& theCommands)
   const char* aGroup ="Commands for low-level TKOpenGl features";
 
   theCommands.Add("vuserdraw",
-    "vuserdraw : name - simulates drawing with help of UserDraw",
+                  "vuserdraw name [-instanced]\n"
+                  "\n\t\t: Test drawing with help of UserDraw.",
     __FILE__, VUserDraw, aGroup);
   theCommands.Add("vglshaders",
                   "vglshaders [-list] [-dump] [-reload] ShaderId"
