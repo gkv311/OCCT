@@ -32,168 +32,182 @@
 #include <ViewerTest.hxx>
 #include <ViewerTest_AutoUpdater.hxx>
 
-static Handle(OpenGl_Caps) getDefaultCaps()
-{
-  Handle(OpenGl_GraphicDriverFactory) aFactory = Handle(OpenGl_GraphicDriverFactory)::DownCast (Graphic3d_GraphicDriverFactory::DefaultDriverFactory());
-  if (aFactory.IsNull())
-  {
-    for (Graphic3d_GraphicDriverFactoryList::Iterator aFactoryIter (Graphic3d_GraphicDriverFactory::DriverFactories());
-         aFactoryIter.More(); aFactoryIter.Next())
-    {
-      aFactory = Handle(OpenGl_GraphicDriverFactory)::DownCast (aFactoryIter.Value());
-      if (!aFactory.IsNull())
-      {
-        break;
-      }
-    }
-  }
-  if (aFactory.IsNull())
-  {
-    throw Standard_ProgramError ("Error: no OpenGl_GraphicDriverFactory registered");
-  }
-  return aFactory->DefaultOptions();
-}
+#include <array>
 
 namespace
 {
 
-//=======================================================================
-//function : VUserDraw
-//purpose  : Checks availability and operation of UserDraw feature
-//=======================================================================
-class VUserDrawObj : public AIS_InteractiveObject
+//! Custom rendering tool.
+class VUserDrawRenderer
 {
 public:
-  // CASCADE RTTI
-  DEFINE_STANDARD_RTTI_INLINE(VUserDrawObj, AIS_InteractiveObject);
+  DEFINE_STANDARD_ALLOC
 
-  VUserDrawObj()
+  //! Main constructor.
+  VUserDrawRenderer() : myGlVertBuffer(new OpenGl_VertexBuffer())
   {
-    myCoords[0] = -10.;
-    myCoords[1] = -20.;
-    myCoords[2] = -30.;
-    myCoords[3] =  10.;
-    myCoords[4] =  20.;
-    myCoords[5] =  30.;
+    myVertData[0].SetValues(-10.0f, -20.0f, -30.0f);
+    myVertData[1].SetValues( 10.0f,  20.0f, -30.0f);
+    myVertData[2].SetValues( 10.0f,  20.0f,  30.0f);
+    myVertData[3].SetValues(-10.0f, -20.0f,  30.0f);
+  }
+
+  //! Return coordinates.
+  const std::array<OpenGl_Vec3, 4>& Vertices() const { return myVertData; }
+
+  //! Calculate bounding box.
+  BVH_Box<float, 3> BoundingBox() const
+  {
+    BVH_Box<float, 3> aBox;
+    for (const OpenGl_Vec3& aPntIter : myVertData)
+      aBox.Add(aPntIter);
+
+    return aBox;
   }
 
 public:
-  class Element : public OpenGl_Element
-  {
-  private:
-    Handle(VUserDrawObj) myIObj;
 
-  public:
-    Element (const Handle(VUserDrawObj)& theIObj) : myIObj (theIObj) {}
+  //! Render element.
+  void Render(const Handle(OpenGl_Workspace)& theWorkspace) const;
 
-    virtual ~Element() {}
+  //! Release OpenGL data.
+  void Release(OpenGl_Context* theCtx) { myGlVertBuffer->Release(theCtx); }
 
-    virtual void Render (const Handle(OpenGl_Workspace)& theWorkspace) const
-    {
-      if (!myIObj.IsNull())
-        myIObj->Render(theWorkspace);
-    }
+private:
+  std::array<OpenGl_Vec3, 4>  myVertData;     //!< Vertex data array
+  Handle(OpenGl_VertexBuffer) myGlVertBuffer; //!< Vertex buffer - OpenGL object
+};
 
-    virtual void Release (OpenGl_Context*)
-    {
-      //
-    }
+//! Custom AIS interactive object implementing User Draw functionality.
+class VUserDrawObj : public AIS_InteractiveObject
+{
+  DEFINE_STANDARD_RTTI_INLINE(VUserDrawObj, AIS_InteractiveObject);
+public:
+  //! Main constructor.
+  VUserDrawObj() : myRenderer(new VUserDrawRenderer()) {}
 
-  public:
-    DEFINE_STANDARD_ALLOC
-  };
-
-  //! Accept display mode 0.
-  virtual Standard_Boolean AcceptDisplayMode (const Standard_Integer theMode) const Standard_OVERRIDE
+  //! Accept only display mode 0.
+  virtual Standard_Boolean AcceptDisplayMode(const Standard_Integer theMode) const override
   {
     return theMode == 0;
   }
 
-private:
-  // Virtual methods implementation
-  virtual void Compute (const Handle(PrsMgr_PresentationManager)& thePrsMgr,
-                        const Handle(Prs3d_Presentation)& thePrs,
-                        const Standard_Integer theMode) Standard_OVERRIDE;
+  //! Compute presentation.
+  virtual void Compute(const Handle(PrsMgr_PresentationManager)& thePrsMgr,
+                       const Handle(Prs3d_Presentation)& thePrs,
+                       const Standard_Integer theMode) override;
 
-  virtual void ComputeSelection (const Handle(SelectMgr_Selection)& theSelection,
-                                 const Standard_Integer theMode) Standard_OVERRIDE;
-
-  // Called by VUserDrawElement
-  void Render(const Handle(OpenGl_Workspace)& theWorkspace) const;
+  //! Compute selection.
+  virtual void ComputeSelection(const Handle(SelectMgr_Selection)& theSel,
+                                const Standard_Integer theMode) override;
 
 private:
-  GLfloat myCoords[6];
-  friend class Element;
+  std::shared_ptr<VUserDrawRenderer> myRenderer;
 };
 
+// =======================================================================
+// function : Compute
+// =======================================================================
 void VUserDrawObj::Compute(const Handle(PrsMgr_PresentationManager)& thePrsMgr,
                            const Handle(Prs3d_Presentation)& thePrs,
                            const Standard_Integer theMode)
 {
-  if (theMode != 0) { return; }
+  //! Proxy element redirecting to renderer class.
+  class GlElement : public OpenGl_Element
+  {
+  public:
+    //! Main constructor.
+    GlElement(const std::shared_ptr<VUserDrawRenderer>& theRend) : myRenderer(theRend) {}
+
+    //! Render element - proxy.
+    virtual void Render(const Handle(OpenGl_Workspace)& theView) const override { myRenderer->Render(theView); }
+
+    //! Release OpenGL data - proxy.
+    virtual void Release(OpenGl_Context* theCtx) override { myRenderer->Release(theCtx); }
+
+  private:
+    std::shared_ptr<VUserDrawRenderer> myRenderer;
+  };
+
+  if (theMode != 0)
+    return;
+
   thePrs->Clear();
 
-  Graphic3d_Vec4 aBndMin (myCoords[0], myCoords[1], myCoords[2], 1.0f);
-  Graphic3d_Vec4 aBndMax (myCoords[3], myCoords[4], myCoords[5], 1.0f);
-  Handle(OpenGl_Group) aGroup = Handle(OpenGl_Group)::DownCast (thePrs->NewGroup());
-  aGroup->SetMinMaxValues (aBndMin.x(), aBndMin.y(), aBndMin.z(),
-                           aBndMax.x(), aBndMax.y(), aBndMax.z());
-  aGroup->SetGroupPrimitivesAspect (myDrawer->LineAspect()->Aspect());
-  VUserDrawObj::Element* anElem = new VUserDrawObj::Element (this);
-  aGroup->AddElement(anElem);
+  Handle(OpenGl_Group) aGroup = Handle(OpenGl_Group)::DownCast(thePrs->NewGroup());
+  aGroup->SetGroupPrimitivesAspect(myDrawer->LineAspect()->Aspect());
+
+  // we need to set proper bounding box of the group for culling and fitall operations
+  const BVH_Box<float, 3> aBnd = myRenderer->BoundingBox();
+  const Graphic3d_Vec3 aBndMin = aBnd.CornerMin();
+  const Graphic3d_Vec3 aBndMax = aBnd.CornerMax();
+  aGroup->SetMinMaxValues(aBndMin.x(), aBndMin.y(), aBndMin.z(),
+                          aBndMax.x(), aBndMax.y(), aBndMax.z());
+
+  // create and add custom OpenGL element (passed as a raw pointer - will be released by graphic driver)
+  aGroup->AddElement(new GlElement(myRenderer));
 
   // invalidate bounding box of the scene
   thePrsMgr->StructureManager()->Update();
 }
 
-void VUserDrawObj::ComputeSelection (const Handle(SelectMgr_Selection)& theSelection,
-                                     const Standard_Integer theMode)
+// =======================================================================
+// function : ComputeSelection
+// =======================================================================
+void VUserDrawObj::ComputeSelection(const Handle(SelectMgr_Selection)& theSel,
+                                    const Standard_Integer theMode)
 {
-  if (theMode != 0) { return; }
-  Handle(SelectMgr_EntityOwner) anEntityOwner = new SelectMgr_EntityOwner(this);
+  if (theMode != 0)
+    return;
+
   Handle(TColgp_HArray1OfPnt) aPnts = new TColgp_HArray1OfPnt(1, 5);
-  aPnts->SetValue(1, gp_Pnt(myCoords[0], myCoords[1], myCoords[2]));
-  aPnts->SetValue(2, gp_Pnt(myCoords[3], myCoords[4], myCoords[2]));
-  aPnts->SetValue(3, gp_Pnt(myCoords[3], myCoords[4], myCoords[5]));
-  aPnts->SetValue(4, gp_Pnt(myCoords[0], myCoords[1], myCoords[5]));
-  aPnts->SetValue(5, gp_Pnt(myCoords[0], myCoords[1], myCoords[2]));
-  Handle(Select3D_SensitiveCurve) aSensitive = new Select3D_SensitiveCurve(anEntityOwner, aPnts);
-  theSelection->Add(aSensitive);
+
+  const std::array<OpenGl_Vec3, 4>& aVerts = myRenderer->Vertices();
+  for (int aPntIter = 0; aPntIter < 5; ++aPntIter)
+  {
+    const OpenGl_Vec3& aPnt = aVerts[aPntIter % 4];
+    aPnts->SetValue(aPntIter + 1, gp_Pnt(aPnt.x(), aPnt.y(), aPnt.z()));
+  }
+
+  Handle(SelectMgr_EntityOwner)   anEntityOwner = new SelectMgr_EntityOwner(this);
+  Handle(Select3D_SensitiveCurve) aSensitive    = new Select3D_SensitiveCurve(anEntityOwner, aPnts);
+  theSel->Add(aSensitive);
 }
 
-void VUserDrawObj::Render(const Handle(OpenGl_Workspace)& theWorkspace) const
+// =======================================================================
+// function : Render
+// =======================================================================
+void VUserDrawRenderer::Render(const Handle(OpenGl_Workspace)& theView)const
 {
-  const Handle(OpenGl_Context)& aCtx = theWorkspace->GetGlContext();
+  const Handle(OpenGl_Context)& aCtx = theView->GetGlContext();
 
   // To test linking against OpenGl_Workspace and all aspect classes
-  const OpenGl_Aspects* aMA = theWorkspace->Aspects();
+  const OpenGl_Aspects* aMA = theView->Aspects();
   aMA->Aspect()->MarkerType();
-  OpenGl_Vec4 aColor = theWorkspace->InteriorColor();
 
-  aCtx->ShaderManager()->BindLineProgram (Handle(OpenGl_TextureSet)(), Aspect_TOL_SOLID,
-                                          Graphic3d_TypeOfShadingModel_Unlit, Graphic3d_AlphaMode_Opaque, false,
-                                          Handle(OpenGl_ShaderProgram)());
-  aCtx->SetColor4fv (aColor);
+  OpenGl_Vec4 aColor = theView->InteriorColor();
 
-  const OpenGl_Vec3 aVertArray[4] =
-  {
-    OpenGl_Vec3(myCoords[0], myCoords[1], myCoords[2]),
-    OpenGl_Vec3(myCoords[3], myCoords[4], myCoords[2]),
-    OpenGl_Vec3(myCoords[3], myCoords[4], myCoords[5]),
-    OpenGl_Vec3(myCoords[0], myCoords[1], myCoords[5]),
-  };
-  Handle(OpenGl_VertexBuffer) aVertBuffer = new OpenGl_VertexBuffer();
-  aVertBuffer->Init (aCtx, 3, 4, aVertArray[0].GetData());
+  aCtx->ShaderManager()->BindLineProgram(Handle(OpenGl_TextureSet)(), Aspect_TOL_SOLID,
+                                         Graphic3d_TypeOfShadingModel_Unlit, Graphic3d_AlphaMode_Opaque, false,
+                                         Handle(OpenGl_ShaderProgram)());
+  aCtx->SetColor4fv(aColor);
 
-  // Finally draw something to make sure UserDraw really works
-  aVertBuffer->BindAttribute  (aCtx, Graphic3d_TOA_POS);
-  aCtx->core11fwd->glDrawArrays (GL_LINE_LOOP, 0, aVertBuffer->GetElemsNb());
-  aVertBuffer->UnbindAttribute(aCtx, Graphic3d_TOA_POS);
-  aVertBuffer->Release (aCtx.get());
+  // initialize VBO once and reuse on next frames
+  if (!myGlVertBuffer->IsValid())
+    myGlVertBuffer->Init(aCtx, myVertData[0].Length(), (int)myVertData.size(), myVertData[0].GetData());
+
+  // Finally draw something to make sureUserDraw really works
+  myGlVertBuffer->BindAttribute(aCtx, Graphic3d_TOA_POS);
+  aCtx->core11fwd->glDrawArrays(GL_LINE_LOOP, 0, myGlVertBuffer->GetElemsNb());
+  myGlVertBuffer->UnbindAttribute(aCtx, Graphic3d_TOA_POS);
 }
 
 } // end of anonymous namespace
 
+//=======================================================================
+//function : VUserDraw
+//purpose  : Checks availability and operation of UserDraw feature
+//=======================================================================
 static Standard_Integer VUserDraw (Draw_Interpretor& ,
                                    Standard_Integer argc,
                                    const char ** argv)
@@ -327,6 +341,26 @@ static Standard_Boolean parseGlslSourceFlag (Standard_CString               theA
     return Standard_False;
   }
   return Standard_True;
+}
+
+//! Auxiliary getter.
+static Handle(OpenGl_Caps) getDefaultCaps()
+{
+  Handle(OpenGl_GraphicDriverFactory) aFactory =
+    Handle(OpenGl_GraphicDriverFactory)::DownCast(Graphic3d_GraphicDriverFactory::DefaultDriverFactory());
+  if (aFactory.IsNull())
+  {
+    for (const Handle(Graphic3d_GraphicDriverFactory)& aFactoryIter : Graphic3d_GraphicDriverFactory::DriverFactories())
+    {
+      aFactory = Handle(OpenGl_GraphicDriverFactory)::DownCast(aFactoryIter);
+      if (!aFactory.IsNull())
+        break;
+    }
+  }
+  if (aFactory.IsNull())
+    throw Standard_ProgramError("Error: no OpenGl_GraphicDriverFactory registered");
+
+  return aFactory->DefaultOptions();
 }
 
 //==============================================================================
