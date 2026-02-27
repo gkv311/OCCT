@@ -3345,6 +3345,19 @@ public:
   //! @param theColor the color to be set
   virtual void SetColor (const Quantity_Color& theColor) Standard_OVERRIDE;
 
+  //! Set line width.
+  virtual void SetWidth (const Standard_Real theWidth) Standard_OVERRIDE
+  {
+    if (myDrawer->SetupOwnShadingAspect())
+      replaceShadingAspect();
+
+    myDrawer->ShadingAspect()->Aspect()->SetLineWidth((float)theWidth);
+    SynchronizeAspects();
+  }
+
+  //! Reset width to default value.
+  virtual void UnsetWidth() Standard_OVERRIDE { SetWidth (1.0f); }
+
 private:
 
   virtual void Compute (const Handle(PrsMgr_PresentationManager)& thePrsMgr,
