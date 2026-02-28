@@ -19,6 +19,7 @@ vdisplay -dispMode 0 s1
 vdisplay -dispMode 1 s2 s3
 vfit
 
+vaspects s1 -mostContinuity c2
 vaspects s2 -setFaceBoundaryDraw 1 -setFaceBoundaryColor RED
 vaspects s3 -setFaceBoundaryDraw 1 -setFaceBoundaryColor RED -setMostContinuity c2
 
