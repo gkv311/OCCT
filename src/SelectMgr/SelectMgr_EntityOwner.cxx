@@ -16,7 +16,45 @@
 
 #include <SelectMgr_EntityOwner.hxx>
 
+IMPLEMENT_STANDARD_RTTIEXT(SelectMgr_LocalPickInfo, Standard_Transient)
+IMPLEMENT_STANDARD_RTTIEXT(SelectMgr_LocalPickIndex, SelectMgr_LocalPickInfo)
 IMPLEMENT_STANDARD_RTTIEXT(SelectMgr_EntityOwner, Standard_Transient)
+
+//==================================================
+// Function: SelectMgr_LocalPickInfo
+// Purpose :
+//==================================================
+SelectMgr_LocalPickInfo::SelectMgr_LocalPickInfo()
+{
+  //
+}
+
+//==================================================
+// Function: ~SelectMgr_LocalPickInfo
+// Purpose :
+//==================================================
+SelectMgr_LocalPickInfo::~SelectMgr_LocalPickInfo()
+{
+  //
+}
+
+//==================================================
+// Function: SelectMgr_LocalPickIndex
+// Purpose :
+//==================================================
+SelectMgr_LocalPickIndex::SelectMgr_LocalPickIndex()
+{
+  //
+}
+
+//==================================================
+// Function: ~SelectMgr_LocalPickIndex
+// Purpose :
+//==================================================
+SelectMgr_LocalPickIndex::~SelectMgr_LocalPickIndex()
+{
+  //
+}
 
 //==================================================
 // Function: SelectMgr_EntityOwner

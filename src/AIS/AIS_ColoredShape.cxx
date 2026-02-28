@@ -509,11 +509,10 @@ void AIS_ColoredShape::ComputeSelection (const Handle(SelectMgr_Selection)& theS
   computeSubshapeSelection (aBaseDrawer, aSubshapeDrawerMap, myshape, aBrepOwner, theSelection,
                             aTypOfSel, aPriority, aDeflection, aDeviationAngle);
 
-  Handle(SelectMgr_SelectableObject) aThis (this);
   for (const Handle(SelectMgr_SensitiveEntity)& aSelEntIter : theSelection->Entities())
   {
     const Handle(SelectMgr_EntityOwner)& anOwner = aSelEntIter->BaseSensitive()->OwnerId();
-    anOwner->SetSelectable (aThis);
+    anOwner->SetSelectablePointer (this);
   }
 }
 

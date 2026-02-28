@@ -90,7 +90,9 @@ AIS_SelectStatus AIS_Selection::Select (const Handle(SelectMgr_EntityOwner)& the
   // and remove the owner from map only if the detected entity is the same as previous selected (IsForcedHilight call)
   if (theObject->IsForcedHilight())
   {
-    return AIS_SS_Added;
+    AIS_InteractiveObject* anObj = dynamic_cast<AIS_InteractiveObject*>(theObject->SelectablePointer());
+    if (anObj != nullptr && anObj->HasInteractiveContext())
+      return AIS_SS_Added;
   }
 
   myresult.Remove (aListIter);

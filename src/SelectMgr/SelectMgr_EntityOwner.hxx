@@ -24,12 +24,76 @@
 
 class V3d_Viewer;
 
+//! Interface defining transient picking details for SelectMgr_EntityOwner
+//! (e.g. information about last picked sub-element to be re-highlighted).
+class SelectMgr_LocalPickInfo : public Standard_Transient
+{
+  DEFINE_STANDARD_RTTIEXT(SelectMgr_LocalPickInfo, Standard_Transient)
+public:
+
+  //! Interface to override - compare two objects for equality.
+  virtual bool IsEqual(const Handle(SelectMgr_LocalPickInfo)& theOther) const = 0;
+
+protected:
+
+  //! Empty constructor
+  Standard_EXPORT SelectMgr_LocalPickInfo();
+
+  //! Destructor.
+  Standard_EXPORT virtual ~SelectMgr_LocalPickInfo();
+};
+
+//! Interface defining transient picking index.
+class SelectMgr_LocalPickIndex : public SelectMgr_LocalPickInfo
+{
+  DEFINE_STANDARD_RTTIEXT(SelectMgr_LocalPickIndex, SelectMgr_LocalPickInfo)
+public:
+
+  //! Empty constructor
+  Standard_EXPORT SelectMgr_LocalPickIndex();
+
+  //! Destructor.
+  Standard_EXPORT virtual ~SelectMgr_LocalPickIndex();
+
+  //! Return index.
+  Standard_Integer Index() const { return myIndex; }
+
+  //! Set index.
+  void SetIndex(Standard_Integer theIndex) { myIndex = theIndex; }
+
+  //! Compare two indices.
+  virtual bool IsEqual(const Handle(SelectMgr_LocalPickInfo)& theOther) const Standard_OVERRIDE
+  {
+    if (theOther == this)
+      return true;
+
+    SelectMgr_LocalPickIndex* anOther = dynamic_cast<SelectMgr_LocalPickIndex*>(theOther.get());
+    return anOther != nullptr && anOther->myIndex == myIndex;
+  }
+
+protected:
+
+  Standard_Integer myIndex = -1;
+};
+
 //! A framework to define classes of owners of sensitive primitives.
 //! The owner is the link between application and selection data structures.
 //! For the application to make its own objects selectable, it must define owner classes inheriting this framework.
 class SelectMgr_EntityOwner : public Standard_Transient
 {
   DEFINE_STANDARD_RTTIEXT(SelectMgr_EntityOwner, Standard_Transient)
+public:
+
+  //! Fill in local pick information to perform dynamic re-highlighting.
+  static void FillLocalPickInfo (Handle(SelectMgr_LocalPickInfo)&        theInfo,
+                                 const Handle(Select3D_SensitiveEntity)& theEntity)
+  {
+    if (!theEntity.IsNull())
+      theEntity->OwnerId()->LocalPickInfo(theInfo, theEntity);
+    else
+      theInfo.Nullify();
+  }
+
 public:
 
   //! Initializes the selection priority aPriority.
@@ -163,7 +227,25 @@ public:
   //! if this method returns TRUE the owner will always call method Hilight for SelectableObject when the owner is detected.
   //! By default it always return FALSE.
   virtual Standard_Boolean IsForcedHilight() const { return Standard_False; }
-  
+
+  //! If this method returns TRUE, the dynamic highlighting of this owner should be recomputed.
+  virtual Standard_Boolean IsForcedDynamicHilight (const Handle(SelectMgr_LocalPickInfo)& thePrev,
+                                                   const Handle(SelectMgr_LocalPickInfo)& theNew) const
+  {
+    if (!theNew.IsNull())
+      return !theNew->IsEqual(thePrev);
+
+    return IsForcedHilight();
+  }
+
+  //! Fill in local pick information to perform dynamic re-highlighting.
+  virtual void LocalPickInfo (Handle(SelectMgr_LocalPickInfo)&        theInfo,
+                              const Handle(Select3D_SensitiveEntity)& theEntity) const
+  {
+    theInfo.Nullify();
+    (void)theEntity;
+  }
+
   //! Set Z layer ID and update all presentations.
   virtual void SetZLayer (const Graphic3d_ZLayerId theLayerId)
   {
