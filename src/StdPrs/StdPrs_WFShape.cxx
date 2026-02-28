@@ -235,22 +235,17 @@ void StdPrs_WFShape::AddEdges (const TopoDS_Shape& theShape,
     }
   }
 
-  if (!aLWire.IsEmpty())
-  {
+  if (theWire != NULL && !aLWire.IsEmpty())
     addEdges (aLWire, theDrawer, theShapeDeflection, *theWire);
-  }
-  if (!aLFree.IsEmpty())
-  {
+
+  if (theFree != NULL && !aLFree.IsEmpty())
     addEdges (aLFree, theDrawer, theShapeDeflection, *theFree);
-  }
-  if (!aLUnFree.IsEmpty())
-  {
+
+  if (theUnFree != NULL && !aLUnFree.IsEmpty())
     addEdges (aLUnFree, theDrawer, theShapeDeflection, *theUnFree);
-  }
-  if (!aLSmooth.IsEmpty())
-  {
+
+  if (theSmooth != NULL && !aLSmooth.IsEmpty())
     addEdges (aLSmooth, theDrawer, theShapeDeflection, *theSmooth);
-  }
 }
 
 // =========================================================================
@@ -370,22 +365,18 @@ void StdPrs_WFShape::AddEdgesOnTriangulation (TColgp_SequenceOfPnt& theSegments,
                                               const TopoDS_Shape& theShape,
                                               const Standard_Boolean theToExcludeGeometric)
 {
-  TopLoc_Location aLocation, aDummyLoc;
-  for (TopExp_Explorer aFaceIter (theShape, TopAbs_FACE); aFaceIter.More(); aFaceIter.Next())
+  TopLoc_Location aLocation;
+  for (const TopoDS_Shape& aFaceIter : TopExp_Explorer (theShape, TopAbs_FACE))
   {
-    const TopoDS_Face& aFace = TopoDS::Face (aFaceIter.Current());
+    const TopoDS_Face& aFace = TopoDS::Face (aFaceIter);
     if (theToExcludeGeometric)
     {
-      const Handle(Geom_Surface)& aSurf = BRep_Tool::Surface (aFace, aDummyLoc);
-      if (!aSurf.IsNull())
-      {
+      TopExp_Explorer aWireIter (aFace, TopAbs_WIRE);
+      if (aWireIter.More())
         continue;
-      }
     }
     if (const Handle(Poly_Triangulation)& aPolyTri = BRep_Tool::Triangulation (aFace, aLocation))
-    {
       Prs3d::AddFreeEdges (theSegments, aPolyTri, aLocation);
-    }
   }
 }
 

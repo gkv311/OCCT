@@ -353,6 +353,12 @@ namespace
         aNodeNumber += anEdgePoly->Nodes().Length();
         ++aNbPolylines;
       }
+      else if (Handle(Poly_Polygon3D) aPoly3d = BRep_Tool::Polygon3D(anEdge, aTrsf))
+      {
+        // fallback to polygon3d if defined (could be converted from polygon-on-triangulation)
+        aNodeNumber += aPoly3d->Nodes().Length();
+        ++aNbPolylines;
+      }
     }
     const Standard_Integer aNbExtra = !aSeqPntsExtra.IsNull() ? aSeqPntsExtra->Size() : 0;
     if (aNodeNumber == 0)
@@ -397,33 +403,48 @@ namespace
       }
 
       Handle(Poly_PolygonOnTriangulation) anEdgePoly = BRep_Tool::PolygonOnTriangulation (anEdge, aTriangulation, aTrsf);
-      if (anEdgePoly.IsNull()
-       || anEdgePoly->Nodes().Length () < 2)
+      if (!anEdgePoly.IsNull()
+        && anEdgePoly->Nodes().Length () >= 2)
       {
-        continue;
-      }
+        // get edge nodes indexes from face triangulation
+        const TColStd_Array1OfInteger& anEdgeNodes = anEdgePoly->Nodes();
 
-      // get edge nodes indexes from face triangulation
-      const TColStd_Array1OfInteger& anEdgeNodes = anEdgePoly->Nodes();
-
-      // collect the edge nodes
-      Standard_Integer aSegmentEdge = aSegments->VertexNumber() + 1;
-      for (Standard_Integer aNodeIdx = anEdgeNodes.Lower(); aNodeIdx <= anEdgeNodes.Upper(); ++aNodeIdx)
-      {
-        // node index in face triangulation
-        // get node and apply location transformation to the node
-        const Standard_Integer aTriIndex = anEdgeNodes.Value (aNodeIdx);
-        gp_Pnt aTriNode = aTriangulation->Node (aTriIndex);
-        if (!aTrsf.IsIdentity())
+        // collect the edge nodes
+        Standard_Integer aSegmentEdge = aSegments->VertexNumber() + 1;
+        for (Standard_Integer aNodeIdx = anEdgeNodes.Lower(); aNodeIdx <= anEdgeNodes.Upper(); ++aNodeIdx)
         {
-          aTriNode.Transform (aTrsf);
+          // node index in face triangulation
+          // get node and apply location transformation to the node
+          const Standard_Integer aTriIndex = anEdgeNodes.Value (aNodeIdx);
+          gp_Pnt aTriNode = aTriangulation->Node (aTriIndex);
+          if (!aTrsf.IsIdentity())
+            aTriNode.Transform (aTrsf);
+
+          aSegments->AddVertex (aTriNode);
+          if (aNodeIdx != anEdgeNodes.Lower())
+          {
+            aSegments->AddEdge (  aSegmentEdge);
+            aSegments->AddEdge (++aSegmentEdge);
+          }
         }
+      }
+      else if (Handle(Poly_Polygon3D) aPoly3d = BRep_Tool::Polygon3D(anEdge, aTrsf))
+      {
+        const TColgp_Array1OfPnt& anEdgeNodes = aPoly3d->Nodes();
 
-        aSegments->AddVertex (aTriNode);
-        if (aNodeIdx != anEdgeNodes.Lower())
+        Standard_Integer aSegmentEdge = aSegments->VertexNumber() + 1;
+        for (Standard_Integer aNodeIdx = anEdgeNodes.Lower(); aNodeIdx <= anEdgeNodes.Upper(); ++aNodeIdx)
         {
-          aSegments->AddEdge (  aSegmentEdge);
-          aSegments->AddEdge (++aSegmentEdge);
+          gp_Pnt aSegNode = anEdgeNodes[aNodeIdx];
+          if (!aTrsf.IsIdentity())
+            aSegNode.Transform(aTrsf);
+
+          aSegments->AddVertex(aSegNode);
+          if (aNodeIdx != anEdgeNodes.Lower())
+          {
+            aSegments->AddEdge(  aSegmentEdge);
+            aSegments->AddEdge(++aSegmentEdge);
+          }
         }
       }
     }
