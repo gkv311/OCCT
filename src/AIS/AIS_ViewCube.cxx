@@ -1027,10 +1027,7 @@ void AIS_ViewCube::HilightOwnerWithColor (const Handle(PrsMgr_PresentationManage
     }
   }
 
-  if (thePrsMgr->IsImmediateModeOn())
-  {
-    thePrsMgr->AddToImmediateList (aHiPrs);
-  }
+  thePrsMgr->AddToImmediateList (aHiPrs);
 }
 
 //=======================================================================

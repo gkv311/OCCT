@@ -92,8 +92,16 @@ public:
   Standard_EXPORT void RedrawImmediate() const;
   
   //! Invalidates viewer content but does not redraw it.
-  Standard_EXPORT void Invalidate() const;
-  
+  Standard_EXPORT void Invalidate (const Handle(Graphic3d_ViewAffinity)& theMask = Handle(Graphic3d_ViewAffinity)(),
+                                   const Standard_Boolean theIsImmediate = Standard_False) const;
+
+  //! Invalidates immediate viewer content but does not redraw it.
+  //! @param[in] theMask specifies which views to consider, when not NULL
+  void InvalidateImmediate (const Handle(Graphic3d_ViewAffinity)& theMask = Handle(Graphic3d_ViewAffinity)()) const
+  {
+    Invalidate (theMask, true);
+  }
+
   //! Suppresses the Viewer.
   Standard_EXPORT void Remove();
 

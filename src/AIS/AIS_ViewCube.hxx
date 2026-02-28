@@ -700,10 +700,6 @@ public:
     myFromDecomposition = true;
   }
 
-  //! @return TRUE. This owner will always call method
-  //! Hilight for its Selectable Object when the owner is detected.
-  virtual Standard_Boolean IsForcedHilight() const Standard_OVERRIDE { return Standard_True; }
-
   //! Return new orientation to set.
   V3d_TypeOfOrientation MainOrientation() const { return myMainOrient; }
 

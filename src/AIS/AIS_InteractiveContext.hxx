@@ -448,6 +448,9 @@ public: //! @name iteration through detected entities
   //! @sa InitDetected(), MoreDetected(), NextDetected().
   Standard_EXPORT Handle(SelectMgr_EntityOwner) DetectedCurrentOwner() const;
 
+  //! Return TRUE if last detected owner has forced dynamic highlight state.
+  Standard_EXPORT bool IsForcedDynamicHilight() const;
+
 public: //! @name Selection management
 
   //! Adds object in the selection.
@@ -1484,7 +1487,9 @@ protected: //! @name internal fields
   Handle(PrsMgr_PresentationManager) myMainPM;
   Handle(V3d_Viewer) myMainVwr;
   V3d_View* myLastActiveView;
-  Handle(SelectMgr_EntityOwner) myLastPicked;
+  Handle(SelectMgr_EntityOwner)   myLastPicked;
+  Handle(SelectMgr_LocalPickInfo) myPrevPickedInfo;
+  Handle(SelectMgr_LocalPickInfo) myLastPickedInfo;
   Standard_Boolean myToHilightSelected;
   Handle(AIS_Selection) mySelection;
   Handle(SelectMgr_AndOrFilter) myFilters; //!< context filter (the content active filters
