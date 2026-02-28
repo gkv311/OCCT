@@ -24,6 +24,7 @@ vinit View1
 vdisplay r1    -dispMode 0
 vdisplay r2 r3 -dispMode 1
 vfit
+vaspects r1 -mostContinuity c2
 vaspects r2 -faceBoundaryDraw 1 -faceBoundaryColor RED
 vaspects r3 -faceBoundaryDraw 1 -faceBoundaryColor RED -mostContinuity c2
 
