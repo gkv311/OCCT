@@ -53,12 +53,23 @@ AIS_PointCloudOwner::~AIS_PointCloudOwner()
 }
 
 //=======================================================================
-//function : HilightWithColor
+//function : LocalPickInfo
 //purpose  :
 //=======================================================================
-Standard_Boolean AIS_PointCloudOwner::IsForcedHilight() const
+void AIS_PointCloudOwner::LocalPickInfo(Handle(SelectMgr_LocalPickInfo)&        theInfo,
+                                        const Handle(Select3D_SensitiveEntity)& theEntity) const
 {
-  return true;
+  Handle(SelectMgr_LocalPickIndex) anInfo = Handle(SelectMgr_LocalPickIndex)::DownCast(theInfo);
+  if (anInfo.IsNull())
+  {
+    anInfo = new SelectMgr_LocalPickIndex();
+    theInfo = anInfo;
+  }
+
+  anInfo->SetIndex(-1);
+  if (Handle(Select3D_SensitivePrimitiveArray) aSensitive =
+        Handle(Select3D_SensitivePrimitiveArray)::DownCast(theEntity))
+    anInfo->SetIndex(aSensitive->LastDetectedElement());
 }
 
 //=======================================================================
@@ -71,9 +82,7 @@ void AIS_PointCloudOwner::HilightWithColor (const Handle(PrsMgr_PresentationMana
 {
   Handle(AIS_PointCloud) anObj = Handle(AIS_PointCloud)::DownCast (Selectable());
   if (anObj.IsNull())
-  {
     throw Standard_ProgramError ("Internal Error within AIS_PointCloud::PointsOwner!");
-  }
 
   const Handle(TColStd_HPackedMapOfInteger)& aMap = thePrsMgr->IsImmediateModeOn()
                                                   ? myDetPoints
@@ -85,21 +94,18 @@ void AIS_PointCloudOwner::HilightWithColor (const Handle(PrsMgr_PresentationMana
                                    ? theStyle->ZLayer()
                                    : (thePrsMgr->IsImmediateModeOn() ? Graphic3d_ZLayerId_Top : anObj->ZLayer());
   aMap->ChangeMap().Clear();
-  for (SelectMgr_SequenceOfSelection::Iterator aSelIter (anObj->Selections()); aSelIter.More(); aSelIter.Next())
+  for (const Handle(SelectMgr_Selection)& aSelIter : anObj->Selections())
   {
-    const Handle(SelectMgr_Selection)& aSel = aSelIter.Value();
-    for (NCollection_Vector<Handle(SelectMgr_SensitiveEntity)>::Iterator aSelEntIter (aSel->Entities()); aSelEntIter.More(); aSelEntIter.Next())
+    for (const Handle(SelectMgr_SensitiveEntity)& aSelEntIter : aSelIter->Entities())
     {
-      const Handle(SelectMgr_SensitiveEntity)& aSelEnt = aSelEntIter.Value();
-      if (aSelEnt->BaseSensitive()->OwnerId() == this)
+      if (aSelEntIter->BaseSensitive()->OwnerId() == this)
       {
-        if (Handle(Select3D_SensitivePrimitiveArray) aSensitive = Handle(Select3D_SensitivePrimitiveArray)::DownCast (aSelEnt->BaseSensitive()))
+        if (Handle(Select3D_SensitivePrimitiveArray) aSensitive = Handle(Select3D_SensitivePrimitiveArray)::DownCast (aSelEntIter->BaseSensitive()))
         {
           aMap->ChangeMap() = aSensitive->LastDetectedElementMap()->Map();
           if (aSensitive->LastDetectedElement() != -1)
-          {
             aMap->ChangeMap().Add (aSensitive->LastDetectedElement());
-          }
+
           break;
         }
       }
@@ -108,19 +114,14 @@ void AIS_PointCloudOwner::HilightWithColor (const Handle(PrsMgr_PresentationMana
 
   aPrs->Clear();
   if (aPrs->GetZLayer() != aZLayer)
-  {
     aPrs->SetZLayer (aZLayer);
-  }
+
   if (aMap->Map().IsEmpty())
-  {
     return;
-  }
 
   const Handle(Graphic3d_ArrayOfPoints) anAllPoints = anObj->GetPoints();
   if (anAllPoints.IsNull())
-  {
     return;
-  }
 
   Handle(Graphic3d_ArrayOfPoints) aPoints = new Graphic3d_ArrayOfPoints (aMap->Map().Extent());
   for (const Standard_Integer aPntIter : *aMap)
@@ -138,7 +139,9 @@ void AIS_PointCloudOwner::HilightWithColor (const Handle(PrsMgr_PresentationMana
   }
   else
   {
+    aPrs->CalculateBoundBox();
     aPrs->Display();
+    thePrsMgr->StructureManager()->Update(aPrs->GetZLayer());
   }
 }
 

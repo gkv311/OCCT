@@ -499,6 +499,11 @@ public:
   Standard_EXPORT virtual void OnSelectionChanged (const Handle(AIS_InteractiveContext)& theCtx,
                                                    const Handle(V3d_View)& theView);
 
+  //! Callback called by handleMoveTo() on object detection (dynamic highlighting) in 3D Viewer.
+  //! This method is expected to be called from rendering thread.
+  Standard_EXPORT virtual void OnObjectDetected (const Handle(AIS_InteractiveContext)& theCtx,
+                                                 const Handle(V3d_View)& theView);
+
   //! Callback called by handleMoveTo() on dragging object in 3D Viewer.
   //! This method is expected to be called from rendering thread.
   Standard_EXPORT virtual void OnObjectDragged (const Handle(AIS_InteractiveContext)& theCtx,
