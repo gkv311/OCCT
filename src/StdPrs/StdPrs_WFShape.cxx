@@ -39,48 +39,6 @@
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <Standard_Mutex.hxx>
 
-//! Functor for executing StdPrs_Isolines in parallel threads.
-class StdPrs_WFShape_IsoFunctor
-{
-public:
-  StdPrs_WFShape_IsoFunctor (Prs3d_NListOfSequenceOfPnt& thePolylinesU,
-                             Prs3d_NListOfSequenceOfPnt& thePolylinesV,
-                             const std::vector<TopoDS_Face>& theFaces,
-                             const Handle(Prs3d_Drawer)& theDrawer,
-                             Standard_Real theShapeDeflection)
-  : myPolylinesU (thePolylinesU),
-    myPolylinesV (thePolylinesV),
-    myFaces (theFaces),
-    myDrawer (theDrawer),
-    myShapeDeflection (theShapeDeflection)
-  {
-    //
-  }
-
-  void operator()(const Standard_Integer& theIndex) const
-  {
-    Prs3d_NListOfSequenceOfPnt aPolylinesU, aPolylinesV;
-    const TopoDS_Face& aFace = myFaces[theIndex];
-    StdPrs_Isolines::Add (aFace, myDrawer, myShapeDeflection, aPolylinesU, aPolylinesV);
-    {
-      Standard_Mutex::Sentry aLock (myMutex);
-      myPolylinesU.Append (aPolylinesU);
-      myPolylinesV.Append (aPolylinesV);
-    }
-  }
-
-private:
-  StdPrs_WFShape_IsoFunctor operator= (StdPrs_WFShape_IsoFunctor& );
-private:
-  Prs3d_NListOfSequenceOfPnt&     myPolylinesU;
-  Prs3d_NListOfSequenceOfPnt&     myPolylinesV;
-  const std::vector<TopoDS_Face>& myFaces;
-  const Handle(Prs3d_Drawer)&     myDrawer;
-  mutable Standard_Mutex          myMutex;
-  const Standard_Real             myShapeDeflection;
-};
-
-
 // =========================================================================
 // function : Add
 // purpose  :
@@ -133,60 +91,28 @@ void StdPrs_WFShape::Add (const Handle(Prs3d_Presentation)& thePresentation,
       aVPolylinesPtr = &aCommonPolylines; // put V isolines into single group with common edges
     }
 
-    bool isParallelIso = false;
-    if (theIsParallel)
-    {
-      Standard_Integer aNbFaces = 0;
-      for (TopExp_Explorer aFaceExplorer (theShape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
-      {
-        ++aNbFaces;
-      }
-      if (aNbFaces > 1)
-      {
-        isParallelIso = true;
-        std::vector<TopoDS_Face> aFaces (aNbFaces);
-        aNbFaces = 0;
-        for (TopExp_Explorer aFaceExplorer (theShape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
-        {
-          const TopoDS_Face& aFace = TopoDS::Face (aFaceExplorer.Current());
-          if (theDrawer->IsoOnPlane() || !StdPrs_ShapeTool::IsPlanarFace (aFace))
-          {
-            aFaces[aNbFaces++] = aFace;
-          }
-        }
-
-        StdPrs_WFShape_IsoFunctor anIsoFunctor (*aUPolylinesPtr, *aVPolylinesPtr, aFaces, theDrawer, aShapeDeflection);
-        OSD_Parallel::For (0, aNbFaces, anIsoFunctor, aNbFaces < 2);
-      }
-    }
-
-    if (!isParallelIso)
-    {
-      for (TopExp_Explorer aFaceExplorer (theShape, TopAbs_FACE); aFaceExplorer.More(); aFaceExplorer.Next())
-      {
-        const TopoDS_Face& aFace = TopoDS::Face (aFaceExplorer.Current());
-        if (theDrawer->IsoOnPlane() || !StdPrs_ShapeTool::IsPlanarFace (aFace))
-        {
-          StdPrs_Isolines::Add (aFace, theDrawer, aShapeDeflection, *aUPolylinesPtr, *aVPolylinesPtr);
-        }
-      }
-    }
-
+    StdPrs_Isolines::Add (theShape, theDrawer, aShapeDeflection, theIsParallel, *aUPolylinesPtr, *aVPolylinesPtr);
     Prs3d::AddPrimitivesGroup (thePresentation, anIsoAspectU, aUPolylines);
     Prs3d::AddPrimitivesGroup (thePresentation, anIsoAspectV, aVPolylines);
   }
 
   {
-    Prs3d_NListOfSequenceOfPnt anUnfree, aFree;
+    Prs3d_NListOfSequenceOfPnt anUnfree, aSmooth, aFree;
     Prs3d_NListOfSequenceOfPnt* anUnfreePtr = &anUnfree;
+    Prs3d_NListOfSequenceOfPnt* aSmoothPtr = &aSmooth;
     Prs3d_NListOfSequenceOfPnt* aFreePtr = &aFree;
     if (!theDrawer->UnFreeBoundaryDraw())
     {
       anUnfreePtr = NULL;
+      aSmoothPtr = NULL;
     }
-    else if (theDrawer->UnFreeBoundaryAspect()->Aspect()->IsEqual (*aWireAspect->Aspect()))
+    else
     {
-      anUnfreePtr = &aCommonPolylines; // put unfree edges into single group with common edges
+      if (theDrawer->UnFreeBoundaryAspect()->Aspect()->IsEqual(*aWireAspect->Aspect()))
+        anUnfreePtr = &aCommonPolylines; // put unfree edges into single group with common edges
+
+      if (theDrawer->HiddenLineAspect()->Aspect()->IsEqual(*aWireAspect->Aspect()))
+        aSmoothPtr = &aCommonPolylines; // put smooth edges into single group with common edges
     }
 
     if (!theDrawer->FreeBoundaryDraw())
@@ -198,14 +124,16 @@ void StdPrs_WFShape::Add (const Handle(Prs3d_Presentation)& thePresentation,
       aFreePtr = &aCommonPolylines; // put free edges into single group with common edges
     }
 
-    addEdges (theShape,
+    AddEdges (theShape,
               theDrawer,
               aShapeDeflection,
               theDrawer->WireDraw() ? &aCommonPolylines : NULL,
               aFreePtr,
-              anUnfreePtr);
+              anUnfreePtr,
+              aSmoothPtr);
     Prs3d::AddPrimitivesGroup (thePresentation, theDrawer->UnFreeBoundaryAspect(), anUnfree);
     Prs3d::AddPrimitivesGroup (thePresentation, theDrawer->FreeBoundaryAspect(), aFree);
+    Prs3d::AddPrimitivesGroup (thePresentation, theDrawer->UIsoAspect(), aSmooth);
   }
 
   Prs3d::AddPrimitivesGroup (thePresentation, theDrawer->WireAspect(), aCommonPolylines);
@@ -227,28 +155,31 @@ Handle(Graphic3d_ArrayOfPrimitives) StdPrs_WFShape::AddAllEdges (const TopoDS_Sh
 {
   const Standard_Real aShapeDeflection = StdPrs_ToolTriangulatedShape::GetDeflection (theShape, theDrawer);
   Prs3d_NListOfSequenceOfPnt aPolylines;
-  addEdges (theShape, theDrawer, aShapeDeflection,
-            &aPolylines, &aPolylines, &aPolylines);
+  AddEdges (theShape, theDrawer, aShapeDeflection,
+            &aPolylines, &aPolylines, &aPolylines, &aPolylines);
   return Prs3d::PrimitivesFromPolylines (aPolylines);
 }
 
 // =========================================================================
-// function : addEdges
+// function : AddEdges
 // purpose  :
 // =========================================================================
-void StdPrs_WFShape::addEdges (const TopoDS_Shape& theShape,
+void StdPrs_WFShape::AddEdges (const TopoDS_Shape& theShape,
                                const Handle(Prs3d_Drawer)& theDrawer,
                                Standard_Real theShapeDeflection,
                                Prs3d_NListOfSequenceOfPnt* theWire,
                                Prs3d_NListOfSequenceOfPnt* theFree,
-                               Prs3d_NListOfSequenceOfPnt* theUnFree)
+                               Prs3d_NListOfSequenceOfPnt* theUnFree,
+                               Prs3d_NListOfSequenceOfPnt* theSmooth)
 {
   if (theShape.IsNull())
   {
     return;
   }
 
-  TopTools_ListOfShape aLWire, aLFree, aLUnFree;
+  const GeomAbs_Shape anUpperContinuity = theDrawer->FaceBoundaryUpperContinuity();
+
+  TopTools_ListOfShape aLWire, aLFree, aLUnFree, aLSmooth;
   TopTools_IndexedDataMapOfShapeListOfShape anEdgeMap;
   TopExp::MapShapesAndAncestors (theShape, TopAbs_EDGE, TopAbs_FACE, anEdgeMap);
   for (TopTools_IndexedDataMapOfShapeListOfShape::Iterator anEdgeIter (anEdgeMap); anEdgeIter.More(); anEdgeIter.Next())
@@ -271,6 +202,26 @@ void StdPrs_WFShape::addEdges (const TopoDS_Shape& theShape,
         {
           aLFree.Append (anEdge);
         }
+        break;
+      }
+      case 2:
+      {
+        if (anUpperContinuity < GeomAbs_CN)
+        {
+          const TopoDS_Face& aFace1 = TopoDS::Face(anEdgeIter.Value().First());
+          const TopoDS_Face& aFace2 = TopoDS::Face(anEdgeIter.Value().Last());
+          if (BRep_Tool::Continuity(anEdge, aFace1, aFace2) > anUpperContinuity)
+          {
+            if (theSmooth != NULL)
+              aLSmooth.Append(anEdge);
+
+            break;
+          }
+        }
+
+        if (theUnFree != NULL)
+          aLUnFree.Append(anEdge);
+
         break;
       }
       default:
@@ -296,6 +247,10 @@ void StdPrs_WFShape::addEdges (const TopoDS_Shape& theShape,
   {
     addEdges (aLUnFree, theDrawer, theShapeDeflection, *theUnFree);
   }
+  if (!aLSmooth.IsEmpty())
+  {
+    addEdges (aLSmooth, theDrawer, theShapeDeflection, *theSmooth);
+  }
 }
 
 // =========================================================================
@@ -307,10 +262,9 @@ void StdPrs_WFShape::addEdges (const TopTools_ListOfShape&  theEdges,
                                const Standard_Real          theShapeDeflection,
                                Prs3d_NListOfSequenceOfPnt&  thePolylines)
 {
-  TopTools_ListIteratorOfListOfShape anEdgesIter;
-  for (anEdgesIter.Initialize (theEdges); anEdgesIter.More(); anEdgesIter.Next())
+  for (const TopoDS_Shape& anEdgesIter : theEdges)
   {
-    const TopoDS_Edge& anEdge = TopoDS::Edge (anEdgesIter.Value());
+    const TopoDS_Edge& anEdge = TopoDS::Edge (anEdgesIter);
     if (BRep_Tool::Degenerated (anEdge))
     {
       continue;

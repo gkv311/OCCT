@@ -77,6 +77,7 @@ void AIS_Shape::replaceWithNewOwnAspects()
   replaceAspectWithOwn (aReplaceMap, FreeBoundaryAspect);
   replaceAspectWithOwn (aReplaceMap, UnFreeBoundaryAspect);
   replaceAspectWithOwn (aReplaceMap, SeenLineAspect);
+  replaceAspectWithOwn (aReplaceMap, HiddenLineAspect);
   replaceAspectWithOwn (aReplaceMap, FaceBoundaryAspect);
   replaceAspectWithOwn (aReplaceMap, PointAspect);
 
@@ -385,6 +386,7 @@ bool AIS_Shape::setColor (const Handle(Prs3d_Drawer)& theDrawer,
   theDrawer->FreeBoundaryAspect()->SetColor (theColor);
   theDrawer->UnFreeBoundaryAspect()->SetColor (theColor);
   theDrawer->SeenLineAspect()->SetColor (theColor);
+  theDrawer->HiddenLineAspect()->SetColor (theColor);
   theDrawer->FaceBoundaryAspect()->SetColor (theColor);
   return toRecompute;
 }
@@ -435,12 +437,14 @@ void AIS_Shape::UnsetColor()
     replaceAspectWithDef (aReplaceMap, FreeBoundaryAspect);
     replaceAspectWithDef (aReplaceMap, UnFreeBoundaryAspect);
     replaceAspectWithDef (aReplaceMap, SeenLineAspect);
+    replaceAspectWithDef (aReplaceMap, HiddenLineAspect);
     replaceAspectWithDef (aReplaceMap, FaceBoundaryAspect);
     myDrawer->SetLineAspect          (Handle(Prs3d_LineAspect)());
     myDrawer->SetWireAspect          (Handle(Prs3d_LineAspect)());
     myDrawer->SetFreeBoundaryAspect  (Handle(Prs3d_LineAspect)());
     myDrawer->SetUnFreeBoundaryAspect(Handle(Prs3d_LineAspect)());
     myDrawer->SetSeenLineAspect      (Handle(Prs3d_LineAspect)());
+    myDrawer->SetHiddenLineAspect    (Handle(Prs3d_LineAspect)());
     myDrawer->SetFaceBoundaryAspect  (Handle(Prs3d_LineAspect)());
   }
   else
@@ -469,11 +473,18 @@ void AIS_Shape::UnsetColor()
       AIS_GraphicTool::GetLineColor (myDrawer->Link(), AIS_TOA_UnFree, aColor);
     }
     myDrawer->UnFreeBoundaryAspect()->SetColor (aColor);
+    aColor = Quantity_NOC_YELLOW;
     if (myDrawer->HasLink())
     {
       AIS_GraphicTool::GetLineColor (myDrawer->Link(), AIS_TOA_Seen,   aColor);
     }
     myDrawer->SeenLineAspect()->SetColor (aColor);
+    aColor = Quantity_NOC_YELLOW;
+    if (myDrawer->HasLink())
+    {
+      AIS_GraphicTool::GetLineColor (myDrawer->Link(), AIS_TOA_Hidden, aColor);
+    }
+    myDrawer->HiddenLineAspect()->SetColor(aColor);
     aColor = Quantity_NOC_BLACK;
     if (myDrawer->HasLink())
     {
@@ -552,6 +563,7 @@ bool AIS_Shape::setWidth (const Handle(Prs3d_Drawer)& theDrawer,
   theDrawer->FreeBoundaryAspect()->SetWidth (theLineWidth);
   theDrawer->UnFreeBoundaryAspect()->SetWidth (theLineWidth);
   theDrawer->SeenLineAspect()->SetWidth (theLineWidth);
+  theDrawer->HiddenLineAspect()->SetWidth (theLineWidth);
   theDrawer->FaceBoundaryAspect()->SetWidth (theLineWidth);
   return toRecompute;
 }
@@ -598,12 +610,14 @@ void AIS_Shape::UnsetWidth()
     replaceAspectWithDef (aReplaceMap, FreeBoundaryAspect);
     replaceAspectWithDef (aReplaceMap, UnFreeBoundaryAspect);
     replaceAspectWithDef (aReplaceMap, SeenLineAspect);
+    replaceAspectWithDef (aReplaceMap, HiddenLineAspect);
     replaceAspectWithDef (aReplaceMap, FaceBoundaryAspect);
     myDrawer->SetLineAspect          (Handle(Prs3d_LineAspect)());
     myDrawer->SetWireAspect          (Handle(Prs3d_LineAspect)());
     myDrawer->SetFreeBoundaryAspect  (Handle(Prs3d_LineAspect)());
     myDrawer->SetUnFreeBoundaryAspect(Handle(Prs3d_LineAspect)());
     myDrawer->SetSeenLineAspect      (Handle(Prs3d_LineAspect)());
+    myDrawer->SetHiddenLineAspect    (Handle(Prs3d_LineAspect)());
     myDrawer->SetFaceBoundaryAspect  (Handle(Prs3d_LineAspect)());
     replaceAspects (aReplaceMap);
   }
@@ -619,6 +633,8 @@ void AIS_Shape::UnsetWidth()
       AIS_GraphicTool::GetLineWidth (myDrawer->Link(), AIS_TOA_UnFree) : 1.);
     myDrawer->SeenLineAspect()      ->SetWidth (myDrawer->HasLink() ?
       AIS_GraphicTool::GetLineWidth (myDrawer->Link(), AIS_TOA_Seen) : 1.);
+    myDrawer->HiddenLineAspect()    ->SetWidth(myDrawer->HasLink() ?
+      AIS_GraphicTool::GetLineWidth (myDrawer->Link(), AIS_TOA_Hidden) : 1.);
     myDrawer->FaceBoundaryAspect()      ->SetWidth (myDrawer->HasLink() ?
       AIS_GraphicTool::GetLineWidth (myDrawer->Link(), AIS_TOA_FaceBoundary) : 1.);
     SynchronizeAspects();
