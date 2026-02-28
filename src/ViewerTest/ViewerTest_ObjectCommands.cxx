@@ -6597,9 +6597,9 @@ static int VPriority (Draw_Interpretor& theDI,
 }
 
 //! Auxiliary class for command vnormals.
-class MyShapeWithNormals : public AIS_Shape
+class MyShapeWithNormals : public AIS_ColoredShape
 {
-  DEFINE_STANDARD_RTTI_INLINE(MyShapeWithNormals, AIS_Shape);
+  DEFINE_STANDARD_RTTI_INLINE(MyShapeWithNormals, AIS_ColoredShape);
 public:
 
   Standard_Real    NormalLength;
@@ -6612,7 +6612,7 @@ public:
 
   //! Main constructor.
   MyShapeWithNormals (const TopoDS_Shape& theShape)
-  : AIS_Shape   (theShape),
+  : AIS_ColoredShape (theShape),
     NormalLength(10),
     NbAlongU  (1),
     NbAlongV  (1),
@@ -6626,7 +6626,7 @@ protected:
                         const Handle(Prs3d_Presentation)& thePrs,
                         const Standard_Integer theMode) Standard_OVERRIDE
   {
-    AIS_Shape::Compute (thePrsMgr, thePrs, theMode);
+    AIS_ColoredShape::Compute (thePrsMgr, thePrs, theMode);
 
     NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > > aNormalMap;
     if (ToUseMesh)
@@ -6642,7 +6642,7 @@ protected:
     aPrsGroup->SetGroupPrimitivesAspect (myDrawer->ArrowAspect()->Aspect());
 
     const Standard_Real aArrowAngle  = myDrawer->ArrowAspect()->Angle();
-    const Standard_Real aArrowLength = myDrawer->ArrowAspect()->Length();
+    const Standard_Real aArrowLength = NormalLength * 0.1;
     for (NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > >::Iterator aFaceIt (aNormalMap);
          aFaceIt.More(); aFaceIt.Next())
     {
@@ -6676,41 +6676,21 @@ static int VNormals (Draw_Interpretor& theDI,
                      Standard_Integer  theArgNum,
                      const char**      theArgs)
 {
-  Handle(AIS_InteractiveContext) aContext = ViewerTest::GetAISContext();
-  if (aContext.IsNull())
+  if (ViewerTest::GetAISContext().IsNull())
   {
-    Message::SendFail ("Error: no active viewer");
-    return 1;
-  }
-  else if (theArgNum < 2)
-  {
-    Message::SendFail ("Syntax error: wrong number of arguments. See usage:");
-    theDI.PrintHelp (theArgs[0]);
+    theDI << "Error: no active viewer";
     return 1;
   }
 
-  Standard_Integer anArgIter = 1;
-  Standard_CString aShapeName = theArgs[anArgIter++];
-  TopoDS_Shape     aShape     = DBRep::Get (aShapeName);
+  const char*  aShapeName = nullptr;
+  TopoDS_Shape aShape;
+
   Standard_Boolean isOn = Standard_True;
-  if (aShape.IsNull())
-  {
-    Message::SendFail() << "Error: shape with name '" << aShapeName << "' is not found";
-    return 1;
-  }
-
-  ViewerTest_DoubleMapOfInteractiveAndName& aMap = GetMapOfAIS();
-  Handle(MyShapeWithNormals) aShapePrs;
-  if (aMap.IsBound2 (aShapeName))
-  {
-    aShapePrs = Handle(MyShapeWithNormals)::DownCast (aMap.Find2 (aShapeName));
-  }
-
-  Standard_Boolean isUseMesh = Standard_False;
-  Standard_Real    aLength = 10.0;
-  Standard_Integer aNbAlongU = 1, aNbAlongV = 1;
-  Standard_Boolean isOriented = Standard_False;
-  for (; anArgIter < theArgNum; ++anArgIter)
+  Standard_Integer isUseMesh = -1;
+  Standard_Real    aLength = -1;
+  Standard_Integer aNbAlongU = -1, aNbAlongV = -1;
+  Standard_Integer isOriented = -1;
+  for (Standard_Integer anArgIter = 1; anArgIter < theArgNum; ++anArgIter)
   {
     TCollection_AsciiString aParam (theArgs[anArgIter]);
     aParam.LowerCase();
@@ -6722,88 +6702,142 @@ static int VNormals (Draw_Interpretor& theDI,
     else if (aParam == "-usemesh"
           || aParam == "-mesh")
     {
-      isUseMesh = Standard_True;
+      isUseMesh = Draw::ParseOnOffIterator(theArgNum, theArgs, anArgIter) ? 1 : 0;
     }
-    else if (aParam == "-length"
-          || aParam == "-len")
+    else if ((aParam == "-length"
+           || aParam == "-len")
+          && anArgIter + 1 < theArgNum
+          && Draw::ParseReal(theArgs[anArgIter + 1], aLength))
     {
       ++anArgIter;
-      aLength = anArgIter < theArgNum ? Draw::Atof (theArgs[anArgIter]) : 0.0;
-      if (Abs (aLength) <= gp::Resolution())
+      if (aLength <= gp::Resolution())
       {
-        Message::SendFail ("Syntax error: length should not be zero");
+        theDI << "Syntax error: length should not be zero";
         return 1;
       }
     }
     else if (aParam == "-orient"
           || aParam == "-oriented")
     {
-      isOriented = Standard_True;
-      if (anArgIter + 1 < theArgNum
-        && Draw::ParseOnOff (theArgs[anArgIter + 1], isOriented))
-      {
-        ++anArgIter;
-      }
+      isOriented = Draw::ParseOnOffIterator(theArgNum, theArgs, anArgIter) ? 1 : 0;
     }
-    else if (aParam == "-nbalongu"
-          || aParam == "-nbu")
+    else if ((aParam == "-nbalongu"
+           || aParam == "-nbu")
+          && anArgIter + 1 < theArgNum
+          && Draw::ParseInteger(theArgs[anArgIter + 1], aNbAlongU))
     {
       ++anArgIter;
-      aNbAlongU = anArgIter < theArgNum ? Draw::Atoi (theArgs[anArgIter]) : 0;
       if (aNbAlongU < 1)
       {
-        Message::SendFail ("Syntax error: NbAlongU should be >=1");
+        theDI << "Syntax error: NbAlongU should be >=1";
         return 1;
       }
     }
-    else if (aParam == "-nbalongv"
-          || aParam == "-nbv")
+    else if ((aParam == "-nbalongv"
+           || aParam == "-nbv")
+          && anArgIter + 1 < theArgNum
+          && Draw::ParseInteger(theArgs[anArgIter + 1], aNbAlongV))
     {
       ++anArgIter;
-      aNbAlongV = anArgIter < theArgNum ? Draw::Atoi (theArgs[anArgIter]) : 0;
       if (aNbAlongV < 1)
       {
-        Message::SendFail ("Syntax error: NbAlongV should be >=1");
+        theDI << "Syntax error: NbAlongV should be >=1";
         return 1;
       }
     }
-    else if (aParam == "-nbalong"
-          || aParam == "-nbuv")
+    else if ((aParam == "-nbalong"
+           || aParam == "-nbuv")
+          && anArgIter + 1 < theArgNum
+          && Draw::ParseInteger(theArgs[anArgIter + 1], aNbAlongU))
     {
       ++anArgIter;
-      aNbAlongU = anArgIter < theArgNum ? Draw::Atoi (theArgs[anArgIter]) : 0;
       aNbAlongV = aNbAlongU;
       if (aNbAlongU < 1)
       {
-        Message::SendFail ("Syntax error: NbAlong should be >=1");
+        theDI << "Syntax error: NbAlong should be >=1";
+        return 1;
+      }
+    }
+    else if (aShape.IsNull())
+    {
+      aShapeName = theArgs[anArgIter];
+      aShape     = DBRep::Get (aShapeName);
+      if (aShape.IsNull())
+      {
+        theDI << "Error: shape '" << aShapeName << "' not found";
         return 1;
       }
     }
     else
     {
-      Message::SendFail() << "Syntax error: unknown argument '" << aParam << "'";
+      theDI << "Syntax error: unknown argument '" << aParam << "'";
       return 1;
     }
   }
 
-  if (isOn)
+  if (aShape.IsNull())
   {
-    if (aShapePrs.IsNull())
-    {
-      aShapePrs = new MyShapeWithNormals (aShape);
-    }
-    aShapePrs->ToUseMesh    = isUseMesh;
-    aShapePrs->ToOrient     = isOriented;
-    aShapePrs->NormalLength = aLength;
-    aShapePrs->NbAlongU     = aNbAlongU;
-    aShapePrs->NbAlongV     = aNbAlongV;
-    VDisplayAISObject (aShapeName, aShapePrs);
-  }
-  else if (!aShapePrs.IsNull())
-  {
-    VDisplayAISObject (aShapeName, new AIS_Shape (aShape));
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
   }
 
+  Handle(AIS_InteractiveObject) aPrs;
+  GetMapOfAIS().Find2 (aShapeName, aPrs);
+
+  Handle(AIS_Shape)          aShapePrs     = Handle(AIS_Shape)::DownCast (aPrs);
+  Handle(AIS_ColoredShape)   aShapeColPrs  = Handle(AIS_ColoredShape)::DownCast (aShapePrs);
+  Handle(MyShapeWithNormals) aShapeNormPrs = Handle(MyShapeWithNormals)::DownCast (aShapePrs);
+
+  if (isOn)
+  {
+    if (aShapeNormPrs.IsNull())
+    {
+      aShapeNormPrs = new MyShapeWithNormals (aShape);
+      if (!aShapePrs.IsNull())
+      {
+        aShapeNormPrs->SetAttributes (aShapePrs->Attributes());
+        aShapeNormPrs->SetHilightAttributes (aShapePrs->HilightAttributes());
+        aShapeNormPrs->SetDynamicHilightAttributes (aShapePrs->DynamicHilightAttributes());
+      }
+      if (!aShapeColPrs.IsNull())
+        aShapeNormPrs->ChangeCustomAspectsMap() =aShapeColPrs->CustomAspectsMap();
+
+      aShapePrs =aShapeNormPrs;
+    }
+    if (isUseMesh != -1)
+      aShapeNormPrs->ToUseMesh =isUseMesh == 1;
+
+    if (isOriented != -1)
+      aShapeNormPrs->ToOrient =isOriented == 1;
+
+    if (aLength != -1)
+      aShapeNormPrs->NormalLength =aLength;
+
+    if (aNbAlongU != -1)
+      aShapeNormPrs->NbAlongU =aNbAlongU;
+
+    if (aNbAlongV != -1)
+      aShapeNormPrs->NbAlongV =aNbAlongV;
+  }
+  else if (!aShapeNormPrs.IsNull())
+  {
+    if (!aShapeNormPrs->CustomAspectsMap().IsEmpty())
+    {
+      aShapeColPrs = new AIS_ColoredShape (aShape);
+      aShapeColPrs->ChangeCustomAspectsMap() = aShapeNormPrs->CustomAspectsMap();
+      aShapePrs = aShapeColPrs;
+    }
+    else
+    {
+      aShapePrs = new AIS_Shape (aShape);
+    }
+
+    aShapePrs->SetAttributes (aShapeNormPrs->Attributes());
+    aShapePrs->SetHilightAttributes (aShapeNormPrs->HilightAttributes());
+    aShapePrs->SetDynamicHilightAttributes (aShapeNormPrs->DynamicHilightAttributes());
+  }
+
+  ViewerTest::Display (aShapeName, aShapePrs);
   return 0;
 }
 
