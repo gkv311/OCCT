@@ -231,6 +231,10 @@ void AIS_ColoredShape::SetColor (const Quantity_Color&  theColor)
     {
       aDrawer->LineAspect()->SetColor (theColor);
     }
+    if (aDrawer->HasOwnHiddenLineAspect())
+    {
+      aDrawer->HiddenLineAspect()->SetColor (theColor);
+    }
     if (aDrawer->HasOwnWireAspect())
     {
       aDrawer->WireAspect()->SetColor (theColor);
@@ -261,6 +265,10 @@ void AIS_ColoredShape::SetWidth (const Standard_Real    theLineWidth)
     if (aDrawer->HasOwnLineAspect())
     {
       aDrawer->LineAspect()->SetWidth (theLineWidth);
+    }
+    if (aDrawer->HasOwnHiddenLineAspect())
+    {
+      aDrawer->HiddenLineAspect()->SetWidth (theLineWidth);
     }
     if (aDrawer->HasOwnWireAspect())
     {

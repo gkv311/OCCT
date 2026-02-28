@@ -36,6 +36,20 @@ class StdPrs_Isolines : public Prs3d_Root
 {
 public:
 
+  //! Computes isolines presentation for all faces in the shape.
+  //! @param[in]  theShape      the shape with faces
+  //! @param[in]  theDrawer     the display settings
+  //! @param[in]  theDeflection the deflection for isolines-on-surface version
+  //! @param[in]  theIsParallel flag to perform multi-threaded functor
+  //! @param[out] theUPolylines result polylines for U isolines
+  //! @param[out] theVPolylines result polylines for V isolines
+  Standard_EXPORT static void Add(const TopoDS_Shape&         theShape,
+                                  const Handle(Prs3d_Drawer)& theDrawer,
+                                  const Standard_Real         theDeflection,
+                                  const Standard_Boolean      theIsParallel,
+                                  Prs3d_NListOfSequenceOfPnt& theUPolylines,
+                                  Prs3d_NListOfSequenceOfPnt& theVPolylines);
+
   //! Computes isolines presentation for a TopoDS face.
   //! This method chooses proper version of isoline builder algorithm : on triangulation
   //! or surface depending on the flag passed from Prs3d_Drawer attributes.
@@ -259,6 +273,9 @@ private:
                                                                       const gp_Pnt*               theNodesXYZ,
                                                                       const gp_Pnt2d*             theNodesUV,
                                                                       SegOnIso&                   theSegment);
+
+private:
+  class IsoFunctor;
 };
 
 #endif // _StdPrs_Isolines_H__

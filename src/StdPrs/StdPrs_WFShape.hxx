@@ -66,21 +66,24 @@ public:
   Standard_EXPORT static Handle(Graphic3d_ArrayOfPoints) AddVertexes (const TopoDS_Shape& theShape,
                                                                       Prs3d_VertexDrawMode theVertexMode);
 
-private:
-
   //! Compute edge presentations for a shape.
-  //! @param[in] theShape  the shape
-  //! @param[in] theDrawer  the drawer settings (deviation angle and maximal parameter value)
-  //! @param[in] theShapeDeflection  the deflection for the wireframe shape
+  //! @param[in]  theShape  the shape
+  //! @param[in]  theDrawer the drawer settings (deviation angle and maximal parameter value)
+  //! @param[in]  theShapeDeflection the deflection for the wireframe shape
   //! @param[out] theWire  output polylines for lonely wires
   //! @param[out] theFree  output polylines for free edges
-  //! @param[out] theUnFree  output polylines for non-free edges
-  Standard_EXPORT static void addEdges (const TopoDS_Shape& theShape,
-                                        const Handle(Prs3d_Drawer)& theDrawer,
-                                        Standard_Real theShapeDeflection,
-                                        Prs3d_NListOfSequenceOfPnt* theWire,
-                                        Prs3d_NListOfSequenceOfPnt* theFree,
-                                        Prs3d_NListOfSequenceOfPnt* theUnFree);
+  //! @param[out] theUnFree output polylines for non-free edges
+  //! @param[out] theSmooth output polylines for non-free edges based on
+  //!                       Prs3d_Drawer::FaceBoundaryUpperContinuity() filter
+  Standard_EXPORT static void AddEdges(const TopoDS_Shape&         theShape,
+                                       const Handle(Prs3d_Drawer)& theDrawer,
+                                       Standard_Real               theShapeDeflection,
+                                       Prs3d_NListOfSequenceOfPnt* theWire,
+                                       Prs3d_NListOfSequenceOfPnt* theFree,
+                                       Prs3d_NListOfSequenceOfPnt* theUnFree,
+                                       Prs3d_NListOfSequenceOfPnt* theSmooth);
+
+private:
 
   //! Compute edge presentations for a shape.
   //! @param[in] theEdges  the list of edges

@@ -25,19 +25,25 @@
 #include <GeomAdaptor_Curve.hxx>
 #include <gp_Lin2d.hxx>
 #include <Hatch_Hatcher.hxx>
+#include <NCollection_StdAllocator.hxx>
 #include <NCollection_Shared.hxx>
+#include <OSD_Parallel.hxx>
 #include <Prs3d.hxx>
 #include <Prs3d_IsoAspect.hxx>
 #include <Poly_Array1OfTriangle.hxx>
 #include <Poly_Triangulation.hxx>
 #include <StdPrs_DeflectionCurve.hxx>
 #include <StdPrs_ToolRFace.hxx>
+#include <StdPrs_ShapeTool.hxx>
 #include <TColgp_SequenceOfPnt2d.hxx>
+#include <TopoDS.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_OffsetSurface.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
+
 #include <algorithm>
+#include <vector>
 
 namespace
 {
@@ -820,4 +826,97 @@ Standard_Boolean StdPrs_Isolines::findSegmentOnTriangulation (const Handle(Geom_
     std::swap (theSegment[0], theSegment[1]);
   }
   return true;
+}
+
+//! Functor for executing StdPrs_Isolines in parallel threads.
+class StdPrs_Isolines::IsoFunctor
+{
+public:
+
+  //! Constructor.
+  IsoFunctor(const Standard_Integer      theNbFaces,
+             Prs3d_NListOfSequenceOfPnt& thePolylinesU,
+             Prs3d_NListOfSequenceOfPnt& thePolylinesV,
+             const Handle(Prs3d_Drawer)& theDrawer,
+             Standard_Real               theShapeDeflection)
+  : myPolylinesU(thePolylinesU),
+    myPolylinesV(thePolylinesV),
+    myDrawer(theDrawer),
+    myShapeDeflection(theShapeDeflection)
+  {
+    myFaces.reserve(theNbFaces);
+  }
+
+  //! Return faces.
+  std::vector<TopoDS_Face, NCollection_StdAllocator<TopoDS_Face>>& Faces() { return myFaces; }
+
+  //! Handle face.
+  void operator()(const Standard_Integer theIndex) const
+  {
+    Prs3d_NListOfSequenceOfPnt aPolylinesU, aPolylinesV;
+    const TopoDS_Face&         aFace = myFaces[theIndex];
+    StdPrs_Isolines::Add(aFace, myDrawer, myShapeDeflection, aPolylinesU, aPolylinesV);
+    {
+      Standard_Mutex::Sentry aLock(myMutex);
+      myPolylinesU.Append(aPolylinesU);
+      myPolylinesV.Append(aPolylinesV);
+    }
+  }
+
+private:
+
+  IsoFunctor operator=(IsoFunctor&) Standard_DELETE;
+
+private:
+
+  std::vector<TopoDS_Face, NCollection_StdAllocator<TopoDS_Face>> myFaces;
+
+  Prs3d_NListOfSequenceOfPnt& myPolylinesU;
+  Prs3d_NListOfSequenceOfPnt& myPolylinesV;
+  const Handle(Prs3d_Drawer)& myDrawer;
+  mutable Standard_Mutex      myMutex;
+  const Standard_Real         myShapeDeflection;
+};
+
+//==================================================================
+// function : Add
+// purpose  :
+//==================================================================
+void StdPrs_Isolines::Add(const TopoDS_Shape&         theShape,
+                          const Handle(Prs3d_Drawer)& theDrawer,
+                          const Standard_Real         theDeflection,
+                          const Standard_Boolean      theIsParallel,
+                          Prs3d_NListOfSequenceOfPnt& theUPolylines,
+                          Prs3d_NListOfSequenceOfPnt& theVPolylines)
+{
+  if (theShape.IsNull())
+    return;
+
+  if (theIsParallel)
+  {
+    Standard_Integer aNbFaces = 0;
+    for (TopExp_Explorer aFaceIter(theShape, TopAbs_FACE); aFaceIter.More(); aFaceIter.Next())
+      ++aNbFaces;
+
+    if (aNbFaces > 1)
+    {
+      StdPrs_Isolines::IsoFunctor anIsoFunctor(aNbFaces, theUPolylines, theVPolylines, theDrawer, theDeflection);
+      for (const TopoDS_Shape& aFaceIter : TopExp_Explorer(theShape, TopAbs_FACE))
+      {
+        const TopoDS_Face& aFace = TopoDS::Face(aFaceIter);
+        if (theDrawer->IsoOnPlane() || !StdPrs_ShapeTool::IsPlanarFace(aFace))
+          anIsoFunctor.Faces().push_back(aFace);
+      }
+
+      OSD_Parallel::For(0, int(anIsoFunctor.Faces().size()), anIsoFunctor, anIsoFunctor.Faces().size() < 2);
+      return;
+    }
+  }
+
+  for (const TopoDS_Shape& aFaceIter : TopExp_Explorer(theShape, TopAbs_FACE))
+  {
+    const TopoDS_Face& aFace = TopoDS::Face(aFaceIter);
+    if (theDrawer->IsoOnPlane() || !StdPrs_ShapeTool::IsPlanarFace(aFace))
+      StdPrs_Isolines::Add(aFace, theDrawer, theDeflection, theUPolylines, theVPolylines);
+  }
 }
