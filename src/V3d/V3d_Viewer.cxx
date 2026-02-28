@@ -191,11 +191,15 @@ void V3d_Viewer::RedrawImmediate() const
 // function : Invalidate
 // purpose  :
 // ========================================================================
-void V3d_Viewer::Invalidate() const
+void V3d_Viewer::Invalidate (const Handle(Graphic3d_ViewAffinity)& theMask,
+                             const Standard_Boolean theIsImmediate) const
 {
-  for (V3d_ListOfView::Iterator aDefViewIter (myDefinedViews); aDefViewIter.More(); aDefViewIter.Next())
+  for (const Handle(V3d_View)& aDefViewIter : myDefinedViews)
   {
-    aDefViewIter.Value()->Invalidate();
+    if (!theMask.IsNull() && !theMask->IsVisible(aDefViewIter->View()->Identification()))
+      continue;
+
+    theIsImmediate ? aDefViewIter->InvalidateImmediate() : aDefViewIter->Invalidate();
   }
 }
 

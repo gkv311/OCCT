@@ -2734,6 +2734,15 @@ void AIS_ViewController::OnSelectionChanged (const Handle(AIS_InteractiveContext
 }
 
 // =======================================================================
+// function : OnObjectDetected
+// purpose  :
+// =======================================================================
+void AIS_ViewController::OnObjectDetected(const Handle(AIS_InteractiveContext)&, const Handle(V3d_View)&)
+{
+  //
+}
+
+// =======================================================================
 // function : OnSubviewChanged
 // purpose  :
 // =======================================================================
@@ -2861,15 +2870,9 @@ void AIS_ViewController::contextLazyMoveTo (const Handle(AIS_InteractiveContext)
     }
   }
 
-  if (aLastPicked != aNewPicked
-   || (!aNewPicked.IsNull() && aNewPicked->IsForcedHilight()))
+  if (aNewPicked != aLastPicked || theCtx->IsForcedDynamicHilight())
   {
-    // dynamic highlight affects all Views
-    for (V3d_ListOfViewIterator aViewIter (theView->Viewer()->ActiveViewIterator()); aViewIter.More(); aViewIter.Next())
-    {
-      const Handle(V3d_View)& aView = aViewIter.Value();
-      aView->InvalidateImmediate();
-    }
+    OnObjectDetected (theCtx, theView);
   }
 }
 
@@ -2925,9 +2928,6 @@ void AIS_ViewController::handleSelectionPick (const Handle(AIS_InteractiveContex
       {
         theCtx->SelectDetected (myGL.Selection.Scheme, false);
       }
-
-      // selection affects all Views
-      theView->Viewer()->Invalidate();
 
       OnSelectionChanged (theCtx, theView);
     }
@@ -3052,11 +3052,7 @@ void AIS_ViewController::handleSelectionPoly (const Handle(AIS_InteractiveContex
 
       myRubberBand->ClearPoints();
       if (myGL.Selection.Tool != AIS_ViewSelectionTool_ZoomWindow)
-      {
-        // selection affects all Views
-        theView->Viewer()->Invalidate();
         OnSelectionChanged (theCtx, theView);
-      }
     }
   }
 }

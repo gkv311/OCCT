@@ -143,7 +143,11 @@ public:
   const Handle(TColStd_HPackedMapOfInteger)& DetectedPoints() const { return myDetPoints; }
 
   //! Always update dynamic highlighting.
-  Standard_EXPORT virtual Standard_Boolean IsForcedHilight() const Standard_OVERRIDE;
+  virtual Standard_Boolean IsForcedHilight() const Standard_OVERRIDE { return true; }
+
+  //! Fill in local pick information to perform dynamic re-highlighting.
+  Standard_EXPORT virtual void LocalPickInfo(Handle(SelectMgr_LocalPickInfo)&        theInfo,
+                                             const Handle(Select3D_SensitiveEntity)& theEntity) const Standard_OVERRIDE;
 
   //! Handle dynamic highlighting.
   Standard_EXPORT virtual void HilightWithColor (const Handle(PrsMgr_PresentationManager)& thePrsMgr,
