@@ -20,6 +20,7 @@
 #include <NCollection_IncAllocator.hxx>
 #include <Standard_Assert.hxx>
 
+#include <algorithm>
 #include <list>
 #include <vector>
 
@@ -115,6 +116,22 @@ static Standard_Integer QANColStdAllocator2(Draw_Interpretor& di, Standard_Integ
       di << "Test5 : Error\n";
     }
 
+  }
+
+  {
+    // test std::sort() with NCollection_StdAllocator
+    typedef std::vector<int, NCollection_StdAllocator<int>> IntVec;
+    std::vector<IntVec, NCollection_StdAllocator<IntVec>>   aVec = {{10}, {23}, {3}};
+    std::sort(aVec.begin(),
+              aVec.end(),
+              [](const IntVec& theVec1, const IntVec& theVec2) -> bool
+              {
+                return theVec1.front() < theVec2.front();
+              });
+    if (aVec[0].front() != 3 || aVec[1].front() != 10 || aVec[2].front() != 23)
+      di << "Test6 : Error\n";
+    else
+      di << "Test6 : OK\n";
   }
 
   return 0;

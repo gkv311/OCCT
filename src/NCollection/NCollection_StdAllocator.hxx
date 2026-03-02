@@ -42,6 +42,7 @@ public:
   typedef const value_type& const_reference;
   typedef size_t size_type;
   typedef ptrdiff_t difference_type;
+  typedef std::true_type propagate_on_container_move_assignment;
   template<typename U> struct rebind {
     typedef NCollection_StdAllocator<U> other;
   };
