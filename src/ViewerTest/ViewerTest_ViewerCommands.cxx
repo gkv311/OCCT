@@ -12447,48 +12447,6 @@ static Standard_Integer VStatProfiler (Draw_Interpretor& theDI,
   return 0;
 }
 
-//=======================================================================
-//function : VXRotate
-//purpose  :
-//=======================================================================
-static Standard_Integer VXRotate (Draw_Interpretor& di,
-                                   Standard_Integer argc,
-                                   const char ** argv)
-{
-  Handle(AIS_InteractiveContext) aContext = ViewerTest::GetAISContext();
-  if (aContext.IsNull())
-  {
-    di << argv[0] << "ERROR : use 'vinit' command before \n";
-    return 1;
-  }
-
-  if (argc != 3)
-  {
-    di << "ERROR : Usage : " << argv[0] << " name angle\n";
-    return 1;
-  }
-
-  TCollection_AsciiString aName (argv[1]);
-  Standard_Real anAngle = Draw::Atof (argv[2]);
-
-  // find object
-  ViewerTest_DoubleMapOfInteractiveAndName& aMap = GetMapOfAIS();
-  Handle(AIS_InteractiveObject) anIObj;
-  if (!aMap.Find2 (aName, anIObj))
-  {
-    di << "Use 'vdisplay' before\n";
-    return 1;
-  }
-
-  gp_Trsf aTransform;
-  aTransform.SetRotation (gp_Ax1 (gp_Pnt (0.0, 0.0, 0.0), gp_Vec (1.0, 0.0, 0.0)), anAngle);
-  aTransform.SetTranslationPart (anIObj->LocalTransformation().TranslationPart());
-
-  aContext->SetLocation (anIObj, aTransform);
-  aContext->UpdateCurrentViewer();
-  return 0;
-}
-
 namespace
 {
   //! Structure for setting AIS_Manipulator::SetPart() property.
@@ -14965,10 +14923,6 @@ Set '-noredraw' flag to avoid additional redraw call and use already collected v
   addCmd ("vplace", VPlace, /* [vplace] */ R"(
 vplace dx dy : Places the point (in pixels) at the center of the window
 )" /* [vplace] */);
-
-  addCmd ("vxrotate", VXRotate, /* [vxrotate] */ R"(
-vxrotate
-)" /* [vxrotate] */);
 
   addCmd ("vmanipulator", VManipulator, /* [vmanipulator] */ R"(
 vmanipulator Name [-attach AISObject | -detach | ...]
