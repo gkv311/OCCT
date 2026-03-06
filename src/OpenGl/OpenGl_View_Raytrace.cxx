@@ -509,7 +509,7 @@ Standard_Boolean OpenGl_View::addRaytraceStructure (const OpenGl_Structure*     
 // =======================================================================
 Standard_Boolean OpenGl_View::addRaytraceGroups (const OpenGl_Structure*        theStructure,
                                                  const OpenGl_RaytraceMaterial& theStructMat,
-                                                 const Handle(TopLoc_Datum3D)&  theTrsf,
+                                                 const Handle(Graphic3d_HGTrsf)& theTrsf,
                                                  const Handle(OpenGl_Context)&  theGlContext)
 {
   OpenGl_Mat4 aMat4;
@@ -554,7 +554,7 @@ Standard_Boolean OpenGl_View::addRaytraceGroups (const OpenGl_Structure*        
             opencascade::handle<BVH_Transform<Standard_ShortReal, 4> > aTransform = new BVH_Transform<Standard_ShortReal, 4>();
             if (!theTrsf.IsNull())
             {
-              theTrsf->Trsf().GetMat4 (aMat4);
+              theTrsf->GetMat4 (aMat4);
               aTransform->SetTransform (aMat4);
             }
 
@@ -571,7 +571,7 @@ Standard_Boolean OpenGl_View::addRaytraceGroups (const OpenGl_Structure*        
               opencascade::handle<BVH_Transform<Standard_ShortReal, 4> > aTransform = new BVH_Transform<Standard_ShortReal, 4>();
               if (!theTrsf.IsNull())
               {
-                theTrsf->Trsf().GetMat4 (aMat4);
+                theTrsf->GetMat4 (aMat4);
                 aTransform->SetTransform (aMat4);
               }
 

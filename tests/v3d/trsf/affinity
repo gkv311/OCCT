@@ -1,0 +1,25 @@
+puts "========"
+puts "Apply affinity gp_GTrsf transformation to AIS presentation"
+puts "========"
+
+pload MODELING VISUALIZATION
+vinit View1
+box b1 -200 0 0 100 100 100
+box b2    0 0 0 100 100 100
+psphere s 50
+ttranslate s 200 50 50
+vdisplay b1 b2 s
+vfit
+vlocation s  -affinity   200 0 0  0 1  1  0.5
+vlocation b1 -affinity2 -200 0 0  0 0 -1  1 1 0  1.5
+vlocation b2 -affinity     0 0 0  0 1  1  0.75
+
+tcopy s  si
+tcopy b1 b1i
+tcopy b2 b2i
+vdisplay b1i b2i si
+vlocation si  -location  0 200 0
+vlocation b1i -location  0 200 0
+vlocation b2i -location  0 200 0
+
+vdump ${imagedir}/${casename}.png

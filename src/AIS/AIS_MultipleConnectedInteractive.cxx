@@ -39,7 +39,7 @@ AIS_MultipleConnectedInteractive::AIS_MultipleConnectedInteractive()
 //purpose  :
 //=======================================================================
 Handle(AIS_InteractiveObject) AIS_MultipleConnectedInteractive::connect (const Handle(AIS_InteractiveObject)& theAnotherObj,
-                                                                         const Handle(TopLoc_Datum3D)& theTrsf,
+                                                                         const Handle(Graphic3d_HGTrsf)& theTrsf,
                                                                          const Handle(Graphic3d_TransformPers)& theTrsfPers)
 {
   if (myAssemblyOwner.IsNull())

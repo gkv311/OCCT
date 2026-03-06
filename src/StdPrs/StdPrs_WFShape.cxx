@@ -376,7 +376,7 @@ void StdPrs_WFShape::AddEdgesOnTriangulation (TColgp_SequenceOfPnt& theSegments,
         continue;
     }
     if (const Handle(Poly_Triangulation)& aPolyTri = BRep_Tool::Triangulation (aFace, aLocation))
-      Prs3d::AddFreeEdges (theSegments, aPolyTri, aLocation);
+      Prs3d::AddFreeEdges (theSegments, aPolyTri, aLocation.Transformation());
   }
 }
 

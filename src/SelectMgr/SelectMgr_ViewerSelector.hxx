@@ -293,7 +293,7 @@ public:
   Standard_EXPORT void ClearSensitive (const Handle(V3d_View)& theView);
 
   Standard_EXPORT void DisplaySensitive (const Handle(SelectMgr_Selection)& theSel,
-                                         const gp_Trsf& theTrsf,
+                                         const gp_GTrsf& theTrsf,
                                          const Handle(V3d_View)& theView,
                                          const Standard_Boolean theToClearOthers = Standard_True);
 

@@ -221,7 +221,7 @@ protected:
                                                             const AIS_DragAction theAction) Standard_OVERRIDE;
 
   //! Sets new local transformation, which is propagated to Graphic3d_CLight instance.
-  Standard_EXPORT virtual void setLocalTransformation (const Handle(TopLoc_Datum3D)& theTrsf) Standard_OVERRIDE;
+  Standard_EXPORT virtual void setLocalTransformation (const Handle(Graphic3d_HGTrsf)& theTrsf) Standard_OVERRIDE;
 
   //! Updates local transformation basing on a type of light source.
   Standard_EXPORT virtual void updateLightLocalTransformation();

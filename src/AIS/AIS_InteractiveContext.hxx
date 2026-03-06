@@ -322,6 +322,9 @@ public: //! @name object local transformation management
   //! Puts the location on the initial graphic representation and the selection for the Object.
   Standard_EXPORT void SetLocation (const Handle(AIS_InteractiveObject)& theObject, const TopLoc_Location& theLocation);
 
+  //! Puts the location on the initial graphic representation and the selection for the Object.
+  Standard_EXPORT void SetLocalTransformation(const Handle(AIS_InteractiveObject)& theObject, const Handle(Graphic3d_HGTrsf)& theLocation);
+
   //! Puts the Object back into its initial position.
   Standard_EXPORT void ResetLocation (const Handle(AIS_InteractiveObject)& theObject);
 

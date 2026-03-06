@@ -226,17 +226,17 @@ public: //! @name object transformation
   //! Return the local transformation.
   //! Note that the local transformation of the object having Transformation Persistence
   //! is applied within Local Coordinate system defined by this Persistence.
-  const Handle(TopLoc_Datum3D)& LocalTransformationGeom() const { return myLocalTransformation; }
+  const Handle(Graphic3d_HGTrsf)& LocalTransformationGeom() const { return myLocalTransformation; }
 
   //! Sets local transformation to theTransformation.
   //! Note that the local transformation of the object having Transformation Persistence
   //! is applied within Local Coordinate system defined by this Persistence.
-  void SetLocalTransformation (const gp_Trsf& theTrsf) { setLocalTransformation (new TopLoc_Datum3D (theTrsf)); }
+  void SetLocalTransformation (const gp_GTrsf& theTrsf) { setLocalTransformation (new Graphic3d_HGTrsf (theTrsf)); }
 
   //! Sets local transformation to theTransformation.
   //! Note that the local transformation of the object having Transformation Persistence
   //! is applied within Local Coordinate system defined by this Persistence.
-  void SetLocalTransformation (const Handle(TopLoc_Datum3D)& theTrsf) { setLocalTransformation (theTrsf); }
+  void SetLocalTransformation (const Handle(Graphic3d_HGTrsf)& theTrsf) { setLocalTransformation (theTrsf); }
 
   //! Returns true if object has a transformation that is different from the identity.
   Standard_Boolean HasTransformation() const { return !myTransformation.IsNull() && myTransformation->Form() != gp_Identity; }
@@ -244,27 +244,27 @@ public: //! @name object transformation
   //! Return the transformation taking into account transformation of parent object(s).
   //! Note that the local transformation of the object having Transformation Persistence
   //! is applied within Local Coordinate system defined by this Persistence.
-  const Handle(TopLoc_Datum3D)& TransformationGeom() const { return myTransformation; }
+  const Handle(Graphic3d_HGTrsf)& TransformationGeom() const { return myTransformation; }
 
   //! Return the local transformation.
   //! Note that the local transformation of the object having Transformation Persistence
   //! is applied within Local Coordinate system defined by this Persistence.
-  const gp_Trsf& LocalTransformation() const { return !myLocalTransformation.IsNull()
-                                                     ? myLocalTransformation->Trsf()
-                                                     : getIdentityTrsf(); }
+  const gp_GTrsf& LocalTransformation() const { return !myLocalTransformation.IsNull()
+                                                      ? *myLocalTransformation
+                                                      : getIdentityTrsf(); }
 
   //! Return the transformation taking into account transformation of parent object(s).
   //! Note that the local transformation of the object having Transformation Persistence
   //! is applied within Local Coordinate system defined by this Persistence.
-  const gp_Trsf& Transformation() const { return !myTransformation.IsNull()
-                                                ? myTransformation->Trsf()
+  const gp_GTrsf& Transformation() const { return !myTransformation.IsNull()
+                                                ? *myTransformation
                                                 : getIdentityTrsf(); }
 
   //! Return inversed transformation.
   const gp_GTrsf& InversedTransformation() const { return myInvTransformation; }
 
   //! Return combined parent transformation.
-  const Handle(TopLoc_Datum3D)& CombinedParentTransformation() const { return myCombinedParentTransform; }
+  const Handle(Graphic3d_HGTrsf)& CombinedParentTransformation() const { return myCombinedParentTransform; }
 
   //! resets local transformation to identity.
   Standard_EXPORT virtual void ResetTransformation();
@@ -366,7 +366,7 @@ protected: //! @name interface methods
   //! @param[in] theTrsf  additional transformation, or NULL if undefined
   //! @param[in] thePrs   presentation to fill
   Standard_EXPORT virtual void computeHLR (const Handle(Graphic3d_Camera)& theProjector,
-                                           const Handle(TopLoc_Datum3D)& theTrsf,
+                                           const Handle(Graphic3d_HGTrsf)& theTrsf,
                                            const Handle(Prs3d_Presentation)& thePrs);
 
   //! Recomputes invalidated presentations of the object.
@@ -381,13 +381,13 @@ protected: //! @name interface methods
 
   //! Sets myCombinedParentTransform to theTransformation. Thus object receives transformation
   //! from parent node and able to derive its own.
-  Standard_EXPORT virtual void SetCombinedParentTransform (const Handle(TopLoc_Datum3D)& theTrsf);
+  Standard_EXPORT virtual void SetCombinedParentTransform (const Handle(Graphic3d_HGTrsf)& theTrsf);
 
   //! Sets local transformation to theTransformation.
-  Standard_EXPORT virtual void setLocalTransformation (const Handle(TopLoc_Datum3D)& theTransformation);
+  Standard_EXPORT virtual void setLocalTransformation (const Handle(Graphic3d_HGTrsf)& theTransformation);
 
   //! Return the identity transformation.
-  Standard_EXPORT static const gp_Trsf& getIdentityTrsf();
+  Standard_EXPORT static const gp_GTrsf& getIdentityTrsf();
 
   //! Recompute computed (HLR) presentations (when view is in computed mode).
   Standard_EXPORT void recomputeComputed() const;
@@ -534,9 +534,9 @@ protected:
   Handle(Prs3d_Drawer)                   myHilightDrawer;           //!< (optional) custom presentation attributes for highlighting selected object
   Handle(Prs3d_Drawer)                   myDynHilightDrawer;        //!< (optional) custom presentation attributes for highlighting detected object
   Handle(Graphic3d_TransformPers)        myTransformPersistence;    //!< transformation persistence
-  Handle(TopLoc_Datum3D)                 myLocalTransformation;     //!< local transformation relative to parent object
-  Handle(TopLoc_Datum3D)                 myTransformation;          //!< absolute transformation of this object (combined parents + local transformations)
-  Handle(TopLoc_Datum3D)                 myCombinedParentTransform; //!< transformation of parent object (combined for all parents)
+  Handle(Graphic3d_HGTrsf)               myLocalTransformation;     //!< local transformation relative to parent object
+  Handle(Graphic3d_HGTrsf)               myTransformation;          //!< absolute transformation of this object (combined parents + local transformations)
+  Handle(Graphic3d_HGTrsf)               myCombinedParentTransform; //!< transformation of parent object (combined for all parents)
   PrsMgr_ListOfPresentableObjects        myChildren;                //!< list of children
   gp_GTrsf                               myInvTransformation;       //!< inversion of absolute transformation (combined parents + local transformations)
   PrsMgr_TypeOfPresentation3d            myTypeOfPresentation3d;    //!< presentation type

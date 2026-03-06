@@ -259,12 +259,16 @@ protected:
 
   //! Compute projected presentation.
   virtual void computeHLR (const Handle(Graphic3d_Camera)& theProjector,
-                           const Handle(TopLoc_Datum3D)& theTrsf,
+                           const Handle(Graphic3d_HGTrsf)& theTrsf,
                            const Handle(Prs3d_Presentation)& thePrs) Standard_OVERRIDE
   {
     if (!theTrsf.IsNull()
       && theTrsf->Form() != gp_Identity)
     {
+      if (theTrsf->Form() == gp_Other)
+      {
+        throw Standard_ProgramError("AIS_Shape::computeHLR() - gp_Other transformation is unsupported by HLR");
+      }
       const TopLoc_Location& aLoc = myshape.Location();
       const TopoDS_Shape aShape = myshape.Located (TopLoc_Location (theTrsf->Trsf()) * aLoc);
       computeHlrPresentation (theProjector, thePrs, aShape, myDrawer);

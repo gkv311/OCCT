@@ -3984,7 +3984,11 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
       }
 
       ++anArgIter;
-      aContext->SetLocation (anObj, anObj2->LocalTransformation());
+      Handle(Graphic3d_HGTrsf) aTrsf;
+      if (anObj2->LocalTransformation().Form() != gp_Identity)
+        aTrsf = new Graphic3d_HGTrsf(anObj2->LocalTransformation());
+
+      aContext->SetLocalTransformation (anObj, aTrsf);
     }
     else if (anArg == "-rotate"
           || anArg == "-prerotate")
@@ -3996,14 +4000,15 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
         return 1;
       }
 
-      gp_Trsf aTrsf;
-      aTrsf.SetRotation (gp_Ax1 (gp_Pnt (Draw::Atof (theArgVec[anArgIter + 1]),
-                                         Draw::Atof (theArgVec[anArgIter + 2]),
-                                         Draw::Atof (theArgVec[anArgIter + 3])),
-                                 gp_Vec (Draw::Atof (theArgVec[anArgIter + 4]),
-                                         Draw::Atof (theArgVec[anArgIter + 5]),
-                                         Draw::Atof (theArgVec[anArgIter + 6]))),
-                                         Draw::Atof (theArgVec[anArgIter + 7]) * (M_PI / 180.0));
+      gp_Trsf aTrsfRot;
+      aTrsfRot.SetRotation (gp_Ax1 (gp_Pnt (Draw::Atof (theArgVec[anArgIter + 1]),
+                                            Draw::Atof (theArgVec[anArgIter + 2]),
+                                            Draw::Atof (theArgVec[anArgIter + 3])),
+                                    gp_Vec (Draw::Atof (theArgVec[anArgIter + 4]),
+                                            Draw::Atof (theArgVec[anArgIter + 5]),
+                                            Draw::Atof (theArgVec[anArgIter + 6]))),
+                                            Draw::Atof (theArgVec[anArgIter + 7]) * (M_PI / 180.0));
+      gp_GTrsf aTrsf(aTrsfRot);
       anArgIter += 7;
 
       if (anArg == "-prerotate")
@@ -4014,7 +4019,7 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
       {
         aTrsf = aTrsf * anObj->LocalTransformation();
      }
-      aContext->SetLocation (anObj, aTrsf);
+      aContext->SetLocalTransformation (anObj, new Graphic3d_HGTrsf(aTrsf));
     }
     else if (anArg == "-translate"
           || anArg == "-pretranslate")
@@ -4029,8 +4034,9 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
         return 1;
       }
 
-      gp_Trsf aTrsf;
-      aTrsf.SetTranslationPart (aLocVec);
+      gp_Trsf aTrsfVec;
+      aTrsfVec.SetTranslationPart (aLocVec);
+      gp_GTrsf aTrsf(aTrsfVec);
       if (anArg == "-pretranslate")
       {
         aTrsf = anObj->LocalTransformation() * aTrsf;
@@ -4039,7 +4045,7 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
       {
         aTrsf = aTrsf * anObj->LocalTransformation();
       }
-      aContext->SetLocation (anObj, aTrsf);
+      aContext->SetLocalTransformation (anObj, new Graphic3d_HGTrsf(aTrsf));
     }
     else if (anArg == "-scale"
           || anArg == "-prescale"
@@ -4110,7 +4116,13 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
 
       if (anArg == "-setscale")
       {
-        gp_Trsf aTrsf = anObj->LocalTransformation();
+        if (anObj->LocalTransformation().Form() == gp_Other)
+        {
+          /// TODO
+          theDI << "Error: updating of gp_Other transformation is not implemented\n";
+          return 1;
+        }
+        gp_Trsf aTrsf = anObj->LocalTransformation().Trsf();
         if (hasScaleLoc)
         {
           aTrsf.SetScale (aScaleLoc, aScale);
@@ -4123,15 +4135,16 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
       }
       else
       {
-        gp_Trsf aTrsf;
+        gp_Trsf aTrsfScale;
         if (hasScaleLoc)
         {
-          aTrsf.SetScale (aScaleLoc, aScale);
+          aTrsfScale.SetScale (aScaleLoc, aScale);
         }
         else
         {
-          aTrsf.SetScaleFactor (aScale);
+          aTrsfScale.SetScaleFactor (aScale);
         }
+        gp_GTrsf aTrsf(aTrsfScale);
 
         if (anArg == "-prescale")
         {
@@ -4141,7 +4154,7 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
         {
           aTrsf = aTrsf * anObj->LocalTransformation();
         }
-        aContext->SetLocation (anObj, aTrsf);
+        aContext->SetLocalTransformation (anObj, new Graphic3d_HGTrsf(aTrsf));
       }
     }
     else if (anArg == "-mirror"
@@ -4154,14 +4167,15 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
         return 1;
       }
 
-      gp_Trsf aTrsf;
-      aTrsf.SetMirror (gp_Ax2 (gp_Pnt (Draw::Atof(theArgVec[theArgNb - 6]),
-                                       Draw::Atof(theArgVec[theArgNb - 5]),
-                                       Draw::Atof(theArgVec[theArgNb - 4])),
-                               gp_Vec (Draw::Atof(theArgVec[theArgNb - 3]),
-                                       Draw::Atof(theArgVec[theArgNb - 2]),
-                                       Draw::Atof(theArgVec[theArgNb - 1]))));
+      gp_Trsf aTrsfMirr;
+      aTrsfMirr.SetMirror (gp_Ax2 (gp_Pnt (Draw::Atof(theArgVec[theArgNb - 6]),
+                                           Draw::Atof(theArgVec[theArgNb - 5]),
+                                           Draw::Atof(theArgVec[theArgNb - 4])),
+                                   gp_Vec (Draw::Atof(theArgVec[theArgNb - 3]),
+                                           Draw::Atof(theArgVec[theArgNb - 2]),
+                                           Draw::Atof(theArgVec[theArgNb - 1]))));
       anArgIter += 6;
+      gp_GTrsf aTrsf(aTrsfMirr);
       if (anArg == "-premirror")
       {
         aTrsf = anObj->LocalTransformation() * aTrsf;
@@ -4170,7 +4184,7 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
       {
         aTrsf = aTrsf * anObj->LocalTransformation();
       }
-      aContext->SetLocation (anObj, aTrsf);
+      aContext->SetLocalTransformation (anObj, new Graphic3d_HGTrsf(aTrsf));
     }
     else if (anArg == "-setrotation"
           || anArg == "-rotation")
@@ -4201,9 +4215,18 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
                                      aQuatArgs[1].RealValue(),
                                      aQuatArgs[2].RealValue(),
                                      aQuatArgs[3].RealValue());
-          gp_Trsf aTrsf = anObj->LocalTransformation();
-          aTrsf.SetRotationPart (aQuat);
-          aContext->SetLocation (anObj, aTrsf);
+          if (anObj->LocalTransformation().Form() == gp_Other)
+          {
+            /// TODO
+            theDI << "Error: chaning rotation for gp_Other transformation is not implemented";
+            return 1;
+          }
+          else
+          {
+            gp_Trsf aTrsf = anObj->LocalTransformation().Trsf();
+            aTrsf.SetRotationPart (aQuat);
+            aContext->SetLocation (anObj, aTrsf);
+          }
           continue;
         }
         else if (anArg == "-setrotation")
@@ -4213,10 +4236,75 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
         }
       }
 
-      char aText[1024];
-      const gp_Quaternion aQuat = anObj->LocalTransformation().GetRotation();
-      Sprintf (aText, "%g %g %g %g ", aQuat.X(), aQuat.Y(), aQuat.Z(), aQuat.W());
+      char aText[1024] = {};
+      if (anObj->LocalTransformation().Form() == gp_Other)
+      {
+        /// TODO
+        theDI << "Error: rotation cannot be displayed for gp_Other\n";
+        const gp_Mat& aMat = anObj->LocalTransformation().VectorialPart();
+        Sprintf(aText,
+                "%g %g %g\n"
+                "%g %g %g\n"
+                "%g %g %g\n",
+                aMat(1, 1), aMat(1, 2), aMat(1, 3),
+                aMat(2, 1), aMat(2, 2), aMat(2, 3),
+                aMat(3, 1), aMat(3, 2), aMat(3, 3));
+      }
+      else
+      {
+        gp_Quaternion aQuat = anObj->LocalTransformation().Trsf().GetRotation();
+        Sprintf(aText, "%g %g %g %g ", aQuat.X(), aQuat.Y(), aQuat.Z(), aQuat.W());
+      }
       theDI << aText;
+    }
+    else if ((anArg == "-affinity"
+           || anArg == "-preaffinity") && anArgIter + 7 < theArgNb)
+    {
+      toPrintInfo = Standard_False;
+
+      gp_Ax1 anAx1(gp_Pnt(Draw::Atof(theArgVec[anArgIter + 1]),
+                          Draw::Atof(theArgVec[anArgIter + 2]),
+                          Draw::Atof(theArgVec[anArgIter + 3])),
+                   gp_Vec(Draw::Atof(theArgVec[anArgIter + 4]),
+                          Draw::Atof(theArgVec[anArgIter + 5]),
+                          Draw::Atof(theArgVec[anArgIter + 6])));
+      double aRatio = Draw::Atof(theArgVec[anArgIter + 7]);
+
+      anArgIter += 7;
+      gp_GTrsf aTrsf;
+      aTrsf.SetAffinity(anAx1, aRatio);
+      if (anArg.StartsWith("-pre"))
+        aTrsf = anObj->LocalTransformation() * aTrsf;
+      else
+        aTrsf = aTrsf * anObj->LocalTransformation();
+
+      aContext->SetLocalTransformation(anObj, new Graphic3d_HGTrsf(aTrsf));
+    }
+    else if ((anArg == "-affinity2"
+           || anArg == "-preaffinity2") && anArgIter + 10 < theArgNb)
+    {
+      toPrintInfo = Standard_False;
+
+      gp_Ax2 anAx2(gp_Pnt(Draw::Atof(theArgVec[anArgIter + 1]),
+                          Draw::Atof(theArgVec[anArgIter + 2]),
+                          Draw::Atof(theArgVec[anArgIter + 3])),
+                   gp_Vec(Draw::Atof(theArgVec[anArgIter + 4]),
+                          Draw::Atof(theArgVec[anArgIter + 5]),
+                          Draw::Atof(theArgVec[anArgIter + 6])),
+                   gp_Vec(Draw::Atof(theArgVec[anArgIter + 7]),
+                          Draw::Atof(theArgVec[anArgIter + 8]),
+                          Draw::Atof(theArgVec[anArgIter + 9])));
+      double aRatio = Draw::Atof(theArgVec[anArgIter + 10]);
+
+      anArgIter += 10;
+      gp_GTrsf aTrsf;
+      aTrsf.SetAffinity(anAx2, aRatio);
+      if (anArg.StartsWith("-pre"))
+        aTrsf = anObj->LocalTransformation() * aTrsf;
+      else
+        aTrsf = aTrsf * anObj->LocalTransformation();
+
+      aContext->SetLocalTransformation(anObj, new Graphic3d_HGTrsf(aTrsf));
     }
     else if (anArg == "-setlocation"
           || anArg == "-location")
@@ -4227,9 +4315,9 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
       anArgIter += aNbParsed;
       if (aNbParsed != 0)
       {
-        gp_Trsf aTrsf = anObj->LocalTransformation();
-        aTrsf.SetTranslationPart (aLocVec);
-        aContext->SetLocation (anObj, aTrsf);
+        gp_GTrsf aTrsf = anObj->LocalTransformation();
+        aTrsf.SetTranslationPart (aLocVec.XYZ());
+        aContext->SetLocalTransformation (anObj, new Graphic3d_HGTrsf(aTrsf));
       }
       else if (anArg == "-setlocation")
       {
@@ -4276,16 +4364,34 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
     return 0;
   }
 
-  const gp_Trsf       aTrsf = anObj->LocalTransformation();
-  const gp_XYZ        aLoc  = aTrsf.TranslationPart();
-  const gp_Quaternion aRot  = aTrsf.GetRotation();
+  const gp_GTrsf aTrsf = anObj->LocalTransformation();
+  const gp_XYZ   aLoc = aTrsf.TranslationPart();
   char aText[4096];
-  Sprintf (aText, "Location: %g %g %g\n"
-                  "Rotation: %g %g %g %g\n"
-                  "Scale:    %g\n",
-                  aLoc.X(), aLoc.Y(), aLoc.Z(),
-                  aRot.X(), aRot.Y(), aRot.Z(), aRot.W(),
-                  aTrsf.ScaleFactor());
+  if (aTrsf.Form() == gp_Other)
+  {
+    const gp_Mat aMat = aTrsf.VectorialPart();
+    Sprintf(aText,
+            "Location: %g %g %g\n"
+            "Matrix:   %g %g %g\n"
+            "          %g %g %g\n"
+            "          %g %g %g\n"
+            "Scale:    %g\n",
+            aLoc.X(), aLoc.Y(), aLoc.Z(),
+            aMat(1, 1), aMat(1, 2), aMat(1, 3),
+            aMat(2, 1), aMat(2, 2), aMat(2, 3),
+            aMat(3, 1), aMat(3, 2), aMat(3, 3),
+            aTrsf.ScaleFactor());
+  }
+  else
+  {
+    const gp_Quaternion aRot = aTrsf.Trsf().GetRotation();
+    Sprintf (aText, "Location: %g %g %g\n"
+                    "Rotation: %g %g %g %g\n"
+                    "Scale:    %g\n",
+                    aLoc.X(), aLoc.Y(), aLoc.Z(),
+                    aRot.X(), aRot.Y(), aRot.Z(), aRot.W(),
+                    aTrsf.ScaleFactor());
+  }
   theDI << aText;
   return 0;
 }
@@ -7112,6 +7218,7 @@ vlocation name
     [-pretranslate X Y [Z]] [-prerotate x y z dx dy dz angle] [-prescale [X Y Z] scale]
     [-mirror x y z dx dy dz] [-premirror x y z dx dy dz]
     [-setLocation X Y [Z]] [-setRotation QX QY QZ QW] [-setScale [X Y Z] scale]
+    [-affinity x y z dx dy dz ratio] [-affinity2 x y z dx dy dz d2x d2y d2z ratio]
 Object local transformation management:
  -reset        resets transformation to identity
  -translate    applies translation vector
@@ -7125,6 +7232,8 @@ Object local transformation management:
  -setLocation  overrides translation part
  -setRotation  overrides rotation part with specified quaternion
  -setScale     overrides scale factor
+ -affinity     applies affinity transformation along one axis
+ -affinity2    applies affinity transformation along two axes
 )" /* [vlocation] */);
 
   addCmd ("vsetlocation", VSetLocation, /* [vsetlocation] */ R"(

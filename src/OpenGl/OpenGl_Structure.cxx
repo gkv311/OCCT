@@ -131,15 +131,17 @@ void OpenGl_Structure::SetZLayer (const Graphic3d_ZLayerId theLayerIndex)
 // function : SetTransformation
 // purpose  :
 // =======================================================================
-void OpenGl_Structure::SetTransformation (const Handle(TopLoc_Datum3D)& theTrsf)
+void OpenGl_Structure::SetTransformation (const Handle(Graphic3d_HGTrsf)& theTrsf)
 {
   myTrsf = theTrsf;
   myIsMirrored = Standard_False;
   if (!myTrsf.IsNull())
   {
     // Determinant of transform matrix less then 0 means that mirror transform applied.
-    const gp_Trsf& aTrsf = myTrsf->Transformation();
-    const Standard_Real aDet = aTrsf.HVectorialPart().Determinant() * aTrsf.ScaleFactor();
+    const gp_GTrsf& aTrsf = *myTrsf;
+    const Standard_Real aDet = aTrsf.Value(1, 1) * (aTrsf.Value (2, 2) * aTrsf.Value (3, 3) - aTrsf.Value (3, 2) * aTrsf.Value (2, 3))
+                             - aTrsf.Value(1, 2) * (aTrsf.Value (2, 1) * aTrsf.Value (3, 3) - aTrsf.Value (3, 1) * aTrsf.Value (2, 3))
+                             + aTrsf.Value(1, 3) * (aTrsf.Value (2, 1) * aTrsf.Value (3, 2) - aTrsf.Value (3, 1) * aTrsf.Value (2, 2));
     myIsMirrored = aDet < 0.0;
   }
 
@@ -170,10 +172,10 @@ void OpenGl_Structure::SetTransformPersistence (const Handle(Graphic3d_Transform
 // =======================================================================
 void OpenGl_Structure::updateLayerTransformation()
 {
-  gp_Trsf aRenderTrsf;
+  gp_GTrsf aRenderTrsf;
   if (!myTrsf.IsNull())
   {
-    aRenderTrsf = myTrsf->Trsf();
+    aRenderTrsf = *myTrsf;
   }
 
   const Graphic3d_ZLayerSettings& aLayer = myGraphicDriver->ZLayerSettings (myZLayer);
@@ -443,8 +445,9 @@ void OpenGl_Structure::Render (const Handle(OpenGl_Workspace) &theWorkspace) con
   if (aCtx->core11ffp != NULL
   && !myTrsf.IsNull())
   {
-    const Standard_Real aScale = myTrsf->Trsf().ScaleFactor();
-    if (Abs (aScale - 1.0) > Precision::Confusion())
+    const Standard_Real aScale = myTrsf->ScaleFactor();
+    if (myTrsf->Form() == gp_Other
+     || Abs (aScale - 1.0) > Precision::Confusion())
     {
       aCtx->SetGlNormalizeEnabled (Standard_True);
     }

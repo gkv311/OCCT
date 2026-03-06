@@ -170,9 +170,9 @@ public:
                                  Aspect_VKeyMouse theButton,
                                  Aspect_VKeyFlags theModifiers,
                                  bool theIsDoubleClick) override;
-  virtual void SetLocation (const TopLoc_Location& theLocation) override
+  virtual void SetLocation (const Handle(Graphic3d_HGTrsf)& theLocation) override
   {
-    if (!myPrs.IsNull()) { myPrs->SetTransformation (new TopLoc_Datum3D (theLocation.Transformation())); }
+    if (!myPrs.IsNull()) { myPrs->SetTransformation (theLocation); }
   }
 protected:
   Handle(Prs3d_Presentation) myPrs;
@@ -269,7 +269,7 @@ bool MyAisOwner::HandleMouseClick (const Graphic3d_Vec2i& thePoint,
 
     gp_Trsf aTrsfTo;
     aTrsfTo.SetRotation (gp_Ax1 (gp::Origin(), gp::DX()), isFirst ? M_PI * 0.5 : -M_PI * 0.5);
-    gp_Trsf aTrsfFrom = anObj->LocalTransformation();
+    gp_Trsf aTrsfFrom = anObj->LocalTransformation().Trsf();
     Handle(AIS_AnimationObject) anAnim = new AIS_AnimationObject ("MyAnim", anObj->InteractiveContext(), anObj, aTrsfFrom, aTrsfTo);
     anAnim->SetOwnDuration (2.0);
 

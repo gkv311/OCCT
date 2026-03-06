@@ -189,15 +189,15 @@ public:
   virtual Standard_Boolean HasLocation() const { return mySelectable != NULL && mySelectable->HasTransformation(); }
 
   //! Returns transformation of selectable.
-  virtual TopLoc_Location Location() const
+  virtual Handle(Graphic3d_HGTrsf) Location() const
   {
     return mySelectable != NULL && mySelectable->HasTransformation()
-         ? TopLoc_Location(mySelectable->Transformation())
-         : TopLoc_Location();
+         ? mySelectable->TransformationGeom()
+         : Handle(Graphic3d_HGTrsf)();
   }
 
   //! Change owner location (callback for handling change of location of selectable object).
-  virtual void SetLocation (const TopLoc_Location& theLocation)
+  virtual void SetLocation (const Handle(Graphic3d_HGTrsf)& theLocation)
   {
     (void )theLocation;
   }

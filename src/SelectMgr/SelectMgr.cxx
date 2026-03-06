@@ -55,12 +55,12 @@ namespace
   static void addTriangulation (Prs3d_NListOfSequenceOfPnt& theSeqLines,
                                 Prs3d_NListOfSequenceOfPnt& theSeqFree,
                                 const Handle(Select3D_SensitiveTriangulation)& theTri,
-                                const gp_Trsf& theLoc)
+                                const gp_GTrsf& theLoc)
   {
-    gp_Trsf aTrsf = theLoc;
+    gp_GTrsf aTrsf = theLoc;
     if (theTri->HasInitLocation())
     {
-      aTrsf = theLoc * theTri->GetInitLocation();
+      aTrsf = theLoc * gp_GTrsf(theTri->GetInitLocation());
     }
     const Handle(Poly_Triangulation)& aPolyTri = theTri->Triangulation();
     for (Standard_Integer aTriIter = 1; aTriIter <= aPolyTri->NbTriangles(); ++aTriIter)
@@ -87,7 +87,7 @@ namespace
   //! Fill in bounding box polylines.
   static void addBoundingBox (Prs3d_NListOfSequenceOfPnt& theSeqLines,
                               const Handle(Select3D_SensitiveBox)& theSensBox,
-                              const gp_Trsf& theLoc)
+                              const gp_GTrsf& theLoc)
   {
     Graphic3d_Vec3d aMin, aMax;
     theSensBox->Box().Get (aMin.x(), aMin.y(), aMin.z(), aMax.x(), aMax.y(), aMax.z());
@@ -137,7 +137,7 @@ namespace
   //! Fill in circle polylines.
   static void addCircle (Prs3d_NListOfSequenceOfPnt& theSeqLines,
                          const Standard_Real theRadius,
-                         const gp_Trsf& theTrsf,
+                         const gp_GTrsf& theTrsf,
                          const Standard_Real theHeight = 0)
   {
     const Standard_Real anUStep = 0.1;
@@ -157,12 +157,12 @@ namespace
   //! Fill in cylinder polylines.
   static void addCylinder (Prs3d_NListOfSequenceOfPnt& theSeqLines,
                            const Handle(Select3D_SensitiveCylinder)& theSensCyl,
-                           const gp_Trsf& theLoc)
+                           const gp_GTrsf& theLoc)
   {
     Handle(TColgp_HSequenceOfPnt) aVertLine1 = new TColgp_HSequenceOfPnt();
     Handle(TColgp_HSequenceOfPnt) aVertLine2 = new TColgp_HSequenceOfPnt();
 
-    const gp_Trsf& aTrsf = theLoc.Multiplied (theSensCyl->Transformation());
+    const gp_GTrsf aTrsf = theLoc.Multiplied (gp_GTrsf(theSensCyl->Transformation()));
     const Standard_Real aHeight = theSensCyl->Height();
 
     for (int aCircNum = 0; aCircNum < 3; aCircNum++)
@@ -193,7 +193,7 @@ namespace
 //=======================================================================
 void SelectMgr::ComputeSensitivePrs (const Handle(Graphic3d_Structure)& thePrs,
                                      const Handle(SelectMgr_Selection)& theSel,
-                                     const gp_Trsf& theLoc,
+                                     const gp_GTrsf& theLoc,
                                      const Handle(Graphic3d_TransformPers)& theTrsfPers)
 {
   thePrs->SetTransformPersistence (theTrsfPers);

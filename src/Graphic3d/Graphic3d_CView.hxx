@@ -184,7 +184,7 @@ private:
 
   //! Transforms the structure in the view.
   Standard_EXPORT void SetTransform (const Handle(Graphic3d_Structure)& theStructure,
-                                     const Handle(TopLoc_Datum3D)& theTrsf);
+                                     const Handle(Graphic3d_HGTrsf)& theTrsf);
 
   //! Suppress the highlighting on the structure <AStructure>
   //! in the view <me>.

@@ -1122,6 +1122,37 @@ void AIS_InteractiveContext::SetLocation (const Handle(AIS_InteractiveObject)& t
   }
 }
 
+
+//=======================================================================
+//function : SetLocalTransformation
+//purpose  :
+//=======================================================================
+void AIS_InteractiveContext::SetLocalTransformation(const Handle(AIS_InteractiveObject)& theIObj,
+                                                    const Handle(Graphic3d_HGTrsf)&      theLoc)
+{
+  if (theIObj.IsNull() ||
+      (!theIObj->HasTransformation() && (theLoc.IsNull() || theLoc->Form() == gp_Identity)))
+    return;
+
+  // reset the previous location to properly clean everything...
+  if (theIObj->HasTransformation())
+    theIObj->ResetTransformation();
+
+  theIObj->SetLocalTransformation(theLoc);
+
+  mgrSelector->Update(theIObj, Standard_False);
+
+  // if the object or its part is highlighted dynamically, it is necessary to apply location transformation
+  // to its highlight structure immediately
+  if (!myLastPicked.IsNull() && myLastPicked->IsSameSelectable(theIObj))
+  {
+    const Standard_Integer aHiMod = theIObj->HasHilightMode() ? theIObj->HilightMode() : 0;
+    myLastPicked->UpdateHighlightTrsf(myMainVwr,
+                                      myMainPM,
+                                      aHiMod);
+  }
+}
+
 //=======================================================================
 //function : ResetLocation
 //purpose  :
@@ -1153,7 +1184,7 @@ Standard_Boolean AIS_InteractiveContext::HasLocation (const Handle(AIS_Interacti
 //=======================================================================
 TopLoc_Location AIS_InteractiveContext::Location (const Handle(AIS_InteractiveObject)& theIObj) const
 {
-  return theIObj->Transformation();
+  return theIObj->Transformation().Trsf(); // will throw exception for non-uniform scale in gp_GTrsf
 }
 
 //=======================================================================
@@ -3528,7 +3559,8 @@ TopoDS_Shape AIS_InteractiveContext::SelectedShape() const
   if (!anOwner->HasLocation())
     return anOwner->Shape();
 
-  return anOwner->Shape().Located (anOwner->Location() * anOwner->Shape().Location());
+  Handle(Graphic3d_HGTrsf) aLoc = anOwner->Location();
+  return anOwner->Shape().Located (aLoc->Trsf() * anOwner->Shape().Location());
 }
 
 //=======================================================================

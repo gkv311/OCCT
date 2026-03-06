@@ -1345,7 +1345,7 @@ void SelectMgr_ViewerSelector::ClearSensitive (const Handle(V3d_View)& theView)
 //purpose  :
 //=======================================================================
 void SelectMgr_ViewerSelector::DisplaySensitive (const Handle(SelectMgr_Selection)& theSel,
-                                                 const gp_Trsf& theTrsf,
+                                                 const gp_GTrsf& theTrsf,
                                                  const Handle(V3d_View)& theView,
                                                  const Standard_Boolean theToClearOthers)
 {

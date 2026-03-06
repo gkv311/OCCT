@@ -457,7 +457,7 @@ void Graphic3d_CView::ReCompute (const Handle(Graphic3d_Structure)& theStruct)
   // compute + validation
   Handle(Graphic3d_Structure) aCompStructOld = myStructsComputed.ChangeValue (anIndex);
   Handle(Graphic3d_Structure) aCompStruct    = aCompStructOld;
-  aCompStruct->SetTransformation (Handle(TopLoc_Datum3D)());
+  aCompStruct->SetTransformation (Handle(Graphic3d_HGTrsf)());
   theStruct->computeHLR (myCamera, aCompStruct);
   if (aCompStruct.IsNull())
   {
@@ -900,7 +900,7 @@ void Graphic3d_CView::Display (const Handle(Graphic3d_Structure)& theStructure)
   if (anIndex != 0)
   {
     aStruct = myStructsComputed.Value (anIndex);
-    aStruct->SetTransformation (Handle(TopLoc_Datum3D)());
+    aStruct->SetTransformation (Handle(Graphic3d_HGTrsf)());
   }
   theStructure->computeHLR (myCamera, aStruct);
   if (aStruct.IsNull())
@@ -1006,7 +1006,7 @@ void Graphic3d_CView::Highlight (const Handle(Graphic3d_Structure)& theStructure
 // purpose  :
 // =======================================================================
 void Graphic3d_CView::SetTransform (const Handle(Graphic3d_Structure)& theStructure,
-                                    const Handle(TopLoc_Datum3D)& theTrsf)
+                                    const Handle(Graphic3d_HGTrsf)& theTrsf)
 {
   const Standard_Integer anIndex = IsComputed (theStructure);
   if (anIndex != 0)

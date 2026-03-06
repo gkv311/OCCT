@@ -52,19 +52,19 @@ public:
   
   //! Establishes the connection between the Connected
   //! Interactive Object, anotherIobj, and its reference.
-  void Connect (const Handle(AIS_InteractiveObject)& theAnotherObj) { connect (theAnotherObj, Handle(TopLoc_Datum3D)()); }
+  void Connect (const Handle(AIS_InteractiveObject)& theAnotherObj) { connect (theAnotherObj, Handle(Graphic3d_HGTrsf)()); }
 
   //! Establishes the connection between the Connected
   //! Interactive Object, anotherIobj, and its reference.
   //! Locates instance in aLocation.
   void Connect (const Handle(AIS_InteractiveObject)& theAnotherObj,
-                const gp_Trsf& theLocation)  { connect (theAnotherObj, new TopLoc_Datum3D (theLocation)); }
+                const gp_Trsf& theLocation)  { connect (theAnotherObj, new Graphic3d_HGTrsf (theLocation)); }
 
   //! Establishes the connection between the Connected
   //! Interactive Object, anotherIobj, and its reference.
   //! Locates instance in aLocation.
   void Connect (const Handle(AIS_InteractiveObject)& theAnotherObj,
-                const Handle(TopLoc_Datum3D)& theLocation) { connect (theAnotherObj, theLocation); }
+                const Handle(Graphic3d_HGTrsf)& theLocation) { connect (theAnotherObj, theLocation); }
 
   //! Returns true if there is a connection established
   //! between the presentation and its source reference.
@@ -109,7 +109,7 @@ protected:
 
   //! Computes the presentation according to a point of view.
   Standard_EXPORT virtual void computeHLR (const Handle(Graphic3d_Camera)& theProjector,
-                                           const Handle(TopLoc_Datum3D)& theTrsf,
+                                           const Handle(Graphic3d_HGTrsf)& theTrsf,
                                            const Handle(Prs3d_Presentation)& thePrs) Standard_OVERRIDE;
 
   //! Generates sensitive entities by copying
@@ -125,7 +125,7 @@ protected:
   Standard_EXPORT void updateShape (const Standard_Boolean WithLocation = Standard_True);
 
   Standard_EXPORT void connect (const Handle(AIS_InteractiveObject)& theAnotherObj,
-                                const Handle(TopLoc_Datum3D)& theLocation);
+                                const Handle(Graphic3d_HGTrsf)& theLocation);
 
 protected:
 

@@ -151,7 +151,7 @@ void StdSelect_BRepOwner::Clear(const Handle(PrsMgr_PresentationManager)& PM,
   myPrsSh.Nullify();
 }
 
-void StdSelect_BRepOwner::SetLocation(const TopLoc_Location& aLoc)
+void StdSelect_BRepOwner::SetLocation(const Handle(Graphic3d_HGTrsf)& aLoc)
 {
   SelectMgr_EntityOwner::SetLocation(aLoc);
   if (!myPrsSh.IsNull())

@@ -14,7 +14,6 @@
 
 #include <PrsMgr_PresentationManager.hxx>
 
-#include <TopLoc_Datum3D.hxx>
 #include <Prs3d_PresentationShadow.hxx>
 #include <PrsMgr_PresentableObject.hxx>
 #include <PrsMgr_Presentation.hxx>
@@ -600,7 +599,7 @@ void PrsMgr_PresentationManager::Connect (const Handle(PrsMgr_PresentableObject)
 // purpose  :
 // =======================================================================
 void PrsMgr_PresentationManager::Transform (const Handle(PrsMgr_PresentableObject)& thePrsObj,
-                                            const Handle(TopLoc_Datum3D)& theTransformation,
+                                            const Handle(Graphic3d_HGTrsf)& theTransformation,
                                             const Standard_Integer theMode)
 {
   Presentation (thePrsObj, theMode)->SetTransformation (theTransformation);
@@ -673,7 +672,7 @@ namespace
   //! of shadow presentation is equal to theRefId
   static void updatePrsTransformation (const PrsMgr_ListOfPresentations& thePrsList,
                                        const Standard_Integer theRefId,
-                                       const Handle(TopLoc_Datum3D)& theTrsf)
+                                       const Handle(Graphic3d_HGTrsf)& theTrsf)
   {
     for (PrsMgr_ListOfPresentations::Iterator anIter (thePrsList); anIter.More(); anIter.Next())
     {
@@ -708,7 +707,7 @@ void PrsMgr_PresentationManager::UpdateHighlightTrsf (const Handle(V3d_Viewer)& 
     return;
   }
 
-  Handle(TopLoc_Datum3D) aTrsf = theObj->LocalTransformationGeom();
+  Handle(Graphic3d_HGTrsf) aTrsf = theObj->LocalTransformationGeom();
   const Standard_Integer aParentId = aPrs->CStructure()->Identification();
   updatePrsTransformation (myImmediateList, aParentId, aTrsf);
 

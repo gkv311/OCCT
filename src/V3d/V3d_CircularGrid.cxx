@@ -170,7 +170,7 @@ void V3d_CircularGrid::UpdateDisplay ()
                       -SinAlpha, CosAlpha, 0.0, -YOrigin(),
                             0.0,      0.0, 1.0, 0.0);
     aTrsf.Multiply (aTrsf2);
-    myStructure->SetTransformation (new TopLoc_Datum3D (aTrsf));
+    myStructure->SetTransformation (new Graphic3d_HGTrsf(aTrsf));
 
     myCurAngle = RotationAngle ();
     myCurXo = XOrigin (), myCurYo = YOrigin ();

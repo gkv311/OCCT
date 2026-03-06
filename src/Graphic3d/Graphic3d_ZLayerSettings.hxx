@@ -15,7 +15,7 @@
 #define _Graphic3d_ZLayerSettings_HeaderFile
 
 #include <gp_XYZ.hxx>
-#include <TopLoc_Datum3D.hxx>
+#include <Graphic3d_HGTrsf.hxx>
 #include <Graphic3d_LightSet.hxx>
 #include <Graphic3d_PolygonOffset.hxx>
 #include <Precision.hxx>
@@ -55,7 +55,7 @@ struct Graphic3d_ZLayerSettings
   const gp_XYZ& Origin() const { return myOrigin; }
 
   //! Return the transformation to the origin.
-  const Handle(TopLoc_Datum3D)& OriginTransformation() const { return myOriginTrsf; }
+  const Handle(Graphic3d_HGTrsf)& OriginTransformation() const { return myOriginTrsf; }
 
   //! Set the origin of all objects within the layer.
   void SetOrigin (const gp_XYZ& theOrigin)
@@ -66,7 +66,7 @@ struct Graphic3d_ZLayerSettings
     {
       gp_Trsf aTrsf;
       aTrsf.SetTranslation (theOrigin);
-      myOriginTrsf = new TopLoc_Datum3D (aTrsf);
+      myOriginTrsf = new Graphic3d_HGTrsf (aTrsf);
     }
   }
 
@@ -189,7 +189,7 @@ protected:
 
   TCollection_AsciiString     myName;                  //!< user-provided name
   Handle(Graphic3d_LightSet)  myLights;                //!< lights list
-  Handle(TopLoc_Datum3D)      myOriginTrsf;            //!< transformation to the origin
+  Handle(Graphic3d_HGTrsf)    myOriginTrsf;            //!< transformation to the origin
   gp_XYZ                      myOrigin;                //!< the origin of all objects within the layer
   Standard_Real               myCullingDistance;       //!< distance to discard objects
   Standard_Real               myCullingSize;           //!< size to discard objects
