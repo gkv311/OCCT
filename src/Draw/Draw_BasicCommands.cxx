@@ -543,8 +543,8 @@ static Standard_Integer dversion(Draw_Interpretor& di, Standard_Integer, const c
   di << "Architecture: SPARC\n";
 #elif defined(__aarch64__) && defined(__LP64__)
   di << "Architecture: ARM 64-bit\n";
-#elif defined(__arm__) || defined(__arm64__)
-  #if defined(__LP64__)
+#elif defined(__arm__) || defined(__arm64__) || defined(_M_ARM) || defined(_M_ARM64)
+  #if defined(__LP64__) || defined(_M_ARM64)
   di << "Architecture: ARM 64-bit\n";
   #else
   di << "Architecture: ARM 32-bit\n";
