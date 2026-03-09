@@ -20,6 +20,7 @@
 
 #include <Image_VideoRecorder.hxx>
 
+#include <Media_FormatContext.hxx>
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
 
@@ -101,13 +102,7 @@ Image_VideoRecorder::~Image_VideoRecorder()
 //=============================================================================
 TCollection_AsciiString Image_VideoRecorder::formatAvError (const int theError) const
 {
-#ifdef HAVE_FFMPEG
-  char anErrBuf[AV_ERROR_MAX_STRING_SIZE] = {};
-  av_strerror (theError, anErrBuf, AV_ERROR_MAX_STRING_SIZE);
-  return anErrBuf;
-#else
-  return TCollection_AsciiString(theError);
-#endif
+  return Media_FormatContext::FormatAVErrorDescription(theError);
 }
 
 //=============================================================================

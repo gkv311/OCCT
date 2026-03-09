@@ -38,6 +38,9 @@ public:
   //! Return bytes reserved for one pixel (may include extra bytes for alignment).
   Standard_EXPORT static Standard_Size SizePixelBytes (const Image_Format thePixelFormat);
 
+  //! Return number of components in pixel format.
+  Standard_EXPORT static unsigned int ImageFormatNbComponents (const Image_Format thePixelFormat);
+
   //! Auxiliary method for swapping bytes between RGB and BGR formats.
   //! This method modifies the image data but does not change pixel format!
   //! Method will fail if pixel format is not one of the following:
@@ -47,6 +50,9 @@ public:
   //!  - Image_Format_RGBF  / Image_Format_BGRF
   //!  - Image_Format_RGBAF / Image_Format_BGRAF
   Standard_EXPORT static bool SwapRgbaBgra (Image_PixMap& theImage);
+
+  //! Return RGB/BGR format with swapped channels or UNKNOWN.
+  Standard_EXPORT static Image_Format SwappedRgbaBgraFormat (Image_Format theFormat);
 
   //! Convert image to Black/White.
   Standard_EXPORT static void ToBlackWhite (Image_PixMap& theImage);

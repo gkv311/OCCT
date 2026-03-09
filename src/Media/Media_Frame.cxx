@@ -19,8 +19,6 @@
 
 #include <Media_Frame.hxx>
 
-#include <Media_Scaler.hxx>
-
 #ifdef HAVE_FFMPEG
 #include <Standard_WarningsDisable.hxx>
 extern "C"
@@ -58,6 +56,18 @@ Image_Format Media_Frame::FormatFFmpeg2Occt (int theFormat)
       return Image_Format_Gray;
     case AV_PIX_FMT_GRAY16:
       return Image_Format_Gray16;
+  #ifdef AV_PIX_FMT_GRAYF16
+    case AV_PIX_FMT_GRAYF16:
+      return Image_Format_GrayF_half;
+  #endif
+    case AV_PIX_FMT_GRAYF32:
+      return Image_Format_GrayF;
+    case AV_PIX_FMT_RGBAF16:
+      return Image_Format_RGBAF_half;
+    case AV_PIX_FMT_RGBAF32:
+      return Image_Format_RGBAF;
+    case AV_PIX_FMT_RGBF32:
+      return Image_Format_RGBF;
     default:
       return Image_Format_UNKNOWN;
   }
@@ -89,21 +99,33 @@ int Media_Frame::FormatOcct2FFmpeg (Image_Format theFormat)
     case Image_Format_BGR:
       return AV_PIX_FMT_BGR24;
     case Image_Format_Gray:
-      return AV_PIX_FMT_GRAY8;
     case Image_Format_Alpha:
       return AV_PIX_FMT_GRAY8;
     case Image_Format_Gray16:
       return AV_PIX_FMT_GRAY16;
     case Image_Format_GrayF:
     case Image_Format_AlphaF:
+      return AV_PIX_FMT_GRAYF32;
     case Image_Format_RGF:
+      return AV_PIX_FMT_NONE; // no mapping
     case Image_Format_RGBAF:
+      return AV_PIX_FMT_RGBAF32;
     case Image_Format_RGBF:
+      return AV_PIX_FMT_RGBF32;
     case Image_Format_BGRAF:
+      return AV_PIX_FMT_NONE; // no mapping
     case Image_Format_BGRF:
+      return AV_PIX_FMT_NONE; // no mapping
     case Image_Format_GrayF_half:
+    #ifdef AV_PIX_FMT_GRAYF16
+      return AV_PIX_FMT_GRAYF16;
+    #else
+      return AV_PIX_FMT_NONE; // no mapping
+    #endif
     case Image_Format_RGF_half:
+      return AV_PIX_FMT_NONE; // no mapping
     case Image_Format_RGBAF_half:
+      return AV_PIX_FMT_RGBAF16;
     case Image_Format_UNKNOWN:
       return AV_PIX_FMT_NONE; // unsupported
   }
@@ -273,25 +295,23 @@ int64_t Media_Frame::BestEffortTimestamp() const
 // function : InitWrapper
 // purpose  :
 // =======================================================================
-bool Media_Frame::InitWrapper (const Handle(Image_PixMap)& thePixMap)
+bool Media_Frame::InitWrapper (const Image_PixMap& thePixMap)
 {
   Unref();
-  if (thePixMap.IsNull())
-  {
+  if (thePixMap.IsEmpty())
     return false;
-  }
 
 #ifdef HAVE_FFMPEG
-  myFrame->format = FormatOcct2FFmpeg (thePixMap->Format());
+  myFrame->format = FormatOcct2FFmpeg (thePixMap.Format());
   if (myFrame->format == AV_PIX_FMT_NONE)
-  {
     return false;
-  }
 
-  myFrame->width       = (int )thePixMap->SizeX();
-  myFrame->height      = (int )thePixMap->SizeY();
-  myFrame->data[0]     = (uint8_t* )thePixMap->ChangeData();
-  myFrame->linesize[0] = (int      )thePixMap->SizeRowBytes();
+  myFrame->width   = (int )thePixMap.SizeX();
+  myFrame->height  = (int )thePixMap.SizeY();
+  myFrame->data[0] = (uint8_t*)thePixMap.Row(0);
+  myFrame->linesize[0] = thePixMap.IsTopDown()
+                       ? int(thePixMap.SizeRowBytes())
+                       : -int(thePixMap.SizeRowBytes());
   for (int aPlaneIter = 1; aPlaneIter < AV_NUM_DATA_POINTERS; ++aPlaneIter)
   {
     myFrame->data    [aPlaneIter] = NULL;
