@@ -365,7 +365,7 @@ https://dev.opencascade.org/resources/download/3rd-party-components
 | OpenVR 1.10+ | https://github.com/ValveSoftware/openvr | Visualization | VR (Virtual Reality) support in 3D Viewer |
 | FreeType 2.4+ | https://www.freetype.org/download.html | Visualization | Text rendering in 3D Viewer |
 | FreeImage 3.17+ | https://sourceforge.net/projects/freeimage/files | Visualization | Reading/writing image files |
-| FFmpeg 3.1+ | https://www.ffmpeg.org/download.html | Visualization | Video recording |
+| FFmpeg 7.0+ | https://www.ffmpeg.org/download.html | Visualization | Video recording |
 | VTK 6.1+ | https://www.vtk.org/download/ | IVtk | VTK integration module |
 | Flex 2.6.4+ and Bison 3.7.1+ | https://sourceforge.net/projects/winflexbison/ | Data Exchange | Updating STEP and ExprIntrp parsers |
 | RapidJSON 1.1+ | https://rapidjson.org/ | Data Exchange | Reading glTF files |
