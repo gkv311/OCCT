@@ -170,7 +170,7 @@ set (USE_FREETYPE_DESCR
 
 set (USE_FFMPEG_DESCR
 "Indicates whether FFmpeg framework is used or not. FFmpeg stands for
-multimedia data handling, open-source software libraries used for video encoding and decoding.")
+multimedia data handling, open-source software libraries used for video/image encoding and decoding.")
 
 set (USE_FREEIMAGE_DESCR
 "Indicates whether FreeImage product should be used in OCCT visualization

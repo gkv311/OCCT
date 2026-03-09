@@ -152,6 +152,15 @@ Standard_Size Image_PixMap::SizePixelBytes (const Image_Format thePixelFormat)
 }
 
 // =======================================================================
+// function : ImageFormatNbComponents
+// purpose  :
+// =======================================================================
+unsigned int Image_PixMap::ImageFormatNbComponents (const Image_Format thePixelFormat)
+{
+  return Image_Table_ImageFormats[thePixelFormat].NbComponents;
+}
+
+// =======================================================================
 // function : SetFormat
 // purpose  :
 // =======================================================================
@@ -763,6 +772,38 @@ void Image_PixMap::ColorToRawPixel (Standard_Byte* theRawValue,
     {
       return;
     }
+  }
+}
+
+// =======================================================================
+// function : SwappedRgbaBgraFormat
+// purpose  :
+// =======================================================================
+Image_Format Image_PixMap::SwappedRgbaBgraFormat (Image_Format theFormat)
+{
+  switch (theFormat)
+  {
+    case Image_Format_BGR32:
+      return Image_Format_RGB32;
+    case Image_Format_RGB32:
+      return Image_Format_BGR32;
+    case Image_Format_BGRA:
+      return Image_Format_RGBA;
+    case Image_Format_RGBA:
+      return Image_Format_BGRA;
+    case Image_Format_BGR:
+      return Image_Format_RGB;
+    case Image_Format_RGB:
+      return Image_Format_BGR;
+    case Image_Format_BGRF:
+      return Image_Format_RGBF;
+    case Image_Format_RGBF:
+      return Image_Format_BGRF;
+    case Image_Format_BGRAF:
+      return Image_Format_RGBAF;
+    case Image_Format_RGBAF:
+      return Image_Format_BGRAF;
+    default: return Image_Format_UNKNOWN;
   }
 }
 

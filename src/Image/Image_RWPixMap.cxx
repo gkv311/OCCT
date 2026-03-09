@@ -13,6 +13,7 @@
 
 #include <Image_RWPixMap.hxx>
 
+#include <Image_RWAVCodec.hxx>
 #include <Image_RWEmscripten.hxx>
 #include <Image_RWFreeImage.hxx>
 #include <Image_RWPixMapSelector.hxx>
@@ -53,10 +54,16 @@ static Handle(Image_RWPixMapSelector) createDefaultSelector()
     aSystem->AddLibrary(aFreeImg, true);
   }
 
+  Handle(Image_RWAVCodec) anFFmpegImg = new Image_RWAVCodec();
+  if (aSystem->Libraries().IsEmpty() && anFFmpegImg->IsAvailable())
+  {
+    aSystem->AddLibrary(anFFmpegImg, true);
+  }
+
   // platform-specific libraries
 #if defined(_WIN32)
   Handle(Image_RWWinCodec) aWinImg = new Image_RWWinCodec();
-  if (!aFreeImg->IsAvailable() && aWinImg->IsAvailable())
+  if (aSystem->Libraries().IsEmpty() && aWinImg->IsAvailable())
   {
     aSystem->AddLibrary(aWinImg, true);
   }

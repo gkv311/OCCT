@@ -28,6 +28,24 @@ class Media_CodecContext : public Standard_Transient
   DEFINE_STANDARD_RTTIEXT(Media_CodecContext, Standard_Transient)
 public:
 
+  //! Codec initialization parameters.
+  struct CodecParams
+  {
+    //! Amount of threads to use for AVMEDIA_TYPE_VIDEO stream;
+    //! - -1 means OSD_Parallel::NbLogicalProcessors();
+    //! -  0 means auto by FFmpeg itself;
+    //! - >0 means specified number of threads (decoder should support multi-threading to take effect).
+    int NbThreads = -1;
+    //! Codec (AVCodecID) to open.
+    int CodecId = 0;
+    //! Check if stream defines video frame dimensions (implicitly reads the first frame).
+    bool ToCheckDims = false;
+    //! Specify preferred pixmap memory layout top-down (default for FFmpeg) or bottom-up.
+    bool IsTopDown = true;
+  };
+
+public:
+
   //! Constructor.
   Standard_EXPORT Media_CodecContext();
 
@@ -51,15 +69,10 @@ public:
   //! Open codec.
   //! @param theStream stream to open
   //! @param thePtsStartBase PTS start in seconds
-  //! @param theNbThreads amount of threads to use for AVMEDIA_TYPE_VIDEO stream;
-  //!                     -1 means OSD_Parallel::NbLogicalProcessors(),
-  //!                      0 means auto by FFmpeg itself
-  //!                     >0 means specified number of threads (decoder should support multi-threading to take effect)
-  //! @param theCodecId codec (AVCodecID) to open
+  //! @param theParams initialization parameters
   Standard_EXPORT bool Init (const AVStream& theStream,
                              double thePtsStartBase,
-                             int    theNbThreads,
-                             int    theCodecId);
+                             const CodecParams& theParams);
 
   //! Close input.
   Standard_EXPORT void Close();

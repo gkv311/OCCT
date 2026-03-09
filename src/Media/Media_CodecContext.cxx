@@ -73,11 +73,12 @@ bool Media_CodecContext::Init (const AVStream& theStream,
                                double thePtsStartBase,
                                int    theNbThreads)
 {
+  CodecParams aParams;
+  aParams.NbThreads = theNbThreads;
 #ifdef HAVE_FFMPEG
-  return Init (theStream, thePtsStartBase, theNbThreads, AV_CODEC_ID_NONE);
-#else
-  return Init (theStream, thePtsStartBase, theNbThreads, 0);
+  aParams.CodecId = AV_CODEC_ID_NONE;
 #endif
+  return Init(theStream, thePtsStartBase, aParams);
 }
 
 // =======================================================================
@@ -86,8 +87,7 @@ bool Media_CodecContext::Init (const AVStream& theStream,
 // =======================================================================
 bool Media_CodecContext::Init (const AVStream& theStream,
                                double thePtsStartBase,
-                               int theNbThreads,
-                               int theCodecId)
+                               const CodecParams& theParams)
 {
 #ifdef HAVE_FFMPEG
   myStreamIndex = theStream.index;
@@ -102,7 +102,9 @@ bool Media_CodecContext::Init (const AVStream& theStream,
   myPtsStartBase   = thePtsStartBase;
   myPtsStartStream = Media_FormatContext::StreamUnitsToSeconds (theStream, theStream.start_time);
 
-  const AVCodecID aCodecId = theCodecId != AV_CODEC_ID_NONE ? (AVCodecID )theCodecId : theStream.codecpar->codec_id;
+  const AVCodecID aCodecId = theParams.CodecId != AV_CODEC_ID_NONE
+                           ? (AVCodecID )theParams.CodecId
+                           : theStream.codecpar->codec_id;
   myCodec = avcodec_find_decoder (aCodecId);
   if (myCodec == NULL)
   {
@@ -116,8 +118,26 @@ bool Media_CodecContext::Init (const AVStream& theStream,
   av_dict_set (&anOpts, "refcounted_frames", "1", 0);
   if (theStream.codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
   {
-    myCodecCtx->thread_count = theNbThreads <= -1 ? OSD_Parallel::NbLogicalProcessors() : theNbThreads;
+    myCodecCtx->thread_count = theParams.NbThreads <= -1 ? OSD_Parallel::NbLogicalProcessors() : theParams.NbThreads;
   }
+
+  auto getBuffer2Flip = [](AVCodecContext* theCodecCtx, AVFrame* theFrame, int theFlags) -> int
+  {
+    const int aGetBuffRes = avcodec_default_get_buffer2(theCodecCtx, theFrame, theFlags);
+    if (theFrame->data[1] != nullptr)
+      return aGetBuffRes; // flip only single-plane formats, as multi-plane formats might have per-plane dimensions
+
+    uint8_t*& aData     = theFrame->data[0];
+    int&      aLineSize = theFrame->linesize[0];
+    if (aData == nullptr || aLineSize <= 0)
+      return aGetBuffRes;
+
+    aData = aData + intptr_t(aLineSize) * (theFrame->height - 1);
+    aLineSize = -aLineSize;
+    return aGetBuffRes;
+  };
+  if (!theParams.IsTopDown)
+    myCodecCtx->get_buffer2 = getBuffer2Flip;
 
   if (avcodec_open2 (myCodecCtx, myCodec, &anOpts) < 0)
   {
@@ -144,7 +164,8 @@ bool Media_CodecContext::Init (const AVStream& theStream,
     }
   }
 
-  if (theStream.codecpar->codec_type == AVMEDIA_TYPE_VIDEO
+  if (theParams.ToCheckDims
+   && theStream.codecpar->codec_type == AVMEDIA_TYPE_VIDEO
    && (myCodecCtx->width  <= 0
     || myCodecCtx->height <= 0))
   {
@@ -157,8 +178,7 @@ bool Media_CodecContext::Init (const AVStream& theStream,
 #else
   (void )&theStream;
   (void )thePtsStartBase;
-  (void )theNbThreads;
-  (void )theCodecId;
+  (void )theParams;
   return false;
 #endif
 }

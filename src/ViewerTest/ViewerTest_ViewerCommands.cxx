@@ -59,6 +59,7 @@
 #include <Image_AlienPixMap.hxx>
 #include <Image_Diff.hxx>
 #include <Image_VideoRecorder.hxx>
+#include <Image_RWAVCodec.hxx>
 #include <Image_RWFreeImage.hxx>
 #include <Image_RWWinCodec.hxx>
 #include <Image_RWPPM.hxx>
@@ -6282,6 +6283,10 @@ static bool parseImgLibName(Handle(Image_RWPixMap)& theLib,
   else if (aName == "freeimage")
   {
     theLib = new Image_RWFreeImage();
+  }
+  else if (aName == "avcodec" || aName == "ffmpeg")
+  {
+    theLib = new Image_RWAVCodec();
   }
   else if (aName == "wincodec" || aName == "windowscodecs")
   {
@@ -14486,7 +14491,7 @@ When -closeOnEscape is specified, view will be closed on pressing Escape.
 
   addCmd("testimage", VTestImage, /* [testimage] */ R"(
 testimage imageInput [imageOutput]
-          [-imglib|-imglibLoad|-imglibSave {default|freeImage|winCodec|ppm|libpng}]=default
+          [-imglib|-imglibLoad|-imglibSave {default|avcodec|freeImage|winCodec|ppm|libpng}]=default
           [-format {RGB|RGBA|Gray|RGBF|GrayF}]
           [-blank width height]
           [-buffer|-stream]

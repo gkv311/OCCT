@@ -213,7 +213,7 @@ bool Media_PlayerContext::DumpFirstFrame (const TCollection_AsciiString& theSrcV
   //if (aFormat == Image_Format_UNKNOWN || theMaxSize > 0)
   {
     Handle(Media_Frame) anRgbFrame = new Media_Frame();
-    anRgbFrame->InitWrapper (aPixMap);
+    anRgbFrame->InitWrapper (*aPixMap);
 
     Media_Scaler aScaler;
     if (!aScaler.Convert (aFrame, anRgbFrame))
