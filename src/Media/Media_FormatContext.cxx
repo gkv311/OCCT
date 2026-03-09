@@ -27,6 +27,7 @@
 extern "C"
 {
   #include <libavformat/avformat.h>
+  #include <libavcodec/avcodec.h>
 };
 #include <Standard_WarningsRestore.hxx>
 #endif
@@ -409,9 +410,11 @@ TCollection_AsciiString Media_FormatContext::StreamInfo (unsigned int theIndex,
   AVCodecContext* aCodecCtx = theCodecCtx;
   if (aCodecCtx == NULL)
   {
+#if(LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(59, 0, 100))
   Standard_DISABLE_DEPRECATION_WARNINGS
     aCodecCtx = aStream.codec;
   Standard_ENABLE_DEPRECATION_WARNINGS
+#endif
   }
 
   char aFrmtBuff[4096] = {};
@@ -497,6 +500,10 @@ bool Media_FormatContext::SeekStream (unsigned int theStreamId,
   int64_t aSeekTarget = StreamSecondsToUnits (aStream, theSeekPts + StreamUnitsToSeconds (aStream, aStream.start_time));
   bool isSeekDone = av_seek_frame (myFormatCtx, theStreamId, aSeekTarget, aFlags) >= 0;
 
+#if(LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(59, 3, 100))
+  /// TODO AVStream::cur_dts has been removed without libavformat version bump and without entry in APIchanges
+  /// with comment "no reason to have them exposed in a public header"
+#else
   // try 10 more times in backward direction to work-around huge duration between key frames
   // will not work for some streams with undefined cur_dts (AV_NOPTS_VALUE)!!!
   for (int aTries = 10; isSeekDone && theToSeekBack && aTries > 0 && (aStream.cur_dts > aSeekTarget); --aTries)
@@ -504,6 +511,8 @@ bool Media_FormatContext::SeekStream (unsigned int theStreamId,
     aSeekTarget -= StreamSecondsToUnits (aStream, 1.0);
     isSeekDone = av_seek_frame (myFormatCtx, theStreamId, aSeekTarget, aFlags) >= 0;
   }
+#endif
+
   if (isSeekDone)
   {
     return true;
