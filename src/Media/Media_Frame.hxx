@@ -104,7 +104,7 @@ public:
 public:
 
   //! Wrap allocated image pixmap.
-  Standard_EXPORT bool InitWrapper (const Handle(Image_PixMap)& thePixMap);
+  Standard_EXPORT bool InitWrapper (const Image_PixMap& thePixMap);
 
 protected:
 

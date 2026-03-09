@@ -17,12 +17,83 @@
 
 #include <Media_Packet.hxx>
 
+#include <NCollection_Buffer.hxx>
 #include <TCollection_AsciiString.hxx>
 
 struct AVCodecContext;
 struct AVFormatContext;
+struct AVIOContext;
 struct AVStream;
 struct AVRational;
+
+//! C++ interface for defining AVIOContext stream.
+class Media_AVIOContext : public Standard_Transient
+{
+public:
+  //! Main constructor.
+  Standard_EXPORT Media_AVIOContext();
+
+  //! Destructor.
+  Standard_EXPORT virtual ~Media_AVIOContext();
+
+  //! Access AVIO context.
+  AVIOContext* GetAvioContext() const { return myAvioCtx.get(); }
+
+  //! Virtual method for reading the data.
+  virtual int Read(uint8_t* theBuf, int theBufSize) = 0;
+
+  //! Virtual method for writing the data.
+  virtual int Write(const uint8_t* theBuf, const int theBufSize) = 0;
+
+  //! Virtual method for seeking to new position.
+  virtual int64_t Seek(int64_t theOffset, int theWhence) = 0;
+
+private:
+  std::shared_ptr<AVIOContext> myAvioCtx;
+};
+
+//! Wrap memory buffer into AVIOContext stream.
+class Media_AVIOMemContext : public Media_AVIOContext
+{
+public:
+  //! Main constructor.
+  Standard_EXPORT explicit Media_AVIOMemContext(const Handle(NCollection_Buffer)& theData);
+
+  //! Read from the file.
+  Standard_EXPORT virtual int Read(uint8_t* theBuf, int theBufSize) override;
+
+  //! Write into the file.
+  Standard_EXPORT virtual int Write(const uint8_t* theBuf, const int theBufSize) override;
+
+  //! Seek within the file.
+  Standard_EXPORT virtual int64_t Seek(int64_t theOffset, int theWhence) override;
+
+private:
+  uint8_t* mySrcBuffer = nullptr; //!< memory buffer
+  int64_t  mySrcSize   = 0;       //!< buffer size
+  int64_t  myPosition  = 0;       //!< current position within the buffer
+};
+
+//! Wrap std::istream into AVIOContext stream.
+class Media_AVIOFileContext : public Media_AVIOContext
+{
+public:
+  //! Main constructor. Passed stream pointer should remain valid until this class destruction.
+  Standard_EXPORT explicit Media_AVIOFileContext(std::istream* theStream);
+
+  //! Read from the file.
+  Standard_EXPORT virtual int Read(uint8_t* theBuf, int theBufSize) override;
+
+  //! Write into the file.
+  virtual int Write(const uint8_t*, const int) override { return -1; }
+
+  //! Seek within the file.
+  Standard_EXPORT virtual int64_t Seek(int64_t theOffset, int theWhence) override;
+
+protected:
+  std::istream* myStream = nullptr;
+  int64_t       myStartPos = 0; //!< start position within the stream
+};
 
 //! AVFormatContext wrapper - the media input/output stream holder.
 class Media_FormatContext : public Standard_Transient
@@ -88,8 +159,13 @@ public:
   //! Return context.
   AVFormatContext* Context() const { return myFormatCtx; }
 
-  //! Open input.
-  Standard_EXPORT bool OpenInput (const TCollection_AsciiString& theInput);
+  //! Open video input.
+  Standard_EXPORT bool OpenInput(const TCollection_AsciiString& theInput,
+                                 const Handle(Media_AVIOContext)& theStream = Handle(Media_AVIOContext)());
+
+  //! Open image input (avoid probing dimensions in advance and avoid defining duration).
+  Standard_EXPORT bool OpenImageInput(const TCollection_AsciiString& theInput,
+                                      const Handle(Media_AVIOContext)& theStream = Handle(Media_AVIOContext)());
 
   //! Close input.
   Standard_EXPORT void Close();
@@ -123,6 +199,8 @@ public:
                              bool   toSeekBack);
 
 protected:
+
+  Handle(Media_AVIOContext) myIOContext;
 
   AVFormatContext* myFormatCtx;    //!< format context
   double           myPtsStartBase; //!< start time

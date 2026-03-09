@@ -1,5 +1,7 @@
 Image_AlienPixMap.cxx
 Image_AlienPixMap.hxx
+Image_RWAVCodec.cxx
+Image_RWAVCodec.hxx
 Image_Color.hxx
 Image_CompressedFormat.hxx
 Image_CompressedPixMap.hxx

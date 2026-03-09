@@ -19,17 +19,23 @@
 #include <Image_RWPixMap.hxx>
 
 //! Image class that support file reading/writing operations using auxiliary image library.
-//! The list of supported image formats depends on OCCT building options and enabled 3rd-party dependencies:
+//! The list of supported image formats depends on OCCT building options
+//! and enabled 3rd-party dependencies (the order defines priority):
 //! - FreeImage library is handled by Image_RWFreeImage.
 //!   When enabled (USE_FREEIMAGE=ON in CMake), the wide range of image formats will be supported including
 //!   BMP, PNG, JPEG, TIFF, GIF, TGA, EXR, PPM.
+//! - FFmpeg framework is handled by Image_RWAVCodec.
+//!   When enabled (USE_FFMPEG=ON in CMake), the wide range of image formats will be supported including
+//!   BMP, PNG, JPEG, TIFF, GIF, TGA, EXR, PPM and others (depending on FFmpeg building options).
 //! - Windows Imaging Component (WIC) is handled by Image_RWWinCodec.
-//!   When available (Windows platform only, built without FreeImage), the minimal set of image formats will be supported including
+//!   When available (Windows platform only, built without FreeImage),
+//!   the minimal set of image formats will be supported including
 //!   BMP, PNG, JPEG, TIFF, GIF.
 //! - Emscripten SDK is handled by Image_RWEmscripten.
-//!   When available (WebAssembly target), the minimal set of image formats will be supported (for which Browser implements readers) including
+//!   When available (WebAssembly target), the minimal set of image formats will be supported
+//!   (for which Browser implements readers) including
 //!   BMP, PNG, JPEG.
-//! - When no multi-format library is available (FreeImage, WIC), then per-format library will be used.
+//! - When no multi-format library is available (FreeImage, FFmpeg, WIC), then per-format library will be used.
 //!   - PPM format is handled by Image_RWPPM.
 //!   - PNG format is handled by Image_RWPNG and available via libpng library (USE_LIBPNG=ON in CMake).
 class Image_AlienPixMap : public Image_PixMap
