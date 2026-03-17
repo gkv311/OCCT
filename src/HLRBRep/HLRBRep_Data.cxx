@@ -144,7 +144,7 @@ public:
       StNbMax=0;
       for(Standard_Integer i=0; i<N; i++) { 
 	Standard_Integer nb=0;
-	for(Standard_Integer j=0; IndUV[i][j]!=-1 && j<nbUV[i]; j++,nb++);
+	for(Standard_Integer j=0; j<nbUV[i] && IndUV[i][j]!=-1; j++,nb++);
 	if(nb>StNbMax) StNbMax=nb;
 	StNbMoy+=nb;
 	if(nb) { StNbMoyNonNul+=nb; nnn++; } 
@@ -242,7 +242,7 @@ public:
     do { 
       TriOk=Standard_True;
       Standard_Integer im1=0;
-      for(i=1; IndUV[i0][i]!=-1 && i<nbUV[i0]; i++,im1++) { 
+      for(i=1; i<nbUV[i0] && IndUV[i0][i]!=-1; i++,im1++) { 
 	if(IndUV[i0][i]>IndUV[i0][im1]) { 
 	  TriOk=Standard_False;
 	  k=IndUV[i0][i]; IndUV[i0][i]=IndUV[i0][im1]; IndUV[i0][im1]=k;
