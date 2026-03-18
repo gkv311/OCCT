@@ -36,10 +36,18 @@ namespace
   static Handle(Image_PixMap) convertToCompatible(const Handle(Image_SupportedFormats)& theSupported,
                                                   const Handle(Image_PixMap)& theImage)
   {
-    if (theImage.IsNull()
-     || theSupported.IsNull()
+    if (theImage.IsNull())
+      return theImage;
+
+    if (theSupported.IsNull()
      || theSupported->IsSupported(theImage->Format()))
     {
+      if (theImage->IsTopDown())
+      {
+        Handle(Image_PixMap) aCopy = new Image_PixMap();
+        aCopy->InitCopy(*theImage);
+        return aCopy;
+      }
       return theImage;
     }
 
