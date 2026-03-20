@@ -1,0 +1,20 @@
+puts "============"
+puts "CR26209: Visualization - provide a method to fit view to the specific bounding box"
+puts "Fit selected sub-shapes of translated AIS_Shape"
+puts "============"
+puts ""
+
+pload VISUALIZATION MODELING
+
+box b 100 200 300
+vinit View1
+vdisplay b -dispMode 1
+vlocation b -location 100 0 0
+vfit
+vzoom 0.5
+vselmode b FACE 1
+vselect 250 125
+vfit -selected
+checkpoint pick [vmoveto 250 250] {196.7 87 300} 1.0
+
+vdump ${imagedir}/${casename}.png
