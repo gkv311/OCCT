@@ -344,16 +344,15 @@ int Graphic3d_ShaderManager::defaultGlslVersion (const Handle(Graphic3d_ShaderPr
     }
     case Aspect_GraphicsLibrary_OpenGLES:
     {
-    #if defined(__EMSCRIPTEN__)
+      // Note that earler OCCT versions attempted to use "100 es"
+      // to workaround bugs of early OpenGL ES 3.0 implementations on Android.
+      // This workaround has been removed to pass a stricker GLSL
+      // validation layer of WebGL 2.0 implementations.
       if (IsGapiGreaterEqual (3, 0))
       {
-        // consider this is browser responsibility to provide working WebGL 2.0 implementation
-        // and black-list broken drivers (there is no OpenGL ES greater than 3.0)
         theProgram->SetHeader ("#version 300 es");
       }
-    #endif
-      // prefer "100 es" on OpenGL ES 3.0- devices (save the features unavailable before "300 es")
-      // and    "300 es" on OpenGL ES 3.1+ devices
+
       if (IsGapiGreaterEqual (3, 1))
       {
         if ((theBits & Graphic3d_ShaderFlags_NeedsGeomShader) != 0)
