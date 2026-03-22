@@ -13,12 +13,15 @@ set aDiff $imagedir/${casename}_diff.png
 
 vinit View1
 
+vertex v0 0 0 0
+vertex v1 1 0 0
+edge e v0 v1
 for {set i 0} {$i < $LINES_IN_ROW} {incr i} {
   for {set j 0} {$j < $LINES_IN_ROW} {incr j} {
-    set aLineName "line"
-    append aLineName [expr $i * $LINES_IN_ROW + $j]
-    vline $aLineName 0 0 0 1 0 0
-    vsetlocation $aLineName [expr $i * 3] [expr $j * 3] 0
+    set aLineName "line[expr $i * $LINES_IN_ROW + $j]"
+    copy e $aLineName
+    vdisplay     -noupdate $aLineName
+    vsetlocation -noupdate $aLineName [expr $i * 3] [expr $j * 3] 0
   }
 }
 

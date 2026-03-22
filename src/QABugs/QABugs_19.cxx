@@ -5221,27 +5221,16 @@ static Standard_Integer OCC29412 (Draw_Interpretor& /*theDI*/, Standard_Integer 
     return 1;
   }
 
+  const gp_Circ circle(gp_Ax2(gp::Origin(), gp::DZ()), 1);
+  const TopoDS_Edge  E1 = BRepBuilderAPI_MakeEdge(circle).Edge();
+  const TopoDS_Shape W2 = BRepBuilderAPI_MakeWire(E1).Wire();
+
   const int aNbIters = (theArgNb <= 1 ? 10000 : Draw::Atoi (theArgVec[1]));
   int aProgressPrev = -1;
   for (int m_loopIndex = 0; m_loopIndex < aNbIters; m_loopIndex++)
   {
-    gp_Pnt pos;
-    gp_Vec dir(0, 0,1);
-
-    gp_Ax2 center (pos, dir);
-    gp_Circ circle (center, 1);
-    Handle(AIS_Shape) feature;
-
-    BRepBuilderAPI_MakeEdge builder( circle );
-
-    if( builder.Error() == BRepBuilderAPI_EdgeDone )
-    {
-      TopoDS_Edge E1 = builder.Edge();
-      TopoDS_Shape W2 = BRepBuilderAPI_MakeWire(E1).Wire();
-      feature = new AIS_Shape(W2);
-      aCtx->Display (feature, true);
-    }
-
+    Handle(AIS_Shape) feature = new AIS_Shape(W2);
+    aCtx->Display (feature, true);
     aCtx->CurrentViewer()->Update();
     ViewerTest::CurrentView()->FitAll();
     aCtx->Remove (feature, true);

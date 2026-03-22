@@ -1084,11 +1084,17 @@ static int VPointBuilder(Draw_Interpretor& ,
   TCollection_AsciiString aName;
   gp_Pnt aPnt (RealLast(), 0.0, 0.0);
   bool is2d = false, isNoSel = false;
+
+  ViewerTest_AutoUpdater anAutoUpdater(ViewerTest::GetAISContext(), ViewerTest::CurrentView());
   for (Standard_Integer anArgIter = 1; anArgIter < theArgNb; ++anArgIter)
   {
     TCollection_AsciiString anArg (theArgVec[anArgIter]);
     anArg.LowerCase();
-    if (anArg == "-2d")
+    if (anAutoUpdater.parseRedrawMode(anArg))
+    {
+      continue;
+    }
+    else if (anArg == "-2d")
     {
       is2d = true;
     }
@@ -1170,7 +1176,7 @@ static int VPointBuilder(Draw_Interpretor& ,
     aPointPrs->SetTransformPersistence (new Graphic3d_TransformPers (Graphic3d_TMF_2d, Aspect_TOTP_LEFT_UPPER));
     aPointPrs->SetZLayer (Graphic3d_ZLayerId_TopOSD);
   }
-  ViewerTest::Display (aName, aPointPrs);
+  ViewerTest::Display (aName, aPointPrs, false);
   if (isNoSel)
   {
     ViewerTest::GetAISContext()->Deactivate (aPointPrs);
@@ -6932,7 +6938,7 @@ The axis will be orthogonal to the selected edge.
 )" /* [vaxisortho] */);
 
   addCmd ("vpoint", VPointBuilder, /* [vpoint] */ R"(
-vpoint name [X Y [Z]] [-2d] [-nosel]
+vpoint name [X Y [Z]] [-2d] [-nosel] [-noupdate]
 Creates a point from coordinates.
 If the values are not defined, a point is created from selected vertex or edge (center).
  -2d    defines on-screen 2D point from top-left window corner;
