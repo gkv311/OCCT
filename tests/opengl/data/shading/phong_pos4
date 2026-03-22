@@ -28,8 +28,8 @@ for { set anZIter -50 } { $anZIter <= 50 } { set anZIter [expr $anZIter + 10] } 
     set anIndex [expr {int(rand() * $aNbColors)}]
     set aColor [lindex $THE_COLORS $anIndex]
     set aPos "$anXIter 0 $anZIter"
-    vlight -add positional -pos {*}$aPos -color $aColor -headLight 0 -constAttenuation $aConstAtten -linearAttenuation $aLinAtten
-    vpoint v${aLightIndex} {*}$aPos
+    vlight -noupdate -add positional -pos {*}$aPos -color $aColor -headLight 0 -constAttenuation $aConstAtten -linearAttenuation $aLinAtten
+    vpoint -noupdate v${aLightIndex} {*}$aPos
     set aLightIndex [expr $aLightIndex + 1]
   }
 }
