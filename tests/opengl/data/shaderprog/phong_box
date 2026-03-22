@@ -17,13 +17,16 @@ vdisplay b
 vfit
 vrotate 0.2 0.0 0.0
 
+set glslVersion ""
+if { [string match "OpenGL ES 3*" [vglinfo VERSION]] } { set glslVersion "#version 300 es" }
+
 # take snapshot with fixed pipeline
 vdump $::imagedir/${::casename}_OFF.png
-vshaderprog b phong
+vshaderprog b phong -header $glslVersion
 vdump $::imagedir/${::casename}_ph1.png
 
 vclear
 vdisplay b
-vshaderprog b phong
+vshaderprog b phong -header $glslVersion
 vdump $::imagedir/${::casename}_ph2.png
 vmoveto 250 250

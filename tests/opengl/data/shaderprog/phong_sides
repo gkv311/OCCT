@@ -18,6 +18,9 @@ vdisplay b_1 b_2
 vfit
 vrotate 0.2 0.0 0.0
 
+set glslVersion ""
+if { [string match "OpenGL ES 3*" [vglinfo VERSION]] } { set glslVersion "#version 300 es" }
+
 # take snapshot with fixed pipeline
 vdump $::imagedir/${::casename}_OFF.png
 set aColorB [vreadpixel 150 150 rgb name]
@@ -26,7 +29,7 @@ if { "$aColorB" != "$aColorF"} { puts "Error: front/back colors are different!" 
 set aColorFixed $aColorF
 
 # activate phong shader
-vshaderprog phong
+vshaderprog phong -header $glslVersion
 set aColorB [vreadpixel 150 150 rgb name]
 set aColorF [vreadpixel 250 250 rgb name]
 if { "$aColorB" != "$aColorF"} { puts "Error: front/back colors are different!" }
