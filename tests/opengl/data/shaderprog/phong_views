@@ -17,7 +17,10 @@ vdisplay b
 vfit
 vrotate 0.2 0.0 0.0
 
-vshaderprog b phong
+set glslVersion ""
+if { [string match "OpenGL ES 3*" [vglinfo VERSION]] } { set glslVersion "#version 300 es" }
+
+vshaderprog b phong -header $glslVersion
 vdump $::imagedir/${::casename}_v1.png
 
 vinit View2
