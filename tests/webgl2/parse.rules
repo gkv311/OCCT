@@ -1,0 +1,7 @@
+FAILED /\bFaulty\b/ error
+SKIPPED /Could not open: TKIVtkDraw/ OCCT is built without VTK
+SKIPPED /Tcl Exception: Skipping test/ unsupported driver
+SKIPPED /OCCT is built without Open GL ES/ OCCT is built without Open GL ES
+SKIPPED /Error: EGL does not provide EGL_ANGLE_create_context_webgl_compatibility extension/ No EGL_ANGLE library
+IGNORE /An exception was caught Aspect_GraphicDeviceDefinitionError: OpenGl_Window, EGL does not provide compatible configurations/ No EGL_ANGLE library
+IGNORE /libEGL warning: DRI3 error/ message from runner without GPU
