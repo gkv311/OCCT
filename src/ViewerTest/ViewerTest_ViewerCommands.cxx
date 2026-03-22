@@ -68,6 +68,7 @@
 #include <NCollection_DataMap.hxx>
 #include <NCollection_List.hxx>
 #include <NCollection_LocalArray.hxx>
+#include <OSD_FileSystem.hxx>
 #include <OSD_Parallel.hxx>
 #include <OSD_Timer.hxx>
 #include <Prs3d_ShadingAspect.hxx>
@@ -6315,6 +6316,7 @@ static int VTestImage(Draw_Interpretor& theDI, Standard_Integer theArgNb, const 
 
   Image_Format aFormat = Image_Format_UNKNOWN;
   Graphic3d_Vec2i aDims;
+  int aReadInStream = 0;
   for (Standard_Integer anArgIter = 1; anArgIter < theArgNb; ++anArgIter)
   {
     TCollection_AsciiString anArg(theArgVec[anArgIter]);
@@ -6352,6 +6354,14 @@ static int VTestImage(Draw_Interpretor& theDI, Standard_Integer theArgNb, const 
     {
       anArgIter += 2;
     }
+    else if (anArg == "-stream")
+    {
+      aReadInStream = 1;
+    }
+    else if (anArg == "-buffer")
+    {
+      aReadInStream = 2;
+    }
     else if (anImgPathIn.IsEmpty() && aDims.x() == 0)
     {
       anImgPathIn = theArgVec[anArgIter];
@@ -6370,7 +6380,42 @@ static int VTestImage(Draw_Interpretor& theDI, Standard_Integer theArgNb, const 
   Handle(Image_PixMap) aPixmap = new Image_PixMap();
   if (!anImgPathIn.IsEmpty())
   {
-    if (!anImgLibIn->Read(*aPixmap, Handle(NCollection_Buffer)(), nullptr, anImgPathIn))
+    Handle(NCollection_Buffer) aBuff;
+    std::shared_ptr<std::istream> aFileStream;
+
+    TCollection_AsciiString aFilePathIn = anImgPathIn;
+    const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
+    if (aReadInStream != 0)
+    {
+      aFilePathIn = TCollection_AsciiString("test://") + anImgPathIn;
+      aFileStream = aFileSystem->OpenIStream(anImgPathIn, std::ios::in | std::ios::binary);
+      if (aFileStream.get() == nullptr)
+      {
+        theDI << "Error: unable to open file '" << anImgPathIn << "'";
+        return 1;
+      }
+    }
+    if (aReadInStream == 2)
+    {
+      const std::streamoff aStart = aFileStream->tellg();
+      aFileStream->seekg(0, std::ios::end);
+      const Standard_Integer aLen = Standard_Integer(aFileStream->tellg() - aStart);
+      aFileStream->seekg(aStart);
+      if (aLen <= 0)
+      {
+        Message::SendFail() << "Error: empty stream";
+        return false;
+      }
+
+      aBuff = new NCollection_Buffer(NCollection_BaseAllocator::CommonBaseAllocator(), aLen);
+      if (!aFileStream->read((char*)aBuff->ChangeData(), aBuff->Size()))
+      {
+        Message::SendFail() << "Error: unable to read stream";
+        return false;
+      }
+      aFileStream.reset();
+    }
+    if (!anImgLibIn->Read(*aPixmap, aBuff, aFileStream.get(), aFilePathIn))
     {
       theDI << "Error: unable to load image '" << anImgPathIn << "'";
       return 1;
@@ -14444,6 +14489,7 @@ testimage imageInput [imageOutput]
           [-imglib|-imglibLoad|-imglibSave {default|freeImage|winCodec|ppm|libpng}]=default
           [-format {RGB|RGBA|Gray|RGBF|GrayF}]
           [-blank width height]
+          [-buffer|-stream]
 Read image from file and save it into another file.
 Command for testing reading/writing image libraries.
  -imglib     image library for reading/writing image file
@@ -14451,6 +14497,8 @@ Command for testing reading/writing image libraries.
  -imglibSave image library for writing output  image file
  -format     image pixel format
  -blank      create blank image instead of reading input file
+ -buffer     load image from custom buffer instead of a filename
+ -stream     load image from custom stream instead of a filename
 )" /* [testimage] */);
 
   addCmd ("vselect", VSelect, /* [vselect] */ R"(
