@@ -19,13 +19,16 @@ vsetcolor    b GREEN
 vfit
 vrotate 0.2 0.0 0.0
 
+set glslVersion ""
+if { [string match "OpenGL ES 3*" [vglinfo VERSION]] } { set glslVersion "#version 300 es" }
+
 # take snapshot with fixed pipeline
 vdump $::imagedir/${::casename}_OFF.png
 set aColorL [vreadpixel 150 250 rgb name]
 set aColorR [vreadpixel 250 250 rgb name]
 if { "$aColorL" != "GREEN3" || "$aColorR" != "GREEN4" } { puts "Error: wrong color (fixed pipeline)!" }
 
-vshaderprog b phong
+vshaderprog b phong -header $glslVersion
 set aColorL [vreadpixel 150 250 rgb name]
 set aColorR [vreadpixel 250 250 rgb name]
 if { "$aColorL" != "GREEN3" || "$aColorR" != "GREEN4" } { puts "Error: wrong color (Phong shader)!" }
