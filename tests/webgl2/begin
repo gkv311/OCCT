@@ -1,0 +1,38 @@
+cpulimit 300
+
+if { ![regexp HAVE_GLES2 [dversion]] } {
+  error "OCCT is built without Open GL ES support"
+}
+
+pload VISUALIZATION
+vdriver -load GLES
+vgldebug -glslWarn 1
+vcaps -useWinBuffer 0
+vcaps -webgl
+
+# clamp number of frames in Path-Tracing tests in case of software rendering
+# (too slow to perform such rendering on CPU)
+rename vfps _vfps
+set _vfpsMaxNbFrames 10000
+proc vfps {{framesNb 100}} {
+  if { $framesNb > $::_vfpsMaxNbFrames } {
+    puts "Warning: 'vfps $framesNb' clamped to 'vfps $::_vfpsMaxNbFrames'"
+    _vfps $::_vfpsMaxNbFrames
+  } else {
+    _vfps $framesNb
+  }
+}
+
+rename vinit _vinit
+proc vinit {args} {
+  if { [catch {_vinit {*}$args} catch_result] } {
+    error "OCCT is built without Open GL ES support"
+  }
+
+  set renderer [vglinfo GL_RENDERER]
+  if { [string match "llvmpipe*" $renderer] } {
+    set ::_vfpsMaxNbFrames 5
+  }
+}
+
+if { [info exists imagedir] == 0 } { set imagedir . }
