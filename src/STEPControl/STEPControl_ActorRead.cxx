@@ -1529,7 +1529,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
   Standard_Boolean isBound = Standard_False;
   Message_ProgressScope aPSRoot(theProgress, NULL, 2);
   Handle(Transfer_Binder) binder = TP->Find(maprep);
-  if (binder.IsNull())    binder = TransferEntity(maprep, TP, theLocalFactors, isBound, Standard_False, theProgress);
+  if (binder.IsNull())    binder = TransferEntity(maprep, TP, theLocalFactors, isBound, Standard_False, aPSRoot.Next());
   shbinder = Handle(TransferBRep_ShapeBinder)::DownCast(binder);
   if (shbinder.IsNull()) TP->AddWarning(mapit,"No Shape Produced");
   else {
