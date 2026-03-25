@@ -173,7 +173,7 @@ void XmlLDrivers_DocumentRetrievalDriver::Read
 
   if (aFileStream.get() != NULL && aFileStream->good())
   {
-    Read (*aFileStream, NULL, theNewDocument, theApplication, theFilter, theRange);
+    read (*aFileStream, NULL, theNewDocument, theApplication, theFilter, theRange);
   }
   else
   {
@@ -189,9 +189,24 @@ void XmlLDrivers_DocumentRetrievalDriver::Read
 
 //=======================================================================
 //function : Read
-//purpose  : 
+//purpose  :
 //=======================================================================
-void XmlLDrivers_DocumentRetrievalDriver::Read (Standard_IStream&              theIStream,
+void XmlLDrivers_DocumentRetrievalDriver::Read(Standard_IStream&              theIStream,
+                                               const Handle(Storage_Data)&    theStorageData,
+                                               const Handle(CDM_Document)&    theNewDocument,
+                                               const Handle(CDM_Application)& theApplication,
+                                               const Handle(PCDM_ReaderFilter)& theFilter,
+                                               const Message_ProgressRange&   theRange)
+{
+  myFileName.Clear();
+  read(theIStream, theStorageData, theNewDocument, theApplication, theFilter, theRange);
+}
+
+//=======================================================================
+//function : read
+//purpose  :
+//=======================================================================
+void XmlLDrivers_DocumentRetrievalDriver::read (Standard_IStream&              theIStream,
                                                 const Handle(Storage_Data)&    /*theStorageData*/,
                                                 const Handle(CDM_Document)&    theNewDocument,
                                                 const Handle(CDM_Application)& theApplication,

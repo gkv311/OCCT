@@ -83,6 +83,15 @@ protected:
   
   Standard_EXPORT virtual void ShapeSetCleaning (const Handle(XmlMDF_ADriver)& theDriver);
 
+  Standard_EXPORT void read(Standard_IStream&               theIStream,
+                            const Handle(Storage_Data)&     theStorageData,
+                            const Handle(CDM_Document)&     theDoc,
+                            const Handle(CDM_Application)&  theApplication,
+                            const Handle(PCDM_ReaderFilter)& theFilter = Handle(PCDM_ReaderFilter)(),
+                            const Message_ProgressRange& theRange = Message_ProgressRange());
+
+protected:
+
   Handle(XmlMDF_ADriverTable) myDrivers;
   XmlObjMgt_RRelocationTable  myRelocTable;
   TCollection_ExtendedString  myFileName;
