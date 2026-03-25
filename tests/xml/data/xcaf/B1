@@ -1,0 +1,24 @@
+puts "============"
+puts "Check that XML document can be opened from C++ stream after opening from the file"
+puts "============"
+puts ""
+
+set aTestName "xcaf200-$casename"
+puts $aTestName
+
+set aFile $WorkDirectory/${aTestName}.${FileSuffix}
+
+box a 100 100 100
+NewShape D 0:1:1:1 a
+
+SaveAs D "$aFile"
+Close  D
+
+Open "$aFile" D
+Close D
+
+Open "$aFile" D -stream
+XGetOneShape b D
+Close D
+
+checknbshapes b -ref [nbshapes a]
