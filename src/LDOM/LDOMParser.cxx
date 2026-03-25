@@ -356,7 +356,7 @@ Standard_Boolean LDOMParser::ParseElement (Standard_IStream& theIStream, Standar
       delete [] aTextStr;
       break;
     case LDOM_XmlReader::XML_EOF:
-      myError = "Inexpected end of file";
+      myError = "Unexpected end of file";
       isError = Standard_True;
       break;
     default: ;
