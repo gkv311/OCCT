@@ -476,7 +476,7 @@ LDOM_XmlReader::RecordType LDOM_XmlReader::ReadRecord (Standard_IStream& theIStr
         continue;
       case '/' :
         if (aStartData)
-          myError = "Inexpected end of attribute";
+          myError = "Unexpected end of attribute";
         else if (myPtr[1] != '>')
           myError = "Improper element tag termination";
         else {
@@ -490,7 +490,7 @@ LDOM_XmlReader::RecordType LDOM_XmlReader::ReadRecord (Standard_IStream& theIStr
         return XML_UNKNOWN;
       case '>' :
         if (aStartData) {
-          myError = "Inexpected end of attribute";
+          myError = "Unexpected end of attribute";
           return XML_UNKNOWN;
         }
         ++ myPtr;
