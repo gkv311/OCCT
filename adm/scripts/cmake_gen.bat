@@ -41,7 +41,6 @@ set USE_GLES2=OFF
 set USE_RAPIDJSON=OFF
 set USE_DRACO=OFF
 set USE_TBB=OFF
-set USE_VTK=OFF
 
 if exist "%~dp0cmake_custom.bat" call "%~dp0cmake_custom.bat"
 
@@ -83,7 +82,6 @@ cmake -G "%arch_compile%" ^
   -D USE_RAPIDJSON:BOOL=%USE_RAPIDJSON% ^
   -D USE_DRACO:BOOL=%USE_DRACO% ^
   -D USE_TBB:BOOL=%USE_TBB% ^
-  -D USE_VTK:BOOL=%USE_VTK% ^
   "%SrcRoot%"
 
 popd

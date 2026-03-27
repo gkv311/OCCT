@@ -1,5 +1,4 @@
 FAILED /\bFaulty\b/ error
-SKIPPED /Could not open: TKIVtkDraw/ OCCT is built without VTK
 SKIPPED /OCCT is built without Open GL ES/ OCCT is built without Open GL ES
 SKIPPED /OCCT is built without Direct3D/ OCCT is built without Direct3D
 SKIPPED /OCCT is built without RapidJSON/ OCCT is built without RapidJSON

@@ -194,22 +194,6 @@ https://sourceforge.net/projects/freeimage/files/Source%20Distribution/
 5. Start the building process.<br>
    As a result, you should have the library files of FreeImage product in `freeimage/Dist` folder (`FreeImage.dll` and `FreeImage.lib`).
 
-@subsection dev_guides__building_3rdparty_win_3_4 VTK
-
-VTK Integration Services component provides adaptation functionality for visualization of OCCT topological shapes by means of VTK library.
-
-1. Download the necessary archive from https://www.vtk.org/VTK/resources/software.html and unpack it into `3rdparty` folder.<br>
-   As a result, you will get a folder named, for example, `3rdparty/VTK-6.1.0`.
-   Further in this document, this folder is referred to as `VTK`.
-
-2. Use CMake to generate VS projects for building the library:
-   - Start CMake-GUI and select `VTK` folder as source path, and the folder of your choice for VS project and intermediate build data.
-   - Click **Configure**.
-   - Select the VS version to be used from the ones you have installed (we recommend using VS 2015) and the architecture (32 or 64-bit).
-   - Generate VS projects with default CMake options. The open solution `VTK.sln` will be generated in the build folder.
-
-3. Build project VTK in Release mode.
-
 @section build_3rdparty_linux Linux
 
 This section presents additional guidelines for building third-party products used by Open CASCADE Technology and samples on Linux platform.
@@ -374,28 +358,6 @@ The directory with unpacked sources is  further referred to as `FREEIMAGE_SRC_DI
 5. Clean temporary files
 
         make clean
-
-@subsection dev_guides__building_3rdparty_linux_3_4 VTK
-
-Download the necessary archive from https://www.vtk.org/VTK/resources/software.html and unpack it.
-
-1. Install or build `cmake` product from the source file.
-2. Start `cmake` in GUI mode with the directory where the source files of *VTK* are located:
-
-       ccmake VTK_SRC_DIR
-
-   * Press `[c]` to make the initial configuration
-   * Define the necessary options in `VTK_INSTALL_PREFIX`
-   * Press `[c]` to make the final configuration
-   * Press `[g]` to generate `Makefile` and exit
-
-3. Start the building of VTK:
-
-       make
-
-4. Start the installation of VTK. Binaries will be installed according to the `VTK_INSTALL_PREFIX` option.
-
-       make install
 
 @section build_3rdparty_macos Mac OS X
 

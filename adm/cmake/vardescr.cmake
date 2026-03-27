@@ -104,7 +104,6 @@ INSTALL_MESSAGE (INSTALL_TBB              "TBB binaries")
 INSTALL_MESSAGE (INSTALL_RAPIDJSON        "RapidJSON header files")
 INSTALL_MESSAGE (INSTALL_TCL              "TCL binaries")
 INSTALL_MESSAGE (INSTALL_TK               "TK binaries")
-INSTALL_MESSAGE (INSTALL_VTK              "VTK binaries ")
 
 # build variables
 macro (BUILD_MODULE_MESSAGE BUILD_MODULE_TARGET_VARIABLE BUILD_MODULE_TARGET_STRING)
@@ -160,7 +159,7 @@ installation directory (overview.bat script) if INSTALL_DOC_Overview variable is
 set (3RDPARTY_DIR_DESCR
 "The root directory where all required third-party products will be searched. If a
 third-party product have been found - corresponding CMake variables will be specified
-(VTK: 3RDPARTY_VTK_DIR, 3RDPARTY_VTK_INCLUDE_DIR, 3RDPARTY_VTK_LIBRARY_DIR)")
+(FreeType: 3RDPARTY_FREETYPE_DIR, 3RDPARTY_FREETYPE_INCLUDE_DIR, 3RDPARTY_FREETYPE_LIBRARY_DIR)")
 
 set (USE_TK_DESCR
 "Indicates whether Tk product should be used by Draw Harness for user interface")
@@ -203,12 +202,6 @@ set (USE_TBB_DESCR
 "Indicates whether TBB is used or not. TBB stands for Threading Building Blocks,
 the technology of Intel Corp, which comes with different mechanisms and patterns for
 injecting parallelism into your application. OCCT remains parallel even without TBB product")
-
-set (USE_VTK_DESCR
-"Indicates whether VTK is used or not. VTK stands for Visualization
-ToolKit, the technology of Kitware Inc intended for general-purpose scientific
-visualization. OCCT comes with a bridge between CAD data representation and
-VTK by means of its dedicated VIS component (VTK Integration Services).")
 
 set (USE_XLIB_DESCR "Indicates whether X11 is used or not")
 

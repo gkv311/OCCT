@@ -1435,13 +1435,6 @@ proc osutils:csfList { theOS theCsfLibsMap theCsfFrmsMap theRelease} {
   if { "$::HAVE_TBB" == "true" } {
     set aLibsMap(CSF_TBB) "tbb tbbmalloc"
   }
-  if { "$::HAVE_VTK" == "true" } {
-    if { "$theOS" == "wnt" } {
-      set aLibsMap(CSF_VTK) [osutils:vtkCsf "wnt"]
-    } else {
-      set aLibsMap(CSF_VTK) [osutils:vtkCsf "unix"]
-    }
-  }
   if { "$::HAVE_ZLIB" == "true" } {
     set aLibsMap(CSF_ZLIB) "z"
   }
@@ -1541,35 +1534,6 @@ proc osutils:csfList { theOS theCsfLibsMap theCsfFrmsMap theRelease} {
       }
     }
   }
-}
-
-# Returns string of library dependencies for generation of Visual Studio project or make lists.
-proc osutils:vtkCsf {{theOS ""}} {
-  set aVtkVer "6.1"
-
-  set aPathSplitter ":"
-  if {"$theOS" == "wnt"} {
-    set aPathSplitter ";"
-  }
-
-  set anOptIncs [split $::env(CSF_OPT_INC) "$aPathSplitter"]
-  foreach anIncItem $anOptIncs {
-    if {[regexp -- "vtk-(.*)$" [file tail $anIncItem] dummy aFoundVtkVer]} {
-      set aVtkVer $aFoundVtkVer
-    }
-  }
-
-  set aLibArray [list vtkCommonCore vtkCommonDataModel vtkCommonExecutionModel vtkCommonMath vtkCommonTransforms vtkRenderingCore \
-                      vtkRenderingOpenGL  vtkFiltersGeneral vtkIOCore vtkIOImage vtkImagingCore vtkInteractionStyle]
-
-  # Additional suffices for the libraries
-  set anIdx 0
-  foreach anItem $aLibArray {
-    lset aLibArray $anIdx $anItem-$aVtkVer
-    incr anIdx
-  }
-
-  return [join $aLibArray " "]
 }
 
 # @param theLibsList   - dependencies (libraries  list)

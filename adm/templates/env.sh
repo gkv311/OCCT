@@ -15,7 +15,6 @@ export HAVE_TK="true";
 export HAVE_FREETYPE="true";
 export HAVE_FREEIMAGE="false";
 export HAVE_FFMPEG="false";
-export HAVE_VTK="false";
 export HAVE_GLES2="false";
 export HAVE_ZLIB="false";
 export HAVE_LIBLZMA="false";
@@ -112,7 +111,6 @@ if [ "$HAVE_FREETYPE"  == "true" ]; then export CSF_OPT_CMPL="${CSF_OPT_CMPL} -D
 if [ "$HAVE_FREEIMAGE" == "true" ]; then export CSF_OPT_CMPL="${CSF_OPT_CMPL} -DHAVE_FREEIMAGE"; fi
 if [ "$HAVE_FFMPEG"    == "true" ]; then export CSF_OPT_CMPL="${CSF_OPT_CMPL} -DHAVE_FFMPEG"; fi
 if [ "$HAVE_GLES2"     == "true" ]; then export CSF_OPT_CMPL="${CSF_OPT_CMPL} -DHAVE_GLES2_EXT"; fi
-if [ "$HAVE_VTK"       == "true" ]; then export CSF_OPT_CMPL="${CSF_OPT_CMPL} -DHAVE_VTK"; fi
 if [ "$HAVE_ZLIB"      == "true" ]; then export CSF_OPT_CMPL="${CSF_OPT_CMPL} -DHAVE_ZLIB"; fi
 if [ "$HAVE_LIBLZMA"   == "true" ]; then export CSF_OPT_CMPL="${CSF_OPT_CMPL} -DHAVE_LIBLZMA"; fi
 if [ "$HAVE_RAPIDJSON" == "true" ]; then export CSF_OPT_CMPL="${CSF_OPT_CMPL} -DHAVE_RAPIDJSON"; fi
