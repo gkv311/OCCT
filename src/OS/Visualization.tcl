@@ -28,10 +28,6 @@ proc Visualization:toolkits { } {
     }
   }
 
-  if { [info exists ::env(HAVE_VTK)] && "$::env(HAVE_VTK)" == "true" } {
-    lappend aResult "TKIVtk"
-  }
-
   return $aResult
 }
 
@@ -60,10 +56,6 @@ proc Visualization:depends { } {
 
 proc Visualization:acdepends { } {
     set aList [list X11 GL FREETYPE]
-
-    if { [info exists ::env(HAVE_VTK)] && "$::env(HAVE_VTK)" == "true" } {
-      lappend aList "VTK"
-    }
 
     return $aList
 }

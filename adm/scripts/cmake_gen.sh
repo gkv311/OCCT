@@ -43,7 +43,6 @@ USE_GLES2=OFF
 USE_RAPIDJSON=OFF
 USE_DRACO=OFF
 USE_TBB=OFF
-USE_VTK=OFF
 AUX_ARGS=
 
 if [ -f "${ScriptDir}/cmake_custom.sh" ]; then
@@ -84,7 +83,6 @@ cmake -G "Unix Makefiles" \
   -D USE_RAPIDJSON:BOOL=$USE_RAPIDJSON \
   -D USE_DRACO:BOOL=$USE_DRACO \
   -D USE_TBB:BOOL=$USE_TBB \
-  -D USE_VTK:BOOL=$USE_VTK \
   $AUX_ARGS "$SrcRoot"
 
 popd
