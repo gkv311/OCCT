@@ -16,7 +16,6 @@ user_guides/modeling_algos/modeling_algos.md
 user_guides/mesh/mesh.md
 user_guides/ocaf/ocaf.md
 user_guides/visualization/visualization.md
-user_guides/vis/vis.md
 user_guides/iges/iges.md
 user_guides/step/step.md
 user_guides/xde/xde.md
