@@ -108,7 +108,6 @@ The following table gives the full list of environment variables used at the con
 | BUILD_YACCLEX | Boolean | Enables Flex/Bison lexical analyzers. OCCT source files relating to STEP reader and ExprIntrp functionality are generated automatically with Flex/Bison. Checking this option leads to automatic search of Flex/Bison binaries and regeneration of the mentioned files |
 | BUILD_SAMPLES_MFC | Boolean | Indicates whether MFC samples should be built together with OCCT. This option is only relevant to Windows platforms |
 | BUILD_SAMPLES_QT  | Boolean | Indicates whether QT samples should be built together with OCCT. |
-| BUILD_Inspector | Boolean | Indicates whether Inspector should be built together with OCCT. |
 | BUILD_DOC_Overview | Boolean | Indicates whether OCCT overview documentation project should be created together with OCCT. It is not built together with OCCT. Checking this option leads to automatic search of Doxygen binaries. Its building calls Doxygen command to generate the documentation in HTML format |
 | BUILD_PATCH | Path | Points to the directory recognized as a "patch" for OCCT. If specified, the files from this directory take precedence over the corresponding native OCCT sources. This way you are able to introduce patches to Open CASCADE Technology not affecting the original source distribution |
 | BUILD_WITH_DEBUG | Boolean | Enables extended messages of many OCCT algorithms, usually printed to cout. These include messages on internal errors and special cases encountered, timing, etc. |

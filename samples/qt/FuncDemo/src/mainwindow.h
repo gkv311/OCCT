@@ -70,9 +70,6 @@ private slots:
     void model2();
     void compute();
     void nbThreads();
-#ifdef HAVE_Inspector
-    void startDFBrowser();
-#endif
     void about();
 
 private:
@@ -90,9 +87,6 @@ private:
     QAction *model2Act;
     QAction *computeAct;
     QAction *nbThreadsAct;
-#ifdef HAVE_Inspector
-    QAction *dfBrowserAct;
-#endif
     QAction *exitAct;
     QAction *aboutAct;
 
