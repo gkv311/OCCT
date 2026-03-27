@@ -38,7 +38,6 @@ FREETYPE_DIR="$OCCT3RDPARTY/freetype-2.7.1"
 #USE_RAPIDJSON=OFF
 #USE_DRACO=OFF
 #USE_TBB=OFF
-#USE_VTK=OFF
 
 # This is to add any additional arguments to cmake
 #AUX_ARGS=

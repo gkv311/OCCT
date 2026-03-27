@@ -97,13 +97,11 @@ The following table gives the full list of environment variables used at the con
 | USE_DRACO     | Boolean | Indicates whether Draco     product should be used in OCCT Data Exchange module for support of Draco compression in glTF mesh file format |
 | USE_TK        | Boolean | Indicates whether Tcl/Tk product should be used in OCCT Draw Harness module for user interface (in addition to Tcl, which is mandatory for Draw Harness) |
 | USE_TBB       | Boolean | Indicates whether TBB (Threading Building Blocks) 3rd party is used or not. Note that OCCT remains parallel even without TBB product |
-| USE_VTK       | Boolean | Indicates whether VTK 3rd party is used or not. OCCT comes with a bridge between CAD data representation and VTK by means of its dedicated VIS component (VTK Integration Services). You may skip this 3rd party unless you are planning to use VTK visualization for OCCT geometry. See the official documentation @ref occt_user_guides__vis for the details on VIS |
 | 3RDPARTY_DIR | Path | Defines the root directory where all required 3rd party products will be searched. Once you define this path it is very convenient to click "Configure" button in order to let CMake automatically detect all necessary products|
 | 3RDPARTY_FREETYPE_* | Path | Path to FreeType binaries |
 | 3RDPARTY_TCL_* 3RDPARTY_TK_* | Path | Path to Tcl/Tk binaries |
 | 3RDPARTY_FREEIMAGE* | Path | Path to FreeImage binaries |
 | 3RDPARTY_TBB*  | Path | Path to TBB binaries |
-| 3RDPARTY_VTK_* | Path | Path to VTK binaries |
 | BUILD_MODULE_<MODULE>| Boolean | Indicates whether the corresponding OCCT module should be built or not. It should be noted that some toolkits of a module can be built even if this module is not checked (this happens if some other modules depend on these toolkits). The main modules and their descriptions can be found in @ref user_guides |
 | BUILD_LIBRARY_TYPE | String |  Specifies the type of library to be created. "Shared" libraries are linked dynamically and loaded at runtime. "Static" libraries are archives of object files used when linking other targets. Note that Draw Harness plugin system is incompatible with "Static" builds, and therefore it is disabled for these builds.|
 | BUILD_ADDITIONAL_TOOLKITS | String | Semicolon-separated individual toolkits to include into build process. If you want to build some particular libraries (toolkits) only, then you may uncheck all modules in the corresponding *BUILD_MODUE_\<MODULE\>* options and provide the list of necessary libraries here. Of course, all dependencies will be resolved automatically |
@@ -131,7 +129,6 @@ The following table gives the full list of environment variables used at the con
 | INSTALL_FREETYPE     | Boolean | Indicates whether FreeType binaries should be installed into the installation directory |
 | INSTALL_FREEIMAGE    | Boolean | Indicates whether FreeImage binaries should be installed into the installation directory |
 | INSTALL_TBB          | Boolean | Indicates whether TBB binaries should be installed into the installation directory |
-| INSTALL_VTK          | Boolean | Indicates whether VTK binaries should be installed into the installation directory |
 | INSTALL_TCL          | Boolean | Indicates whether TCL binaries should be installed into the installation directory |
 | INSTALL_TEST_CASES   | Boolean | Indicates whether non-regression OCCT test scripts should be installed into the installation directory |
 | INSTALL_DOC_Overview | Boolean | Indicates whether OCCT overview documentation should be installed into the installation directory |

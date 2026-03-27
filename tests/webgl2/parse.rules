@@ -1,5 +1,4 @@
 FAILED /\bFaulty\b/ error
-SKIPPED /Could not open: TKIVtkDraw/ OCCT is built without VTK
 SKIPPED /Tcl Exception: Skipping test/ unsupported driver
 SKIPPED /OCCT is built without Open GL ES/ OCCT is built without Open GL ES
 SKIPPED /Error: EGL does not provide EGL_ANGLE_create_context_webgl_compatibility extension/ No EGL_ANGLE library

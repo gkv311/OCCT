@@ -72,7 +72,7 @@ if { [info exists ::env(SHORTCUT_HEADERS)] } {
 }
 
 # fetch environment variables (e.g. set by custom.sh or custom.bat) and set them as tcl variables with the same name
-set THE_ENV_VARIABLES { HAVE_TK HAVE_FREETYPE HAVE_FREEIMAGE HAVE_FFMPEG HAVE_TBB HAVE_GLES2 HAVE_D3D HAVE_VTK \
+set THE_ENV_VARIABLES { HAVE_TK HAVE_FREETYPE HAVE_FREEIMAGE HAVE_FFMPEG HAVE_TBB HAVE_GLES2 HAVE_D3D \
   HAVE_ZLIB HAVE_LIBLZMA HAVE_E57 HAVE_RAPIDJSON HAVE_DRACO HAVE_OPENVR HAVE_OPENCL \
   CHECK_QT4 CHECK_JDK HAVE_XLIB \
   HAVE_RelWithDebInfo BUILD_Inspector }
@@ -996,135 +996,6 @@ proc wokdep:SearchRapidJson {theErrInc theErrLib32 theErrLib64 theErrBin32 theEr
     } else {
       lappend anErrInc "Error: 'rapidjson/rapidjson.h' not found (RapidJSON)"
       set isFound "false"
-    }
-  }
-
-  return "$isFound"
-}
-
-# Auxiliary function, gets VTK version to set default search directory
-proc wokdep:VtkVersion { thePath } {
-  set aResult "6.1"
-
-  set aVtkRoot [lindex [regexp -all -inline {[0-9.]*} [file tail $thePath]] 0]
-  if { "$aVtkRoot" != "" } {
-    set aVtkRoot [regexp -inline {[0-9]*.[0-9]*} $aVtkRoot]
-    if { "$aVtkRoot" != "" } {
-    set aResult $aVtkRoot
-    }
-  }
-
-  return $aResult
-}
-
-# Search VTK library placement
-proc wokdep:SearchVTK {theErrInc theErrLib32 theErrLib64 theErrBin32 theErrBin64} {
-  upvar $theErrInc   anErrInc
-  upvar $theErrLib32 anErrLib32
-  upvar $theErrLib64 anErrLib64
-  upvar $theErrBin32 anErrBin32
-  upvar $theErrBin64 anErrBin64
-
-  set isFound "true"
-  
-  set aVtkPath ""
-  set aVtkIncPath [wokdep:SearchHeader "vtkConfigure.h"]
-  set aVtkVer [wokdep:VtkVersion $aVtkIncPath]
-  if { "$aVtkIncPath" == ""} {
-    set aPathList [glob -nocomplain -directory "$::PRODUCTS_PATH" -type d *{VTK}*]
-    set aVtkPath [wokdep:Preferred "$aPathList" "$::VCVER" "$::ARCH" ]
-    if { "$aVtkPath" != "" && [file exists "$aVtkPath/include/vtk-[wokdep:VtkVersion $aVtkPath]/vtkConfigure.h"]} { 
-      set aVtkVer [wokdep:VtkVersion $aVtkPath]
-      lappend ::CSF_OPT_INC "$aVtkPath/include/vtk-[wokdep:VtkVersion $aVtkPath]"
-    } else { # try to search in all found paths
-      set isFound "false"
-      foreach anIt $aPathList {
-        if { [file exists "$anIt/include/vtk-[wokdep:VtkVersion $anIt]/vtkConfigure.h"] } {
-          set aVtkPath $anIt
-          set aVtkVer [wokdep:VtkVersion $aVtkPath]
-          lappend ::CSF_OPT_INC "$anIt/include/vtk-[wokdep:VtkVersion $anIt]"
-          set isFound "true"
-          break
-        }
-      }
-
-      # Bad case: we do not found vtkConfigure.h in all paths.
-      if { "$isFound" == "false"} {
-        lappend anErrInc "Error: 'vtkConfigure.h' not found (VTK)"
-        set isFound "false"
-      }
-    }
-  }
-
-  set aVtkLibPath ""
-  foreach anArchIter {64 32} {
-    set aVtkLibPath [wokdep:SearchLib "vtkCommonCore-$aVtkVer" "$anArchIter"]
-    if { "$aVtkLibPath" == "" } {
-      set aPathList [glob -nocomplain -directory "$::PRODUCTS_PATH" -type d *{VTK}*]
-      set aPath [wokdep:Preferred $aPathList "$::VCVER" "$anArchIter" ]
-      set aVtkLibPath [wokdep:SearchLib "vtkCommonCore-$aVtkVer" "$anArchIter" "$aPath/lib"]
-      if { "$aVtkLibPath" != "" } {
-        lappend ::CSF_OPT_LIB$anArchIter "$aPath/lib"
-      } else {
-        set aPath [wokdep:SearchLib "vtkCommonCore-$aVtkVer" "$anArchIter" "$aVtkPath/lib"]
-        if { "$aPath" != "" } {
-          set aLibPath $aVtkIncPath
-          lappend ::CSF_OPT_LIB$anArchIter "$aLibPath/lib"
-        } else {
-          # The last chance: search /lib directory in all found paths
-          foreach anIt $aPathList {
-            set aVtkLibPath [wokdep:SearchLib "vtkCommonCore-$aVtkVer" "$anArchIter" "$anIt/lib"]
-            if { "$aVtkLibPath" != ""} {
-              lappend ::CSF_OPT_LIB$anArchIter "$anIt/lib"
-              break
-            }
-          }
-          if { "$aVtkLibPath" == "" } {
-            lappend anErrLib$anArchIter "Error: '${::SYS_LIB_PREFIX}vtkCommonCore-${aVtkVer}\.${::SYS_LIB_SUFFIX}' not found (VTK)"
-            if { "$::ARCH" == "$anArchIter" } {
-              set isFound "false"
-            }
-          }
-        }
-      }
-    }
-  
-    # Search binary path
-    if { "$::tcl_platform(platform)" == "windows" } {
-      set aVtkBinPath [wokdep:SearchBin "vtkCommonCore-${aVtkVer}.dll" "$anArchIter"]
-      if { "$aVtkBinPath" == "" } {
-        set aPathList [glob -nocomplain -directory "$::PRODUCTS_PATH" -type d *{VTK}*]
-        set aPath [wokdep:Preferred $aPathList "$::VCVER" "$anArchIter" ]
-        set aVtkBinPath [wokdep:SearchBin "vtkCommonCore-${aVtkVer}.dll" "$anArchIter" "$aPath/bin"]
-        if { "$aVtkBinPath" != "" } {
-          lappend ::CSF_OPT_BIN$anArchIter "$aPath/bin"
-        } else {
-          # Try to find in lib path
-          set aVtkBinPath [wokdep:SearchBin "vtkCommonCore-${aVtkVer}.dll" "$anArchIter" "$aPath/lib"]
-          if { "$aVtkBinPath" != "" } {
-            lappend ::CSF_OPT_BIN$anArchIter "$aPath/lib"
-          } else {
-            # We didn't find preferred binary path => search through all available VTK directories
-            foreach anIt $aPathList {
-              set aVtkBinPath [wokdep:SearchBin "vtkCommonCore-${aVtkVer}.dll" "$anArchIter" "$anIt/bin"]
-              if { "$aVtkBinPath" != "" } {
-                lappend ::CSF_OPT_BIN$anArchIter "$anIt/bin"
-                break
-              } else {
-                # Try to find in lib path
-                set aVtkBinPath [wokdep:SearchBin "vtkCommonCore-${aVtkVer}.dll" "$anArchIter" "$anIt/lib"]
-                if { "$aVtkBinPath" != "" } {
-                  lappend ::CSF_OPT_BIN$anArchIter "$anIt/lib"
-                }
-              }
-            }
-            if { "$aVtkBinPath" == "" } {
-              lappend anErrBin$anArchIter "Error: 'vtkCommonCore-${aVtkVer}.dll' not found (VTK)"
-              set isFound "false"
-            }
-          }
-        }
-      }
     }
   }
 

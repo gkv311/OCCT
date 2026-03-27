@@ -217,8 +217,6 @@ Here are a few examples of OCCT Visualization features:
 
 For more details, see @ref occt_user_guides__visualization "Visualization User's Guide".
 
-The visualization of OCCT topological shapes by means of VTK library provided by VIS component is described in a separate @ref occt_user_guides__vis "VTK Integration Services" User's Guide.
-
 @subsection intro_overview_de Data Exchange
 
 **Data Exchange** allows developing OCCT-based applications that can interact with other CAD systems by writing and reading CAD models to and from external data.
@@ -366,7 +364,6 @@ https://dev.opencascade.org/resources/download/3rd-party-components
 | FreeType 2.4+ | https://www.freetype.org/download.html | Visualization | Text rendering in 3D Viewer |
 | FreeImage 3.17+ | https://sourceforge.net/projects/freeimage/files | Visualization | Reading/writing image files |
 | FFmpeg 7.0+ | https://www.ffmpeg.org/download.html | Visualization | Video recording, reading/writing image files |
-| VTK 6.1+ | https://www.vtk.org/download/ | IVtk | VTK integration module |
 | Flex 2.6.4+ and Bison 3.7.1+ | https://sourceforge.net/projects/winflexbison/ | Data Exchange | Updating STEP and ExprIntrp parsers |
 | RapidJSON 1.1+ | https://rapidjson.org/ | Data Exchange | Reading glTF files |
 | Draco 1.4.1+ | https://github.com/google/draco | Data Exchange | Reading compressed glTF files |
@@ -583,10 +580,6 @@ file *glext.h* obtained from Khronos web site.
 without requiring that applications have specific knowledge of the hardware they are targeting.
 OpenVR is optionally used by OCCT for VR support.
 OpenVR is released under BSD-like license (https://github.com/ValveSoftware/openvr/blob/master/LICENSE).
-
-**VTK** -- The **Visualization Toolkit (VTK)** is an open-source, freely available software system for 3D computer graphics, image processing and visualization.
-OCCT VIS component provides adaptation functionality for visualization of OCCT topological shapes by means of VTK library.
-If you need further information on VTK, refer to VTK Homepage https://www.vtk.org/.
 
 **Doxygen** developed by Dimitri van Heesch is open source documentation system for 
 C++, C, Java, Objective-C, Python, IDL, PHP and C#. This product is used in Open CASCADE Technology 

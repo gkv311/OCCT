@@ -445,13 +445,6 @@ n Font
 n BOPAlgo
 n BOPDS
 n BOPCol
-n IVtk
-n IVtkOCC
-n IVtkVTK
-n IVtkTools
-t TKIVtk
-n IVtkDraw
-t TKIVtkDraw
 n Geom2dEvaluator
 t TKVCAF
 n XCAFView

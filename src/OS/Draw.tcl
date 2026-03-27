@@ -26,10 +26,6 @@ proc Draw:toolkits { } {
     }
   }
 
-  if { [info exists ::env(HAVE_VTK)] && "$::env(HAVE_VTK)" == "true" } {
-    lappend aResult "TKIVtkDraw"
-  }
-
   return $aResult
 }
 

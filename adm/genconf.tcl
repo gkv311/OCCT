@@ -230,9 +230,6 @@ proc wokdep:gui:UpdateList {} {
 #  if { "$::HAVE_OPENCL" == "true" } {
 #    wokdep:SearchOpenCL  anIncErrs anLib32Errs anLib64Errs anBin32Errs anBin64Errs
 #  }
-  if { "$::HAVE_VTK" == "true" } {
-    wokdep:SearchVTK  anIncErrs anLib32Errs anLib64Errs anBin32Errs anBin64Errs
-  }
 
   if { "$::HAVE_ZLIB" == "true" } {
     set aCheckLib "z"
@@ -490,8 +487,6 @@ ttk::label    .myFrame.myChecks.myDracoLbl      -text "Use Draco"
 
 checkbutton   .myFrame.myChecks.myXLibCheck     -offvalue "false" -onvalue "true" -variable HAVE_XLIB
 ttk::label    .myFrame.myChecks.myXLibLbl       -text "Use X11 for windows drawing"
-ttk::label    .myFrame.myChecks.myVtkLbl        -text "Use VTK"
-checkbutton   .myFrame.myChecks.myVtkCheck      -offvalue "false" -onvalue "true" -variable HAVE_VTK       -command wokdep:gui:UpdateList
 
 checkbutton   .myFrame.myChecks.myZLibCheck     -offvalue "false" -onvalue "true" -variable HAVE_ZLIB      -command wokdep:gui:UpdateList
 ttk::label    .myFrame.myChecks.myZLibLbl       -text "Use zlib"
@@ -682,8 +677,6 @@ grid .myFrame.myChecks.myJDKLbl        -row $aCheckRowIter -column 13 -sticky w
 incr aCheckRowIter
 grid .myFrame.myChecks.myFFmpegCheck   -row $aCheckRowIter -column 0 -sticky e
 grid .myFrame.myChecks.myFFmpegLbl     -row $aCheckRowIter -column 1 -sticky w
-grid .myFrame.myChecks.myVtkCheck      -row $aCheckRowIter -column 2 -sticky e
-grid .myFrame.myChecks.myVtkLbl        -row $aCheckRowIter -column 3 -sticky w
 grid .myFrame.myChecks.myOpenVrCheck   -row $aCheckRowIter -column 4 -sticky e
 grid .myFrame.myChecks.myOpenVrLbl     -row $aCheckRowIter -column 5 -sticky w
 grid .myFrame.myChecks.myE57Check      -row $aCheckRowIter -column 6 -sticky e

@@ -9,7 +9,6 @@ OCCT User Guides are organized by OCCT modules:
 * @subpage occt_user_guides__mesh "Mesh"
 * @subpage occt_user_guides__shape_healing "Shape Healing"
 * @subpage occt_user_guides__visualization "Visualization"
-* @subpage occt_user_guides__vis "VTK Integration Services"
 * @subpage occt_user_guides__iges "IGES Translator"
 * @subpage occt_user_guides__step "STEP Translator"
 * @subpage occt_user_guides__xde "Extended Data Exchange (XDE)"
