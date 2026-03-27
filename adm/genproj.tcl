@@ -401,10 +401,6 @@ proc genprojbat {theFormat thePlatform theSolution} {
     osutils:writeTextFile "$::path/env.${aTargetPlatformExt}" $aLineList $aTargetEol true
 
     copy_with_warning "$::THE_CASROOT/adm/templates/draw.${aTargetPlatformExt}" "$::path/draw.${aTargetPlatformExt}"
-
-    if { "$::BUILD_Inspector" == "true" } {
-      copy_with_warning "$::THE_CASROOT/adm/templates/inspector.${aTargetPlatformExt}" "$::path/inspector.${aTargetPlatformExt}"
-    }
   }
 
   set aSolShList ""
@@ -521,25 +517,6 @@ proc OS:MKPRC { theOutDir theFormat theLibType thePlatform theCmpl theSolution }
   puts "Collecting required header files into $path/inc ..."
   osutils:collectinc $aModules "src" $path/inc
 
-  # make list of Inspector tools
-  set aTools {}
-  if { "$::BUILD_Inspector" == "true" } {
-    set aTools [OS:init OS Tools]
-    if { [llength $aTools] == 0 } {
-      set aTools [OS:init VAS Tools]
-    }
-
-    # create the out dir if it does not exist
-    if (![file isdirectory $path/inc/inspector]) {
-     puts "$path/inc/inspector folder does not exists and will be created"
-     wokUtils:FILES:mkdir $path/inc/inspector
-    }
-
-    # collect all required header files
-    puts "Collecting required tools header files into $path/inc/inspector ..."
-    osutils:collectinc $aTools "tools" $path/inc/inspector
-  }
-
   if { "$theFormat" == "pro" } {
     return
   }
@@ -562,7 +539,7 @@ proc OS:MKPRC { theOutDir theFormat theLibType thePlatform theCmpl theSolution }
     "vc141" -
     "vc142" -
     "vc143" -
-    "vclang"   { OS:MKVC  $anOutDir $aModules $aTools $theSolution $theFormat $isUWP}
+    "vclang"   { OS:MKVC  $anOutDir $aModules $theSolution $theFormat $isUWP}
     "cbp"      { OS:MKCBP $anOutDir $aModules $theSolution $thePlatform $theCmpl }
     "xcd"      {
       set ::THE_GUIDS_LIST($::aTKNullKey) "000000000000000000000000"
@@ -1832,19 +1809,6 @@ proc osutils:vcproj { theVcVer isUWP theOutDir theToolKit theGuidsMap theSrcDir 
     set aSrcFiles [osutils:tk:cxxfiles $xlo wnt $theSrcDir]
     set aHxxFiles [osutils:tk:hxxfiles $xlo wnt $theSrcDir]
 
-    # prepare Qt moc files, appears only in Inspector - directory tools
-    set aGeneratedFiles {}
-    if { "$aHasQtDep" == "true" } {
-      set aMocResFiles [osutils:tk:mocfiles $aHxxFiles $theOutDir]
-      set aGeneratedFiles [osutils:tk:execfiles $aMocResFiles $theOutDir moc${::SYS_EXE_SUFFIX} moc cpp]
-
-      set aQrcResFiles [osutils:tk:qrcfiles $xlo wnt $theSrcDir]
-      set aQrcFiles [osutils:tk:execfiles $aQrcResFiles $theOutDir rcc${::SYS_EXE_SUFFIX} rcc cpp]
-      foreach resFile $aQrcFiles {
-        lappend aGeneratedFiles $resFile
-      }
-    }
-
     set fxlo_cmplrs_options_cxx [_get_options wnt cmplrs_cxx $fxlo]
     if {$fxlo_cmplrs_options_cxx == ""} {
       set fxlo_cmplrs_options_cxx [_get_options wnt cmplrs_cxx b]
@@ -1889,16 +1853,6 @@ proc osutils:vcproj { theVcVer isUWP theOutDir theToolKit theGuidsMap theSrcDir 
         }
         if { ! [info exists aVcFilesHxx($xlo)] } { lappend aVcFilesHxx(units) $xlo }
         lappend aVcFilesHxx($xlo) $aHxxFile
-      }
-      foreach aGenFile [lsort $aGeneratedFiles] {
-        if { ![info exists written([file tail $aGenFile])] } {
-          set written([file tail $aGenFile]) 1
-          append aFilesSection [osutils:vcxproj:cxxfile $aGenFile $needparam 5]
-        } else {
-          puts "Warning : in vcproj more than one occurrences for [file tail $aGenFile]"
-        }
-        if { ! [info exists aVcFilesCxx($xlo)] } { lappend aVcFilesCxx(units) $xlo }
-        lappend aVcFilesCxx($xlo) $aGenFile
       }
     } else {
       append aFilesSection "\t\t\t<Filter\n"

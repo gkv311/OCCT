@@ -261,10 +261,6 @@ proc wokdep:gui:UpdateList {} {
     wokdep:SearchStandardLibrary  anIncErrs anLib32Errs anLib64Errs aDummy aDummy "draco" "draco/compression/decode.h" "draco" {"draco"}
   }
 
-  if {"$::BUILD_Inspector" == "true" } {
-    set ::CHECK_QT "true"
-  }
-
   if { "$::CHECK_QT" == "true" } {
     wokdep:SearchQt     anIncErrs anLib32Errs anLib64Errs anBin32Errs anBin64Errs
   }
@@ -500,11 +496,6 @@ ttk::label    .myFrame.myChecks.myQtLbl         -text "Search Qt"
 checkbutton   .myFrame.myChecks.myJDKCheck      -offvalue "false" -onvalue "true" -variable CHECK_JDK      -command wokdep:gui:UpdateList
 ttk::label    .myFrame.myChecks.myJDKLbl        -text "Search JDK"
 
-if { "$::tcl_platform(platform)" == "windows" } {
-  checkbutton   .myFrame.myChecks.myInspectorBuild -offvalue "false" -onvalue "true" -variable BUILD_Inspector      -command wokdep:gui:UpdateList
-  ttk::label    .myFrame.myChecks.myInspectorLbl   -text "Build Inspector"
-}
-
 # Additional headers search paths
 ttk::label    .myFrame.myIncLbl    -text "Additional headers search paths:" -padding {5 5 80 5}
 scrollbar     .myFrame.myIncScrl   -command ".myFrame.myIncList yview"
@@ -681,11 +672,6 @@ grid .myFrame.myChecks.myOpenVrCheck   -row $aCheckRowIter -column 4 -sticky e
 grid .myFrame.myChecks.myOpenVrLbl     -row $aCheckRowIter -column 5 -sticky w
 grid .myFrame.myChecks.myE57Check      -row $aCheckRowIter -column 6 -sticky e
 grid .myFrame.myChecks.myE57Lbl        -row $aCheckRowIter -column 7 -sticky w
-
-if { "$::tcl_platform(platform)" == "windows" } {
-  grid .myFrame.myChecks.myInspectorBuild      -row $aCheckRowIter -column 12 -sticky e
-  grid .myFrame.myChecks.myInspectorLbl        -row $aCheckRowIter -column 13 -sticky w
-}
 
 incr aCheckRowIter
 
