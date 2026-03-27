@@ -509,20 +509,6 @@ OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/occt_defs_flags")
 
 OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/3rdparty_macro")
 
-# search for TKIVtk and TKIVtkDraw in BUILD_TOOLKITS
-list (FIND BUILD_TOOLKITS TKIVtk CAN_USE_VTK)
-if (CAN_USE_VTK EQUAL -1)
-  list (FIND BUILD_TOOLKITS TKIVtkDraw CAN_USE_VTK)
-endif()
-
-if (NOT CAN_USE_VTK EQUAL -1)
-  if (NOT DEFINED USE_VTK)
-    set (USE_VTK OFF CACHE BOOL "${USE_VTK_DESCR}")
-  endif()
-else()
-  OCCT_CHECK_AND_UNSET (USE_VTK)
-endif()
-
 # Rebuild *.yacc and *.lex files that are contained by TKMath toolkit
 list (FIND BUILD_TOOLKITS TKMath   CAN_REBUILD_PDC_FOR_TKMATH)
 list (FIND BUILD_TOOLKITS StepFile CAN_REBUILD_PDC_FOR_STEPFILE)
@@ -625,22 +611,6 @@ else()
   OCCT_CHECK_AND_UNSET ("USE_FREETYPE")
   OCCT_CHECK_AND_UNSET_GROUP ("3RDPARTY_FREETYPE")
   OCCT_CHECK_AND_UNSET ("INSTALL_FREETYPE")
-endif()
-
-# VTK
-if (USE_VTK)
-  add_definitions (-DHAVE_VTK)
-  set (OCCT_VTK_USED_TARGETS "" CACHE INTERNAL "" FORCE)
-  OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/vtk")
-else()
-  OCCT_CHECK_AND_UNSET_GROUP ("3RDPARTY_VTK")
-
-  if (NOT CAN_USE_VTK EQUAL -1)
-    message (STATUS "Info: TKIVtk and TKIVtkDraw toolkits excluded due to VTK usage is disabled")
-
-    list (REMOVE_ITEM BUILD_TOOLKITS TKIVtk)
-    list (REMOVE_ITEM BUILD_TOOLKITS TKIVtkDraw)
-  endif()
 endif()
 
 # FREEIMAGE
