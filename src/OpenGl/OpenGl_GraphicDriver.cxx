@@ -633,15 +633,6 @@ Standard_Integer OpenGl_GraphicDriver::InquireLimit (const Graphic3d_TypeOfLimit
 }
 
 // =======================================================================
-// function : DefaultTextHeight
-// purpose  :
-// =======================================================================
-Standard_ShortReal OpenGl_GraphicDriver::DefaultTextHeight() const
-{
-  return 16.;
-}
-
-// =======================================================================
 // function : EnableVBO
 // purpose  :
 // =======================================================================
