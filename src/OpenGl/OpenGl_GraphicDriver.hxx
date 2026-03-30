@@ -104,8 +104,6 @@ public:
                                  Standard_ShortReal&            theAscent,
                                  Standard_ShortReal&            theDescent) const Standard_OVERRIDE;
 
-  Standard_EXPORT Standard_ShortReal DefaultTextHeight() const Standard_OVERRIDE;
-
   Standard_EXPORT Standard_Boolean ViewExists (const Handle(Aspect_Window)& theWindow, Handle(Graphic3d_CView)& theView) Standard_OVERRIDE;
 
 public:
@@ -152,11 +150,8 @@ public:
   //! Specify swap buffer behavior.
   Standard_EXPORT void SetBuffersNoSwap (const Standard_Boolean theIsNoSwap);
 
-  //! VBO usage can be forbidden by this method even if it is supported by GL driver.
-  //! Notice that disabling of VBO will cause rendering performance degradation.
-  //! Warning! This method should be called only before any primitives are displayed in GL scene!
-  Standard_EXPORT virtual void EnableVBO (const Standard_Boolean theToTurnOn) Standard_OVERRIDE;
-
+  Standard_DEPRECATED("Deprecated functionality for enabling/disabling VBO")
+  Standard_EXPORT void EnableVBO (const Standard_Boolean theToTurnOn);
 
   //! Returns TRUE if vertical synchronization with display refresh rate (VSync) should be used; TRUE by default.
   Standard_EXPORT virtual bool IsVerticalSync() const Standard_OVERRIDE;

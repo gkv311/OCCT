@@ -66,9 +66,6 @@ public:
   //! Removes view from graphic driver and releases its resources.
   virtual void RemoveView (const Handle(Graphic3d_CView)& theView) = 0;
 
-  //! enables/disables usage of OpenGL vertex buffer arrays while drawing primitive arrays
-  virtual void EnableVBO (const Standard_Boolean status) = 0;
-
   //! Returns TRUE if vertical synchronization with display refresh rate (VSync) should be used; TRUE by default.
   virtual bool IsVerticalSync() const = 0;
 
@@ -77,8 +74,9 @@ public:
   
   //! Returns information about GPU memory usage.
   virtual Standard_Boolean MemoryInfo (Standard_Size& theFreeBytes, TCollection_AsciiString& theInfo) const = 0;
-  
-  virtual Standard_ShortReal DefaultTextHeight() const = 0;
+
+  //! Return default text height.
+  Standard_ShortReal DefaultTextHeight() const { return 16.0f; }
 
   Standard_DEPRECATED("Deprecated method, Font_FTFont should be used instead")
   virtual void TextSize (const Handle(Graphic3d_CView)& theView,
