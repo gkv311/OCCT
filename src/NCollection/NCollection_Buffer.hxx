@@ -97,11 +97,8 @@ public:
   {
     Free();
     mySize = theSize;
-    if (theSize != 0
-    || !myAllocator.IsNull())
-    {
+    if (theSize != 0 && !myAllocator.IsNull())
       myData = (Standard_Byte* )myAllocator->Allocate (theSize);
-    }
 
     if (myData == NULL)
     {
