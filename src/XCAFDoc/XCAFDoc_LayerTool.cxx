@@ -194,10 +194,14 @@ TDF_Label XCAFDoc_LayerTool::AddLayer(const TCollection_ExtendedString& theLayer
   TDF_Label lab = FindLayer(theLayer, Standard_True, theToFindVisible);
   if (!lab.IsNull())
     return lab;
+
   TDF_TagSource aTag;
   TDF_Label aLabel = aTag.NewChild(Label());
-  Handle(TDataStd_Name) aName = new TDataStd_Name;
+  Handle(TDataStd_Name) aName = new TDataStd_Name();
   aName->Set(aLabel, theLayer);
+  if (!theToFindVisible)
+    TDataStd_UAttribute::Set (aLabel, XCAFDoc::InvisibleGUID());
+
   return aLabel;
 }
 
