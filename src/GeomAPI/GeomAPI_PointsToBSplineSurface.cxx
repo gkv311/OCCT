@@ -176,8 +176,8 @@ static void BuildPeriodicTangent(const AppDef_MultiLine& theLine,
 //purpose  : 
 //=======================================================================
 GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface()
-: myIsDone ( Standard_False)
 {
+  //
 }
 
 
@@ -192,7 +192,6 @@ GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface
  const Standard_Integer DegMax,
  const GeomAbs_Shape Continuity, 
  const Standard_Real Tol3D)
-: myIsDone ( Standard_False)
 {
   Init(Points,DegMin,DegMax,Continuity,Tol3D);
 }
@@ -209,7 +208,6 @@ GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface
  const Standard_Integer DegMax,
  const GeomAbs_Shape Continuity, 
  const Standard_Real Tol3D)
-: myIsDone ( Standard_False)
 {
   Init(Points,ParType,DegMin,DegMax,Continuity,Tol3D);
 }
@@ -227,7 +225,6 @@ GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface
  const Standard_Integer DegMax,
  const GeomAbs_Shape Continuity, 
  const Standard_Real Tol3D)
-: myIsDone ( Standard_False)
 {
   Init(Points,Weight1,Weight2,Weight3,DegMax,Continuity,Tol3D);
 }
@@ -249,7 +246,6 @@ GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface
  const Standard_Integer DegMax, 
  const GeomAbs_Shape Continuity, 
  const Standard_Real Tol3D)
-: myIsDone ( Standard_False)
 {
   Init(ZPoints,X0,dX,Y0,dY,DegMin,DegMax,Continuity,Tol3D);
 }
@@ -310,6 +306,8 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColgp_Array2OfPnt& Points,
             const Standard_Real Tol3D,
             const Standard_Boolean thePeriodic)
 {
+  myIsDone = false;
+
   Standard_Integer Imin = Points.LowerRow();
   Standard_Integer Imax = Points.UpperRow();
   Standard_Integer Jmin = Points.LowerCol();
@@ -479,6 +477,8 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColgp_Array2OfPnt& Points,
 					  const GeomAbs_Shape Continuity,
 					  const Standard_Real Tol3D)
 {
+  myIsDone = false;
+
   Standard_Integer Imin = Points.LowerRow();
   Standard_Integer Imax = Points.UpperRow();
   Standard_Integer Jmin = Points.LowerCol();
@@ -665,6 +665,8 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColStd_Array2OfReal& ZPoints,
 					  const GeomAbs_Shape Continuity,
 					  const Standard_Real Tol3D)
 {
+  myIsDone = false;
+
   Standard_Integer Imin = ZPoints.LowerRow();
   Standard_Integer Imax = ZPoints.UpperRow();
   Standard_Integer Jmin = ZPoints.LowerCol();

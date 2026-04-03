@@ -34,7 +34,6 @@
 //-----------------------------------------------------
 #define LONGUEUR_MINI_EDGE_TRIANGLE 1e-15
 
-
 //=======================================================================
 //function : IntCurveSurface_Polyhedron
 //purpose  : 
@@ -76,6 +75,12 @@ IntCurveSurface_Polyhedron::IntCurveSurface_Polyhedron (const ThePSurface&     S
       TheDeflection(Epsilon(100.)),
       C_MyPnts(NULL),C_MyU(NULL),C_MyV(NULL),C_MyIsOnBounds(NULL)
 {
+  if (Upars.Length() < 2)
+    throw Standard_OutOfRange("IntCurveSurface_Polyhedron - Upars must contain at least two values");
+
+  if (Vpars.Length() < 2)
+    throw Standard_OutOfRange("IntCurveSurface_Polyhedron - Vpars must contain at least two values");
+
   Standard_Integer t = (nbdeltaU+1)*(nbdeltaV+1)+1; 
   gp_Pnt           *CMyPnts = new gp_Pnt[t];         C_MyPnts = (void *)CMyPnts;
   Standard_Real    *CMyU    = new Standard_Real[t];  C_MyU    = (void *)CMyU;  
@@ -626,9 +631,14 @@ void IntCurveSurface_Polyhedron::PlaneEquation (const Standard_Integer Triang,
   gp_XYZ v2= Pointi3 - Pointi2;
   gp_XYZ v3= Pointi1 - Pointi3;
 
-  if(v1.SquareModulus()<=LONGUEUR_MINI_EDGE_TRIANGLE) { NormalVector.SetCoord(1.0,0.0,0.0); return; } 
-  if(v2.SquareModulus()<=LONGUEUR_MINI_EDGE_TRIANGLE) { NormalVector.SetCoord(1.0,0.0,0.0); return; } 
-  if(v3.SquareModulus()<=LONGUEUR_MINI_EDGE_TRIANGLE) { NormalVector.SetCoord(1.0,0.0,0.0); return; } 
+  if (v1.SquareModulus() <= LONGUEUR_MINI_EDGE_TRIANGLE
+   || v2.SquareModulus() <= LONGUEUR_MINI_EDGE_TRIANGLE
+   || v3.SquareModulus() <= LONGUEUR_MINI_EDGE_TRIANGLE)
+  {
+    NormalVector.SetCoord(1.0,0.0,0.0);
+    PolarDistance = 0.0;
+    return;
+  }
 
   NormalVector= (v1^v2)+(v2^v3)+(v3^v1);
   Standard_Real aNormLen = NormalVector.Modulus();
@@ -825,6 +835,9 @@ Standard_Real IntCurveSurface_Polyhedron::ComputeBorderDeflection
     aNbSamples = nbdeltaV;
   else
     aNbSamples = nbdeltaU;
+
+  if (aNbSamples <= 0)
+    return 0.0;
 
   Standard_Real aDelta      = (PMax - PMin)/aNbSamples;
   Standard_Real aPar        = PMin;

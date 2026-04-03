@@ -36,12 +36,18 @@ inline void IntSurf_LineOn2S::Value(const Standard_Integer Index,
 				    const IntSurf_PntOn2S& P)
 {
   mySeq(Index) = P;
+  myBuv1.SetWhole();
+  myBuv2.SetWhole();
+  myBxyz.SetWhole();
 }
 
 inline void IntSurf_LineOn2S::SetPoint(const Standard_Integer Index,
                                        const gp_Pnt& thePnt)
 {
   mySeq(Index).SetValue (thePnt);
+  myBuv1.SetWhole();
+  myBuv2.SetWhole();
+  myBxyz.SetWhole();
 }
 
 inline void IntSurf_LineOn2S::Clear ()

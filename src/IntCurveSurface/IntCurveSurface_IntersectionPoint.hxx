@@ -78,10 +78,10 @@ private:
 
 
   gp_Pnt myP;
-  Standard_Real myUSurf;
-  Standard_Real myVSurf;
-  Standard_Real myUCurv;
-  IntCurveSurface_TransitionOnCurve myTrOnCurv;
+  Standard_Real myUSurf = 0.0;
+  Standard_Real myVSurf = 0.0;
+  Standard_Real myUCurv = 0.0;
+  IntCurveSurface_TransitionOnCurve myTrOnCurv = IntCurveSurface_Tangent;
 
 
 };

@@ -153,7 +153,7 @@ inline void IntWalk_IWLine::SetTangentVector (const gp_Vec& V,
 inline void IntWalk_IWLine::SetTangencyAtBegining
   (const Standard_Boolean IsTangent) {
 
-  istgtend = IsTangent;
+  istgtbeg = IsTangent;
 }
 
 inline void IntWalk_IWLine::SetTangencyAtEnd

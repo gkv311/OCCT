@@ -68,10 +68,10 @@ IntPatch_Polyhedron::IntPatch_Polyhedron (const Handle(Adaptor3d_Surface)& Surfa
        nbdeltaU(NbPOnU(Surface)),
        nbdeltaV(NbPOnV(Surface)),
        C_MyPnts(NULL),C_MyU(NULL),C_MyV(NULL),
-       UMinSingular(IntPatch_HInterTool::SingularOnVMin(Surface)),
-       UMaxSingular(IntPatch_HInterTool::SingularOnVMin(Surface)),
+       UMinSingular(IntPatch_HInterTool::SingularOnUMin(Surface)),
+       UMaxSingular(IntPatch_HInterTool::SingularOnUMax(Surface)),
        VMinSingular(IntPatch_HInterTool::SingularOnVMin(Surface)),
-       VMaxSingular(IntPatch_HInterTool::SingularOnVMin(Surface))
+       VMaxSingular(IntPatch_HInterTool::SingularOnVMax(Surface))
 { 
   const Standard_Integer t = (nbdeltaU+1)*(nbdeltaV+1)+1;
   gp_Pnt *CMyPnts     = new gp_Pnt[t];
@@ -124,13 +124,13 @@ IntPatch_Polyhedron::IntPatch_Polyhedron (const Handle(Adaptor3d_Surface)& Surfa
                                           const Standard_Integer nbu,
                                           const Standard_Integer nbv)
 : TheDeflection(Epsilon(100.)),
-  nbdeltaU(nbu),
-  nbdeltaV(nbv),
+  nbdeltaU(Max(nbu, 1)),
+  nbdeltaV(Max(nbv, 1)),
   C_MyPnts(NULL),C_MyU(NULL),C_MyV(NULL),
-  UMinSingular(IntPatch_HInterTool::SingularOnVMin(Surface)),
-  UMaxSingular(IntPatch_HInterTool::SingularOnVMin(Surface)),
+  UMinSingular(IntPatch_HInterTool::SingularOnUMin(Surface)),
+  UMaxSingular(IntPatch_HInterTool::SingularOnUMax(Surface)),
   VMinSingular(IntPatch_HInterTool::SingularOnVMin(Surface)),
-  VMaxSingular(IntPatch_HInterTool::SingularOnVMin(Surface))
+  VMaxSingular(IntPatch_HInterTool::SingularOnVMax(Surface))
 { 
   const Standard_Integer t = (nbdeltaU+1)*(nbdeltaV+1)+1;
   gp_Pnt *CMyPnts     = new gp_Pnt[t];
@@ -498,7 +498,7 @@ Standard_Integer IntPatch_Polyhedron::TriConnex (const Standard_Integer Triang,
   //-- Alors on retourne OtherP a 0 
   //-- et Tricon = Triangle
   //--
-  if(Point(Pivot).SquareDistance(Point(Pedge))<=LONGUEUR_MINI_EDGE_TRIANGLE) { 
+  if(Pedge != 0 && Point(Pivot).SquareDistance(Point(Pedge))<=LONGUEUR_MINI_EDGE_TRIANGLE) {
     OtherP=0;
     TriCon=Triang;
 #if MSG_DEBUG
@@ -506,7 +506,7 @@ Standard_Integer IntPatch_Polyhedron::TriConnex (const Standard_Integer Triang,
 #endif
     return(TriCon);
   }
-  if(Point(OtherP).SquareDistance(Point(Pedge))<=LONGUEUR_MINI_EDGE_TRIANGLE) { 
+  if(Pedge != 0 && Point(OtherP).SquareDistance(Point(Pedge))<=LONGUEUR_MINI_EDGE_TRIANGLE) {
 #if MSG_DEBUG
     std::cout<<" Probleme ds IntCurveSurface_Polyhedron : OtherP et PEdge Confondus "<<std::endl;
 #endif

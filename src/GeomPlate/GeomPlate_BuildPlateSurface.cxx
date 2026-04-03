@@ -436,7 +436,8 @@ void GeomPlate_BuildPlateSurface::
 // Calculates the surface filled with loaded constraints
 //---------------------------------------------------------
 void GeomPlate_BuildPlateSurface::Perform(const Message_ProgressRange& theProgress)
-{ 
+{
+  myGeomPlateSurface.Nullify();
 #ifdef OCCT_DEBUG
   // Timing
   OSD_Chronometer Chrono;

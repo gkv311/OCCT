@@ -71,9 +71,11 @@ void IntCurveSurface_Intersection::SetValues(const IntCurveSurface_Intersection&
       lseg.Append(Other.lseg.Value(i));
     } 
     done=Standard_True;
+    myIsParallel = Other.myIsParallel;
   }
   else {
     done=Standard_False;
+    myIsParallel = false;
   }
 }
 //================================================================================

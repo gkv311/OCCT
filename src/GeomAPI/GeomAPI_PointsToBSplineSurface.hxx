@@ -256,7 +256,7 @@ private:
 
 
 
-  Standard_Boolean myIsDone;
+  Standard_Boolean myIsDone = false;
   Handle(Geom_BSplineSurface) mySurface;
 
 
