@@ -25,6 +25,12 @@
 #include <IntSurf_Quadric.hxx>
 #include <StdFail_NotDone.hxx>
 
+//! Return FALSE if vector magnitude is too small.
+static bool hasMagnitudeForNormalization(const gp_Vec& theVector)
+{
+  return theVector.SquareMagnitude() > (gp::Resolution() * gp::Resolution());
+}
+
 // ============================================================
 IntSurf_Quadric::IntSurf_Quadric ():typ(GeomAbs_OtherSurface),
    prm1(0.), prm2(0.), prm3(0.), prm4(0.), ax3direc(Standard_False)
@@ -209,7 +215,10 @@ gp_Vec IntSurf_Quadric::Gradient (const gp_Pnt& P) const {
       if(ax3direc==Standard_False) { 
         grad.Reverse();
       }
-      grad.Normalize();
+      if (hasMagnitudeForNormalization(grad))
+        grad.Normalize();
+      else
+        grad.SetCoord(0.0, 0.0, 0.0);
     }
     break;
   case GeomAbs_Torus:   // torus
@@ -289,11 +298,10 @@ void IntSurf_Quadric::ValAndGrad (const gp_Pnt& P,
       //-- Si le gardient est nul, on est sur l axe 
       //-- et dans ce cas dist vaut 0 
       //-- On peut donc renvoyer une valeur quelconque. 
-      if(   Grad.X() > 1e-13 
-         || Grad.Y() > 1e-13 
-         || Grad.Z() > 1e-13) { 
+      if (hasMagnitudeForNormalization(Grad))
         Grad.Normalize();
-      }
+      else
+        Grad.SetCoord(0.0, 0.0, 0.0);
     }
     break;
   case GeomAbs_Torus:   

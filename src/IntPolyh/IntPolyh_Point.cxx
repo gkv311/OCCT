@@ -74,7 +74,7 @@ IntPolyh_Point IntPolyh_Point::Divide(const Standard_Real RR)const
 { 
   IntPolyh_Point res;
   //
-  if (Abs(RR)>10.0e-20) {
+  if (Abs(RR) > gp::Resolution()) {
     res.SetX(myX/RR);
     res.SetY(myY/RR);
     res.SetZ(myZ/RR);

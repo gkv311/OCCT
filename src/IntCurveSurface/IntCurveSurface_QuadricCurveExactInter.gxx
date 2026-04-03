@@ -41,7 +41,7 @@ IntCurveSurface_QuadricCurveExactInter::IntCurveSurface_QuadricCurveExactInter(c
   case GeomAbs_Sphere:    { Quadric.SetValue(TheSurfaceTool::Sphere(S));    break; }  
   default:  {  
     //cout<<" Probleme Sur le Type de Surface dans IntCurveSurface_Inter::InternalPerform "<<endl; 
-    break;  
+    return;
   }
   }
 

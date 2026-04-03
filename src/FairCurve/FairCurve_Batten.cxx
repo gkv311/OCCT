@@ -248,7 +248,10 @@ Standard_Boolean FairCurve_Batten::Compute(const gp_Vec2d& DeltaP1,
    if (NewConstraintOrder1>0) {
       gp_Vec2d OldDerive( Poles->Value(Poles->Lower()), 
                           Poles->Value(Poles->Lower()+1) );
-      OldDerive *= Degree / (Knots->Value(2) - Knots->Value(1));
+      const double aKnotGap1 = Knots->Value(2) - Knots->Value(1);
+      if (std::abs(aKnotGap1) > gp::Resolution())
+        OldDerive *= Degree / aKnotGap1;
+
       ADelta(kk) = (OldDerive.Rotated(DeltaAngle1-DAngleRef) -  OldDerive).XY();
       kk += 1;
    }
@@ -257,7 +260,10 @@ Standard_Boolean FairCurve_Batten::Compute(const gp_Vec2d& DeltaP1,
    if (NewConstraintOrder2>0) {
       gp_Vec2d OldDerive( Poles->Value(Poles->Upper()-1), 
                           Poles->Value(Poles->Upper()) );
-      OldDerive *= Degree / (Knots->Value(Knots->Upper())  - Knots->Value(Knots->Upper()-1) );
+      const double aKnotGap2 = Knots->Value(Knots->Upper()) - Knots->Value(Knots->Upper() - 1);
+      if (std::abs(aKnotGap2) > gp::Resolution())
+        OldDerive *= Degree / aKnotGap2;
+
       ADelta(kk) = (OldDerive.Rotated(DAngleRef-DeltaAngle2) -  OldDerive).XY();
    }
 
@@ -476,7 +482,12 @@ Standard_Real FairCurve_Batten::SlidingOfReference(const Standard_Real Dist,
 
 // case of angle of opposite sign
  else {
-    Standard_Real Ratio = a1 / ( a1 + a2 );
+    const double aSum = a1 + a2;
+    if (std::abs(aSum) < Precision::Angular())
+      return Compute(Dist, a1, M_PI / 2);
+
+    const double Ratio = a1 / aSum;
+
     Standard_Real AngleMilieu = pow(1-Ratio,2) * a1 + pow(Ratio,2) * a2;
     if (AngleMilieu > M_PI/2) AngleMilieu = M_PI/2;
 

@@ -38,6 +38,9 @@ static Standard_Boolean IsInSegment(const gp_Vec& P1P2,
 				    const Standard_Real NP1P2,
 				    Standard_Real &Param,
 				    const Standard_Real Tolerance) { 
+  if (NP1P2 < gp::Resolution())
+    return false;
+
   Param = P1P2.Dot(P1P);
   Param/= NP1P2;
   if(Param > (NP1P2+Tolerance))
@@ -776,8 +779,7 @@ void Intf_InterferencePolygonPolyhedron::Intersect
 
   Standard_Real dBegTri=(triNor*BegO.XYZ())-triDp; // Distance <BegO> plan
   Standard_Real dEndTri=(triNor*EndO.XYZ())-triDp; // Distance <EndO> plan
-  gp_XYZ segO=EndO.XYZ()-BegO.XYZ();
-  segO.Normalize();
+
   Standard_Boolean NoIntersectionWithTriangle = Standard_False;
 
   Standard_Real param;
@@ -983,6 +985,9 @@ void Intf_InterferencePolygonPolyhedron::Intersect
   {
     gp_Vec VecPol(BegO,EndO);
     Standard_Real NVecPol = VecPol.Magnitude();
+    if (NVecPol < gp::Resolution())
+      return;
+
     gp_Dir DirPol(VecPol);
     gp_Lin LinPol(BegO,DirPol);
     Standard_Real dist2,ParamOnO,ParamOnT;
@@ -995,6 +1000,9 @@ void Intf_InterferencePolygonPolyhedron::Intersect
       gp_Vec  VecTri(BegT,EndT);
       Standard_Real NVecTri = VecTri.Magnitude();
       gp_Dir  DirTri(VecTri);
+      if (NVecTri < gp::Resolution())
+        continue;
+
       gp_Lin  LinTri(BegT,DirTri);
       Extrema_ExtElC Extrema(LinPol,LinTri,0.00000001);
       if(Extrema.IsDone()) { 
@@ -1010,7 +1018,7 @@ void Intf_InterferencePolygonPolyhedron::Intersect
 	      if(IsInSegment(VecPol,gp_Vec(BegO,PO),NVecPol,ParamOnO,Tolerance)) {
 		if(IsInSegment(VecTri,gp_Vec(BegT,PT),NVecTri,ParamOnT,Tolerance)) {
 		  //-- cout<<" * "<<endl;
-		  gp_XYZ spLieu=BegT.XYZ()+((EndT.XYZ()-BegT.XYZ())*param);
+		  gp_XYZ spLieu=BegT.XYZ()+((EndT.XYZ()-BegT.XYZ())*ParamOnT);
 		  Standard_Integer tmin,tmax;
 		  if(pTri_i>pTri_ip1pc3) { 
 		    tmin=pTri_ip1pc3; tmax=pTri_i; 
@@ -1263,6 +1271,9 @@ void Intf_InterferencePolygonPolyhedron::Intersect (const gp_Pnt& BegO,
   {
     gp_Vec VecPol(BegO,EndO);
     Standard_Real NVecPol = VecPol.Magnitude();
+    if (NVecPol < gp::Resolution())
+      return;
+
     gp_Dir DirPol(VecPol);
     gp_Lin LinPol(BegO,DirPol);
     Standard_Real dist2,ParamOnO,ParamOnT;
@@ -1274,6 +1285,9 @@ void Intf_InterferencePolygonPolyhedron::Intersect (const gp_Pnt& BegO,
       const gp_Pnt& EndT = ToolPolyh::Point(thePolyh, pTri_i);
       gp_Vec  VecTri(BegT,EndT);
       Standard_Real NVecTri = VecTri.Magnitude();
+      if (NVecTri < gp::Resolution())
+        continue;
+
       gp_Dir  DirTri(VecTri);
       gp_Lin  LinTri(BegT,DirTri);
       Extrema_ExtElC Extrema(LinPol,LinTri,0.00000001);
@@ -1290,7 +1304,7 @@ void Intf_InterferencePolygonPolyhedron::Intersect (const gp_Pnt& BegO,
 	      if(IsInSegment(VecPol,gp_Vec(BegO,PO),NVecPol,ParamOnO,Tolerance)) {
 		if(IsInSegment(VecTri,gp_Vec(BegT,PT),NVecTri,ParamOnT,Tolerance)) {
 		  //-- cout<<" * "<<endl;
-		  gp_XYZ spLieu=BegT.XYZ()+((EndT.XYZ()-BegT.XYZ())*param);
+		  gp_XYZ spLieu=BegT.XYZ()+((EndT.XYZ()-BegT.XYZ())*ParamOnT);
 		  Standard_Integer tmin,tmax;
 		  if(pTri_i>pTri_ip1pc3) { 
 		    tmin=pTri_ip1pc3; tmax=pTri_i; 

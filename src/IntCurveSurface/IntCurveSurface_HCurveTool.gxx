@@ -43,8 +43,12 @@ Standard_Integer IntCurveSurface_HCurveTool::NbSamples (const CurveGen& C,
     nbs = C->NbKnots();
     nbs*= C->Degree();
     nbs*= C->LastParameter()- C->FirstParameter();
-    nbs/= U1-U0;
-    if(nbs < 2.0) nbs=2;
+    const double aRange = U1 - U0;
+    if (std::abs(aRange) > Precision::PConfusion())
+      nbs /= aRange;
+
+    if (nbs < 2.0)
+      nbs = 2;
   }
   if(nbs>50)
     nbs = 50;

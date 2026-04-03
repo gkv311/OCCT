@@ -33,6 +33,12 @@
 #include <TColgp_Array1OfPnt.hxx>
 #include <AppDef_BSpParLeastSquareOfMyBSplGradientOfBSplineCompute.hxx>
 
+//! Returns FALSE if input span is too small.
+static bool hasMeaningfulSpan(const double theSpan)
+{
+  return theSpan * theSpan > (gp::Resolution() * gp::Resolution());
+}
+
 static void BuildParameters(const AppDef_MultiLine& theLine,
   const Approx_ParametrizationType theParT,
   TColStd_Array1OfReal&  thePars)
@@ -76,7 +82,16 @@ static void BuildParameters(const AppDef_MultiLine& theLine,
         thePars(i) = thePars(i - 1) + Sqrt(dist);
       }
     }
-    for (i = firstP; i <= lastP; i++) thePars(i) /= thePars(lastP);
+    if (hasMeaningfulSpan(thePars(lastP)))
+    {
+      for (i = firstP; i <= lastP; i++)
+        thePars(i) /= thePars(lastP);
+    }
+    else
+    {
+      for (i = firstP; i <= lastP; i++)
+        thePars(i) = (double(i) - firstP) / (double(lastP - firstP));
+    }
   }
   else {
     for (i = firstP; i <= lastP; i++) {
@@ -176,8 +191,8 @@ static void BuildPeriodicTangent(const AppDef_MultiLine& theLine,
 //purpose  : 
 //=======================================================================
 GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface()
-: myIsDone ( Standard_False)
 {
+  //
 }
 
 
@@ -192,7 +207,6 @@ GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface
  const Standard_Integer DegMax,
  const GeomAbs_Shape Continuity, 
  const Standard_Real Tol3D)
-: myIsDone ( Standard_False)
 {
   Init(Points,DegMin,DegMax,Continuity,Tol3D);
 }
@@ -209,7 +223,6 @@ GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface
  const Standard_Integer DegMax,
  const GeomAbs_Shape Continuity, 
  const Standard_Real Tol3D)
-: myIsDone ( Standard_False)
 {
   Init(Points,ParType,DegMin,DegMax,Continuity,Tol3D);
 }
@@ -227,7 +240,6 @@ GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface
  const Standard_Integer DegMax,
  const GeomAbs_Shape Continuity, 
  const Standard_Real Tol3D)
-: myIsDone ( Standard_False)
 {
   Init(Points,Weight1,Weight2,Weight3,DegMax,Continuity,Tol3D);
 }
@@ -249,7 +261,6 @@ GeomAPI_PointsToBSplineSurface::GeomAPI_PointsToBSplineSurface
  const Standard_Integer DegMax, 
  const GeomAbs_Shape Continuity, 
  const Standard_Real Tol3D)
-: myIsDone ( Standard_False)
 {
   Init(ZPoints,X0,dX,Y0,dY,DegMin,DegMax,Continuity,Tol3D);
 }
@@ -310,6 +321,8 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColgp_Array2OfPnt& Points,
             const Standard_Real Tol3D,
             const Standard_Boolean thePeriodic)
 {
+  myIsDone = false;
+
   Standard_Integer Imin = Points.LowerRow();
   Standard_Integer Imax = Points.UpperRow();
   Standard_Integer Jmin = Points.LowerCol();
@@ -479,6 +492,8 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColgp_Array2OfPnt& Points,
 					  const GeomAbs_Shape Continuity,
 					  const Standard_Real Tol3D)
 {
+  myIsDone = false;
+
   Standard_Integer Imin = Points.LowerRow();
   Standard_Integer Imax = Points.UpperRow();
   Standard_Integer Jmin = Points.LowerCol();
@@ -665,6 +680,8 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColStd_Array2OfReal& ZPoints,
 					  const GeomAbs_Shape Continuity,
 					  const Standard_Real Tol3D)
 {
+  myIsDone = false;
+
   Standard_Integer Imin = ZPoints.LowerRow();
   Standard_Integer Imax = ZPoints.UpperRow();
   Standard_Integer Jmin = ZPoints.LowerCol();
@@ -674,6 +691,7 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColStd_Array2OfReal& ZPoints,
   Standard_Real Tol2D = Tol3D;
 
   // first approximate the U isos:
+  const int        aVSpan = Jmax - Jmin;
   AppDef_MultiLine Line(Jmax-Jmin+1);
   math_Vector Param(Jmin, Jmax);
   Standard_Integer i, j;
@@ -685,7 +703,7 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColStd_Array2OfReal& ZPoints,
     for (i = Imin; i <= Imax; i++) {
       MP.SetPoint2d(i, gp_Pnt2d(0.0, ZPoints(i, j)));
     }
-    Param(j) = (Standard_Real)(j-Jmin)/(Standard_Real)(Jmax-Jmin);
+    Param(j) = (aVSpan > 0) ? double(j - Jmin) / double(aVSpan) : 0.0;
     Line.SetValue(j, MP);
   }
 
@@ -761,6 +779,7 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColStd_Array2OfReal& ZPoints,
   
 
   Standard_Integer nbisosu = Imax-Imin+1;
+  const int        aUSpan = nbisosu - 1;
   AppDef_MultiLine Line2(nbisosu);
   math_Vector Param2(1, nbisosu);
   length = dX*(Imax-Imin);
@@ -771,7 +790,7 @@ void GeomAPI_PointsToBSplineSurface::Init(const TColStd_Array2OfReal& ZPoints,
     for (j = 1; j <= Poles.Upper(); j++) {
       MP.SetPoint2d(j, gp_Pnt2d(0.0, Poles(j).Y()));
     }
-    Param2(i) = (Standard_Real)(i-1)/(Standard_Real)(nbisosu-1);
+    Param2(i) = (aUSpan > 0) ? double(i - 1) / double(aUSpan) : 0.0;
     Line2.SetValue(i, MP);
   }
 

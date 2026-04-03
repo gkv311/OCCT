@@ -28,13 +28,19 @@
 #include <Standard_OutOfRange.hxx>
 #include <StdFail_NotDone.hxx>
 
+//! Returns FALSE if input span is too small.
+static bool hasMeaningfulSpan(const double theSpan)
+{
+  return theSpan * theSpan > (gp::Resolution() * gp::Resolution());
+}
+
 //=======================================================================
 //function : GeomAPI_PointsToBSpline
 //purpose  : 
 //=======================================================================
 GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline()
 {
-  myIsDone = Standard_False;
+  //
 }
 
 
@@ -50,7 +56,6 @@ GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,DegMin,DegMax,Continuity,Tol3D);
 }
 
@@ -67,7 +72,6 @@ GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,ParType,DegMin,DegMax,Continuity,Tol3D);
 }
 
@@ -85,7 +89,6 @@ GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,Params,DegMin,DegMax,Continuity,Tol3D);
 }
 
@@ -103,7 +106,6 @@ GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,W1,W2,W3,DegMax,Continuity,Tol3D);
 }
 
@@ -119,7 +121,6 @@ void GeomAPI_PointsToBSpline::Init
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,Approx_ChordLength,DegMin,DegMax,Continuity,Tol3D);
 }
 //=======================================================================
@@ -135,6 +136,7 @@ void GeomAPI_PointsToBSpline::Init
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol3D)
 {
+  myIsDone = false;
   Standard_Real Tol2D = 0.; // dummy argument for BSplineCompute.
 
   Standard_Integer nbit = 2;
@@ -190,6 +192,7 @@ void GeomAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol3D)
 {
+  myIsDone = false;
   if (Params.Length() != Points.Length()) throw Standard_OutOfRange ("GeomAPI_PointsToBSpline::Init() - invalid input");
 
   Standard_Real Tol2D = 0.; // dummy argument for BSplineCompute.
@@ -200,6 +203,9 @@ void GeomAPI_PointsToBSpline::Init
 
   Standard_Real Uf = Params(Params.Lower());
   Standard_Real Ul = Params(Params.Upper()) - Uf;
+  if (!hasMeaningfulSpan(Ul))
+    return;
+
   for (Standard_Integer i=2; i<Nbp; i++) {
     theParams(i) = (Params(i)-Uf)/Ul;
   }
@@ -261,6 +267,7 @@ void GeomAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol3D)
 {
+  myIsDone = false;
   Standard_Integer NbPoint = Points.Length(), i;
 
  

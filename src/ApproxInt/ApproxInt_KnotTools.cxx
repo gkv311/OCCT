@@ -595,6 +595,12 @@ void ApproxInt_KnotTools::BuildKnots(const TColgp_Array1OfPnt& thePntsXYZ,
   if(theApproxU2V2)
     aDim += 2;
 
+  if (aDim == 0 || thePars.Length() < 2)
+  {
+    theKnots.Clear();
+    return;
+  }
+
   NCollection_LocalArray<Standard_Real> aCoords(thePars.Length()*aDim);
   Standard_Integer i, j;
   for(i = thePars.Lower(); i <= thePars.Upper(); ++i)
@@ -659,8 +665,12 @@ static Standard_Real MaxParamRatio(const math_Vector& thePars)
   //
   for (i = thePars.Lower() + 1; i < thePars.Upper(); ++i)
   {
-    Standard_Real aRat = (thePars(i + 1) - thePars(i)) / (thePars(i) - thePars(i - 1));
-    if (aRat < 1.)
+    const double aDenom = thePars(i) - thePars(i - 1);
+    if (std::abs(aDenom) < gp::Resolution())
+      continue;
+
+    Standard_Real aRat = (thePars(i + 1) - thePars(i)) / aDenom;
+    if (aRat > 0.0 && aRat < 1.0)
       aRat = 1. / aRat;
 
     aMaxRatio = Max(aMaxRatio, aRat);

@@ -42,6 +42,7 @@ Intf_Tool::Intf_Tool()
      : nbSeg(0)
 {
   memset (beginOnCurve, 0, sizeof (beginOnCurve));
+  memset (endOnCurve, 0, sizeof (endOnCurve));
   memset (bord, 0, sizeof (bord));
   memset (xint, 0, sizeof (xint));
   memset (yint, 0, sizeof (yint));
@@ -174,7 +175,7 @@ void  Intf_Tool::Hypr2dBox(const gp_Hypr2d& theHypr2d,
   if (nbPi>0) {
     Standard_Real Xmin, Xmax, Ymin, Ymax;
 
-    domain.Get(Xmax, Ymax, Xmin, Ymin);
+    domain.Get(Xmin, Ymin, Xmax, Ymax);
 
     Standard_Integer npi;
     for (npi=0; npi<nbPi; npi++) {
@@ -223,17 +224,21 @@ void  Intf_Tool::Hypr2dBox(const gp_Hypr2d& theHypr2d,
 	break;
       }
       if (Abs(sinan)>Precision::Angular()) {
-	if (sinan>0.) {
-	  out=Standard_False;
-	  beginOnCurve[nbSeg]=parint[npi];
-	  nbSeg++;
-	}
-	else {
-	  if (out) {
-	    beginOnCurve[nbSeg]=-Precision::Infinite();
-	    nbSeg++;
-	  }
-	  endOnCurve[nbSeg-1]=parint[npi];
+        if (sinan>0.) {
+          if (nbSeg < 6) {
+            out=Standard_False;
+            beginOnCurve[nbSeg]=parint[npi];
+            nbSeg++;
+          }
+        }
+        else {
+          if (out && nbSeg < 6) {
+            beginOnCurve[nbSeg]=-Precision::Infinite();
+            nbSeg++;
+          }
+          if (nbSeg > 0) {
+            endOnCurve[nbSeg-1]=parint[npi];
+          }
 	  out=Standard_True;
 
 	  Standard_Integer ipmin;
@@ -259,6 +264,8 @@ void  Intf_Tool::Hypr2dBox(const gp_Hypr2d& theHypr2d,
 	}
       }
     }
+    if (!out && nbSeg > 0)
+      endOnCurve[nbSeg - 1] = Precision::Infinite();
   }
   else if (!domain.IsOut(ElCLib::Value(0., theHypr2d))) {
     boxHypr2d=domain;
@@ -381,7 +388,7 @@ void  Intf_Tool::Parab2dBox(const gp_Parab2d& theParab2d,
   if (nbPi>0) {
     Standard_Real Xmin, Xmax, Ymin, Ymax;
 
-    domain.Get(Xmax, Ymax, Xmin, Ymin);
+    domain.Get(Xmin, Ymin, Xmax, Ymax);
 
     Standard_Integer npi;
     for (npi=0; npi<nbPi; npi++) {
@@ -431,16 +438,20 @@ void  Intf_Tool::Parab2dBox(const gp_Parab2d& theParab2d,
       }
       if (Abs(sinan)>Precision::Angular()) {
 	if (sinan>0.) {
-	  out=Standard_False;
-	  beginOnCurve[nbSeg]=parint[npi];
-	  nbSeg++;
+          if (nbSeg < 6) {
+	    out=Standard_False;
+	    beginOnCurve[nbSeg]=parint[npi];
+	    nbSeg++;
+          }
 	}
 	else {
-	  if (out) {
+	  if (out && nbSeg < 6) {
 	    beginOnCurve[nbSeg]=-Precision::Infinite();
 	    nbSeg++;
 	  }
-	  endOnCurve[nbSeg-1]=parint[npi];
+          if (nbSeg > 0) {
+	    endOnCurve[nbSeg-1]=parint[npi];
+          }
 	  out=Standard_True;
 
 	  Standard_Integer ipmin;
@@ -466,6 +477,8 @@ void  Intf_Tool::Parab2dBox(const gp_Parab2d& theParab2d,
 	}
       }
     }
+    if (!out && nbSeg > 0)
+      endOnCurve[nbSeg - 1] = Precision::Infinite();
   }
   else if (!domain.IsOut(ElCLib::Value(0., theParab2d))) {
     boxParab2d=domain;
@@ -738,7 +751,7 @@ void Intf_Tool::HyprBox(const gp_Hypr& theHypr,
       Ymin=Min(Ymin, yint[npi]);
       Ymax=Max(Ymax, yint[npi]);
       Zmin=Min(Zmin, zint[npi]);
-      Zmax=Max(Zmax, yint[npi]);
+      Zmax=Max(Zmax, zint[npi]);
     }
     boxHypr.Update(Xmin, Ymin, Zmin, Xmax, Ymax, Zmax);
     //
@@ -1211,7 +1224,7 @@ void  Intf_Tool::ParabBox(const gp_Parab& theParab,
       Ymin = Min(Ymin, yint[npi]);
       Ymax = Max(Ymax, yint[npi]);
       Zmin = Min(Zmin, zint[npi]);
-      Zmax = Max(Zmax, yint[npi]);
+      Zmax = Max(Zmax, zint[npi]);
     }
 
     boxParab.Update(Xmin, Ymin, Zmin, Xmax, Ymax, Zmax);
@@ -1233,16 +1246,20 @@ void  Intf_Tool::ParabBox(const gp_Parab& theParab,
       }
       if (Abs(sinan) > Precision::Angular()) {
         if (sinan > 0.) {
-          out = Standard_False;
-          beginOnCurve[nbSeg] = parint[npi];
-          nbSeg++;
+          if (nbSeg < 6) {
+            out = Standard_False;
+            beginOnCurve[nbSeg] = parint[npi];
+            nbSeg++;
+          }
         }
         else {
-          if (out) {
+          if (out && nbSeg < 6) {
             beginOnCurve[nbSeg] = -Precision::Infinite();
             nbSeg++;
           }
-          endOnCurve[nbSeg - 1] = parint[npi];
+          if (nbSeg > 0) {
+            endOnCurve[nbSeg - 1] = parint[npi];
+          }
           out = Standard_True;
 
           Standard_Integer ipmin;
@@ -1264,6 +1281,8 @@ void  Intf_Tool::ParabBox(const gp_Parab& theParab,
         }
       }
     }
+    if (!out && nbSeg > 0)
+      endOnCurve[nbSeg - 1] = Precision::Infinite();
   }
   else if (!domain.IsOut(ElCLib::Value(0., theParab))) {
     boxParab = domain;

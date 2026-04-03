@@ -30,13 +30,19 @@
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
+//! Returns FALSE if span is too small.
+static bool hasMeaningfulSpan(const double theSpan)
+{
+  return theSpan * theSpan > (gp::Resolution() * gp::Resolution());
+}
+
 //=======================================================================
 //function : Geom2dAPI_PointsToBSpline
 //purpose  : 
 //=======================================================================
 Geom2dAPI_PointsToBSpline::Geom2dAPI_PointsToBSpline()
 {
-  myIsDone = Standard_False;
+  //
 }
 
 
@@ -86,7 +92,6 @@ Geom2dAPI_PointsToBSpline::Geom2dAPI_PointsToBSpline
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol2D)
 {
-  myIsDone = Standard_False;
   Init(Points,ParType,DegMin,DegMax,Continuity,Tol2D);
 }
 
@@ -103,7 +108,6 @@ Geom2dAPI_PointsToBSpline::Geom2dAPI_PointsToBSpline
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
-  myIsDone = Standard_False;
   Init(Points,Params,DegMin,DegMax,Continuity,Tol2D);
 }
 
@@ -122,7 +126,6 @@ Geom2dAPI_PointsToBSpline::Geom2dAPI_PointsToBSpline
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
-  myIsDone = Standard_False;
   Init(Points,W1,W2,W3,DegMax,Continuity,Tol2D);
 }
 
@@ -140,6 +143,7 @@ void Geom2dAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
+  myIsDone = false;
   Standard_Real Tol3D = 0.; // dummy argument for BSplineCompute.
 
 
@@ -195,16 +199,25 @@ void Geom2dAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
+  myIsDone = false;
   // first approximate the Y values (with dummy 0 as X values)
-
   Standard_Real Tol3D = 0.; // dummy argument for BSplineCompute.
   TColgp_Array1OfPnt2d Points(YValues.Lower(),YValues.Upper());
   math_Vector Param(YValues.Lower(),YValues.Upper());
   Standard_Real length = DX * (YValues.Upper() - YValues.Lower());
+
+  const Standard_Real    aDenominator = X0 + length;
+  const Standard_Integer aParamSpan   = YValues.Upper() - YValues.Lower();
+  const Standard_Boolean hasDenom     = hasMeaningfulSpan(aDenominator);
+
   Standard_Integer i;
   
   for (i = YValues.Lower(); i <= YValues.Upper(); i++) {
-    Param(i) = (X0+(i-1)*DX)/(X0+length);
+    if (hasDenom)
+      Param(i) = (X0 + (i - YValues.Lower()) * DX) / aDenominator;
+    else
+      Param(i) = (aParamSpan > 0) ? double(i - YValues.Lower()) / double(aParamSpan) : 0.0;
+
     Points(i).SetCoord(0.0, YValues(i));
   }
 
@@ -316,6 +329,7 @@ void Geom2dAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
+  myIsDone = Standard_False;
   if (Params.Length() != Points.Length()) throw Standard_OutOfRange ("Geom2dAPI_PointsToBSpline::Init() - invalid input");
 
   Standard_Real Tol3D = 0.; // dummy argument for BSplineCompute.
@@ -326,6 +340,9 @@ void Geom2dAPI_PointsToBSpline::Init
 
   Standard_Real Uf = Params(Params.Lower());
   Standard_Real Ul = Params(Params.Upper()) - Uf;
+  if (!hasMeaningfulSpan(Ul))
+    return;
+
   for (Standard_Integer i=2; i<Nbp; i++) {
     theParams(i) = (Params(i)-Uf)/Ul;
   }
@@ -383,6 +400,8 @@ void Geom2dAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
+  myIsDone = false;
+
   Standard_Integer NbPoint = Points.Length(), i;
 
  

@@ -80,13 +80,19 @@ void  Geom2dHatch_Intersector::LocalGeometry(const Geom2dAdaptor_Curve& E,
 					     gp_Dir2d& Norm, 
 					     Standard_Real& C) const 
 {
-  //Standard_Real f,l;
+  C = 0.;
   Geom2dLProp_CLProps2d Prop(E.Curve(),U,2,Precision::PConfusion());
 
-  if(!Prop.IsTangentDefined()) return;
+  if (Prop.IsTangentDefined())
+  {
+    Prop.Tangent(Tang);
+    C = Prop.Curvature();
+  }
+  else
+  {
+    Tang = gp::DX2d();
+  }
 
-  Prop.Tangent(Tang);
-  C = Prop.Curvature();
   if (C > Precision::PConfusion() && C<RealLast())
     Prop.Normal(Norm);
   else

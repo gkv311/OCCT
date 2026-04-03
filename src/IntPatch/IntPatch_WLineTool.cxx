@@ -356,9 +356,12 @@ static Standard_Boolean IsInsideIn2d(const gp_Pnt2d& aBasePnt,
   gp_Vec2d aVec2d(aBasePnt, aNextPnt);
 
   //d*d = (basevec^(nextpnt-basepnt))**2 / basevec**2
+  const Standard_Real aSqMag = aBaseVec.SquareMagnitude();
+  if (aSqMag < (gp::Resolution() * gp::Resolution()))
+    return false;
+
   Standard_Real aCross = aVec2d.Crossed(aBaseVec);
-  Standard_Real aSquareDist = aCross * aCross
-                            / aBaseVec.SquareMagnitude();
+  Standard_Real aSquareDist = aCross * aCross / aSqMag;
 
   return (aSquareDist <= aSquareMaxDist);
 }
@@ -376,8 +379,11 @@ static Standard_Boolean IsInsideIn3d(const gp_Pnt& aBasePnt,
   gp_Vec aVec(aBasePnt, aNextPnt);
 
   //d*d = (basevec^(nextpnt-basepnt))**2 / basevec**2
-  Standard_Real aSquareDist = aVec.CrossSquareMagnitude(aBaseVec)
-                            / aBaseVec.SquareMagnitude();
+  const Standard_Real aSqMag = aBaseVec.SquareMagnitude();
+  if (aSqMag < (gp::Resolution() * gp::Resolution()))
+    return false;
+
+  Standard_Real aSquareDist = aVec.CrossSquareMagnitude(aBaseVec) / aSqMag;
 
   return (aSquareDist <= aSquareMaxDist);
 }
@@ -483,8 +489,14 @@ static Handle(IntPatch_WLine)
       gp_XY aPntOnS2[2]= { gp_XY(UonS2[1] - UonS2[0], VonS2[1] - VonS2[0])
                          , gp_XY(UonS2[2] - UonS2[1], VonS2[2] - VonS2[1])};
 
-      Standard_Real aStepOnS1 = aPntOnS1[0].SquareModulus() / aPntOnS1[1].SquareModulus();
-      Standard_Real aStepOnS2 = aPntOnS2[0].SquareModulus() / aPntOnS2[1].SquareModulus();
+      const Standard_Real aSqModS1 = aPntOnS1[1].SquareModulus();
+      const Standard_Real aSqModS2 = aPntOnS2[1].SquareModulus();
+      if (aSqModS1 < (gp::Resolution() * gp::Resolution())
+       || aSqModS2 < (gp::Resolution() * gp::Resolution()))
+        continue;
+
+      const Standard_Real aStepOnS1 = aPntOnS1[0].SquareModulus() / aSqModS1;
+      const Standard_Real aStepOnS2 = aPntOnS2[0].SquareModulus() / aSqModS2;
 
       // Check very rare case when wline fluctuates nearly one point and some of them may be equal.
       // Middle point will be deleted when such situation occurs.
@@ -496,7 +508,9 @@ static Handle(IntPatch_WLine)
         Standard_Real aSqrRatio = 0.;
         if (!isPlanePlane)
         {
-          aSqrRatio = aPrevStep / aCurrStep;
+          aSqrRatio = (aCurrStep > (gp::Resolution() * gp::Resolution()))
+                    ? (aPrevStep / aCurrStep)
+                    : aMaxSqrRatio;
           if (aSqrRatio < 1.)
           {
             aSqrRatio = 1. / aSqrRatio;
