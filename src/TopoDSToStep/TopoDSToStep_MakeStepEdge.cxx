@@ -23,7 +23,9 @@
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Line.hxx>
+#include <Geom_OffsetSurface.hxx>
 #include <Geom_Plane.hxx>
+#include <Geom_RectangularTrimmedSurface.hxx>
 #include <GeomToStep_MakeCurve.hxx>
 #include <GeomToStep_MakeLine.hxx>
 #include <gp_Vec.hxx>
@@ -52,6 +54,20 @@
 #include <TransferBRep_ShapeMapper.hxx>
 #include <BRepTools.hxx>
 #include <ShapeAnalysis_Curve.hxx>
+
+//! Method returns TRUE if input Face is planar one.
+static bool isPlanarFace (const TopoDS_Face& theF)
+{
+  Handle(Geom_Surface) aSurface = BRep_Tool::Surface (theF);
+  if (Handle(Geom_RectangularTrimmedSurface) aTS = Handle(Geom_RectangularTrimmedSurface)::DownCast(aSurface))
+    aSurface = aTS->BasisSurface();
+
+  if (Handle(Geom_OffsetSurface) anOffsetSurf = Handle(Geom_OffsetSurface)::DownCast(aSurface))
+    aSurface = anOffsetSurf->BasisSurface();
+
+  Handle(Geom_Plane) aPlaneSurf = Handle(Geom_Plane)::DownCast(aSurface);
+  return !aPlaneSurf.IsNull();
+}
 
 // Processing of non-manifold topology (ssv; 11.11.2010)
 // ----------------------------------------------------------------------------
@@ -132,8 +148,7 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
     if ( count < 2 ) isSeam = Standard_False;
   }
 
-  BRepAdaptor_Curve   CA = BRepAdaptor_Curve(aEdge);
-  BRepAdaptor_Surface SA = BRepAdaptor_Surface(aTool.CurrentFace());
+  BRepAdaptor_Curve CA = BRepAdaptor_Curve(aEdge);
 
   if (aEdge.Orientation() == TopAbs_INTERNAL  ||
       aEdge.Orientation() == TopAbs_EXTERNAL ) {
@@ -260,8 +275,7 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
 #ifdef OCCT_DEBUG
     std::cout << "Warning: TopoDSToStep_MakeStepEdge: edge without 3d curve; creating..." << std::endl;
 #endif
-    if ((SA.GetType() == GeomAbs_Plane) &&
-	(CA.GetType() == GeomAbs_Line)) {
+    if ((CA.GetType() == GeomAbs_Line) && isPlanarFace (aTool.CurrentFace())) {
       U1 = CA.FirstParameter();
       U2 = CA.LastParameter();
       gp_Vec V = gp_Vec( CA.Value(U1), CA.Value(U2) );
