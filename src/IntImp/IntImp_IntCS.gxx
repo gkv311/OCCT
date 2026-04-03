@@ -38,7 +38,7 @@ IntImp_IntCS::IntImp_IntCS(const Standard_Real U,
   v(0.0),
   tol(TolTangency*TolTangency)
   {
-    if(tol<1e-13) { tol=1e-13; } 
+    tol = Max(tol, 1e-13);
     math_FunctionSetRoot Rsnld(myFunction);
     Standard_Real u0,u1,v0,v1,w0,w1;
     const ThePSurface& S = myFunction.AuxillarSurface();
@@ -75,6 +75,7 @@ IntImp_IntCS::IntImp_IntCS(const TheFunction& F,
   myFunction(F),
   tol(TolTangency*TolTangency)
 {
+  tol = Max(tol, 1e-13);
 }
 
 void IntImp_IntCS::Perform(const Standard_Real U,

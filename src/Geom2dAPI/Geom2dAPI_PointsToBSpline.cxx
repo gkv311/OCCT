@@ -36,7 +36,7 @@
 //=======================================================================
 Geom2dAPI_PointsToBSpline::Geom2dAPI_PointsToBSpline()
 {
-  myIsDone = Standard_False;
+  //
 }
 
 
@@ -86,7 +86,6 @@ Geom2dAPI_PointsToBSpline::Geom2dAPI_PointsToBSpline
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol2D)
 {
-  myIsDone = Standard_False;
   Init(Points,ParType,DegMin,DegMax,Continuity,Tol2D);
 }
 
@@ -103,7 +102,6 @@ Geom2dAPI_PointsToBSpline::Geom2dAPI_PointsToBSpline
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
-  myIsDone = Standard_False;
   Init(Points,Params,DegMin,DegMax,Continuity,Tol2D);
 }
 
@@ -122,7 +120,6 @@ Geom2dAPI_PointsToBSpline::Geom2dAPI_PointsToBSpline
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
-  myIsDone = Standard_False;
   Init(Points,W1,W2,W3,DegMax,Continuity,Tol2D);
 }
 
@@ -140,6 +137,7 @@ void Geom2dAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
+  myIsDone = false;
   Standard_Real Tol3D = 0.; // dummy argument for BSplineCompute.
 
 
@@ -195,6 +193,7 @@ void Geom2dAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
+  myIsDone = false;
   // first approximate the Y values (with dummy 0 as X values)
 
   Standard_Real Tol3D = 0.; // dummy argument for BSplineCompute.
@@ -316,6 +315,7 @@ void Geom2dAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
+  myIsDone = Standard_False;
   if (Params.Length() != Points.Length()) throw Standard_OutOfRange ("Geom2dAPI_PointsToBSpline::Init() - invalid input");
 
   Standard_Real Tol3D = 0.; // dummy argument for BSplineCompute.
@@ -383,6 +383,7 @@ void Geom2dAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol2D)
 {
+  myIsDone = false;
   Standard_Integer NbPoint = Points.Length(), i;
 
  
