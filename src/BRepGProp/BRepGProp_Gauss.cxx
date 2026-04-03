@@ -233,11 +233,11 @@ Standard_Integer BRepGProp_Gauss::FillIntervalBounds(
   const Standard_Integer aSize =
     Max(theKnots.Upper(), MaxSubs(theKnots.Upper() - 1, theNumSubs));
 
-  if (aSize - 1 > theParam1->Upper())
+  if (aSize > theParam1->Upper())
   {
     theInerts = new NCollection_Array1<Inertia>(1, aSize);
-    theParam1 = new math_Vector(1, aSize);
-    theParam2 = new math_Vector(1, aSize);
+    theParam1 = new math_Vector(1, aSize, 0.0);
+    theParam2 = new math_Vector(1, aSize, 0.0);
     theError  = new math_Vector(1, aSize, 0.0);
 
     if (theCommonError.IsNull() == Standard_False)
@@ -556,20 +556,20 @@ Standard_Real BRepGProp_Gauss::Compute(
   const Standard_Integer aNbGaussPoint =
     RealToInt(Ceiling(ERROR_ALGEBR_RATIO * GPM));
 
-  LGaussP[0] = new math_Vector(1, GPM);
-  LGaussP[1] = new math_Vector(1, aNbGaussPoint);
-  LGaussW[0] = new math_Vector(1, GPM);
-  LGaussW[1] = new math_Vector(1, aNbGaussPoint);
+  LGaussP[0] = new math_Vector(1, GPM, 0.0);
+  LGaussP[1] = new math_Vector(1, aNbGaussPoint, 0.0);
+  LGaussW[0] = new math_Vector(1, GPM, 0.0);
+  LGaussW[1] = new math_Vector(1, aNbGaussPoint, 0.0);
 
-  UGaussP[0] = new math_Vector(1, GPM);
-  UGaussP[1] = new math_Vector(1, aNbGaussPoint);
-  UGaussW[0] = new math_Vector(1, GPM);
-  UGaussW[1] = new math_Vector(1, aNbGaussPoint);
+  UGaussP[0] = new math_Vector(1, GPM, 0.0);
+  UGaussP[1] = new math_Vector(1, aNbGaussPoint, 0.0);
+  UGaussW[0] = new math_Vector(1, GPM, 0.0);
+  UGaussW[1] = new math_Vector(1, aNbGaussPoint, 0.0);
 
-  NCollection_Handle<math_Vector> L1 = new math_Vector(1, SM);
-  NCollection_Handle<math_Vector> L2 = new math_Vector(1, SM);
-  NCollection_Handle<math_Vector> U1 = new math_Vector(1, SM);
-  NCollection_Handle<math_Vector> U2 = new math_Vector(1, SM);
+  NCollection_Handle<math_Vector> aL1 = new math_Vector(1, SM, 0.0);
+  NCollection_Handle<math_Vector> aL2 = new math_Vector(1, SM, 0.0);
+  NCollection_Handle<math_Vector> U1 = new math_Vector(1, SM, 0.0);
+  NCollection_Handle<math_Vector> U2 = new math_Vector(1, SM, 0.0);
 
   NCollection_Handle<math_Vector> ErrL  = new math_Vector(1, SM, 0.0);
   NCollection_Handle<math_Vector> ErrU  = new math_Vector(1, SM, 0.0);
@@ -658,17 +658,17 @@ Standard_Real BRepGProp_Gauss::Compute(
 
     if (Abs(l2 - l1) > EPS_PARAM)
     {
-      iLSubEnd = FillIntervalBounds(l1, l2, LKnots, NumSubs, anInertiaL, L1, L2, ErrL, ErrUL);
+      iLSubEnd = FillIntervalBounds(l1, l2, LKnots, NumSubs, anInertiaL, aL1, aL2, ErrL, ErrUL);
+      const Standard_Integer ind = anInertiaL->Length();
       LMaxSubs = BRepGProp_Gauss::MaxSubs(iLSubEnd);
 
+      BRepGProp_Gauss::InitMass(0.0, 1, ind, anInertiaL);
+      BRepGProp_Gauss::Init(ErrL, 0.0, 1, ind);
+      BRepGProp_Gauss::Init(ErrUL, 0.0, 1, ind);
       if (LMaxSubs > SM)
       {
         LMaxSubs = SM;
       }
-
-      BRepGProp_Gauss::InitMass(0.0, 1, LMaxSubs, anInertiaL);
-      BRepGProp_Gauss::Init(ErrL,  0.0, 1, LMaxSubs);
-      BRepGProp_Gauss::Init(ErrUL, 0.0, 1, LMaxSubs);
 
       do // while: L
       {
@@ -676,16 +676,16 @@ Standard_Real BRepGProp_Gauss::Compute(
         {
           LRange[0] = IL = ErrL->Max();
           LRange[1] = JL;
-          L1->Value(JL) = (L1->Value(IL) + L2->Value(IL)) * 0.5;
-          L2->Value(JL) = L2->Value(IL);
-          L2->Value(IL) = L1->Value(JL);
+          aL1->Value(JL) = (aL1->Value(IL) + aL2->Value(IL)) * 0.5;
+          aL2->Value(JL) = aL2->Value(IL);
+          aL2->Value(IL) = aL1->Value(JL);
         }
         else
         {
           LRange[0] = IL = JL;
         }
 
-        if (JL == LMaxSubs || Abs(L2->Value(JL) - L1->Value(JL)) < EPS_PARAM)
+        if (JL == LMaxSubs || Abs(aL2->Value(JL) - aL1->Value(JL)) < EPS_PARAM)
         {
           if (kLEnd == 1)
           {
@@ -705,8 +705,8 @@ Standard_Real BRepGProp_Gauss::Compute(
           for (kL = 0; kL < kLEnd; kL++)
           {
             iLS = LRange[kL];
-            lm = 0.5 * (L2->Value(iLS) + L1->Value(iLS));
-            lr = 0.5 * (L2->Value(iLS) - L1->Value(iLS));
+            lm = 0.5 * (aL2->Value(iLS) + aL1->Value(iLS));
+            lr = 0.5 * (aL2->Value(iLS) - aL1->Value(iLS));
 
             CIx = CIy = CIz = CIxy = CIxz = CIyz = 0.0;
 
@@ -757,11 +757,12 @@ Standard_Real BRepGProp_Gauss::Compute(
                 iUSubEnd = FillIntervalBounds(u1, u2, UKnots, NumSubs, anInertiaU, U1, U2, ErrU, aDummy);
                 UMaxSubs = BRepGProp_Gauss::MaxSubs(iUSubEnd);
 
+                const Standard_Integer ind2 = anInertiaU->Length();
+                BRepGProp_Gauss::InitMass(0.0, 1, ind2, anInertiaU);
+                BRepGProp_Gauss::Init(ErrU, 0.0, 1, ind2);
                 if (UMaxSubs > SM)
                   UMaxSubs = SM;
 
-                BRepGProp_Gauss::InitMass(0.0, 1, UMaxSubs, anInertiaU);
-                BRepGProp_Gauss::Init(ErrU, 0.0, 1, UMaxSubs);
                 ErrorU = 0.0;
 
                 do
@@ -893,7 +894,7 @@ Standard_Real BRepGProp_Gauss::Compute(
                     kUEnd = 2;
                     ErrorU = ErrU->Value(ErrU->Max());
                   }
-                } while ( (ErrorU - EpsU > 0.0 && EpsU != 0.0) || kUEnd == 1 );
+                } while (((ErrorU - EpsU > 0.0 && EpsU != 0.0) || kUEnd == 1) && JU < ind2);
 
                 for (i = 1; i <= JU; ++i)
                 {
@@ -1008,9 +1009,10 @@ Standard_Real BRepGProp_Gauss::Compute(
         }
         if (kLEnd == 2)
         {
-          ErrorL = ErrL->Value(ErrL->Max());
+          const Standard_Integer indMax = ErrL->Max();
+          ErrorL = ErrL->Value(indMax);
         }
-      } while ( (ErrorL - EpsL > 0.0 && isVerifyComputation) || kLEnd == 1 );
+      } while (((ErrorL - EpsL > 0.0 && isVerifyComputation) || kLEnd == 1) && JL < ind);
 
       for ( i = 1; i <= JL; i++ )
       {
