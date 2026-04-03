@@ -39,14 +39,8 @@
 //purpose  : 
 //=======================================================================
 Intf_Tool::Intf_Tool()
-     : nbSeg(0)
 {
-  memset (beginOnCurve, 0, sizeof (beginOnCurve));
-  memset (bord, 0, sizeof (bord));
-  memset (xint, 0, sizeof (xint));
-  memset (yint, 0, sizeof (yint));
-  memset (zint, 0, sizeof (zint));
-  memset (parint, 0, sizeof (parint));
+  //
 }
 
 //=======================================================================
@@ -174,7 +168,7 @@ void  Intf_Tool::Hypr2dBox(const gp_Hypr2d& theHypr2d,
   if (nbPi>0) {
     Standard_Real Xmin, Xmax, Ymin, Ymax;
 
-    domain.Get(Xmax, Ymax, Xmin, Ymin);
+    domain.Get(Xmin, Ymin, Xmax, Ymax);
 
     Standard_Integer npi;
     for (npi=0; npi<nbPi; npi++) {
@@ -381,7 +375,7 @@ void  Intf_Tool::Parab2dBox(const gp_Parab2d& theParab2d,
   if (nbPi>0) {
     Standard_Real Xmin, Xmax, Ymin, Ymax;
 
-    domain.Get(Xmax, Ymax, Xmin, Ymin);
+    domain.Get(Xmin, Ymin, Xmax, Ymax);
 
     Standard_Integer npi;
     for (npi=0; npi<nbPi; npi++) {
@@ -738,7 +732,7 @@ void Intf_Tool::HyprBox(const gp_Hypr& theHypr,
       Ymin=Min(Ymin, yint[npi]);
       Ymax=Max(Ymax, yint[npi]);
       Zmin=Min(Zmin, zint[npi]);
-      Zmax=Max(Zmax, yint[npi]);
+      Zmax=Max(Zmax, zint[npi]);
     }
     boxHypr.Update(Xmin, Ymin, Zmin, Xmax, Ymax, Zmax);
     //
@@ -1211,7 +1205,7 @@ void  Intf_Tool::ParabBox(const gp_Parab& theParab,
       Ymin = Min(Ymin, yint[npi]);
       Ymax = Max(Ymax, yint[npi]);
       Zmin = Min(Zmin, zint[npi]);
-      Zmax = Max(Zmax, yint[npi]);
+      Zmax = Max(Zmax, zint[npi]);
     }
 
     boxParab.Update(Xmin, Ymin, Zmin, Xmax, Ymax, Zmax);
