@@ -123,11 +123,12 @@ private:
   gp_Dir myTgt;
   gp_Dir myNorm;
   gp_Dir beafter;
-  Standard_Real myCurvRef;
+  Standard_Real myCurvRef = 0.0;
   TColStd_Array2OfReal myAng;
   TColStd_Array2OfReal myCurv;
   TopTrans_Array2OfOrientation myOri;
-  Standard_Boolean myTouchFlag;
+  Standard_Boolean myIsDefined = false;
+  Standard_Boolean myTouchFlag = false;
 
 
 };

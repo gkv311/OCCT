@@ -53,7 +53,7 @@ public:
 
   void Closed (const Standard_Boolean flag) { ClosedPolygon = flag; }
 
-  Standard_Boolean Closed() const { return Standard_False; } // -- Voir si le cas Closed est traitable
+  Standard_Boolean Closed() const { return ClosedPolygon; } // -- Voir si le cas Closed est traitable
 
   //! Give the number of Segments in the polyline.
   Standard_Integer NbSegments() const { return NbPntIn - 1; }
@@ -87,12 +87,12 @@ protected:
 private:
 
   Bnd_Box TheBnd;
-  Standard_Real TheDeflection;
-  Standard_Integer NbPntIn;
+  Standard_Real TheDeflection = 0.0;
+  Standard_Integer NbPntIn = 0;
   TColgp_Array1OfPnt ThePnts;
-  Standard_Boolean ClosedPolygon;
-  Standard_Real Binf;
-  Standard_Real Bsup;
+  Standard_Boolean ClosedPolygon = false;
+  Standard_Real Binf = 0.0;
+  Standard_Real Bsup = 0.0;
   Handle(TColStd_HArray1OfReal) myParams;
 
 };

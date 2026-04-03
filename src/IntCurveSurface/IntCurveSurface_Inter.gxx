@@ -971,9 +971,8 @@ void IntCurveSurface_Inter::PerformConicSurf(const gp_Lin&   Line,
   }
   if (!isAnaProcessed)
   {
-    Standard_Integer nbsu,nbsv;
-    nbsu = TheSurfaceTool::NbSamplesU(surface,U1,U2);
-    nbsv = TheSurfaceTool::NbSamplesV(surface,V1,V2);
+    Standard_Integer nbsu = Max(TheSurfaceTool::NbSamplesU(surface,U1,U2), 1);
+    Standard_Integer nbsv = Max(TheSurfaceTool::NbSamplesV(surface,V1,V2), 1);
 
     Standard_Boolean U1inf = Precision::IsInfinite(U1);
     Standard_Boolean U2inf = Precision::IsInfinite(U2);

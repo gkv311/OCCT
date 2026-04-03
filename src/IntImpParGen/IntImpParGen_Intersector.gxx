@@ -89,7 +89,7 @@ void IntImpParGen_Intersector::And_Domaine_Objet1_Intersections(const ImpTool& T
     if (IsOnTheImpCurveDomain1 && TheImpCurveDomain.HasLastPoint()) {
       if (param1>TheImpCurveDomain.LastParameter()) {
         if (Pt1.Distance(TheImpCurveDomain.LastPoint())
-     > TheImpCurveDomain.FirstTolerance()) {
+     > TheImpCurveDomain.LastTolerance()) {
           IsOnTheImpCurveDomain1 = Standard_False;
         }
       }
@@ -106,7 +106,7 @@ void IntImpParGen_Intersector::And_Domaine_Objet1_Intersections(const ImpTool& T
     if (IsOnTheImpCurveDomain2 && TheImpCurveDomain.HasLastPoint()) {
       if (param2>TheImpCurveDomain.LastParameter()) {
         if (Pt2.Distance(TheImpCurveDomain.LastPoint())
-     > TheImpCurveDomain.FirstTolerance()) {
+     > TheImpCurveDomain.LastTolerance()) {
           IsOnTheImpCurveDomain2 = Standard_False;
         }
       }
@@ -302,7 +302,7 @@ void IntImpParGen_Intersector::Perform(const ImpTool& TheImpTool,
     if (IsOnTheImpCurveDomain && TheImpCurveDomain.HasLastPoint()) {
       if (param1>TheImpCurveDomain.LastParameter()) {
         if (Pt.Distance(TheImpCurveDomain.LastPoint())
-     > TheImpCurveDomain.FirstTolerance()) {
+     > TheImpCurveDomain.LastTolerance()) {
           IsOnTheImpCurveDomain = Standard_False;
         }
       }

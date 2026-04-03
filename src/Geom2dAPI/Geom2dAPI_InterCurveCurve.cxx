@@ -74,6 +74,8 @@ void Geom2dAPI_InterCurveCurve::Init
    const Handle(Geom2d_Curve)& C2,
    const Standard_Real         Tol)
 {
+  Standard_NullObject_Raise_if(C1.IsNull(), "Geom2dAPI_InterCurveCurve::Init - C1 is null");
+  Standard_NullObject_Raise_if(C2.IsNull(), "Geom2dAPI_InterCurveCurve::Init - C2 is null");
   myCurve1 = Handle(Geom2d_Curve)::DownCast(C1->Copy());
   myCurve2 = Handle(Geom2d_Curve)::DownCast(C2->Copy());
 
@@ -94,6 +96,7 @@ void Geom2dAPI_InterCurveCurve::Init
   (const Handle(Geom2d_Curve)& C1,
    const Standard_Real         Tol)
 {
+  Standard_NullObject_Raise_if(C1.IsNull(), "Geom2dAPI_InterCurveCurve::Init - C1 is null");
   myCurve1 = Handle(Geom2d_Curve)::DownCast(C1->Copy());
   myCurve2.Nullify();
 
@@ -126,7 +129,7 @@ Standard_Integer Geom2dAPI_InterCurveCurve::NbPoints() const
 gp_Pnt2d Geom2dAPI_InterCurveCurve::Point
   (const Standard_Integer Index) const 
 {
-  Standard_OutOfRange_Raise_if(Index < 0 || Index > NbPoints(),
+  Standard_OutOfRange_Raise_if(Index < 1 || Index > NbPoints(),
 			       "Geom2dAPI_InterCurveCurve::Points");
 
   return (myIntersector.Point(Index)).Value();

@@ -149,20 +149,20 @@ private:
   Standard_EXPORT Standard_Real ComputeBorderDeflection (const Handle(Adaptor3d_Surface)& Surface, const Standard_Real Parameter, const Standard_Real PMin, const Standard_Real PMax, const Standard_Boolean isUIso) const;
 
 
-  Standard_Integer nbdeltaU;
-  Standard_Integer nbdeltaV;
+  Standard_Integer nbdeltaU = 0;
+  Standard_Integer nbdeltaV = 0;
   Bnd_Box TheBnd;
   Handle(Bnd_HArray1OfBox) TheComponentsBnd;
-  Standard_Real TheDeflection;
-  Standard_Address C_MyPnts;
-  Standard_Address C_MyU;
-  Standard_Address C_MyV;
-  Standard_Boolean UMinSingular;
-  Standard_Boolean UMaxSingular;
-  Standard_Boolean VMinSingular;
-  Standard_Boolean VMaxSingular;
-  Standard_Real TheBorderDeflection;
-  Standard_Address C_MyIsOnBounds;
+  Standard_Real TheDeflection = 0.0;
+  Standard_Address C_MyPnts = nullptr;
+  Standard_Address C_MyU = nullptr;
+  Standard_Address C_MyV = nullptr;
+  Standard_Boolean UMinSingular = false;
+  Standard_Boolean UMaxSingular = false;
+  Standard_Boolean VMinSingular = false;
+  Standard_Boolean VMaxSingular = false;
+  Standard_Real TheBorderDeflection = 0.0;
+  Standard_Address C_MyIsOnBounds = nullptr;
 
 
 };

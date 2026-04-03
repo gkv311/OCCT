@@ -21,8 +21,6 @@
 #include <HatchGen_PointOnElement.hxx>
 #include <HatchGen_PointOnHatching.hxx>
 
-#define RAISE_IF_NOSUCHOBJECT 0
-
 #include <Precision.hxx>
 //=======================================================================
 // Function : Geom2dHatch_Hatching
@@ -203,10 +201,6 @@ Standard_Integer Geom2dHatch_Hatching::NbPoints () const
 
 const HatchGen_PointOnHatching& Geom2dHatch_Hatching::Point (const Standard_Integer Index) const
 {
-#if RAISE_IF_NOSUCHOBJECT
-  Standard_Integer NbPoints = myPoints.Length () ;
-  Standard_OutOfRange_Raise_if (Index < 1 || Index > NbPoints, "") ;
-#endif
   const HatchGen_PointOnHatching& Point = myPoints.Value (Index) ;
   return Point ;
 }
@@ -218,10 +212,6 @@ const HatchGen_PointOnHatching& Geom2dHatch_Hatching::Point (const Standard_Inte
 
 HatchGen_PointOnHatching& Geom2dHatch_Hatching::ChangePoint (const Standard_Integer Index) 
 {
-#if RAISE_IF_NOSUCHOBJECT
-  Standard_Integer NbPoints = myPoints.Length () ;
-  Standard_OutOfRange_Raise_if (Index < 1 || Index > NbPoints, "") ;
-#endif
   HatchGen_PointOnHatching& Point = myPoints.ChangeValue (Index) ;
   return Point ;
 }
@@ -233,10 +223,6 @@ HatchGen_PointOnHatching& Geom2dHatch_Hatching::ChangePoint (const Standard_Inte
 
 void Geom2dHatch_Hatching::RemPoint (const Standard_Integer Index)
 {
-#if RAISE_IF_NOSUCHOBJECT
-  Standard_Integer NbPoints = myPoints.Length () ;
-  Standard_OutOfRange_Raise_if (Index < 1 || Index > NbPoints, "") ;
-#endif
   if (myIsDone) ClrDomains() ;
   myPoints.Remove (Index) ;
 }
@@ -285,10 +271,6 @@ Standard_Integer Geom2dHatch_Hatching::NbDomains () const
 
 const HatchGen_Domain& Geom2dHatch_Hatching::Domain (const Standard_Integer Index) const
 {
-#if RAISE_IF_NOSUCHOBJECT
-  Standard_Integer NbDomains = myDomains.Length () ;
-  Standard_OutOfRange_Raise_if (Index < 1 || Index > NbDomains, "") ;
-#endif
   const HatchGen_Domain& Domain = myDomains.Value (Index) ;
   return Domain ;
 }
@@ -300,10 +282,6 @@ const HatchGen_Domain& Geom2dHatch_Hatching::Domain (const Standard_Integer Inde
 
 void Geom2dHatch_Hatching::RemDomain (const Standard_Integer Index)
 {
-#if RAISE_IF_NOSUCHOBJECT
-  Standard_Integer NbDomains = myDomains.Length () ;
-  Standard_OutOfRange_Raise_if (Index < 1 || Index > NbDomains, "") ;
-#endif
   myDomains.Remove (Index) ;
 }
 

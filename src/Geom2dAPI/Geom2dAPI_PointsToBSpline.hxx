@@ -180,7 +180,7 @@ private:
 
 
 
-  Standard_Boolean myIsDone;
+  Standard_Boolean myIsDone = Standard_False;
   Handle(Geom2d_BSplineCurve) myCurve;
 
 

@@ -1720,12 +1720,12 @@ void CalculPtsInterTriEdgeCoplanaires(const Standard_Integer TriSurfID,
           if (TriSurfID==1) {
             if(Abs(alpha)<MyConfusionPrecision) {//alpha=0
               SP1.SetUV1(PT1.U(),PT1.V());
-              SP1.SetUV1(PIE.U(),PIE.V());
+              SP1.SetUV2(PIE.U(),PIE.V());
               SP1.SetEdge1(-1);
             }
             if(Abs(alpha)>1.0-MyConfusionPrecision) {//alpha=1
               SP1.SetUV1(PT2.U(),PT2.V());
-              SP1.SetUV1(PIE.U(),PIE.V());
+              SP1.SetUV2(PIE.U(),PIE.V());
               SP1.SetEdge1(-1);
             }
             else {
@@ -1739,12 +1739,12 @@ void CalculPtsInterTriEdgeCoplanaires(const Standard_Integer TriSurfID,
           }
           else if (TriSurfID==2) {
             if(Abs(alpha)<MyConfusionPrecision) {//alpha=0
-              SP1.SetUV1(PT1.U(),PT1.V());
+              SP1.SetUV2(PT1.U(),PT1.V());
               SP1.SetUV1(PIE.U(),PIE.V());
               SP1.SetEdge2(-1);
             }
             if(Abs(alpha)>1.0-MyConfusionPrecision) {//alpha=1
-              SP1.SetUV1(PT2.U(),PT2.V());
+              SP1.SetUV2(PT2.U(),PT2.V());
               SP1.SetUV1(PIE.U(),PIE.V());
               SP1.SetEdge2(-1);
             }
@@ -1767,12 +1767,12 @@ void CalculPtsInterTriEdgeCoplanaires(const Standard_Integer TriSurfID,
           if (TriSurfID==1) {
             if(Abs(alpha)<MyConfusionPrecision) {//alpha=0
               SP2.SetUV1(PT1.U(),PT1.V());
-              SP2.SetUV1(PIE.U(),PIE.V());
+              SP2.SetUV2(PIE.U(),PIE.V());
               SP2.SetEdge1(-1);
             }
             if(Abs(alpha)>1.0-MyConfusionPrecision) {//alpha=1
               SP2.SetUV1(PT2.U(),PT2.V());
-              SP2.SetUV1(PIE.U(),PIE.V());
+              SP2.SetUV2(PIE.U(),PIE.V());
               SP2.SetEdge1(-1);
             }
             else {
@@ -1786,12 +1786,12 @@ void CalculPtsInterTriEdgeCoplanaires(const Standard_Integer TriSurfID,
           }
           else if (TriSurfID==2) {
             if(Abs(alpha)<MyConfusionPrecision) {//alpha=0
-              SP2.SetUV1(PT1.U(),PT1.V());
+              SP2.SetUV2(PT1.U(),PT1.V());
               SP2.SetUV1(PIE.U(),PIE.V());
               SP2.SetEdge2(-1);
             }
             if(Abs(alpha)>1.0-MyConfusionPrecision) {//alpha=1
-              SP2.SetUV1(PT2.U(),PT2.V());
+              SP2.SetUV2(PT2.U(),PT2.V());
               SP2.SetUV1(PIE.U(),PIE.V());
               SP2.SetEdge2(-1);
             }

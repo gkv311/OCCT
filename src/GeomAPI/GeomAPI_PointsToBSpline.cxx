@@ -34,7 +34,7 @@
 //=======================================================================
 GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline()
 {
-  myIsDone = Standard_False;
+  //
 }
 
 
@@ -50,7 +50,6 @@ GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,DegMin,DegMax,Continuity,Tol3D);
 }
 
@@ -67,7 +66,6 @@ GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,ParType,DegMin,DegMax,Continuity,Tol3D);
 }
 
@@ -85,7 +83,6 @@ GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,Params,DegMin,DegMax,Continuity,Tol3D);
 }
 
@@ -103,7 +100,6 @@ GeomAPI_PointsToBSpline::GeomAPI_PointsToBSpline
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,W1,W2,W3,DegMax,Continuity,Tol3D);
 }
 
@@ -119,7 +115,6 @@ void GeomAPI_PointsToBSpline::Init
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol3D)
 {
-  myIsDone = Standard_False;
   Init(Points,Approx_ChordLength,DegMin,DegMax,Continuity,Tol3D);
 }
 //=======================================================================
@@ -135,6 +130,7 @@ void GeomAPI_PointsToBSpline::Init
    const GeomAbs_Shape       Continuity,
    const Standard_Real       Tol3D)
 {
+  myIsDone = false;
   Standard_Real Tol2D = 0.; // dummy argument for BSplineCompute.
 
   Standard_Integer nbit = 2;
@@ -190,6 +186,7 @@ void GeomAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol3D)
 {
+  myIsDone = false;
   if (Params.Length() != Points.Length()) throw Standard_OutOfRange ("GeomAPI_PointsToBSpline::Init() - invalid input");
 
   Standard_Real Tol2D = 0.; // dummy argument for BSplineCompute.
@@ -261,6 +258,7 @@ void GeomAPI_PointsToBSpline::Init
    const GeomAbs_Shape         Continuity,
    const Standard_Real         Tol3D)
 {
+  myIsDone = false;
   Standard_Integer NbPoint = Points.Length(), i;
 
  

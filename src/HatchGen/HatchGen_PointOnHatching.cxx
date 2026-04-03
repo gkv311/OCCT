@@ -19,8 +19,6 @@
 #include <IntRes2d_IntersectionPoint.hxx>
 #include <Standard_Stream.hxx>
 
-#define RAISE_IF_NOSUCHOBJECT 0
-
 //=======================================================================
 // Function : HatchGen_PointOnHatching
 // Purpose  : Constructor.
@@ -88,10 +86,6 @@ Standard_Integer HatchGen_PointOnHatching::NbPoints () const
 
 const HatchGen_PointOnElement& HatchGen_PointOnHatching::Point (const Standard_Integer Index) const
 {
-#if RAISE_IF_NOSUCHOBJECT
-  Standard_Integer NbPnt = myPoints.Length() ;
-  Standard_OutOfRange_Raise_if (Index < 1 || Index > NbPnt, "") ;
-#endif
   const HatchGen_PointOnElement& Point = myPoints.Value (Index) ;
   return Point ;
 }
@@ -103,10 +97,6 @@ const HatchGen_PointOnElement& HatchGen_PointOnHatching::Point (const Standard_I
 
 void HatchGen_PointOnHatching::RemPoint (const Standard_Integer Index)
 {
-#if RAISE_IF_NOSUCHOBJECT
-  Standard_Integer NbPnt = myPoints.Length() ;
-  Standard_OutOfRange_Raise_if (Index < 1 || Index > NbPnt, "") ;
-#endif
   myPoints.Remove (Index) ;
 }
   
