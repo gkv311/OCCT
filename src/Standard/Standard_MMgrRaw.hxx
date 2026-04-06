@@ -32,15 +32,20 @@ class Standard_MMgrRaw : public Standard_MMgrRoot
   Standard_EXPORT Standard_MMgrRaw(const Standard_Boolean aClear=Standard_False);
 
   //! Allocate aSize bytes 
-  Standard_EXPORT virtual Standard_Address Allocate(const Standard_Size aSize);
+  Standard_EXPORT virtual Standard_Address Allocate(const Standard_Size aSize) override;
   
   //! Reallocate aPtr to the size aSize. 
   //! The new pointer is returned.
   Standard_EXPORT virtual Standard_Address Reallocate(Standard_Address thePtr, 
-						      const Standard_Size theSize);
+						      const Standard_Size theSize) override;
   
   //! Free allocated memory. The pointer is nullified.
-  Standard_EXPORT virtual void Free (Standard_Address thePtr);
+  Standard_EXPORT virtual void Free (Standard_Address thePtr) override;
+
+  //! Release blocks of memory in free lists to the system.
+  //! Returns 1 if anything has been freed.
+  //! The function calls malloc_trim() on Linux, and does nothing on other systems.
+  Standard_EXPORT virtual Standard_Integer Purge(Standard_Boolean isDestroyed) override;
 
  protected:
   Standard_Boolean myClear; //! Option to nullify allocated memory

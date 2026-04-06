@@ -16,6 +16,10 @@
 #include <Standard_MMgrRaw.hxx>
 #include <Standard_OutOfMemory.hxx>
 
+#if defined(__linux__) && defined(__GLIBC__)
+  #include <malloc.h>
+#endif
+
 //=======================================================================
 //function : Standard_MMgrRaw
 //purpose  : 
@@ -72,4 +76,20 @@ Standard_Address Standard_MMgrRaw::Reallocate(Standard_Address theStorage,
   // allocated by realloc will be cleared (so as to satisfy myClear mode);
   // in order to do that we would need using memset...
   return newStorage;
+}
+
+//=======================================================================
+//function : Purge
+//purpose  :
+//=======================================================================
+Standard_Integer Standard_MMgrRaw::Purge(Standard_Boolean )
+{
+#if defined(USE_MIMALLOC)
+  //mi_collect(true); // untested
+  return 0;
+#elif defined(__linux__) && defined(__GLIBC__)
+  return malloc_trim(0);
+#else
+  return 0;
+#endif
 }

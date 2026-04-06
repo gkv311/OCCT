@@ -965,7 +965,12 @@ static int dmeminfo (Draw_Interpretor& theDI,
   for (Standard_Integer anIter = 1; anIter < theArgNb; ++anIter)
   {
     const char* anArg = theArgVec[anIter];
-    if (strcasecmp(anArg, "virt") == 0 || strcasecmp(anArg, "v") == 0)
+    if (strcasecmp(anArg, "-purge") == 0 || strcasecmp(anArg, "-trim") == 0)
+    {
+      const int isTrimmed = Standard::Purge();
+      theDI << (isTrimmed ? "Free blocks purged\n" : "No free blocks purged\n");
+    }
+    else if (strcasecmp(anArg, "virt") == 0 || strcasecmp(anArg, "v") == 0)
     {
       aCounters[(int)OSD_MemInfo::MemVirtual] = true;
     }
@@ -1530,7 +1535,9 @@ void Draw::BasicCommands(Draw_Interpretor& theCommands)
                   __FILE__, mallochook, g);
   theCommands.Add ("meminfo",
              "meminfo [virt|v] [heap|h] [wset|w] [wsetpeak] [swap] [swappeak] [private] [virtMax|vmax] [stack]"
+    "\n\t\t:          [-purge]"
     "\n\t\t: Prints memory counters for this process (and stack size for the main thread)."
+    "\n\t\t:  -purge releases free blocks to system (trims), when implemented."
 #if defined(__EMSCRIPTEN__)
     "\n\t\t:"
     "\n\t\t: meminfo [-wasmResize nbMiB]"
