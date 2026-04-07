@@ -296,12 +296,7 @@ static bool checkFont (NCollection_Sequence<Handle(Font_SystemFont)>& theFonts,
 // =======================================================================
 Handle(Font_FontMgr) Font_FontMgr::GetInstance()
 {
-  static Handle(Font_FontMgr) _mgr;
-  if (_mgr.IsNull())
-  {
-    _mgr = new Font_FontMgr();
-  }
-
+  static Handle(Font_FontMgr) _mgr = new Font_FontMgr();
   return _mgr;
 }
 
