@@ -17,30 +17,22 @@
 #ifndef _TopOpeBRep_FacesFiller_HeaderFile
 #define _TopOpeBRep_FacesFiller_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <TopAbs_Orientation.hxx>
 #include <TopOpeBRep_PFacesIntersector.hxx>
 #include <TopOpeBRepDS_PDataStructure.hxx>
-#include <Standard_Integer.hxx>
 #include <TopOpeBRep_PLineInter.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopOpeBRep_PointClassifier.hxx>
 #include <TopOpeBRepTool_PShapeClassifier.hxx>
 #include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
-#include <TopAbs_State.hxx>
+#include <TopoDS_Vertex.hxx>
+
 class TopOpeBRepDS_HDataStructure;
 class TopOpeBRep_FFDumper;
-class TopoDS_Shape;
 class TopOpeBRep_VPointInter;
 class TopOpeBRep_VPointInterClassifier;
 class TopOpeBRep_VPointInterIterator;
 class TopOpeBRepDS_Interference;
 class TopOpeBRepDS_Point;
-class gp_Pnt;
-
 
 //! Fills a DataStructure from TopOpeBRepDS with the result
 //! of Face/Face intersection described by FacesIntersector from TopOpeBRep.
@@ -242,40 +234,64 @@ private:
   //! Classifies (VPf, VPl) middle point on restriction edge
   Standard_EXPORT TopAbs_State StBipVPonF (const TopOpeBRep_VPointInter& IVPf, const TopOpeBRep_VPointInter& IVPl, const TopOpeBRep_LineInter& Lrest, const Standard_Boolean isonedge1) const;
 
+private:
+
+  Standard_Integer FUN_putInterfonDegenEd(const TopOpeBRep_VPointInter& VP,
+                                          Standard_Integer&             is,
+                                          TopoDS_Edge&                  dgE,
+                                          TopOpeBRepDS_Transition&      Trans1,
+                                          Standard_Real&                param1,
+                                          TopOpeBRepDS_Transition&      Trans2,
+                                          Standard_Real&                param2,
+                                          TopoDS_Edge&                  OOEi,
+                                          Standard_Real&                paronOOEi,
+                                          Standard_Boolean&             hasOOEi,
+                                          Standard_Boolean&             isT2d);
+
+  bool local_FindTreatedEdgeOnVertex(const TopoDS_Edge& theEdge, const TopoDS_Vertex& theVertex) const
+  {
+    if (const TopTools_ListOfShape* aList = myMapOfTreatedVertexListOfEdge.Seek(theVertex))
+    {
+      for (const TopoDS_Shape& anIt : *aList)
+      {
+        if (theEdge.IsSame(anIt))
+          return true;
+      }
+    }
+    return false;
+  }
+
+private:
 
   TopoDS_Face myF1;
   TopoDS_Face myF2;
-  TopAbs_Orientation myF1ori;
-  TopAbs_Orientation myF2ori;
+  TopAbs_Orientation myF1ori = TopAbs_FORWARD;
+  TopAbs_Orientation myF2ori = TopAbs_FORWARD;
   TopOpeBRep_PFacesIntersector myFacesIntersector;
   Handle(TopOpeBRepDS_HDataStructure) myHDS;
   TopOpeBRepDS_PDataStructure myDS;
-  Standard_Integer myFFfirstDSP;
-  TopOpeBRep_PLineInter myLine;
-  Standard_Boolean myLineOK;
-  Standard_Boolean myLineINL;
+  Standard_Integer myFFfirstDSP = 0;
+  TopOpeBRep_LineInter* myLine = nullptr;
+  Standard_Boolean myLineOK = false;
+  Standard_Boolean myLineINL = false;
   TopOpeBRepDS_Transition myLineTonF1;
   TopOpeBRepDS_Transition myLineTonF2;
-  Standard_Boolean myLineIsonEdge;
+  Standard_Boolean myLineIsonEdge = false;
   TopTools_ListOfShape myERL;
   TopTools_DataMapOfShapeListOfShape myDataforDegenEd;
-  Standard_Boolean myLastVPison0;
-  Standard_Integer mykeptVPnbr;
-  Standard_Integer myDSCIndex;
+  Standard_Boolean myLastVPison0 = false;
+  Standard_Integer mykeptVPnbr = 0;
+  Standard_Integer myDSCIndex = 0;
   TopOpeBRepDS_ListOfInterference myDSCIL;
   TopOpeBRep_PointClassifier myPointClassifier;
   TopOpeBRepTool_PShapeClassifier myPShapeClassifier;
-  Standard_Integer myexF1;
-  Standard_Integer myexF2;
+  Standard_Integer myexF1 = 0;
+  Standard_Integer myexF2 = 0;
   Handle(TopOpeBRep_FFDumper) myHFFD;
 
+  TopTools_DataMapOfShapeListOfShape myMapOfTreatedVertexListOfEdge;
+  TopOpeBRep_LineInter* myLocalCurrentLine = nullptr;
 
 };
-
-
-
-
-
-
 
 #endif // _TopOpeBRep_FacesFiller_HeaderFile

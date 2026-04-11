@@ -85,7 +85,7 @@ private:
   Standard_Real myParOnEd;
   Standard_Boolean myOnEdDef;
   Standard_Real myTole;
-
+  Standard_Boolean myTOREVERSE = Standard_False;
 
 };
 

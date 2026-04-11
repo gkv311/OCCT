@@ -40,12 +40,6 @@ Standard_EXPORT void debffsfs(const Standard_Integer i){std::cout<<"+++ debffsfs
 Standard_EXPORT void debffflo(const Standard_Integer i){std::cout<<"+++ debffflo "<<i<<std::endl;}
 #endif
 
-static Standard_Boolean STATIC_motheropedef = Standard_False; static TopOpeBRepBuild_GTopo STATIC_Gmotherope;
-Standard_EXPORT void FUN_setmotherope(const TopOpeBRepBuild_GTopo& G) {STATIC_Gmotherope = G;STATIC_motheropedef = Standard_True;}
-Standard_EXPORT void FUN_unsetmotherope() { STATIC_motheropedef = Standard_False; }
-Standard_EXPORT Standard_Boolean FUN_ismotheropedef() { return STATIC_motheropedef; }
-Standard_EXPORT const TopOpeBRepBuild_GTopo& FUN_motherope() { return STATIC_Gmotherope; } 
-
 //Standard_IMPORT extern Standard_Boolean GLOBAL_classifysplitedge;
 Standard_EXPORTEXTERN Standard_Boolean GLOBAL_classifysplitedge;
 //Standard_IMPORT extern Standard_Boolean GLOBAL_revownsplfacori;
@@ -257,8 +251,6 @@ void TopOpeBRepBuild_Builder::GFillFaceSFS(const TopoDS_Shape& FOR,const TopTool
       l1 = LF1.Extent(); l2 = LF2.Extent();
       dodo = (l1!=0) && (l2!=0);      
       
-      FUN_unsetmotherope(); // +12/07
-      
       GM = Gin;
       GM.ChangeConfig(TopOpeBRepDS_SAMEORIENTED,TopOpeBRepDS_SAMEORIENTED);
       if (dodo) {
@@ -306,7 +298,6 @@ void TopOpeBRepBuild_Builder::GFillFaceSFS(const TopoDS_Shape& FOR,const TopTool
       GM.ChangeValue(TB,TopAbs_ON,Standard_False);
       GM.ChangeValue(NTB,TopAbs_ON,Standard_True);
       GM.ChangeConfig(TopOpeBRepDS_SAMEORIENTED,TopOpeBRepDS_DIFFORIENTED);
-      FUN_setmotherope(GM); // +12/07
       if (dodo) {
 #ifdef OCCT_DEBUG
 	if(tSPS){
@@ -365,7 +356,6 @@ void TopOpeBRepBuild_Builder::GFillFaceSFS(const TopoDS_Shape& FOR,const TopTool
 	GM.ChangeValue(TopAbs_ON,TB,Standard_False);
 	GM.ChangeValue(TopAbs_ON,NTB,Standard_True);
 	GM.ChangeConfig(TopOpeBRepDS_SAMEORIENTED,TopOpeBRepDS_DIFFORIENTED);
-	FUN_setmotherope(GM); // +12/07
 	if (dodo) {
 #ifdef OCCT_DEBUG
 	  if(tSPS){
@@ -392,8 +382,6 @@ void TopOpeBRepBuild_Builder::GFillFaceSFS(const TopoDS_Shape& FOR,const TopTool
 	  GLOBAL_revownsplfacori = Standard_False;
 	}
       } // !Opecom
-      
-      FUN_unsetmotherope(); // +12/07
       
 #ifdef OCCT_DEBUG
       if(tSPS) { 

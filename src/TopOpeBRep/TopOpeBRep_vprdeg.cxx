@@ -47,14 +47,6 @@
 #define M_REVERSED(st) (st == TopAbs_REVERSED) 
 
 // modified by NIZHNY-MKK  Tue Nov 21 17:30:23 2000.BEGIN
-static TopTools_DataMapOfShapeListOfShape aMapOfTreatedVertexListOfEdge;
-static TopOpeBRep_PLineInter localCurrentLine=NULL;
-
-static Standard_Boolean local_FindTreatedEdgeOnVertex(const TopoDS_Edge& theEdge,
-						      const TopoDS_Vertex& theVertex);
-
-static void local_ReduceMapOfTreatedVertices(const TopOpeBRep_PLineInter& theCurrentLine);
-
 static Standard_Boolean local_FindVertex(const TopOpeBRep_VPointInter& theVP,
 					 const TopTools_IndexedDataMapOfShapeListOfShape& theMapOfVertexEdges,
 					 TopoDS_Vertex& theVertex);
@@ -265,19 +257,18 @@ Standard_EXPORT void FUN_GetdgData(TopOpeBRepDS_PDataStructure& pDS,const TopOpe
 #define MKI2     (2)
 #define MKI12    (3)
 
-static Standard_Integer FUN_putInterfonDegenEd
+Standard_Integer TopOpeBRep_FacesFiller::FUN_putInterfonDegenEd
 (const TopOpeBRep_VPointInter& VP,
- const TopoDS_Face& F1, const TopoDS_Face& F2,
- TopTools_DataMapOfShapeListOfShape& DataforDegenEd, // const but for copy &
- Handle(TopOpeBRepDS_HDataStructure)& HDS,
  Standard_Integer& is, TopoDS_Edge& dgE,
-// Standard_Integer& makeinterf, // 1,2,3 : compute interf1, or2 or the 2 interfs
- Standard_Integer& , // 1,2,3 : compute interf1, or2 or the 2 interfs
  TopOpeBRepDS_Transition& Trans1, Standard_Real& param1, 
  TopOpeBRepDS_Transition& Trans2, Standard_Real& param2,
  TopoDS_Edge& OOEi, Standard_Real& paronOOEi, Standard_Boolean& hasOOEi,
  Standard_Boolean& isT2d)
-{  
+{
+  const TopoDS_Face&                  F1 = myF1;
+  const TopoDS_Face&                  F2 = myF1;
+  TopTools_DataMapOfShapeListOfShape& DataforDegenEd = myDataforDegenEd;
+  Handle(TopOpeBRepDS_HDataStructure)& HDS = myHDS;
   OOEi.Nullify();
 
   Standard_Boolean on3 = (VP.ShapeIndex() == 3);// <VP> is shared by edge of 1 and edge of 2.
@@ -391,11 +382,12 @@ static Standard_Integer FUN_putInterfonDegenEd
 	    if(ok && mkt!=NOI) {
 	      OOEi = ei; paronOOEi = pari; hasOOEi = Standard_True;
 	    }
-	    if(!aMapOfTreatedVertexListOfEdge.IsBound(aVertex)) {
+	    TopTools_ListOfShape* aListPtr = myMapOfTreatedVertexListOfEdge.ChangeSeek(aVertex);
+	    if (aListPtr == nullptr) {
               TopTools_ListOfShape thelist;
-	      aMapOfTreatedVertexListOfEdge.Bind(aVertex, thelist);
+              aListPtr = myMapOfTreatedVertexListOfEdge.Bound(aVertex, thelist);
 	    }
-	    aMapOfTreatedVertexListOfEdge(aVertex).Append(ei);
+	    aListPtr->Append(ei);
 	  }
 	}
       }
@@ -453,19 +445,21 @@ Standard_Boolean TopOpeBRep_FacesFiller::ProcessVPondgE
 
   Standard_Boolean hasOOEi=Standard_False; TopoDS_Edge OOEi; Standard_Real parOOEi; 
   TopOpeBRepDS_Transition T1ondg, T2ondg; 
-  Standard_Integer rankdg=0, Iiondg=0; 
+  Standard_Integer rankdg=0;
   Standard_Real par1ondg=0., par2ondg=0.;
-  Standard_Boolean hasdgdata = !myDataforDegenEd.IsEmpty();
-  if (!hasdgdata) {
+  if (myDataforDegenEd.IsEmpty())
     return Standard_False; 
-  } 
 
-  // modified by NIZHNY-MKK  Tue Nov 21 17:35:29 2000
-  local_ReduceMapOfTreatedVertices(myLine);
+  // local_ReduceMapOfTreatedVertices
+  if (myLocalCurrentLine == nullptr || myLocalCurrentLine != myLine)
+  {
+    myLocalCurrentLine = myLine;
+    myMapOfTreatedVertexListOfEdge.Clear();
+  }
 
   Standard_Boolean isT2d = Standard_False; TopoDS_Edge dgEd;   
-  Standard_Integer makeI = FUN_putInterfonDegenEd (VP,myF1,myF2,myDataforDegenEd,myHDS,
-				      rankdg,dgEd, Iiondg,T1ondg,par1ondg,T2ondg,par2ondg,
+  Standard_Integer makeI = FUN_putInterfonDegenEd (VP,
+              rankdg,dgEd, T1ondg,par1ondg,T2ondg,par2ondg,
 				      OOEi,parOOEi,hasOOEi, isT2d);
   if (makeI == NOI) {
     return Standard_False; 
@@ -538,20 +532,6 @@ Standard_Boolean TopOpeBRep_FacesFiller::ProcessVPondgE
 
 
 // modified by NIZHNY-MKK  Tue Nov 21 17:32:52 2000.BEGIN
-static Standard_Boolean local_FindTreatedEdgeOnVertex(const TopoDS_Edge& theEdge,
-						const TopoDS_Vertex& theVertex) {
-  Standard_Boolean found = Standard_False;
-  if(aMapOfTreatedVertexListOfEdge.IsBound(theVertex)) {
-    TopTools_ListIteratorOfListOfShape anIt(aMapOfTreatedVertexListOfEdge(theVertex));
-    for(; !found && anIt.More(); anIt.Next()) {
-      if(theEdge.IsSame(anIt.Value())) {
-	found = Standard_True;
-      }
-    }
-  }
-  return found;
-}
-
 static Standard_Boolean local_FindVertex(const TopOpeBRep_VPointInter& theVP,
 					 const TopTools_IndexedDataMapOfShapeListOfShape& theMapOfVertexEdges,
 					 TopoDS_Vertex& theVertex) {
@@ -568,17 +548,3 @@ static Standard_Boolean local_FindVertex(const TopOpeBRep_VPointInter& theVP,
   return vertexfound;
 }
 
-static void local_ReduceMapOfTreatedVertices(const TopOpeBRep_PLineInter& theCurrentLine) {
-
-  if(localCurrentLine==NULL) {
-    localCurrentLine = theCurrentLine;
-    aMapOfTreatedVertexListOfEdge.Clear();
-  }
-  else {
-    if(localCurrentLine != theCurrentLine) {
-      localCurrentLine = theCurrentLine;
-      aMapOfTreatedVertexListOfEdge.Clear();
-    }
-  }
-}
-// modified by NIZHNY-MKK  Tue Nov 21 17:32:55 2000.END
