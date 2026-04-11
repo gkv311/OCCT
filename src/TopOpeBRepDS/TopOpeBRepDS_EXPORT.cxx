@@ -2280,7 +2280,7 @@ Standard_EXPORT Standard_Boolean FDS_stateEwithF2d(const TopOpeBRepDS_DataStruct
   gp_Pnt P2; Standard_Boolean ok2 = FUN_tool_value(t2,E,P2);
   if (!ok1 || !ok2) return Standard_False;
 
-  TopOpeBRepTool_ShapeClassifier& PSC = FSC_GetPSC(F1);
+  TopOpeBRepTool_ShapeClassifier PSC; PSC.SetReference(F1);
   TopAbs_State sta1 = FSC_StatePonFace(P1,F1,PSC);
   TopAbs_State sta2 = FSC_StatePonFace(P2,F1,PSC);
 
