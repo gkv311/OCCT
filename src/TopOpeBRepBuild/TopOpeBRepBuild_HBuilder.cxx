@@ -241,8 +241,6 @@ const TopTools_ListOfShape& TopOpeBRepBuild_HBuilder::Section()
   return L;
 }
 
-static TopTools_ListOfShape* PLE = NULL;
-static TopTools_ListIteratorOfListOfShape* PITLE = NULL;
 //=======================================================================
 //function : InitExtendedSectionDS
 //purpose  : 
@@ -270,15 +268,14 @@ void TopOpeBRepBuild_HBuilder::InitExtendedSectionDS(const Standard_Integer k)
 
 void TopOpeBRepBuild_HBuilder::InitSection(const Standard_Integer k)
 {
-  if (PLE == NULL) PLE = new TopTools_ListOfShape();
-  if (PITLE == NULL) PITLE = new TopTools_ListIteratorOfListOfShape();
-  PLE->Clear(); PITLE->Initialize(*PLE);
+  if (myPLE.IsNull()) myPLE = new NCollection_Shared<TopTools_ListOfShape>();
+  myPLE->Clear(); myPITLE.Initialize(*myPLE);
   InitExtendedSectionDS(k);
-  if      (k == 1) myBuilder.SectionCurves(*PLE);
-  else if (k == 2) myBuilder.SectionEdges(*PLE);
-  else if (k == 3) myBuilder.Section(*PLE);
+  if      (k == 1) myBuilder.SectionCurves(*myPLE);
+  else if (k == 2) myBuilder.SectionEdges(*myPLE);
+  else if (k == 3) myBuilder.Section(*myPLE);
   else return;
-  PITLE->Initialize(*PLE);
+  myPITLE.Initialize(*myPLE);
 }
 
 //=======================================================================
@@ -288,9 +285,7 @@ void TopOpeBRepBuild_HBuilder::InitSection(const Standard_Integer k)
 
 Standard_Boolean TopOpeBRepBuild_HBuilder::MoreSection() const
 {
-  if (PITLE == NULL) return Standard_False;
-  Standard_Boolean b = PITLE->More();
-  return b;
+  return myPITLE.More();
 }
 
 //=======================================================================
@@ -300,8 +295,7 @@ Standard_Boolean TopOpeBRepBuild_HBuilder::MoreSection() const
 
 void TopOpeBRepBuild_HBuilder::NextSection()
 {
-  if (PITLE == NULL) return;
-  if (PITLE->More()) PITLE->Next();
+  if (myPITLE.More()) myPITLE.Next();
 }  
 
 //=======================================================================
@@ -311,9 +305,8 @@ void TopOpeBRepBuild_HBuilder::NextSection()
 
 const TopoDS_Shape& TopOpeBRepBuild_HBuilder::CurrentSection() const
 {
-  if (PITLE == NULL) throw Standard_ProgramError("no more CurrentSection");
-  if (!PITLE->More()) throw Standard_ProgramError("no more CurrentSection");
-  return PITLE->Value();
+  if (!myPITLE.More()) throw Standard_ProgramError("no more CurrentSection");
+  return myPITLE.Value();
 }
 
 //=======================================================================

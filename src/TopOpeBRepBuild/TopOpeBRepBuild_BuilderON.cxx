@@ -859,7 +859,7 @@ void TopOpeBRepBuild_BuilderON::GFillONPartsWES2(const Handle(TopOpeBRepDS_Inter
     // xpu230798 : cto902A3 (iFOR=5,GI=3,iFCX=6) 
     //                      (iFOR=20,GI=3,iFCX=6)    
     if (yapc2b && (!M_EXTERNAL(neworiE))){
-      TopOpeBRepTool_ShapeClassifier& PSC = FSC_GetPSC(FOR);
+      TopOpeBRepTool_ShapeClassifier PSC; PSC.SetReference(FOR);
       TopAbs_State state2d = FSC_StateEonFace(EspON,0.345,FOR,PSC);
       if (state2d != TopAbs_IN) return;
     }
@@ -1245,7 +1245,7 @@ void TopOpeBRepBuild_BuilderON::GFillONPartsWES2(const Handle(TopOpeBRepDS_Inter
     
     // on garde EspON pour la reconstruction de la face FOR
     // si elle est IN/ON la face FOR (EGBoundFOR = 0 ==> projection)
-    TopOpeBRepTool_ShapeClassifier& PSC = FSC_GetPSC(FOR);
+    TopOpeBRepTool_ShapeClassifier PSC; PSC.SetReference(FOR);
     TopAbs_State state2d = FSC_StateEonFace(EspON,0.345,FOR,PSC);
     Standard_Boolean isin = (state2d == TopAbs_IN);
     if (!isin) return;
@@ -1436,7 +1436,7 @@ void TopOpeBRepBuild_BuilderON::GFillONPartsWES2(const Handle(TopOpeBRepDS_Inter
 
     // on garde EspON pour la reconstruction de la face FOR
     // si elle est IN/ON la face FOR (EGBoundFOR = 0 ==> projection)
-    TopOpeBRepTool_ShapeClassifier& PSC = FSC_GetPSC(FOR);
+    TopOpeBRepTool_ShapeClassifier PSC; PSC.SetReference(FOR);
     TopAbs_State state2d = FSC_StateEonFace(EspON,0.345,FOR,PSC);
     Standard_Boolean isin = (state2d == TopAbs_IN);
     if (!isin) return;
