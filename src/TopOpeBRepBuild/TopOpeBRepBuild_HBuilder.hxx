@@ -17,18 +17,14 @@
 #ifndef _TopOpeBRepBuild_HBuilder_HeaderFile
 #define _TopOpeBRepBuild_HBuilder_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_Type.hxx>
-
+#include <NCollection_Shared.hxx>
 #include <TopOpeBRepBuild_Builder1.hxx>
 #include <TopTools_DataMapOfShapeInteger.hxx>
 #include <TColStd_DataMapOfIntegerListOfInteger.hxx>
-#include <TopoDS_Shape.hxx>
 #include <TColStd_ListOfInteger.hxx>
-#include <Standard_Transient.hxx>
 #include <TopAbs_State.hxx>
 #include <TopTools_ListOfShape.hxx>
-#include <Standard_Integer.hxx>
+
 class TopOpeBRepDS_BuildTool;
 class TopOpeBRepDS_HDataStructure;
 class TopOpeBRepBuild_Builder;
@@ -194,6 +190,8 @@ private:
   TopoDS_Shape myEmptyShape;
   TColStd_ListOfInteger myEmptyIntegerList;
 
+  Handle(NCollection_Shared<TopTools_ListOfShape>) myPLE;
+  TopTools_ListOfShape::Iterator myPITLE;
 
 };
 

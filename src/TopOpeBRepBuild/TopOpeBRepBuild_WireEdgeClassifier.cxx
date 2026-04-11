@@ -132,12 +132,11 @@ TopAbs_State TopOpeBRepBuild_WireEdgeClassifier::Compare
     if (state == TopAbs_UNKNOWN) {
       TopoDS_Shape s1 = LoopToShape(L1); if (s1.IsNull()) return state;
       TopoDS_Shape s2 = LoopToShape(L2); if (s2.IsNull()) return state;
-      TopOpeBRepTool_ShapeClassifier& SC = FSC_GetPSC();
-      Standard_Integer samedomain = SC.SameDomain(); SC.SameDomain(1); 
+      TopOpeBRepTool_ShapeClassifier SC;
+      SC.SameDomain(1);
       SC.SetReference(s2);
       const TopoDS_Shape& AvS = s2;
       state = SC.StateShapeReference(s1,AvS);
-      SC.SameDomain(samedomain);
     } // UNKNOWN
 
   }

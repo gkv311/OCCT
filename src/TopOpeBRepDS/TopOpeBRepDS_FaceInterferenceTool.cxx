@@ -31,7 +31,6 @@
 #include <TopOpeBRepTool_ShapeTool.hxx>
 #include <TopOpeBRepTool_TOOL.hxx>
 
-static Standard_Boolean STATIC_TOREVERSE = Standard_False; // xpu150498
 #define M_FORWARD(ori) (ori == TopAbs_FORWARD)
 #define M_REVERSED(ori) (ori == TopAbs_REVERSED)
 
@@ -151,12 +150,12 @@ void TopOpeBRepDS_FaceInterferenceTool::Init
   const TopoDS_Edge& E = TopoDS::Edge(EE);
 
   //   xpu150498
-  STATIC_TOREVERSE = Standard_False;
+  myTOREVERSE = Standard_False;
   if (EEisnew) {
     Standard_Integer G = I->Geometry(); const TopoDS_Edge& EG = TopoDS::Edge(myPBDS->Shape(G));    
     TopOpeBRepDS_Config cf; Standard_Boolean cfok = FDS_Config3d(E,EG,cf);
     if (!cfok) { FUN_RaiseError(); return; }
-    if (cf == TopOpeBRepDS_DIFFORIENTED) STATIC_TOREVERSE = Standard_True;
+    if (cf == TopOpeBRepDS_DIFFORIENTED) myTOREVERSE = Standard_True;
   } // xpu150498
 
   myFaceOrientation = FI.Orientation();
@@ -221,7 +220,7 @@ void TopOpeBRepDS_FaceInterferenceTool::Add
   TopOpeBRepDS_Kind GT,ST; Standard_Integer G,S; FDS_data(I,GT,G,ST,S);
   const TopoDS_Edge& EG = TopoDS::Edge(myPBDS->Shape(G));
   FDS_HasSameDomain3d(*myPBDS,EG);
-  Standard_Boolean same = !STATIC_TOREVERSE; // xpu150498
+  Standard_Boolean same = !myTOREVERSE; // xpu150498
   
   TopAbs_Orientation oriloc = I->Transition().Orientation(TopAbs_IN);
   // xpu150498 : CTS20205 : sp(e5) = sp(e4 of rank=1) and c3d(e5) c3d(e4) are diff oriented
@@ -295,7 +294,7 @@ void TopOpeBRepDS_FaceInterferenceTool::Transition(const Handle(TopOpeBRepDS_Int
     T.Set(stb,sta);
     //xpu150498 
     TopAbs_Orientation o = T.Orientation(TopAbs_IN);
-    Standard_Boolean rev = STATIC_TOREVERSE && (M_FORWARD(o) || M_REVERSED(o));
+    Standard_Boolean rev = myTOREVERSE && (M_FORWARD(o) || M_REVERSED(o));
     if (rev) o = TopAbs::Complement(o);
     T.Set(o);
     //xpu150498 

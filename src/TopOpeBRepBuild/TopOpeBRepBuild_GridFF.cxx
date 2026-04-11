@@ -930,8 +930,6 @@ static void FUN_samgeomori(const TopOpeBRepDS_DataStructure& BDS, const Standard
   return;
 } // GSplitEdgeWES
 
-Standard_IMPORT Standard_Boolean FUN_ismotheropedef();
-Standard_IMPORT const TopOpeBRepBuild_GTopo& FUN_motherope();
 Standard_EXPORT Standard_Boolean GLOBAL_IEtoMERGE = 0; // xpu240498
 
 #ifdef OCCT_DEBUG
