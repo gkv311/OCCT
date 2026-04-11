@@ -72,7 +72,7 @@ private:
 
   Standard_Integer myIndex;
   Standard_Integer myMax;
-  Standard_Address myDS;
+  const TopOpeBRepDS_DataStructure* myDS;
   Standard_Boolean myFound;
   Standard_Boolean myFindKeep;
 

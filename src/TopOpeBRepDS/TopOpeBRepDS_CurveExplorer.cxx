@@ -19,9 +19,6 @@
 #include <TopOpeBRepDS_CurveExplorer.hxx>
 #include <TopOpeBRepDS_DataStructure.hxx>
 
-#define MYDS (*((TopOpeBRepDS_DataStructure*)myDS))
-static TopOpeBRepDS_Curve* CEX_PEMPTY = NULL;
-
 //=======================================================================
 //function : TopOpeBRepDS_CurveExplorer
 //purpose  : 
@@ -57,7 +54,7 @@ void TopOpeBRepDS_CurveExplorer::Init
 (const TopOpeBRepDS_DataStructure& DS,
  const Standard_Boolean FindKeep)
 {
-  myDS = (TopOpeBRepDS_DataStructure*)&DS;
+  myDS = &DS;
   myIndex = 1; 
   myMax = DS.NbCurves();
   myFindKeep = FindKeep;
@@ -114,14 +111,11 @@ void TopOpeBRepDS_CurveExplorer::Next()
 const TopOpeBRepDS_Curve& TopOpeBRepDS_CurveExplorer::Curve()const
 {
   if ( myFound ) {
-    return MYDS.Curve(myIndex);
+    return myDS->Curve(myIndex);
   }
-  else {
-    if ( CEX_PEMPTY == NULL ) {
-      CEX_PEMPTY = new TopOpeBRepDS_Curve();
-    }
-    return *CEX_PEMPTY;
-  }
+
+  static const TopOpeBRepDS_Curve CEX_PEMPTY;
+  return CEX_PEMPTY;
 }
 
 //=======================================================================
@@ -132,7 +126,7 @@ const TopOpeBRepDS_Curve& TopOpeBRepDS_CurveExplorer::Curve()const
 Standard_Boolean TopOpeBRepDS_CurveExplorer::IsCurve
    (const Standard_Integer I)const
 {
-  Standard_Boolean b = MYDS.myCurves.IsBound(I);
+  Standard_Boolean b = myDS->myCurves.IsBound(I);
   return b;
 }
 
@@ -144,8 +138,8 @@ Standard_Boolean TopOpeBRepDS_CurveExplorer::IsCurve
 Standard_Boolean TopOpeBRepDS_CurveExplorer::IsCurveKeep
    (const Standard_Integer I)const
 {
-  Standard_Boolean b = MYDS.myCurves.IsBound(I);
-  if (b) b = MYDS.Curve(I).Keep();
+  Standard_Boolean b = myDS->myCurves.IsBound(I);
+  if (b) b = myDS->Curve(I).Keep();
   return b;
 }
 
@@ -159,14 +153,12 @@ const TopOpeBRepDS_Curve& TopOpeBRepDS_CurveExplorer::Curve
 (const Standard_Integer I)const
 {
   if ( IsCurve(I) ) {
-    const TopOpeBRepDS_Curve& C = MYDS.Curve(I);
+    const TopOpeBRepDS_Curve& C = myDS->Curve(I);
     return C;
   }
 
-  if ( CEX_PEMPTY == NULL ) {
-    CEX_PEMPTY = new TopOpeBRepDS_Curve();
-  }
-  return *CEX_PEMPTY;
+  static const TopOpeBRepDS_Curve CEX_PEMPTY;
+  return CEX_PEMPTY;
 }
 
 //=======================================================================
@@ -176,7 +168,7 @@ const TopOpeBRepDS_Curve& TopOpeBRepDS_CurveExplorer::Curve
 
 Standard_Integer TopOpeBRepDS_CurveExplorer::NbCurve()
 {
-  myIndex = 1; myMax = MYDS.NbCurves();
+  myIndex = 1; myMax = myDS->NbCurves();
   Find();
   Standard_Integer n = 0;
   for (; More(); Next() ) n++;

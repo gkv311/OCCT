@@ -232,7 +232,7 @@ TopAbs_State FUN_stateedgeface(const TopoDS_Shape& E, const TopoDS_Shape& F, gp_
   Standard_Real par; FUN_tool_findPinE(E,P,par);
   Standard_Real u,v; Standard_Boolean Pok = FUN_Parameters(P,F,u,v);
   if (Pok) { // classifier u,v dans F
-    TopOpeBRepTool_ShapeClassifier& PSC = FSC_GetPSC(F);
+    TopOpeBRepTool_ShapeClassifier PSC; PSC.SetReference(F);
     gp_Pnt2d Puv(u,v);
     PSC.StateP2DReference(Puv);
     state = PSC.State();
