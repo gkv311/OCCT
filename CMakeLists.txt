@@ -76,19 +76,39 @@ set_property (GLOBAL PROPERTY OCC_VERSION_MAJOR ${OCC_VERSION_MAJOR})
 set_property (GLOBAL PROPERTY OCC_VERSION_MINOR ${OCC_VERSION_MINOR})
 set_property (GLOBAL PROPERTY OCC_VERSION_MAINTENANCE ${OCC_VERSION_MAINTENANCE})
 
-# set soversion variable determining compatibility version on platforms with symlinks
+# Set SOVERSION target property determining compatibility version on platforms with symlinks
 # 0 - for empty, 1 - for major, 2 - for major.minor, 3 - for major.minor.maintenance
-if (NOT BUILD_SOVERSION_NUMBERS)
-  set (BUILD_SOVERSION_NUMBERS "0" CACHE STRING "${BUILD_SOVERSION_NUMBERS_DESCR}" FORCE)
-  SET_PROPERTY(CACHE BUILD_SOVERSION_NUMBERS PROPERTY STRINGS 0 1 2 3)
-
-  # update default state of soversion on different platforms
-  if (WIN32 OR ANDROID OR EMSCRIPTEN)
-    set (BUILD_SOVERSION_NUMBERS 0)
-  else()
-    set (BUILD_SOVERSION_NUMBERS 2)
-  endif()
+#
+# When BUILD_SOVERSION_NUMBERS=0, the properties SOVERSION and VERSION will be skipped altogether.
+# E.g. for TKernel toolkit on Linux platform there will be:
+# - only libTKernel.so file.
+#
+# Otherwise, the full version will be provided to VERSION and specified number of numbers to SOVERSION.
+# E.g. for TKernel toolkit on Linux platform there will be:
+# - libTKernel.so.MAJOR.MINOR.MICRO file (full version specified via VERSION regardless of BUILD_SOVERSION_NUMBERS);
+# - libTKernel.so.MAJOR.MINOR for BUILD_SOVERSION_NUMBERS=2 or libTKernel.so.MAJOR for BUILD_SOVERSION_NUMBERS=1 symblink to libTKernel.so.MAJOR.MINOR.MICRO;
+# - libTKernel.so symblink to above-mentioned symlink;
+#
+# The final application will depend on (via SONAME):
+# - libTKernel.so for BUILD_SOVERSION_NUMBERS=0;
+# - libTKernel.so.MAJOR for BUILD_SOVERSION_NUMBERS=1;
+# - libTKernel.so.MAJOR.MINOR for BUILD_SOVERSION_NUMBERS=2;
+# - libTKernel.so.MAJOR.MINOR.MICRO for BUILD_SOVERSION_NUMBERS=3.
+#
+# BUILD_SOVERSION_NUMBERS=0 should be used only on platforms,
+# where libraries are usually packaged within each application (Windows, Android, etc.).
+#
+# Other values allow installing several version of OCCT system-wide without conflicts,
+# so that granularity/compatibility should be defined by package maintainers of specific system.
+# BUILD_SOVERSION_NUMBERS=1 is discouraged as major version is bumped very rarely;
+# BUILD_SOVERSION_NUMBERS=2 is the most reasonable choice, and hence the default value;
+# BUILD_SOVERSION_NUMBERS=3 would allow installing several maintenance releases, but this looks too broad to maintain.
+if (WIN32 OR ANDROID OR EMSCRIPTEN)
+  set (BUILD_SOVERSION_NUMBERS "0" CACHE STRING "${BUILD_SOVERSION_NUMBERS_DESCR}")
+else()
+  set (BUILD_SOVERSION_NUMBERS "2" CACHE STRING "${BUILD_SOVERSION_NUMBERS_DESCR}")
 endif()
+set_property (CACHE BUILD_SOVERSION_NUMBERS PROPERTY STRINGS 0 1 2 3)
 
 set (INSTALL_TEST_CASES OFF CACHE BOOL "${INSTALL_TEST_CASES_DESCR}")
 
