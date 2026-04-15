@@ -213,14 +213,15 @@ EOL"}";
 
 //! Compute gl_Position vertex shader output.
 const char THE_VERT_gl_Position[] =
-EOL"  gl_Position = occProjectionMatrix * occWorldViewMatrix * occModelWorldMatrix * occVertex;";
+EOL"  mat4 aWorldMat = occWorldViewMatrix * occModelWorldMatrix;"
+EOL"  gl_Position = occProjectionMatrix * aWorldMat * occVertex;";
 
 //! Displace gl_Position alongside vertex normal for outline rendering.
 //! This code adds silhouette only for smooth surfaces of closed primitive, and produces visual artifacts on sharp edges.
 const char THE_VERT_gl_Position_OUTLINE[] =
 EOL"  float anOutlineDisp = occOrthoScale > 0.0 ? occOrthoScale : gl_Position.w;"
 EOL"  vec4  anOutlinePos  = occVertex + vec4 (occNormal * (occSilhouetteThickness * anOutlineDisp), 0.0);"
-EOL"  gl_Position = occProjectionMatrix * occWorldViewMatrix * occModelWorldMatrix * anOutlinePos;";
+EOL"  gl_Position = occProjectionMatrix * aWorldMat * anOutlinePos;";
 
 }
 
@@ -1973,7 +1974,8 @@ Handle(Graphic3d_ShaderProgram) Graphic3d_ShaderManager::getStdProgramBoundBox()
     EOL"{"
     EOL"  vec4 aCenter = vec4(occVertex.xyz * occBBoxSize + occBBoxCenter, 1.0);"
     EOL"  vec4 aPos    = vec4(occVertex.xyz * occBBoxSize + occBBoxCenter, 1.0);"
-    EOL"  gl_Position = occProjectionMatrix * occWorldViewMatrix * occModelWorldMatrix * aPos;"
+    EOL"  mat4 aWorldMat = occWorldViewMatrix * occModelWorldMatrix;"
+    EOL"  gl_Position = occProjectionMatrix * aWorldMat * aPos;"
     EOL"}";
 
   TCollection_AsciiString aSrcFrag =

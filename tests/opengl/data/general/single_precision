@@ -1,0 +1,18 @@
+puts "========"
+puts "0024393: Visualization - objects position with enhanced precision"
+puts "Test case displays object located far from world origin."
+puts "The single floating precision should be sufficient"
+puts "to avoid disruption of shape details."
+puts "Visual check should be done for test results."
+puts "========"
+
+pload MODELING VISUALIZATION
+vinit View1
+vtop
+text2brep t2 "Located\n1.e7" -height 20
+prism     t2 t2 0 0 10
+vdisplay  t2 -dispMode 1
+vlocation t2 -location 1.e7 0 0
+vfit
+
+vdump $::imagedir/${::casename}.png
