@@ -2588,8 +2588,7 @@ static void VProcessEvents (ClientData theDispX, int)
     // Sending a dummy event in this case is a simple workaround (still, it is possible that new event will be queued in-between).
     if (aNbRemain != 0)
     {
-      XEvent aDummyEvent;
-      memset (&aDummyEvent, 0, sizeof(aDummyEvent));
+      XEvent aDummyEvent = {};
       aDummyEvent.type = ClientMessage;
       aDummyEvent.xclient.format = 32;
       XSendEvent (aDispX, InputFocus, False, 0, &aDummyEvent);

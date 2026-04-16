@@ -265,16 +265,14 @@ int64_t Media_AVIOFileContext::Seek(int64_t theOffset, int theWhence)
 TCollection_AsciiString Media_FormatContext::FormatAVErrorDescription (int theErrCodeAV)
 {
 #ifdef HAVE_FFMPEG
-  char aBuff[4096];
-  memset (aBuff, 0, sizeof(aBuff));
+  char aBuff[4096] = {};
   if (av_strerror (theErrCodeAV, aBuff, 4096) != -1)
   {
     return TCollection_AsciiString (aBuff);
   }
 
 #ifdef _MSC_VER
-  wchar_t aBuffW[4096];
-  memset (aBuffW, 0, sizeof(aBuffW));
+  wchar_t aBuffW[4096] = {};
   if (_wcserror_s (aBuffW, 4096, AVUNERROR(theErrCodeAV)) == 0)
   {
     return TCollection_AsciiString (aBuffW);

@@ -24,12 +24,8 @@ Aspect_WindowInputListener::Aspect_WindowInputListener()
   myMouseModifiers (Aspect_VKeyFlags_NONE),
   //
   my3dMouseNoRotate  (false, false, false),
-  my3dMouseToReverse (true,  false, false),
-  my3dMouseAccelTrans  (2.0f),
-  my3dMouseAccelRotate (4.0f),
-  my3dMouseIsQuadric   (true)
+  my3dMouseToReverse (true,  false, false)
 {
-  memset(my3dMouseButtonState, 0, sizeof(my3dMouseButtonState));
   myEventTimer.Start();
 }
 

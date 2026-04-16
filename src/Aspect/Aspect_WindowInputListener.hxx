@@ -263,12 +263,12 @@ protected:
 
 protected: //! @name 3d mouse input variables
 
-  bool                   my3dMouseButtonState[32];//!< cached button state
-  NCollection_Vec3<bool> my3dMouseNoRotate;       //!< ignore  3d mouse rotation axes
-  NCollection_Vec3<bool> my3dMouseToReverse;      //!< reverse 3d mouse rotation axes
-  float                  my3dMouseAccelTrans;     //!< acceleration ratio for translation event
-  float                  my3dMouseAccelRotate;    //!< acceleration ratio for rotation event
-  bool                   my3dMouseIsQuadric;      //!< quadric acceleration
+  bool                   my3dMouseButtonState[32] = {}; //!< cached button state
+  NCollection_Vec3<bool> my3dMouseNoRotate;             //!< ignore  3d mouse rotation axes
+  NCollection_Vec3<bool> my3dMouseToReverse;            //!< reverse 3d mouse rotation axes
+  float                  my3dMouseAccelTrans  = 2.0f;   //!< acceleration ratio for translation event
+  float                  my3dMouseAccelRotate = 4.0f;   //!< acceleration ratio for rotation event
+  bool                   my3dMouseIsQuadric   = true;   //!< quadric acceleration
 
 };
 

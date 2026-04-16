@@ -892,18 +892,13 @@ OSD_Path ::  OSD_Path (
 {
 
  Standard_Integer        i, j, len;
- char __drive [ _MAX_DRIVE ];
- char __dir [ _MAX_DIR ];
- char __trek [ _MAX_DIR ];
- char __fname [ _MAX_FNAME ];
- char __ext [ _MAX_EXT ];
+ char __drive [ _MAX_DRIVE ] = {};
+ char __dir [ _MAX_DIR ] = {};
+ char __trek [ _MAX_DIR ] = {};
+ char __fname [ _MAX_FNAME ] = {};
+ char __ext [ _MAX_EXT ] = {};
 
- memset(__drive, 0,_MAX_DRIVE);
- memset(__dir, 0,_MAX_DIR);
- memset(__trek, 0,_MAX_DIR);
- memset(__fname, 0,_MAX_FNAME);
- memset(__ext, 0,_MAX_EXT);
- Standard_Character      chr;
+ Standard_Character chr = '\0';
 
  TEST_RAISE(  aSysType, "OSD_Path"  );
 
@@ -1017,10 +1012,8 @@ void OSD_Path :: SystemName (
 
  Standard_Integer        i, j;
  TCollection_AsciiString fullPath;
- Standard_Character trek [ _MAX_PATH ];
- Standard_Character      chr;
-
- memset(trek,0,_MAX_PATH);
+ Standard_Character trek [ _MAX_PATH ] = {};
+ Standard_Character      chr = '\0';
 
  TEST_RAISE(  aType, "SystemName"  );
 

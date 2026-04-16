@@ -2058,8 +2058,7 @@ static Standard_Integer OCC5698 (Draw_Interpretor& di, Standard_Integer argc, co
 #if defined(_WIN32) && !defined(_WIN64)
 static int StackOverflow (int i = -1)
 {
-  char arr[2000];
-  memset (arr, 0, sizeof(arr));
+  char arr[2000] = {};
   if (i < 0)
     StackOverflow(i-1);
   return i;

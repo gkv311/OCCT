@@ -121,17 +121,17 @@ protected:
 
 protected:
 
-  Standard_Boolean done;
-  Standard_Boolean identical;
+  Standard_Boolean done = false;
+  Standard_Boolean identical = false;
   IntAna_Curve TheCurve[12];
-  Standard_Integer previouscurve[12];
-  Standard_Integer nextcurve[12];
-  Standard_Integer NbCurves;
-  Standard_Integer Nbpoints;
+  Standard_Integer previouscurve[12] = {};
+  Standard_Integer nextcurve[12] = {};
+  Standard_Integer NbCurves = 0;
+  Standard_Integer Nbpoints = 0;
   gp_Pnt Thepoints[2];
-  Standard_Integer myNbMaxCurves;
-  Standard_Real myEpsilon;
-  Standard_Real myEpsilonCoeffPolyNull;
+  Standard_Integer myNbMaxCurves = 12;
+  Standard_Real myEpsilon = 0.00000001;
+  Standard_Real myEpsilonCoeffPolyNull = 0.00000001;
 
 };
 

@@ -172,29 +172,29 @@ private:
   Standard_EXPORT void MinTgte (const Standard_Integer I);
 
 
-  Standard_Integer degmax;
-  Standard_Integer segmax;
+  Standard_Integer degmax = 0;
+  Standard_Integer segmax = 0;
   Handle(GeomFill_CoonsAlgPatch) ptch;
   Handle(GeomFill_TgtField) tgalg[4];
-  Standard_Real mig[4];
+  Standard_Real mig[4] = {};
   GeomFill_CornerState stcor[4];
   gp_Vec v[4];
-  Standard_Boolean appdone;
-  Standard_Integer degree[2];
+  Standard_Boolean appdone = false;
+  Standard_Integer degree[2] = {};
   Handle(TColgp_HArray1OfPnt) curvpol[4];
   Handle(TColgp_HArray1OfPnt) tgtepol[4];
   Handle(TColStd_HArray1OfInteger) mults[2];
   Handle(TColStd_HArray1OfReal) knots[2];
   Handle(TColStd_HArray1OfReal) ab[4];
   Handle(TColStd_HArray1OfReal) pq[4];
-  Standard_Real dom[4];
+  Standard_Real dom[4] = { 1.0, 1.0, 1.0, 1.0 };
   Handle(TColgp_HArray1OfPnt) ncpol[4];
   Handle(TColgp_HArray1OfPnt) ntpol[4];
   Handle(TColStd_HArray1OfInteger) nm[2];
   Handle(TColStd_HArray1OfReal) nk[2];
-  Standard_Integer ibound[2];
-  Standard_Integer ctr[2];
-  Standard_Integer nbd3;
+  Standard_Integer ibound[2] = {};
+  Standard_Integer ctr[2] = {};
+  Standard_Integer nbd3 = 0;
   Handle(TColgp_HArray2OfPnt) S0;
   Handle(TColgp_HArray2OfPnt) S1;
   Handle(Geom_BSplineSurface) surf;

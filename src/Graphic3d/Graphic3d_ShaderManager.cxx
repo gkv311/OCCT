@@ -248,16 +248,10 @@ TCollection_AsciiString Graphic3d_ShaderManager::genLightKey (const Handle(Graph
 // purpose  :
 // =======================================================================
 Graphic3d_ShaderManager::Graphic3d_ShaderManager (Aspect_GraphicsLibrary theGapi)
-: myGapi (theGapi),
-  // desktop defines a dedicated API for point size, with gl_PointSize added later to GLSL
-  myHasFlatShading (true),
-  myToReverseDFdxSign (false),
-  mySetPointSize (myGapi == Aspect_GraphicsLibrary_OpenGLES),
-  myUseRedAlpha (false),
-  myToEmulateDepthClamp (true),
-  mySRgbState (true)
+: myGapi (theGapi)
 {
-  memset (myGlslExtensions, 0, sizeof(myGlslExtensions));
+  // desktop defines a dedicated API for point size, with gl_PointSize added later to GLSL
+  mySetPointSize = (theGapi == Aspect_GraphicsLibrary_OpenGLES);
 }
 
 // =======================================================================

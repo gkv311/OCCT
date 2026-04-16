@@ -245,8 +245,7 @@ Standard_Boolean Standard::StackTrace (char* theBuffer,
   aDbgHelp.SymInitialize (anHProcess, NULL, TRUE);
 
   DWORD anImage = 0;
-  STACKFRAME64 aStackFrame;
-  memset (&aStackFrame, 0, sizeof(aStackFrame));
+  STACKFRAME64 aStackFrame = {};
 
   anImage = IMAGE_FILE_MACHINE_AMD64;
   aStackFrame.AddrPC.Offset = aCtx.Rip;

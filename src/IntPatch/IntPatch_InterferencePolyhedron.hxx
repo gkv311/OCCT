@@ -84,14 +84,14 @@ private:
   Standard_EXPORT void CoupleCharacteristics (const IntPatch_Polyhedron& FirstPol, const IntPatch_Polyhedron& SeconPol);
 
 
-  Standard_Integer OI[3];
-  Standard_Integer TI[3];
-  Standard_Real dpOpT[3][3];
-  Standard_Real dpOeT[3][3];
-  Standard_Real deOpT[3][3];
+  Standard_Integer OI[3] = {};
+  Standard_Integer TI[3] = {};
+  Standard_Real dpOpT[3][3] = {};
+  Standard_Real dpOeT[3][3] = {};
+  Standard_Real deOpT[3][3] = {};
   gp_XYZ voo[3];
   gp_XYZ vtt[3];
-  Standard_Real Incidence;
+  Standard_Real Incidence = 0.0;
 
 
 };

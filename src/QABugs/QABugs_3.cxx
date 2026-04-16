@@ -523,8 +523,7 @@ static Standard_Integer coordload (Draw_Interpretor& theDi,
     return 2;
   }
 
-  char aLine[80];
-  memset (aLine, 0, 40);
+  char aLine[80] = {};
   aFile.getline (aLine, 80);
 
   gp_Pnt aPnt (0.0, 0.0, 0.0);

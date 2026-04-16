@@ -51,16 +51,11 @@ IMPLEMENT_STANDARD_RTTIEXT(AIS_Trihedron, AIS_InteractiveObject)
 //purpose  :
 //=======================================================================
 AIS_Trihedron::AIS_Trihedron (const Handle(Geom_Axis2Placement)& theComponent)
-: myComponent (theComponent),
-  myTrihDispMode (Prs3d_DM_WireFrame),
-  myHasOwnSize (Standard_False),
-  myHasOwnTextColor (Standard_False),
-  myHasOwnArrowColor (Standard_False)
+: myComponent (theComponent)
 {
   myAutoHilight = Standard_False;
 
   // selection priorities
-  memset (mySelectionPriority, 0, sizeof(mySelectionPriority));
   mySelectionPriority[Prs3d_DatumParts_None] =    5; // complete trihedron: priority 5 (same as faces)
   mySelectionPriority[Prs3d_DatumParts_Origin] =  8; // origin: priority 8
   for (int aPartIter = Prs3d_DatumParts_XAxis; aPartIter <= Prs3d_DatumParts_ZAxis; ++aPartIter)

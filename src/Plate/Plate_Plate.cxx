@@ -34,18 +34,8 @@
 //purpose  : 
 //=======================================================================
 Plate_Plate::Plate_Plate()
-: order(0), n_el(0), n_dim(0),
-  solution(0),points(0),deru(0),derv(0),
-  OK(Standard_False),maxConstraintOrder(0),
-  Uold (1.e20),
-  Vold (1.e20),
-  U2 (0.0),
-  R (0.0),
-  L (0.0)
 {
-  PolynomialPartOnly = Standard_False;
-  memset (ddu, 0, sizeof (ddu));
-  memset (ddv, 0, sizeof (ddv));
+  //
 }
 
 //=======================================================================
@@ -55,13 +45,7 @@ Plate_Plate::Plate_Plate()
 
 Plate_Plate::Plate_Plate(const Plate_Plate& Ref)
 : order(Ref.order),n_el(Ref.n_el),n_dim(Ref.n_dim),
-  solution(0),points(0),deru(0),derv(0),
-  OK (Ref.OK),
-  Uold (1.e20),
-  Vold (1.e20),
-  U2 (0.0),
-  R (0.0),
-  L (0.0)
+  OK (Ref.OK)
 {
   Standard_Integer i;
   if (Ref.OK) {

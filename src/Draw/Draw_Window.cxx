@@ -986,8 +986,7 @@ static Standard_Boolean SaveBitmap (HBITMAP     theHBitmap,
   anImage.SetTopDown (false);
 
   // Setup image data
-  BITMAPINFOHEADER aBitmapInfo;
-  memset (&aBitmapInfo, 0, sizeof(BITMAPINFOHEADER));
+  BITMAPINFOHEADER aBitmapInfo = {};
   aBitmapInfo.biSize        = sizeof(BITMAPINFOHEADER);
   aBitmapInfo.biWidth       = aBitmap.bmWidth;
   aBitmapInfo.biHeight      = aBitmap.bmHeight; // positive means bottom-up!

@@ -101,20 +101,20 @@ public: //! @name view API
 
 protected:
 
-  Standard_Integer       myId;
-  Draw_Viewer*           myViewer;
-  char                   myType[5];
-  Standard_Boolean       myIsPers;
-  Standard_Boolean       myIs2D;
-  Standard_Real          myFocalDistance;
-  Standard_Real          myZoom;
+  Standard_Integer       myId = 0;
+  Draw_Viewer*           myViewer = nullptr;
+  char                   myType[5] = {};
+  Standard_Boolean       myIsPers = false;
+  Standard_Boolean       myIs2D = false;
+  Standard_Real          myFocalDistance = 0.0;
+  Standard_Real          myZoom = 0.0;
   gp_Trsf                myMatrix;
-  Standard_Integer       myDx;
-  Standard_Integer       myDy;
-  Standard_Integer       myFrameX0;
-  Standard_Integer       myFrameY0;
-  Standard_Integer       myFrameX1;
-  Standard_Integer       myFrameY1;
+  Standard_Integer       myDx = 0;
+  Standard_Integer       myDy = 0;
+  Standard_Integer       myFrameX0 = 0;
+  Standard_Integer       myFrameY0 = 0;
+  Standard_Integer       myFrameX1 = 0;
+  Standard_Integer       myFrameY1 = 0;
 };
 
 #endif
