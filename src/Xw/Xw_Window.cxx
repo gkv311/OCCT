@@ -67,8 +67,7 @@ Xw_Window::Xw_Window (const Handle(Xw_DisplayConnection)& theXDisplay,
   int      aScreen = DefaultScreen(aDisp);
   Window   aParent = RootWindow   (aDisp, aScreen);
 
-  XSetWindowAttributes aWinAttr;
-  memset (&aWinAttr, 0, sizeof(aWinAttr));
+  XSetWindowAttributes aWinAttr = {};
   aWinAttr.event_mask = ExposureMask | StructureNotifyMask;
 
   if (aVisInfo != NULL)
@@ -262,8 +261,7 @@ Aspect_TypeOfResize Xw_Window::DoResize()
 
 #if defined(HAVE_XLIB)
   XFlush (myDisplay->GetDisplay());
-  XWindowAttributes aWinAttr;
-  memset (&aWinAttr, 0, sizeof(aWinAttr));
+  XWindowAttributes aWinAttr = {};
   XGetWindowAttributes (myDisplay->GetDisplay(), (Window )myXWindow, &aWinAttr);
   if (aWinAttr.map_state == IsUnmapped)
   {
@@ -314,8 +312,7 @@ Standard_Real Xw_Window::Ratio() const
 
 #if defined(HAVE_XLIB)
   XFlush (myDisplay->GetDisplay());
-  XWindowAttributes aWinAttr;
-  memset (&aWinAttr, 0, sizeof(aWinAttr));
+  XWindowAttributes aWinAttr = {};
   XGetWindowAttributes (myDisplay->GetDisplay(), (Window )myXWindow, &aWinAttr);
   return Standard_Real(aWinAttr.width) / Standard_Real(aWinAttr.height);
 #else
@@ -341,8 +338,7 @@ void Xw_Window::Position (Standard_Integer& theX1, Standard_Integer& theY1,
 
 #if defined(HAVE_XLIB)
   XFlush (myDisplay->GetDisplay());
-  XWindowAttributes anAttributes;
-  memset (&anAttributes, 0, sizeof(anAttributes));
+  XWindowAttributes anAttributes = {};
   XGetWindowAttributes (myDisplay->GetDisplay(), (Window )myXWindow, &anAttributes);
   Window aChild;
   XTranslateCoordinates (myDisplay->GetDisplay(), anAttributes.root, (Window )myXWindow,
@@ -371,8 +367,7 @@ void Xw_Window::Size (Standard_Integer& theWidth,
 
 #if defined(HAVE_XLIB)
   XFlush (myDisplay->GetDisplay());
-  XWindowAttributes aWinAttr;
-  memset (&aWinAttr, 0, sizeof(aWinAttr));
+  XWindowAttributes aWinAttr = {};
   XGetWindowAttributes (myDisplay->GetDisplay(), (Window )myXWindow, &aWinAttr);
   theWidth  = aWinAttr.width;
   theHeight = aWinAttr.height;
@@ -413,8 +408,7 @@ void Xw_Window::InvalidateContent (const Handle(Aspect_DisplayConnection)& theDi
 
   Display* aDispX = aDisp->GetDisplay();
 
-  XEvent anEvent;
-  memset (&anEvent, 0, sizeof(anEvent));
+  XEvent anEvent = {};
   anEvent.type = Expose;
   anEvent.xexpose.window = (Window )myXWindow;
   XSendEvent (aDispX, (Window )myXWindow, False, ExposureMask, &anEvent);

@@ -131,14 +131,14 @@ protected:
 
 protected:
 
-  TCollection_AsciiString myKey;           //!< key of shared resource
-  Handle(Font_FTFont)     myFont;          //!< FreeType font instance
-  Standard_ShortReal      myAscender;      //!< ascender     provided my FT font
-  Standard_ShortReal      myDescender;     //!< descender    provided my FT font
-  Standard_Integer        myTileSizeY;     //!< tile height
-  Standard_Integer        myLastTileId;    //!< id of last tile
-  RectI                   myLastTilePx;
-  Standard_Integer        myTextureFormat; //!< texture format
+  TCollection_AsciiString myKey;               //!< key of shared resource
+  Handle(Font_FTFont)     myFont;              //!< FreeType font instance
+  Standard_ShortReal      myAscender   = 0.0f; //!< ascender     provided my FT font
+  Standard_ShortReal      myDescender  = 0.0f; //!< descender    provided my FT font
+  Standard_Integer        myTileSizeY  = 0;    //!< tile height
+  Standard_Integer        myLastTileId = -1;   //!< id of last tile
+  RectI                   myLastTilePx = {};
+  Standard_Integer        myTextureFormat = 0; //!< texture format
 
   NCollection_Vector<Handle(OpenGl_Texture)> myTextures; //!< array of textures
   NCollection_Vector<Tile>                   myTiles;    //!< array of loaded tiles

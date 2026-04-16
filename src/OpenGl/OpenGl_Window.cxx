@@ -298,8 +298,7 @@ void OpenGl_Window::Init (const Handle(OpenGl_GraphicDriver)& theDriver,
   HDC   aWindowDC = GetDC (aWindow);
   HGLRC aGContext = (HGLRC )theGContext;
 
-  PIXELFORMATDESCRIPTOR aPixelFrmt;
-  memset (&aPixelFrmt, 0, sizeof(aPixelFrmt));
+  PIXELFORMATDESCRIPTOR aPixelFrmt = {};
   aPixelFrmt.nSize        = sizeof(PIXELFORMATDESCRIPTOR);
   aPixelFrmt.nVersion     = 1;
   aPixelFrmt.dwFlags      = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
@@ -346,7 +345,7 @@ void OpenGl_Window::Init (const Handle(OpenGl_GraphicDriver)& theDriver,
   {
     // create temporary context to retrieve advanced context creation procedures
     HMODULE aModule = GetModuleHandleW(NULL);
-    WNDCLASSW aClass; memset (&aClass, 0, sizeof(aClass));
+    WNDCLASSW aClass = {};
     aClass.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
     aClass.lpfnWndProc   = wndProcDummy;
     aClass.hInstance     = aModule;

@@ -72,12 +72,12 @@ private:
 
 
 
-  Standard_Boolean done;
-  Standard_Integer nbpt;
+  Standard_Boolean done = false;
+  Standard_Integer nbpt = 0;
   gp_Pnt thePoint[4];
-  Standard_Real theParam[4];
-  Standard_Real theFi[4];
-  Standard_Real theTheta[4];
+  Standard_Real theParam[4] = {};
+  Standard_Real theFi[4] = {};
+  Standard_Real theTheta[4] = {};
 
 
 };

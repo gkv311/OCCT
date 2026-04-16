@@ -73,20 +73,17 @@
 struct aFuncStruct
 {
   aFuncStruct() // Empty constructor.
-  : mySqProjOrtTol(0.0),
-    myTolU(0.0),
-    myTolV(0.0)
   {
-    memset(myPeriod, 0, sizeof (myPeriod));
+    //
   }
 
   Handle(Adaptor3d_Surface) mySurf; // Surface where to project.
   Handle(Adaptor3d_Curve)   myCurve; // Curve to project.
   Handle(Adaptor2d_Curve2d) myInitCurve2d; // Initial 2dcurve projection.
-  Standard_Real mySqProjOrtTol; // Used to filter non-orthogonal projected point.
-  Standard_Real myTolU;
-  Standard_Real myTolV;
-  Standard_Real myPeriod[2]; // U and V period correspondingly.
+  Standard_Real mySqProjOrtTol = 0.0; // Used to filter non-orthogonal projected point.
+  Standard_Real myTolU = 0.0;
+  Standard_Real myTolV = 0.0;
+  Standard_Real myPeriod[2] = {}; // U and V period correspondingly.
 };
 
 //=======================================================================

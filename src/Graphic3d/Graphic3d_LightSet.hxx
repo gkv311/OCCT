@@ -188,12 +188,14 @@ protected:
   Graphic3d_Vec4          myAmbient;                //!< cached value of cumulative ambient color
   TCollection_AsciiString myKeyEnabledLong;         //!< key identifying the list of enabled light sources by their type
   TCollection_AsciiString myKeyEnabledShort;        //!< key identifying the list of enabled light sources by the number of sources of each type
-  Standard_Integer        myLightTypes       [Graphic3d_TypeOfLightSource_NB]; //!< counters per each light source type defined in the list
-  Standard_Integer        myLightTypesEnabled[Graphic3d_TypeOfLightSource_NB]; //!< counters per each light source type enabled in the list
-  Standard_Integer        myNbEnabled;              //!< number of enabled light sources, excluding ambient
-  Standard_Integer        myNbCastShadows;          //!< number of enabled light sources casting shadows
-  Standard_Size           myRevision;               //!< current revision of light source set
-  Standard_Size           myCacheRevision;          //!< revision of cached state
+  //! counters per each light source type defined in the list
+  Standard_Integer        myLightTypes[Graphic3d_TypeOfLightSource_NB] = {};
+  //! counters per each light source type enabled in the list
+  Standard_Integer        myLightTypesEnabled[Graphic3d_TypeOfLightSource_NB] = {};
+  Standard_Integer        myNbEnabled = 0;          //!< number of enabled light sources, excluding ambient
+  Standard_Integer        myNbCastShadows = 0;      //!< number of enabled light sources casting shadows
+  Standard_Size           myRevision = 1;           //!< current revision of light source set
+  Standard_Size           myCacheRevision = 0;      //!< revision of cached state
 };
 
 DEFINE_STANDARD_HANDLE(Graphic3d_LightSet, Standard_Transient)

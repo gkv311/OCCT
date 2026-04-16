@@ -459,8 +459,7 @@ Standard_Boolean Image_VideoRecorder::writeVideoFrame (const Standard_Boolean th
                myFrame->data, myFrame->linesize);
   }
 
-  AVPacket aPacket;
-  memset (&aPacket, 0, sizeof(aPacket));
+  AVPacket aPacket = {};
   av_init_packet (&aPacket);
   if (!theToFlush)
   {
