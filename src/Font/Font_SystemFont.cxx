@@ -26,10 +26,8 @@ IMPLEMENT_STANDARD_RTTIEXT(Font_SystemFont, Standard_Transient)
 // =======================================================================
 Font_SystemFont::Font_SystemFont (const TCollection_AsciiString& theFontName)
 : myFontKey (theFontName),
-  myFontName (theFontName),
-  myIsSingleLine (Standard_False)
+  myFontName (theFontName)
 {
-  memset (myFaceIds, 0, sizeof(myFaceIds));
   if (theFontName.IsEmpty()) { throw Standard_ProgramError ("Font_SystemFont constructor called with empty font name"); }
   myFontKey.LowerCase();
 }

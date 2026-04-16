@@ -510,8 +510,7 @@ void OpenGl_GraphicDriver::chooseVisualInfo()
   XVisualInfo* aVisInfo = NULL;
   Aspect_FBConfig anFBConfig = NULL;
 #if defined(HAVE_EGL)
-  XVisualInfo aVisInfoTmp;
-  memset (&aVisInfoTmp, 0, sizeof(aVisInfoTmp));
+  XVisualInfo aVisInfoTmp = {};
   aVisInfoTmp.screen = DefaultScreen (aDisp);
   if (myEglDisplay != EGL_NO_DISPLAY
    && myEglConfig != NULL

@@ -214,15 +214,15 @@ protected:
 
 protected:
 
-  Aspect_GraphicsLibrary myGapi;          //!< GAPI name
+  Aspect_GraphicsLibrary myGapi = Aspect_GraphicsLibrary_OpenGL; //!< GAPI name
   Graphic3d_Vec2i  myGapiVersion;         //!< GAPI version major/minor number pair
-  Standard_Boolean myGlslExtensions[Graphic3d_GlslExtension_NB];
-  Standard_Boolean myHasFlatShading;      //!< flag indicating flat shading usage
-  Standard_Boolean myToReverseDFdxSign;   //!< flag to reverse flat shading normal (workaround)
-  Standard_Boolean mySetPointSize;        //!< always set gl_PointSize variable
-  Standard_Boolean myUseRedAlpha;         //!< use RED channel instead of ALPHA (e.g. GAPI supports only GL_RED textures and not GL_ALPHA)
-  Standard_Boolean myToEmulateDepthClamp; //!< emulate depth clamping in GLSL program
-  Standard_Boolean mySRgbState;           //!< track sRGB state
+  Standard_Boolean myGlslExtensions[Graphic3d_GlslExtension_NB] = {};
+  Standard_Boolean myHasFlatShading = true;      //!< flag indicating flat shading usage
+  Standard_Boolean myToReverseDFdxSign = false;   //!< flag to reverse flat shading normal (workaround)
+  Standard_Boolean mySetPointSize = false;        //!< always set gl_PointSize variable
+  Standard_Boolean myUseRedAlpha = false;         //!< use RED channel instead of ALPHA (e.g. GAPI supports only GL_RED textures and not GL_ALPHA)
+  Standard_Boolean myToEmulateDepthClamp = true; //!< emulate depth clamping in GLSL program
+  Standard_Boolean mySRgbState = true;           //!< track sRGB state
 
 };
 

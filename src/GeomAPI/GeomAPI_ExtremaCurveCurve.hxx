@@ -167,16 +167,16 @@ private:
   Standard_EXPORT void TotalPerform();
 
 
-  Standard_Boolean myIsDone;
-  Standard_Integer myIndex;
+  Standard_Boolean myIsDone = false;
+  Standard_Integer myIndex = 0;
   Extrema_ExtCC myExtCC;
   GeomAdaptor_Curve myC1;
   GeomAdaptor_Curve myC2;
-  Standard_Boolean myTotalExt;
-  Standard_Boolean myIsInfinite;
-  Standard_Real myTotalDist;
+  Standard_Boolean myTotalExt = false;
+  Standard_Boolean myIsInfinite = false;
+  Standard_Real myTotalDist = 0.0;
   gp_Pnt myTotalPoints[2];
-  Standard_Real myTotalPars[2];
+  Standard_Real myTotalPars[2] = {};
 
 
 };

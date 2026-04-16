@@ -314,8 +314,7 @@ Standard_Boolean RWStl::writeASCII (const Handle(Poly_Triangulation)& theMesh,
     return Standard_False;
   }
 
-  char aBuffer[512];
-  memset (aBuffer, 0, sizeof(aBuffer));
+  char aBuffer[512] = {};
 
   const Standard_Integer NBTriangles = theMesh->NbTriangles();
   Message_ProgressScope aPS (theProgress, "Triangles", NBTriangles);

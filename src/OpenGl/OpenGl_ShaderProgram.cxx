@@ -162,19 +162,9 @@ void OpenGl_VariableSetterSelector::Set (const Handle(OpenGl_Context)&          
 OpenGl_ShaderProgram::OpenGl_ShaderProgram (const Handle(Graphic3d_ShaderProgram)& theProxy,
                                             const TCollection_AsciiString& theId)
 : OpenGl_NamedResource (!theProxy.IsNull() ? theProxy->GetId() : theId),
-  myProgramID (NO_PROGRAM),
-  myProxy     (theProxy),
-  myShareCount(1),
-  myNbLightsMax (0),
-  myNbShadowMaps (0),
-  myNbClipPlanesMax (0),
-  myNbFragOutputs (1),
-  myTextureSetBits (Graphic3d_TextureSetBits_NONE),
-  myOitOutput (Graphic3d_RTM_BLEND_UNORDERED),
-  myHasAlphaTest (false),
-  myHasTessShader (false)
+  myProxy (theProxy)
 {
-  memset (myCurrentState, 0, sizeof (myCurrentState));
+  //
 }
 
 // =======================================================================

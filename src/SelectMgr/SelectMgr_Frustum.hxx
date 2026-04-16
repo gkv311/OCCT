@@ -52,10 +52,7 @@ public:
 
   SelectMgr_Frustum() : SelectMgr_BaseFrustum()
   {
-    memset (myMaxOrthoVertsProjections, 0, sizeof (myMaxOrthoVertsProjections));
-    memset (myMinOrthoVertsProjections, 0, sizeof (myMinOrthoVertsProjections));
-    memset (myMaxVertsProjections, 0, sizeof (myMaxVertsProjections));
-    memset (myMinVertsProjections, 0, sizeof (myMinVertsProjections));
+    //
   }
 
   //! Dumps the content of me into the stream
@@ -152,10 +149,10 @@ protected:
   gp_Vec myPlanes[N + 2];        //!< Plane equations
   gp_Pnt myVertices[N * 2];      //!< Vertices coordinates
 
-  Standard_Real myMaxVertsProjections[N + 2];      //!< Cached projections of vertices onto frustum plane directions
-  Standard_Real myMinVertsProjections[N + 2];      //!< Cached projections of vertices onto frustum plane directions
-  Standard_Real myMaxOrthoVertsProjections[3];     //!< Cached projections of vertices onto directions of ortho unit vectors
-  Standard_Real myMinOrthoVertsProjections[3];     //!< Cached projections of vertices onto directions of ortho unit vectors
+  Standard_Real myMaxVertsProjections[N + 2] = {};  //!< Cached projections of vertices onto frustum plane directions
+  Standard_Real myMinVertsProjections[N + 2] = {};  //!< Cached projections of vertices onto frustum plane directions
+  Standard_Real myMaxOrthoVertsProjections[3] = {}; //!< Cached projections of vertices onto directions of ortho unit vectors
+  Standard_Real myMinOrthoVertsProjections[3] = {}; //!< Cached projections of vertices onto directions of ortho unit vectors
 
   gp_Vec myEdgeDirs[6];                    //!< Cached edge directions
 };

@@ -235,13 +235,13 @@ protected:
 
 protected:
   Handle(Geom_Axis2Placement) myComponent;
-  Prs3d_DatumMode  myTrihDispMode;
-  Standard_Boolean myHasOwnSize;
-  Standard_Boolean myHasOwnTextColor;
-  Standard_Boolean myHasOwnArrowColor;
+  Prs3d_DatumMode  myTrihDispMode = Prs3d_DM_WireFrame;
+  Standard_Boolean myHasOwnSize = false;
+  Standard_Boolean myHasOwnTextColor = false;
+  Standard_Boolean myHasOwnArrowColor = false;
 
   TCollection_ExtendedString myLabels[Prs3d_DatumParts_NB];
-  Standard_Integer mySelectionPriority[Prs3d_DatumParts_NB];
+  Standard_Integer mySelectionPriority[Prs3d_DatumParts_NB] = {};
 
   Handle(Graphic3d_Group) myPartToGroup[Prs3d_DatumParts_NB];
   NCollection_List<Prs3d_DatumParts> mySelectedParts;

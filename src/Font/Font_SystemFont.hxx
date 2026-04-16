@@ -141,11 +141,11 @@ public:
 
 private:
 
-  TCollection_AsciiString myFilePaths[Font_FontAspect_NB]; //!< paths to the font file
-  Standard_Integer        myFaceIds  [Font_FontAspect_NB]; //!< face ids per font file
-  TCollection_AsciiString myFontKey;      //!< font family name, lower cased
-  TCollection_AsciiString myFontName;     //!< font family name
-  Standard_Boolean        myIsSingleLine; //!< single stroke font flag, FALSE by default
+  TCollection_AsciiString myFilePaths[Font_FontAspect_NB];      //!< paths to the font file
+  Standard_Integer        myFaceIds  [Font_FontAspect_NB] = {}; //!< face ids per font file
+  TCollection_AsciiString myFontKey;                            //!< font family name, lower cased
+  TCollection_AsciiString myFontName;                           //!< font family name
+  Standard_Boolean        myIsSingleLine = false;               //!< single stroke font flag, FALSE by default
 
 };
 

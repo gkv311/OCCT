@@ -30,13 +30,9 @@ OpenGl_Font::OpenGl_Font (const Handle(Font_FTFont)&     theFont,
                           const TCollection_AsciiString& theKey)
 : myKey  (theKey),
   myFont (theFont),
-  myAscender (0.0f),
-  myDescender (0.0f),
-  myTileSizeY (0),
-  myLastTileId (-1),
   myTextureFormat (GL_ALPHA)
 {
-  memset (&myLastTilePx, 0, sizeof(myLastTilePx));
+  //
 }
 
 // =======================================================================

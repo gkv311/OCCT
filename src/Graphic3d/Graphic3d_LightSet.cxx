@@ -34,14 +34,9 @@ namespace
 // purpose  :
 // =======================================================================
 Graphic3d_LightSet::Graphic3d_LightSet()
-: myAmbient (0.0f, 0.0f, 0.0f, 0.0f),
-  myNbEnabled (0),
-  myNbCastShadows (0),
-  myRevision (1),
-  myCacheRevision (0)
+: myAmbient (0.0f, 0.0f, 0.0f, 0.0f)
 {
-  memset (myLightTypes,        0, sizeof(myLightTypes));
-  memset (myLightTypesEnabled, 0, sizeof(myLightTypesEnabled));
+  //
 }
 
 // =======================================================================

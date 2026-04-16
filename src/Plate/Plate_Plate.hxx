@@ -149,26 +149,26 @@ private:
   Standard_EXPORT void fillXYZmatrix (math_Matrix& mat, const Standard_Integer i0, const Standard_Integer j0, const Standard_Integer ncc1, const Standard_Integer ncc2) const;
 
 
-  Standard_Integer order;
-  Standard_Integer n_el;
-  Standard_Integer n_dim;
-  Standard_Address solution;
-  Standard_Address points;
-  Standard_Address deru;
-  Standard_Address derv;
-  Standard_Boolean OK;
+  Standard_Integer order = 0;
+  Standard_Integer n_el = 0;
+  Standard_Integer n_dim = 0;
+  Standard_Address solution = nullptr;
+  Standard_Address points = nullptr;
+  Standard_Address deru = nullptr;
+  Standard_Address derv = nullptr;
+  Standard_Boolean OK = false;
   Plate_SequenceOfPinpointConstraint myConstraints;
   Plate_SequenceOfLinearXYZConstraint myLXYZConstraints;
   Plate_SequenceOfLinearScalarConstraint myLScalarConstraints;
-  Standard_Real ddu[10];
-  Standard_Real ddv[10];
-  Standard_Integer maxConstraintOrder;
-  Standard_Boolean PolynomialPartOnly;
-  Standard_Real Uold;
-  Standard_Real Vold;
-  Standard_Real U2;
-  Standard_Real R;
-  Standard_Real L;
+  Standard_Real ddu[10] = {};
+  Standard_Real ddv[10] = {};
+  Standard_Integer maxConstraintOrder = 0;
+  Standard_Boolean PolynomialPartOnly = false;
+  Standard_Real Uold = 1.e20;
+  Standard_Real Vold = 1.e20;
+  Standard_Real U2 = 0.0;
+  Standard_Real R = 0.0;
+  Standard_Real L = 0.0;
 
 
 };

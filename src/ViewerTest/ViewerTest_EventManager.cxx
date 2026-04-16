@@ -899,8 +899,7 @@ void ViewerTest_EventManager::SetupWindowCallbacks (const Handle(Aspect_Window)&
     XSynchronize (anXDisplay, 1);
 
     // X11 : For keyboard on SUN
-    XWMHints aWmHints;
-    memset (&aWmHints, 0, sizeof(aWmHints));
+    XWMHints aWmHints = {};
     aWmHints.flags = InputHint;
     aWmHints.input = 1;
     XSetWMHints (anXDisplay, anXWin, &aWmHints);
