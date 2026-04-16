@@ -309,16 +309,9 @@ class MyTrigonometricFunction {
 //function : IntAna_IntQuadQuad::IntAna_IntQuadQuad
 //purpose  : C o n s t r u c t e u r    v i d e   
 //=======================================================================
-IntAna_IntQuadQuad::IntAna_IntQuadQuad(void) {
-  done=Standard_False;
-  identical = Standard_False;
-  NbCurves=0;
-  Nbpoints=0;
-  myNbMaxCurves=12;
-  myEpsilon=0.00000001;
-  myEpsilonCoeffPolyNull=0.00000001;
-  memset (nextcurve, 0, sizeof (nextcurve));
-  memset (previouscurve, 0, sizeof (previouscurve));
+IntAna_IntQuadQuad::IntAna_IntQuadQuad()
+{
+  //
 }
 //=======================================================================
 //function : IntAna_IntQuadQuad::IntAna_IntQuadQuad
@@ -327,9 +320,6 @@ IntAna_IntQuadQuad::IntAna_IntQuadQuad(void) {
 IntAna_IntQuadQuad::IntAna_IntQuadQuad(const gp_Cylinder& Cyl,
 				       const IntAna_Quadric& Quad,
 				       const Standard_Real Tol) {
-  myNbMaxCurves=12;
-  myEpsilon=0.00000001;
-  myEpsilonCoeffPolyNull=0.00000001;
   Perform(Cyl,Quad,Tol);
 }
 //=======================================================================

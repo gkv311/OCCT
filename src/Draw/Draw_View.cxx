@@ -32,19 +32,9 @@ Draw_View::Draw_View(Standard_Integer theId,
                NCollection_Vec2<int> (theWidth, theHeight),
                0, theWindow),
   myId       (theId),
-  myViewer   (theViewer),
-  myIsPers   (Standard_False),
-  myIs2D     (Standard_False),
-  myFocalDistance(0.0),
-  myZoom     (0.0),
-  myDx       (0),
-  myDy       (0),
-  myFrameX0  (0),
-  myFrameY0  (0),
-  myFrameX1  (0),
-  myFrameY1  (0)
+  myViewer   (theViewer)
 {
-  memset (myType, 0, sizeof (myType));
+  //
 }
 
 //! Find window by it's XID - applicable only to X11.
@@ -68,19 +58,9 @@ Draw_View::Draw_View(Standard_Integer theId,
                      const char*      theTitle)
 : Draw_Window  (theTitle, NCollection_Vec2<int>(0), NCollection_Vec2<int>(50), 0, findWindow (theTitle)),
   myId         (theId),
-  myViewer     (theViewer),
-  myIsPers     (Standard_False),
-  myIs2D       (Standard_False),
-  myFocalDistance(0.0),
-  myZoom       (0.0),
-  myDx         (0),
-  myDy         (0),
-  myFrameX0    (0),
-  myFrameY0    (0),
-  myFrameX1    (0),
-  myFrameY1    (0)
+  myViewer     (theViewer)
 {
-  memset (myType, 0, sizeof (myType));
+  //
 }
 
 //=======================================================================

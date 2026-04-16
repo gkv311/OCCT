@@ -1788,8 +1788,7 @@ void OpenGl_Context::MemoryInfo (TColStd_IndexedDataMapOfStringString& theDict) 
 
   if (atiMem)
   {
-    GLint aValues[4];
-    memset (aValues, 0, sizeof(aValues));
+    GLint aValues[4] = {};
     core11fwd->glGetIntegerv (GL_VBO_FREE_MEMORY_ATI, aValues);
 
     // total memory free in the pool
@@ -1895,9 +1894,8 @@ void OpenGl_Context::WindowBufferBits (Graphic3d_Vec4i& theColorBits,
     }
   #elif defined(_WIN32)
     const int aPixFrmtIndex = GetPixelFormat ((HDC )myDisplay);
-    PIXELFORMATDESCRIPTOR aFormat;
-    memset (&aFormat, 0, sizeof(aFormat));
-    aFormat.nSize      = sizeof(aFormat);
+    PIXELFORMATDESCRIPTOR aFormat = {};
+    aFormat.nSize = sizeof(aFormat);
     DescribePixelFormat ((HDC )myDisplay, aPixFrmtIndex, sizeof(PIXELFORMATDESCRIPTOR), &aFormat);
     theColorBits.SetValues (aFormat.cRedBits, aFormat.cGreenBits, aFormat.cBlueBits, aFormat.cAlphaBits);
     theDepthStencilBits.SetValues (aFormat.cDepthBits, aFormat.cStencilBits);

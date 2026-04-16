@@ -96,16 +96,16 @@ private:
   Handle(TColStd_HArray1OfReal) myParameters;
   Handle(TColStd_HArray1OfReal) myCache;
   Handle(FEmTool_ElementaryCriterion) myCriteria[3];
-  Standard_Real myEstimation[3];
-  Standard_Real myQuadraticWeight;
-  Standard_Real myQualityWeight;
-  Standard_Real myPercent[3];
+  Standard_Real myEstimation[3] = {};
+  Standard_Real myQuadraticWeight = 0.0;
+  Standard_Real myQualityWeight = 0.0;
+  Standard_Real myPercent[3] = {};
   TColStd_Array1OfReal myPntWeight;
   Handle(FEmTool_Curve) myCurve;
-  Standard_Real myLength;
-  Standard_Integer myE;
-  Standard_Integer IF;
-  Standard_Integer IL;
+  Standard_Real myLength = 0.0;
+  Standard_Integer myE = 0;
+  Standard_Integer IF = 0;
+  Standard_Integer IL = 0;
 
 
 };

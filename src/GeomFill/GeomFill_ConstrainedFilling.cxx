@@ -309,15 +309,9 @@ GeomFill_ConstrainedFilling::GeomFill_ConstrainedFilling
 (const Standard_Integer MaxDeg,
  const Standard_Integer MaxSeg)
 : degmax(MaxDeg),
-  segmax(MaxSeg),
-  appdone(Standard_False),
-  nbd3(0)
+  segmax(MaxSeg)
 {
   dom[0] = dom[1] = dom[2] = dom[3] = 1.;
-  memset (ctr, 0, sizeof (ctr));
-  memset (degree, 0, sizeof (degree));
-  memset (ibound, 0, sizeof (ibound));
-  memset (mig, 0, sizeof (mig));
 }
 
 
