@@ -199,8 +199,11 @@ Standard_Boolean STEPConstruct_Assembly::CheckSRRReversesNAUO(const Interface_Gr
     if (enti->DynamicType() == tSDR) {
       Handle(StepShape_ShapeDefinitionRepresentation) SDR =
         Handle(StepShape_ShapeDefinitionRepresentation)::DownCast(enti);
-      if ( SDR->UsedRepresentation() == rep1 ) 
-        pd1 = SDR->Definition().PropertyDefinition()->Definition().ProductDefinition();
+      if ( SDR->UsedRepresentation() == rep1 ) {
+        Handle(StepRepr_PropertyDefinition) aPD = SDR->Definition().PropertyDefinition();
+        if (!aPD.IsNull())
+          pd1 = aPD->Definition().ProductDefinition();
+      }
     }
   }
   
@@ -210,8 +213,11 @@ Standard_Boolean STEPConstruct_Assembly::CheckSRRReversesNAUO(const Interface_Gr
     if (enti->DynamicType() == tSDR) {
       Handle(StepShape_ShapeDefinitionRepresentation) SDR =
         Handle(StepShape_ShapeDefinitionRepresentation)::DownCast(enti);
-      if ( SDR->UsedRepresentation() == rep2 ) 
-        pd2 = SDR->Definition().PropertyDefinition()->Definition().ProductDefinition();
+      if ( SDR->UsedRepresentation() == rep2 ) {
+        Handle(StepRepr_PropertyDefinition) aPD = SDR->Definition().PropertyDefinition();
+        if (!aPD.IsNull())
+          pd2 = aPD->Definition().ProductDefinition();
+      }
     }
   }
 
