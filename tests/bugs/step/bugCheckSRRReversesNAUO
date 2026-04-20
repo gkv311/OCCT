@@ -1,0 +1,104 @@
+puts "===================================="
+puts "0033638: Data Exchange, Step Import - Style for tessellated object missed"
+puts "===================================="
+puts ""
+
+pload MODELING XDE VISUALIZATION
+
+set TEST_STEP {ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('Minimal reproducer'),'2;1');
+FILE_NAME('minimal_crash.stp','2026-04-15T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
+ENDSEC;
+DATA;
+#1=APPLICATION_CONTEXT('automotive design');
+#2=PRODUCT_CONTEXT(' ',#1,'mechanical');
+#3=PRODUCT_DEFINITION_CONTEXT('part definition',#1,' ');
+#4=APPLICATION_PROTOCOL_DEFINITION('international standard','automotive_design',2001,#1);
+#10=(LENGTH_UNIT()NAMED_UNIT(*)SI_UNIT(.MILLI.,.METRE.));
+#11=(NAMED_UNIT(*)PLANE_ANGLE_UNIT()SI_UNIT($,.RADIAN.));
+#12=(NAMED_UNIT(*)SI_UNIT($,.STERADIAN.)SOLID_ANGLE_UNIT());
+#13=UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(0.005),#10,'distance_accuracy_value','CONFUSED CURVE UNCERTAINTY');
+#14=(GEOMETRIC_REPRESENTATION_CONTEXT(3)GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#13))GLOBAL_UNIT_ASSIGNED_CONTEXT((#10,#11,#12))REPRESENTATION_CONTEXT(' ',' '));
+#20=PRODUCT('Assembly','Assembly','',(#2));
+#21=PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE(' ','',#20,.NOT_KNOWN.);
+#22=PRODUCT_DEFINITION('Assembly',' ',#21,#3);
+#23=PRODUCT_DEFINITION_SHAPE(' ',' ',#22);
+#24=CARTESIAN_POINT('',(0.,0.,0.));
+#25=AXIS2_PLACEMENT_3D('',#24,$,$);
+#26=SHAPE_REPRESENTATION(' ',(#25),#14);
+#27=SHAPE_DEFINITION_REPRESENTATION(#23,#26);
+#30=PRODUCT('Part','Part','',(#2));
+#31=PRODUCT_DEFINITION_FORMATION_WITH_SPECIFIED_SOURCE(' ','',#30,.NOT_KNOWN.);
+#32=PRODUCT_DEFINITION('Part',' ',#31,#3);
+#33=PRODUCT_DEFINITION_SHAPE(' ',' ',#32);
+#40=CARTESIAN_POINT('',(0.,0.,0.));
+#41=DIRECTION('',(0.,0.,1.));
+#42=DIRECTION('',(1.,0.,0.));
+#43=AXIS2_PLACEMENT_3D('',#40,#41,#42);
+#44=PLANE('',#43);
+#45=CARTESIAN_POINT('',(0.,0.,0.));
+#46=CARTESIAN_POINT('',(10.,0.,0.));
+#47=CARTESIAN_POINT('',(10.,10.,0.));
+#48=CARTESIAN_POINT('',(0.,10.,0.));
+#49=VERTEX_POINT('',#45);
+#50=VERTEX_POINT('',#46);
+#51=VERTEX_POINT('',#47);
+#52=VERTEX_POINT('',#48);
+#53=DIRECTION('',(1.,0.,0.));
+#54=VECTOR('',#53,10.);
+#55=LINE('',#45,#54);
+#56=EDGE_CURVE('',#49,#50,#55,.T.);
+#57=DIRECTION('',(0.,1.,0.));
+#58=VECTOR('',#57,10.);
+#59=LINE('',#46,#58);
+#60=EDGE_CURVE('',#50,#51,#59,.T.);
+#61=DIRECTION('',(-1.,0.,0.));
+#62=VECTOR('',#61,10.);
+#63=LINE('',#47,#62);
+#64=EDGE_CURVE('',#51,#52,#63,.T.);
+#65=DIRECTION('',(0.,-1.,0.));
+#66=VECTOR('',#65,10.);
+#67=LINE('',#48,#66);
+#68=EDGE_CURVE('',#52,#49,#67,.T.);
+#69=ORIENTED_EDGE('',*,*,#56,.T.);
+#70=ORIENTED_EDGE('',*,*,#60,.T.);
+#71=ORIENTED_EDGE('',*,*,#64,.T.);
+#72=ORIENTED_EDGE('',*,*,#68,.T.);
+#73=EDGE_LOOP('',(#69,#70,#71,#72));
+#74=FACE_OUTER_BOUND('',#73,.T.);
+#75=ADVANCED_FACE('',(#74),#44,.T.);
+#76=CLOSED_SHELL('',(#75));
+#77=MANIFOLD_SOLID_BREP('',#76);
+#78=ADVANCED_BREP_SHAPE_REPRESENTATION('',(#77,#43),#14);
+/* SDR with ShapeAspect — triggers the bug */
+#80=SHAPE_ASPECT('aspect','',#33,.F.);
+#81=SHAPE_DEFINITION_REPRESENTATION(#80,#78);
+/* Normal SDR — placed after so graph iterator hits the bad one first */
+#79=SHAPE_DEFINITION_REPRESENTATION(#33,#78);
+#90=NEXT_ASSEMBLY_USAGE_OCCURRENCE('link','','',#22,#32,'');
+#91=PRODUCT_DEFINITION_SHAPE(' ',' ',#90);
+#92=CARTESIAN_POINT('',(0.,0.,0.));
+#93=DIRECTION('',(0.,0.,1.));
+#94=DIRECTION('',(1.,0.,0.));
+#95=AXIS2_PLACEMENT_3D('',#92,#93,#94);
+#96=CARTESIAN_POINT('',(0.,0.,0.));
+#97=DIRECTION('',(0.,0.,1.));
+#98=DIRECTION('',(1.,0.,0.));
+#99=AXIS2_PLACEMENT_3D('',#96,#97,#98);
+#100=ITEM_DEFINED_TRANSFORMATION(' ',' ',#99,#95);
+#101=(REPRESENTATION_RELATIONSHIP(' ',' ',#78,#26)REPRESENTATION_RELATIONSHIP_WITH_TRANSFORMATION(#100)SHAPE_REPRESENTATION_RELATIONSHIP());
+#102=CONTEXT_DEPENDENT_SHAPE_REPRESENTATION(#101,#91);
+#5=PRODUCT_RELATED_PRODUCT_CATEGORY('part',$,(#20,#30));
+ENDSEC;
+END-ISO-10303-21;
+}
+
+set testFile "$imagedir/${casename}.stp"
+set fp [open "$testFile" wb]
+puts $fp $TEST_STEP
+close $fp
+
+testreadstep "$testFile" s
+checknbshapes s -vertex 4 -edge 4 -wire 1 -face 1 -shell 1 -solid 0 -compsolid 0 -compound 1 -shape 12
