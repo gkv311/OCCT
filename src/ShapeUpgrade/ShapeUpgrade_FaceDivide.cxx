@@ -96,6 +96,14 @@ Standard_Boolean ShapeUpgrade_FaceDivide::Perform (const Standard_Real theArea)
 {
   myStatus = ShapeExtend::EncodeStatus ( ShapeExtend_OK );
   if ( myFace.IsNull() ) return Standard_False;
+
+  // Ensure context is initialized: SplitCurves() and SplitSurface() call Context()->Apply(),
+  // which dereferences a null handle if no context was set.
+  // ShapeUpgrade_ShapeDivide handles this in its own Perform(),
+  // but when ShapeUpgrade_FaceDivide is used independently there is no default context.
+  if (Context().IsNull())
+    SetContext (new ShapeBuild_ReShape());
+
   myResult = myFace;
   SplitSurface (theArea);
   SplitCurves();
