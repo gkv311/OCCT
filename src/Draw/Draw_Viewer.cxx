@@ -28,6 +28,7 @@
 static const Standard_Real DRAWINFINITE = 1e50;
 Standard_EXPORT Standard_Boolean Draw_Bounds = Standard_True;
 extern Standard_Boolean Draw_Batch;
+extern Standard_Boolean Draw_VirtualWindows;
 const Standard_Integer MAXSEGMENT = 1000;
 Draw_XSegment segm[MAXSEGMENT];
 static int nbseg=0;
@@ -415,8 +416,9 @@ void Draw_Viewer::FitView(const Standard_Integer id, const Standard_Integer fram
     Standard_Integer X,Y,H,W;
     GetPosSize(id,X,Y,W,H);
     // compute the min max
-    Standard_Integer n = myDrawables.Length();
-    if (n == 0) return;
+    if (myDrawables.IsEmpty())
+      return;
+
 //    Draw_Display DF;
     curview = myViews[id];
     Standard_Real umin,umax,vmin,vmax;
@@ -424,18 +426,28 @@ void Draw_Viewer::FitView(const Standard_Integer id, const Standard_Integer fram
     umin = vmin = DRAWINFINITE;
     umax = vmax = -DRAWINFINITE;
 
-    for (i = 1; i <= n; i++) {
-      Standard_Boolean d3d = myDrawables(i)->Is3D();
-      if ((d3d && !is2d) || (!d3d && is2d)) {
-	// if this is not the only view recompute...
-	if (!only)
-	  DrawOnView(id,myDrawables(i));
-	myDrawables(i)->Bounds(u1,u2,v1,v2);
-	if (u1 < umin) umin = u1;
-	if (u2 > umax) umax = u2;
-	if (v1 < vmin) vmin = v1;
-	if (v2 > vmax) vmax = v2;
+    for (const Handle(Draw_Drawable3D)& aDraw : myDrawables)
+    {
+      if (!aDraw->Is3D() != is2d)
+        continue;
+
+      if (!only)
+      {
+        // if this is not the only view recompute...
+        DrawOnView(id, aDraw);
       }
+      else if (Draw_VirtualWindows)
+      {
+        // in case of a virtual window the bounds have to be computed
+        // (ideally should be done with suppressed redering operations)
+        DrawOnView(id, aDraw);
+      }
+
+      aDraw->Bounds(u1,u2,v1,v2);
+      if (u1 < umin) umin = u1;
+      if (u2 > umax) umax = u2;
+      if (v1 < vmin) vmin = v1;
+      if (v2 > vmax) vmax = v2;
     }
     Standard_Real z;
     umin = umin / curview->GetZoom();
@@ -574,13 +586,15 @@ void Draw_Viewer::RemoveView(const Standard_Integer id)
 //=======================================================================
 void Draw_Viewer::RepaintView (const Standard_Integer id) const
 {
-  if (Draw_Batch) return;
-  if (myViews[id]) {
-    ClearView(id);
-    Standard_Integer n = myDrawables.Length();
-    for (Standard_Integer i = 1; i <= n; i++)
-      DrawOnView(id,myDrawables(i));
-  }
+  if (Draw_Batch || Draw_VirtualWindows)
+    return; // redraw virtual window only when dumping a screenshot
+
+  if (myViews[id] == nullptr)
+    return;
+
+  ClearView(id);
+  for (const Handle(Draw_Drawable3D)& aDraw : myDrawables)
+    DrawOnView(id, aDraw);
 }
 
 
@@ -655,17 +669,16 @@ void Draw_Viewer::PostScriptView (const Standard_Integer id,
     ps_kx = ((Standard_Real) (PXmax - PXmin)) / ((Standard_Real) (VXmax - VXmin));
     ps_ky = ((Standard_Real) (PYmax - PYmin)) / ((Standard_Real) (VYmax - VYmin));
     ps_stream = &sortie;
-    Standard_Integer n = myDrawables.Length();
-    if (n == 0) return;
+    if (myDrawables.IsEmpty())
+      return;
+
     CurrentMode = POSTSCRIPT;
     Draw_Display DF = MakeDisplay(id);
     Standard_Boolean view2d = myViews[id]->Is2D();
-    for (Standard_Integer i = 1; i <= n; i++)
-      if (myDrawables(i)->Is3D()) {
-	if (!view2d) myDrawables(i)->DrawOn(DF);
-      }
-    else {
-      if (view2d) myDrawables(i)->DrawOn(DF);
+    for (const Handle(Draw_Drawable3D)& aDraw : myDrawables)
+    {
+      if (!aDraw->Is3D() == view2d)
+        aDraw->DrawOn(DF);
     }
     sortie << "stroke\n";
     CurrentMode = DRAW;
@@ -696,18 +709,23 @@ Standard_Boolean Draw_Viewer::SaveView(const Standard_Integer id,
                                        const char* filename)
 {
   if (Draw_Batch)
-  {
     return Standard_False;
-  }
-  Flush();
-  if (myViews[id]) {
-    return myViews[id]->Save(filename);
-  }
-  else
+
+  if (myViews[id] == nullptr)
   {
     std::cerr << "View " << id << " doesn't exists!\n";
     return Standard_False;
   }
+
+  if (Draw_VirtualWindows)
+  {
+    // immediate drawing was skipped, so now its time to redraw view
+    myViews[id]->Clear();
+    for (const Handle(Draw_Drawable3D)& aDraw : myDrawables)
+      DrawOnView(id, aDraw);
+  }
+  Flush();
+  return myViews[id]->Save(filename);
 }
 
 //=======================================================================
@@ -773,9 +791,12 @@ void Draw_Viewer::DeleteView(const Standard_Integer id)
 
 void Draw_Viewer::Clear()
 {
-  if (Draw_Batch) return;
-  for (Standard_Integer i = 1; i <= myDrawables.Length(); i++)
-    myDrawables(i)->Visible(Standard_False);
+  if (Draw_Batch)
+    return;
+
+  for (const Handle(Draw_Drawable3D)& aDraw : myDrawables)
+    aDraw->Visible(Standard_False);
+
   myDrawables.Clear();
   for (Standard_Integer id = 0; id < MAXVIEW; id++)
     ClearView(id);
@@ -788,16 +809,21 @@ void Draw_Viewer::Clear()
 
 void Draw_Viewer::Clear2D()
 {
-  if (Draw_Batch) return;
-  Standard_Integer i = 1;
-  while (i <= myDrawables.Length()) {
-    if (myDrawables(i)->Is3D())
-      i++;
-    else {
-      myDrawables(i)->Visible(Standard_False);
-      myDrawables.Remove(i);
+  if (Draw_Batch)
+    return;
+
+  for (Draw_SequenceOfDrawable3D::Iterator aDrawIter(myDrawables); aDrawIter.More();)
+  {
+    if (aDrawIter.Value()->Is3D())
+    {
+      aDrawIter.Next();
+      continue;
     }
+
+    aDrawIter.Value()->Visible(Standard_False);
+    myDrawables.Remove(aDrawIter);
   }
+
   for (Standard_Integer id = 0; id < MAXVIEW; id++) {
     if (myViews[id]) {
       if (myViews[id]->Is2D())
@@ -813,16 +839,21 @@ void Draw_Viewer::Clear2D()
 
 void Draw_Viewer::Clear3D()
 {
-  if (Draw_Batch) return;
-  Standard_Integer i = 1;
-  while (i <= myDrawables.Length()) {
-    if (myDrawables(i)->Is3D()) {
-      myDrawables(i)->Visible(Standard_False);
-      myDrawables.Remove(i);
+  if (Draw_Batch)
+    return;
+
+  for (Draw_SequenceOfDrawable3D::Iterator aDrawIter(myDrawables); aDrawIter.More();)
+  {
+    if (!aDrawIter.Value()->Is3D())
+    {
+      aDrawIter.Next();
+      continue;
     }
-    else
-      i++;
+
+    aDrawIter.Value()->Visible(Standard_False);
+    myDrawables.Remove(aDrawIter);
   }
+
   for (Standard_Integer id = 0; id < MAXVIEW; id++) {
     if (myViews[id]) {
       if (!myViews[id]->Is2D())
@@ -905,15 +936,19 @@ void Draw_Viewer::AddDrawable (const Handle(Draw_Drawable3D)& D)
 
 void Draw_Viewer::RemoveDrawable (const Handle(Draw_Drawable3D)& D)
 {
-  if (Draw_Batch) return;
-  if (!D.IsNull() && D->Visible()) {
-    Standard_Integer index;
-    for (index = 1; index <= myDrawables.Length(); index++) {
-      if (myDrawables(index) == D) {
-	D->Visible(Standard_False);
-	myDrawables.Remove(index);
-	return;
-      }
+  if (Draw_Batch)
+    return;
+
+  if (D.IsNull() || !D->Visible())
+    return;
+
+  for (Draw_SequenceOfDrawable3D::Iterator aDrawIter(myDrawables); aDrawIter.More(); aDrawIter.Next())
+  {
+    if (aDrawIter.Value() == D)
+    {
+      D->Visible(Standard_False);
+      myDrawables.Remove(aDrawIter);
+      return;
     }
   }
 }
@@ -1200,12 +1235,19 @@ Draw_Viewer::~Draw_Viewer()
 
 Draw_Viewer& Draw_Viewer::operator<<(const Handle(Draw_Drawable3D)& d3d)
 {
-  if (Draw_Batch) return *this;
-  if (!d3d.IsNull()) {
-    AddDrawable(d3d);
-    for (Standard_Integer id = 0; id < MAXVIEW; id++)
-      DrawOnView(id,d3d);
-  }
+  if (Draw_Batch)
+    return *this;
+
+  if (d3d.IsNull())
+    return *this;
+
+  AddDrawable(d3d);
+  if (Draw_VirtualWindows)
+    return *this; // redraw virtual window only when dumping a screenshot
+
+  for (Standard_Integer id = 0; id < MAXVIEW; id++)
+    DrawOnView(id,d3d);
+
   return *this;
 }
 
