@@ -6,7 +6,7 @@ on:
 jobs:
   # Build OCCT using the fastest configuration.
   build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     steps:
     - name: Runner info
       run: |
@@ -109,7 +109,7 @@ jobs:
             group: xde
           - cmd: 'bugs caf,iges,step,stlvrml,xde'
             group: xde-bugs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-24.04-arm
     needs: build
     steps:
     - name: Runner info
