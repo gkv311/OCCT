@@ -66,6 +66,7 @@ static Standard_Real upick,vpick;
 #ifdef _WIN32
 extern Draw_Viewer dout;
 #endif
+extern Standard_Boolean Draw_Bounds;
 
 //=======================================================================
 //function : DBRep_DrawableShape
@@ -716,6 +717,7 @@ void  DBRep_DrawableShape::DrawOn(Draw_Display& dis) const
       
       if (myDispOr) {
 	// display an arrow at the end
+	Draw_Bounds = Standard_False;
 	gp_Pnt aPnt;
 	gp_Vec V;
 	C.D1(l, aPnt,V);
@@ -738,6 +740,7 @@ void  DBRep_DrawableShape::DrawOn(Draw_Display& dis) const
 //	gp_Vec tang;
 //	C.D1(l,P,tang);
 	
+	Draw_Bounds = Standard_False;
       }
     }
     
