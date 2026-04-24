@@ -1,0 +1,21 @@
+puts "============"
+puts "Font_FontMgr::FindFont() - handle lookup by font filename"
+puts "============"
+puts ""
+
+pload MODELING VISUALIZATION
+dtracelevel trace
+vfont -verbose 1
+set fontPath [locate_data_file DejaVuSans.ttf]
+vfont add $fontPath SansFont
+
+text2brep s1 "ABCDabcd123" -strict strict -font "SansFont"       -height 48 -pos 0   0 0
+text2brep s2 "ABCDabcd123" -strict strict -font "DEJAVUSANS.TTF" -height 48 -pos 0  50 0
+
+vclear
+vinit View1
+vtop
+vdisplay -dispMode 1 s1 s2
+vfit
+
+vdump ${imagedir}/${casename}.png

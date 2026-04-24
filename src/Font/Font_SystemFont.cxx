@@ -26,10 +26,8 @@ IMPLEMENT_STANDARD_RTTIEXT(Font_SystemFont, Standard_Transient)
 // =======================================================================
 Font_SystemFont::Font_SystemFont (const TCollection_AsciiString& theFontName)
 : myFontKey (theFontName),
-  myFontName (theFontName),
-  myIsSingleLine (Standard_False)
+  myFontName (theFontName)
 {
-  memset (myFaceIds, 0, sizeof(myFaceIds));
   if (theFontName.IsEmpty()) { throw Standard_ProgramError ("Font_SystemFont constructor called with empty font name"); }
   myFontKey.LowerCase();
 }
@@ -45,6 +43,10 @@ void Font_SystemFont::SetFontPath (Font_FontAspect theAspect,
   if (theAspect == Font_FontAspect_UNDEFINED) { throw Standard_ProgramError ("Font_SystemFont::SetFontPath() called with UNDEFINED aspect"); }
   myFilePaths[theAspect] = thePath;
   myFaceIds  [theAspect] = theFaceId;
+
+  TCollection_AsciiString aDummy;
+  OSD_Path::FolderAndFileFromPath(thePath, aDummy, myFileNames[theAspect]);
+  myFileNames[theAspect].LowerCase();
 }
 
 // =======================================================================

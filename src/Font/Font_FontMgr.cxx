@@ -1023,11 +1023,34 @@ Handle(Font_SystemFont) Font_FontMgr::FindFont (const TCollection_AsciiString& t
   TCollection_AsciiString aFontName (theFontName);
   aFontName.LowerCase();
   Handle(Font_SystemFont) aFont = myFontMap.Find (aFontName);
-  if (!aFont.IsNull()
-    || theStrictLevel == Font_StrictLevel_Strict)
-  {
+  if (!aFont.IsNull())
     return aFont;
+
+  // Handle irregular case, when font is specified by file name.
+  // Performs suboptimal iteration over all fonts in the map.
+  if (aFontName.EndsWith(".ttf")
+   || aFontName.EndsWith(".woff")
+   || aFontName.EndsWith(".woff2")
+   || aFontName.EndsWith(".otf"))
+  {
+    for (Font_FontMap::Iterator aFontIter(myFontMap); aFontIter.More(); aFontIter.Next())
+    {
+      const Handle(Font_SystemFont)& aTestFont = aFontIter.Value();
+      for (int anAspectIter = 0; anAspectIter < Font_FontAspect_NB; ++anAspectIter)
+      {
+        if (!aTestFont->FontFileLowerCase((Font_FontAspect)anAspectIter).IsEqual(aFontName))
+          continue;
+
+        if (anAspectIter != Font_FontAspect_Regular)
+          theFontAspect = (Font_FontAspect)anAspectIter;
+
+        return aTestFont;
+      }
+    }
   }
+
+  if (theStrictLevel == Font_StrictLevel_Strict)
+    return Handle(Font_SystemFont)();
 
   // Trying to use font names mapping
   for (int aPass = 0; aPass < 2; ++aPass)

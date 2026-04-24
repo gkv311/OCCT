@@ -93,12 +93,13 @@ public:
   //! If the specified font is not found tries to use font names mapping.
   //! If the requested family name not found -> search for any font family with given aspect and height.
   //! If the font is still not found, returns any font available in the system.
-  //! Returns NULL in case when the fonts are not found in the system.
-  //! @param[in] theFontName           font family to find or alias name
+  //! @param[in] theFontName           font family to find, or alias name,
+  //!                                  or font filename (suboptimal, should be avoided when family name is known)
   //! @param[in] theStrictLevel        search strict level for using aliases and fallback
   //! @param[in][out] theFontAspect    font aspect to find (considered only if family name is not found);
   //!                                  can be modified if specified font alias refers to another style (compatibility with obsolete aliases)
   //! @param[in] theDoFailMsg          put error message on failure into default messenger
+  //! @return found font or NULL if not found in the system
   Standard_EXPORT Handle(Font_SystemFont) FindFont (const TCollection_AsciiString& theFontName,
                                                     Font_StrictLevel theStrictLevel,
                                                     Font_FontAspect& theFontAspect,
