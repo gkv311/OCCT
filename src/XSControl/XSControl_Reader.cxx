@@ -259,7 +259,7 @@ Standard_Boolean  XSControl_Reader::TransferEntity
   TopoDS_Shape sh = TR->ShapeResult(start);
   //ShapeExtend_Explorer STU;
   //SMH May 00: allow empty shapes (STEP CAX-IF, external references)
-  //if (STU.ShapeType(sh,Standard_True) == TopAbs_SHAPE) return Standard_False;  // nulle-vide 
+  //if (STU.ShapeType(sh,Standard_True) == TopAbs_SHAPE) return Standard_False;
   theshapes.Append(sh);
   return Standard_True;
 }
@@ -280,13 +280,14 @@ Standard_Integer  XSControl_Reader::TransferList
   const Handle(XSControl_TransferReader) &TR = thesession->TransferReader();
   TR->BeginTransfer();
   ClearShapes();
-  ShapeExtend_Explorer STU;
   Message_ProgressScope PS(theProgress, NULL, nb);
   for (i = 1; i <= nb && PS.More(); i++) {
     Handle(Standard_Transient) start = list->Value(i);
     if (TR->TransferOne (start, Standard_True, PS.Next()) == 0) continue;
     TopoDS_Shape sh = TR->ShapeResult(start);
-    if (STU.ShapeType(sh,Standard_True) == TopAbs_SHAPE) continue;  // nulle-vide
+    // allow empty shapes (STEP CAX-IF, external references)
+    //ShapeExtend_Explorer STU;
+    //if (STU.ShapeType(sh,Standard_True) == TopAbs_SHAPE) continue;
     theshapes.Append(sh);
     nbt ++;
   }
@@ -308,13 +309,14 @@ Standard_Integer  XSControl_Reader::TransferRoots (const Message_ProgressRange& 
    
   TR->BeginTransfer();
   ClearShapes();
-  ShapeExtend_Explorer STU;
   Message_ProgressScope PS (theProgress, "Root", nb);
   for (i = 1; i <= nb && PS.More(); i ++) {
     Handle(Standard_Transient) start = theroots.Value(i);
     if (TR->TransferOne (start, Standard_True, PS.Next()) == 0) continue;
     TopoDS_Shape sh = TR->ShapeResult(start);
-    if (STU.ShapeType(sh,Standard_True) == TopAbs_SHAPE) continue;  // nulle-vide
+    // allow empty shapes (STEP CAX-IF, external references)
+    //ShapeExtend_Explorer STU;
+    //if (STU.ShapeType(sh,Standard_True) == TopAbs_SHAPE) continue;
     theshapes.Append(sh);
     nbt ++;
   }
@@ -373,16 +375,21 @@ TopoDS_Shape  XSControl_Reader::Shape (const Standard_Integer num) const
 
 TopoDS_Shape  XSControl_Reader::OneShape () const
 {
-  TopoDS_Shape sh;
-  Standard_Integer i,nb = theshapes.Length();
-  if (nb == 0) return sh;
-  if (nb == 1) return theshapes.Value(1);
+  if (theshapes.IsEmpty())
+    return TopoDS_Shape();
+
+  if (theshapes.Length() == 1)
+    return theshapes.First();
+
   TopoDS_Compound C;
   BRep_Builder B;
-  //pdn 26.02.99 testing S4133
   B.MakeCompound(C);
-  for (i = 1; i <= nb; i ++)  B.Add (C,theshapes.Value(i));
-  return C;
+  for (const TopoDS_Shape& aShape : theshapes)
+  {
+    if (!aShape.IsNull())
+      B.Add (C, aShape);
+  }
+  return C.NbChildren() != 0 ? C : TopoDS_Shape();
 }
 
 //=======================================================================
