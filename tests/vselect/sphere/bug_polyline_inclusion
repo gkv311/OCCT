@@ -1,0 +1,67 @@
+puts {
+========================================
+Visualization - polyline (polygonal) selection in strict-inclusion mode
+
+Regression guard for SelectMgr_TriangularFrustumSet::OverlapsPoint / OverlapsBox
+========================================
+}
+
+pload MODELING VISUALIZATION
+set vw 600
+set vh 400
+vinit View1 -height $vh -width $vw
+
+psphere s1 1
+psphere s2 1
+ttranslate s1  2 0 0
+ttranslate s2 -2 0 0
+vdisplay -dispMode 1 s1 s2
+vfit
+
+proc dispPoly {theNodes} {
+  set nbNodes [expr [llength $theNodes] / 2 + 1]
+  set nodes3d {}
+  for {set i 0} {$i < $nbNodes} {incr i} {
+    lappend nodes3d [lindex $theNodes [expr ($i%($nbNodes-1))*2+0]]
+    lappend nodes3d [lindex $theNodes [expr ($i%($nbNodes-1))*2+1]]
+    lappend nodes3d 0.0
+  }
+  polygon3d p $nbNodes {*}$nodes3d
+  mkedge   e p
+  fmirror  e 0 0 0 0 1 0
+  vdisplay e -2d topLeft -noselect
+}
+
+# A 4-point polygon that matches the extent of the selection rectangle
+# (15,15)-(585,385) used in tests/vselect/sphere/rectangle_selection,
+# where strict inclusion is known to select both spheres.
+set poly {15 15 585 15 585 385 15 385}
+vselect {*}$poly -allowoverlap 0
+if {![string match -nocase "*SEL*" [vstate s1]] ||
+    ![string match -nocase "*SEL*" [vstate s2]]} {
+  puts "Error: polyline enclosing both spheres must select s1 and s2 in strict inclusion mode"
+}
+dispPoly $poly
+vdump ${imagedir}/${casename}_large.png
+
+# A tiny polygon fully inside the upper-left corner of the viewport that
+# does not cover either sphere. Neither sphere must be selected, in either mode.
+vselect 0 0
+set poly {5 5 40 5 40 40 5 40}
+vselect {*}$poly -allowoverlap 0
+if { [string match -nocase "*SEL*" [vstate s1]] ||
+     [string match -nocase "*SEL*" [vstate s2]]} {
+  puts "Error: polyline not covering any sphere must not select anything (strict)"
+}
+dispPoly $poly
+vdump ${imagedir}/${casename}_tiny2.png
+
+vselect 0 0
+set poly {5 5 40 5 40 40 5 40}
+vselect {*}$poly -allowoverlap 1
+if { [string match -nocase "*SEL*" [vstate s1]] ||
+     [string match -nocase "*SEL*" [vstate s2]]} {
+  puts "Error: polyline not covering any sphere must not select anything (overlap)"
+}
+dispPoly $poly
+vdump ${imagedir}/${casename}_tiny1.png
