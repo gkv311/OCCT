@@ -25,6 +25,7 @@ enum Graphic3d_VerticalTextAlignment
   Graphic3d_VerticalTextAlignment_Center,          //!< The anchor lies on the center of the text (not bounding box)
   Graphic3d_VerticalTextAlignment_TopBaseline,     //!< The anchor lies on the first baseline of the text
   Graphic3d_VerticalTextAlignment_TopAscender,     //!< The anchor lies on the first baseline plus ascender
+  Graphic3d_VerticalTextAlignment_TopCapHeight,    //!< The anchor lies on the first baseline plus CapHeight
 
   // obsolete aliases; notice that Graphic3d_VTA_BOTTOM points to baseline for compatibility
   Graphic3d_VTA_BOTTOM = Graphic3d_VerticalTextAlignment_BottomBaseline,

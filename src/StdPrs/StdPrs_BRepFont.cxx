@@ -57,12 +57,6 @@ namespace
   static const unsigned int THE_RESOLUTION_DPI = 4800;
   static const Font_FTFontParams THE_FONT_PARAMS (THE_FONT_SIZE, THE_RESOLUTION_DPI);
 
-  // compute scaling factor for specified font size
-  inline Standard_Real getScale (const Standard_Real theSize)
-  {
-    return theSize / Standard_Real(THE_FONT_SIZE) * 72.0 / Standard_Real(THE_RESOLUTION_DPI);
-  }
-
 #ifdef HAVE_FREETYPE
   //! Auxiliary method to convert FT_Vector to gp_XY
   static gp_XY readFTVec (const FT_Vector& theVec,
@@ -117,27 +111,15 @@ namespace
 // function : Constructor
 // purpose  :
 // =======================================================================
-StdPrs_BRepFont::StdPrs_BRepFont ()
-: myPrecision  (Precision::Confusion()),
-  myScaleUnits (1.0),
-  myIsCompositeCurve (Standard_False),
-  my3Poles     (1, 3),
-  my4Poles     (1, 4)
+StdPrs_BRepFont::StdPrs_BRepFont()
+: my3Poles(1, 3),
+  my4Poles(1, 4)
 {
   myFTFont = new Font_FTFont();
-  init();
-}
-
-// =======================================================================
-// function : init
-// purpose  :
-// =======================================================================
-void StdPrs_BRepFont::init()
-{
-  mySurface        = new Geom_Plane (gp_Pln (gp::XOY()));
+  mySurface = new Geom_Plane(gp_Pln(gp::XOY()));
   myCurve2dAdaptor = new Geom2dAdaptor_Curve();
-  Handle(Adaptor3d_Surface) aSurfAdaptor = new GeomAdaptor_Surface (mySurface);
-  myCurvOnSurf.Load (aSurfAdaptor);
+  Handle(Adaptor3d_Surface) aSurfAdaptor = new GeomAdaptor_Surface(mySurface);
+  myCurvOnSurf.Load(aSurfAdaptor);
 }
 
 // =======================================================================
@@ -147,21 +129,10 @@ void StdPrs_BRepFont::init()
 StdPrs_BRepFont::StdPrs_BRepFont (const NCollection_String& theFontPath,
                                   const Standard_Real       theSize,
                                   const Standard_Integer    theFaceId)
-: myPrecision  (Precision::Confusion()),
-  myScaleUnits (1.0),
-  myIsCompositeCurve (Standard_False),
-  my3Poles     (1, 3),
-  my4Poles     (1, 4)
+: StdPrs_BRepFont()
 {
-  init();
-  if (theSize <= myPrecision * 100.0)
-  {
-    return;
-  }
-
-  myScaleUnits = getScale (theSize);
-  myFTFont = new Font_FTFont();
   myFTFont->Init (theFontPath.ToCString(), THE_FONT_PARAMS, theFaceId);
+  SetFontSize(theSize);
 }
 
 // =======================================================================
@@ -172,21 +143,10 @@ StdPrs_BRepFont::StdPrs_BRepFont (const NCollection_String& theFontName,
                                   const Font_FontAspect     theFontAspect,
                                   const Standard_Real       theSize,
                                   const Font_StrictLevel    theStrictLevel)
-: myPrecision  (Precision::Confusion()),
-  myScaleUnits (1.0),
-  myIsCompositeCurve (Standard_False),
-  my3Poles     (1, 3),
-  my4Poles     (1, 4)
+: StdPrs_BRepFont()
 {
-  init();
-  if (theSize <= myPrecision * 100.0)
-  {
-    return;
-  }
-
-  myScaleUnits = getScale (theSize);
-  myFTFont = new Font_FTFont();
   myFTFont->FindAndInit (theFontName.ToCString(), theFontAspect, THE_FONT_PARAMS, theStrictLevel);
+  SetFontSize(theSize);
 }
 
 // =======================================================================
@@ -217,6 +177,51 @@ Handle(StdPrs_BRepFont) StdPrs_BRepFont::FindAndCreate (const TCollection_AsciiS
 }
 
 // =======================================================================
+// function : SetFontSize
+// purpose  :
+// =======================================================================
+void StdPrs_BRepFont::SetFontSize (Standard_Real theSize)
+{
+  Standard_Mutex::Sentry aSentry (myMutex);
+  if (theSize <= myPrecision * 100.0)
+    throw Standard_ConstructionError("StdPrs_BRepFont - too small font size");
+
+  const Standard_Real aScale = theSize / Standard_Real(THE_RESOLUTION_DPI);
+  if (myScaleUnits == aScale)
+    return;
+
+  myCache.Clear();
+  myFontSize = theSize;
+  myScaleUnits = aScale;
+}
+
+// =======================================================================
+// function : SetCapHeight
+// purpose  :
+// =======================================================================
+void StdPrs_BRepFont::SetCapHeight (Standard_Real theSize)
+{
+  Standard_Mutex::Sentry aSentry (myMutex);
+  if (theSize <= myPrecision * 100.0)
+    throw Standard_ConstructionError("StdPrs_BRepFont - too small font size");
+
+  const Standard_Real aCapHeight = !myFTFont.IsNull() ? myFTFont->CapHeight() : 0.0;
+  if (aCapHeight <= 0.0)
+  {
+    SetFontSize (theSize);
+    return;
+  }
+
+  const Standard_Real aScale = theSize / aCapHeight;
+  if (myScaleUnits == aScale)
+    return;
+
+  myCache.Clear();
+  myFontSize = aScale * Standard_Real(THE_RESOLUTION_DPI);
+  myScaleUnits = aScale;
+}
+
+// =======================================================================
 // function : SetCompositeCurveMode
 // purpose  :
 // =======================================================================
@@ -237,13 +242,9 @@ bool StdPrs_BRepFont::Init (const NCollection_String& theFontPath,
                             const Standard_Real       theSize,
                             const Standard_Integer    theFaceId)
 {
-  if (theSize <= myPrecision * 100.0)
-  {
-    return false;
-  }
-
-  myScaleUnits = getScale (theSize);
+  Standard_Mutex::Sentry aSentry (myMutex);
   myCache.Clear();
+  SetFontSize (theSize);
   return myFTFont->Init (theFontPath.ToCString(), THE_FONT_PARAMS, theFaceId);
 }
 
@@ -256,12 +257,8 @@ bool StdPrs_BRepFont::FindAndInit (const TCollection_AsciiString& theFontName,
                                    const Standard_Real    theSize,
                                    const Font_StrictLevel theStrictLevel)
 {
-  if (theSize <= myPrecision * 100.0)
-  {
-    return false;
-  }
-
-  myScaleUnits = getScale (theSize);
+  Standard_Mutex::Sentry aSentry (myMutex);
+  SetFontSize (theSize);
   myCache.Clear();
   return myFTFont->FindAndInit (theFontName.ToCString(), theFontAspect, THE_FONT_PARAMS, theStrictLevel);
 }

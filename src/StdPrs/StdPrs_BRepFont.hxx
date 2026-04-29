@@ -101,6 +101,22 @@ public:
                                     const Standard_Real    theSize,
                                     const Font_StrictLevel theStrictLevel = Font_StrictLevel_Any);
 
+  //! Return requested font size.
+  Standard_Real FontSize() const { return myFontSize; }
+
+  //! Change size of initialized font.
+  Standard_EXPORT void SetFontSize (Standard_Real theSize);
+
+  //! Return the distance between baseline and the approximate height
+  //! of uppercase letters, measured in font design units.
+  //! This metric could be used in systems, that specify type size by capital height measured in millimeters.
+  //! When unavailable in font metrics itself, the value is calculated as unscaled and unhinted
+  //! glyph bounding box of letter 'H'.
+  Standard_Real CapHeight() { return myScaleUnits * Standard_Real(myFTFont->CapHeight()); }
+
+  //! Change size of initialized font to specified height of uppercase letters.
+  Standard_EXPORT void SetCapHeight (Standard_Real theSize);
+
   //! Return wrapper over FreeType font.
   const Handle(Font_FTFont)& FTFont() const { return myFTFont; }
 
@@ -150,6 +166,24 @@ public:
   {
     return myScaleUnits * Standard_Real(myFTFont->LineSpacing());
   }
+
+  //! Return the distance between baseline and the approximate height
+  //! of lowercase letters, measured in font design units.
+  //! When unavailable in font metrics itself, the value is calculated as unscaled and unhinted
+  //! glyph bounding box of letter 'x'.
+  Standard_Real LowerXHeight() { return myScaleUnits * Standard_Real(myFTFont->LowerXHeight()); }
+
+  //! Return underline position.
+  Standard_Real UnderlinePosition() const { return myScaleUnits * Standard_Real(myFTFont->UnderlinePosition()); }
+
+  //! Return underline thickness.
+  Standard_Real UnderlineThickness() const { return myScaleUnits * Standard_Real(myFTFont->UnderlineThickness()); }
+
+  //! Return strikeout line position.
+  Standard_Real StrikeoutPosition() { return myScaleUnits * Standard_Real(myFTFont->StrikeoutPosition()); }
+
+  //! Return strikeout line thickness.
+  Standard_Real StrikeoutThickness() { return myScaleUnits * Standard_Real(myFTFont->StrikeoutThickness()); }
 
   //! Configured point size
   Standard_Real PointSize() const
@@ -221,9 +255,6 @@ protected:
 
 private:
 
-  //! Initialize class fields
-  void init();
-
   //! Auxiliary method to create 3D curve
   bool to3d (const Handle(Geom2d_Curve)& theCurve2d,
              const GeomAbs_Shape        theContinuity,
@@ -236,14 +267,22 @@ private:
 
 protected: //! @name Protected fields
 
-  Handle(Font_FTFont) myFTFont;            //!< wrapper over FreeType font
-  NCollection_DataMap<Standard_Utf32Char, TopoDS_Shape>
-                       myCache;            //!< glyphs cache
-  Standard_Mutex       myMutex;            //!< lock for thread-safety
-  Handle(Geom_Surface) mySurface;          //!< surface to place glyphs on to
-  Standard_Real        myPrecision;        //!< algorithm precision
-  Standard_Real        myScaleUnits;       //!< scale font rendering units into model units
-  Standard_Boolean     myIsCompositeCurve; //!< flag to merge C1 curves of each contour into single C0 curve, OFF by default
+  //! wrapper over FreeType font
+  Handle(Font_FTFont) myFTFont;
+  //! glyphs cache
+  NCollection_DataMap<Standard_Utf32Char, TopoDS_Shape> myCache;
+  //! lock for thread-safety
+  Standard_Mutex       myMutex;
+  //! surface to place glyphs on to
+  Handle(Geom_Surface) mySurface;
+  //! algorithm precision
+  Standard_Real        myPrecision = Precision::Confusion();
+  //! requested font size
+  Standard_Real        myFontSize = 1.0;
+  //! scale font rendering units into model units
+  Standard_Real        myScaleUnits = 1.0;
+  //! flag to merge C1 curves of each contour into single C0 curve, OFF by default
+  Standard_Boolean     myIsCompositeCurve = false;
 
 protected: //! @name Shared temporary variables for glyph construction
 

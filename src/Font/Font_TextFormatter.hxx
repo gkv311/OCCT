@@ -167,8 +167,9 @@ public:
     NCollection_Vec2<float> Pen; //!< position of the next symbol to put in the line
 
     float LineSpacing = 0.0f; //!< line spacing (the distance to the next line)
-    float Ascender = 0.0f;
-    float Descender = 0.0f;
+    float CapHeight   = 0.0f;
+    float Ascender    = 0.0f;
+    float Descender   = 0.0f;
 
     Graphic3d_HorizontalTextAlignment AlignX = Graphic3d_HTA_LEFT; //!< horizontal alignment style
 
@@ -179,7 +180,7 @@ public:
     int LastWordStart = 0; //!< index of the beginning of the last word in the line (for word wrapping)
 
     //! Update font parameters.
-    Standard_EXPORT void Update(const Font_FTFont& theFont,
+    Standard_EXPORT void Update(Font_FTFont& theFont,
                                 const Graphic3d_HorizontalTextAlignment theAlignX,
                                 const FontScaling& theFontScale);
 

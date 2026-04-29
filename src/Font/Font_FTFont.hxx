@@ -226,6 +226,8 @@ public:
   //! Render specified glyph into internal buffer (bitmap).
   Standard_EXPORT bool RenderGlyph (const Standard_Utf32Char theChar);
 
+public:
+
   //! @return maximal glyph width in pixels (rendered to bitmap).
   Standard_EXPORT unsigned int GlyphMaxSizeX (bool theToIncludeFallback = false) const;
 
@@ -241,11 +243,60 @@ public:
   //! @return default line spacing (the baseline-to-baseline distance).
   Standard_EXPORT float LineSpacing() const;
 
+  //! Return the distance between baseline and the approximate height
+  //! of uppercase letters, measured in font design units.
+  //! This metric could be used in systems, that specify type size by capital height measured in millimeters.
+  //! When unavailable in font metrics itself, the value is calculated as unscaled and unhinted
+  //! glyph bounding box of letter 'H'.
+  //! @sa CapHeightFromSFNT()
+  Standard_EXPORT float CapHeight();
+
+  //! Return the distance between baseline and the approximate height
+  //! of lowercase letters, measured in font design units.
+  //! When unavailable in font metrics itself, the value is calculated as unscaled and unhinted
+  //! glyph bounding box of letter 'x'.
+  //! @sa LowerXHeightFromSFNT()
+  Standard_EXPORT float LowerXHeight();
+
   //! Return underline position.
   Standard_EXPORT float UnderlinePosition() const;
 
   //! Return underline thickness.
   Standard_EXPORT float UnderlineThickness() const;
+
+  //! Return strikeout line position.
+  Standard_EXPORT float StrikeoutPosition();
+
+  //! Return strikeout line thickness.
+  Standard_EXPORT float StrikeoutThickness();
+
+public:
+
+  //! Return the distance between baseline and the approximate height
+  //! of uppercase letters, measured in font design units.
+  //! This method retrieves the value from SFNT tables or 0 if not found.
+  //! @sa CapHeight()
+  Standard_EXPORT float CapHeightFromSFNT() const;
+
+  //! Return the distance between baseline and the approximate height
+  //! of lowercase letters, measured in font design units.
+  //! This method retrieves the value from SFNT tables or 0 if not found.
+  //! @sa LowerXHeight()
+  Standard_EXPORT float LowerXHeightFromSFNT() const;
+
+  //! Return strikeout line position.
+  //! This method retrieves the value from SFNT tables or 0 if not found.
+  Standard_EXPORT float StrikeoutPositionFromSFNT() const;
+
+  //! Return strikeout line thickness.
+  //! This method retrieves the value from SFNT tables or 0 if not found.
+  Standard_EXPORT float StrikeoutThicknessFromSFNT() const;
+
+  //! Return italic angle in radians.
+  //! This method retrieves the value from SFNT tables or 0 if not found.
+  Standard_EXPORT float ItalicAngleFromSFNT() const;
+
+public:
 
   //! Configured point size
   unsigned int PointSize() const
@@ -425,6 +476,7 @@ protected:
   Handle(Font_FTFont)        myFallbackFaces[Font_UnicodeSubset_NB]; //!< fallback fonts
   FT_Face                    myFTFace;       //!< FT face object
   FT_Face                    myActiveFTFace; //!< active FT face object (the main of fallback)
+  Standard_Integer           myFaceId = 0;   //!< FT face index
   TCollection_AsciiString    myFontPath;     //!< font path
   Font_FTFontParams          myFontParams;   //!< font initialization parameters
   Font_FontAspect            myFontAspect;   //!< font initialization aspect

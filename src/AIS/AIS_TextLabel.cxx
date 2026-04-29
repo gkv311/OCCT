@@ -451,6 +451,9 @@ Standard_Boolean AIS_TextLabel::calculateLabelParams (const gp_Pnt& thePosition,
     case Graphic3d_VerticalTextAlignment_TopBaseline:
       aDYOffset = -theHeight * 0.5 + aFont->Ascender();
       break;
+    case Graphic3d_VerticalTextAlignment_TopCapHeight:
+      aDYOffset = -theHeight * 0.5 + Max (aFont->Ascender() - aFont->CapHeight(), 0.0f);
+      break;
     case Graphic3d_VerticalTextAlignment_TopAscender:
       aDYOffset = -theHeight * 0.5;
       break;
