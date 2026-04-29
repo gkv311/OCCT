@@ -47,10 +47,11 @@ void Font_TextFormatter::Reset()
 // function : TextLine::Update
 // purpose :
 // =======================================================================
-void Font_TextFormatter::TextLine::Update(const Font_FTFont&                      theFont,
+void Font_TextFormatter::TextLine::Update(Font_FTFont&                            theFont,
                                           const Graphic3d_HorizontalTextAlignment theAlignX,
                                           const FontScaling&                      theFontScale)
 {
+  CapHeight = Max(CapHeight, theFont.CapHeight() * theFontScale.SizeScaling);
   Ascender = Max(Ascender, theFont.Ascender() * theFontScale.SizeScaling);
   Descender = Min(Descender, theFont.Descender() * theFontScale.SizeScaling);
   LineSpacing = Max(LineSpacing, theFont.LineSpacing() * theFontScale.SizeScaling * theFontScale.LineScaling);
@@ -241,6 +242,9 @@ Font_Rect Font_TextFormatter::BoundingBox() const
     case Graphic3d_VerticalTextAlignment_TopAscender:
       aBox.Top = 0.0f;
       break;
+    case Graphic3d_VerticalTextAlignment_TopCapHeight:
+      aBox.Top = Max (myLines.First().Ascender - myLines.First().CapHeight, 0.0f);
+      break;
     case Graphic3d_VerticalTextAlignment_TopBaseline:
       aBox.Top = myLines.First().Ascender;
       break;
@@ -334,6 +338,11 @@ void Font_TextFormatter::Format()
     case Graphic3d_VerticalTextAlignment_TopBaseline:
     {
       aMoveY = 0.0f; // already at first baseline
+      break;
+    }
+    case Graphic3d_VerticalTextAlignment_TopCapHeight:
+    {
+      aMoveY = -myLines.First().CapHeight;
       break;
     }
     case Graphic3d_VerticalTextAlignment_TopAscender:

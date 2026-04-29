@@ -27,6 +27,7 @@
   #include <ft2build.h>
   #include FT_FREETYPE_H
   #include FT_GLYPH_H
+  #include FT_TRUETYPE_TABLES_H
 #endif
 
 IMPLEMENT_STANDARD_RTTIEXT(Font_FTFont,Standard_Transient)
@@ -98,6 +99,7 @@ bool Font_FTFont::Init (const Handle(NCollection_Buffer)& theData,
   myBuffer = theData;
   myFontPath = theFileName;
   myFontParams = theParams;
+  myFaceId = theFaceId;
 
   // manage hinting style
   if ((theParams.FontHinting & Font_Hinting_Light)  != 0
@@ -166,7 +168,6 @@ bool Font_FTFont::Init (const Handle(NCollection_Buffer)& theData,
   myActiveFTFace = myFTFace;
   return true;
 #else
-  (void )theFaceId;
   return false;
 #endif
 }
@@ -631,6 +632,81 @@ float Font_FTFont::LineSpacing() const
 }
 
 // =======================================================================
+// function : CapHeightFromSFNT
+// purpose  :
+// =======================================================================
+float Font_FTFont::CapHeightFromSFNT() const
+{
+#ifdef HAVE_FREETYPE
+  TT_OS2* anOS2 = (TT_OS2*)FT_Get_Sfnt_Table(myFTFace, FT_SFNT_OS2);
+  if (anOS2 != nullptr && anOS2->sCapHeight != 0)
+    return float(anOS2->sCapHeight) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+
+  TT_PCLT* aPclt = (TT_PCLT*)FT_Get_Sfnt_Table(myFTFace, FT_SFNT_PCLT);
+  if (aPclt != nullptr && aPclt->CapHeight != 0)
+    return float(aPclt->CapHeight) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+#endif
+  return 0.0f;
+}
+
+// =======================================================================
+// function : CapHeight
+// purpose  :
+// =======================================================================
+float Font_FTFont::CapHeight()
+{
+  const float aSize = CapHeightFromSFNT();
+  if (aSize != 0.0f)
+    return aSize;
+
+#ifdef HAVE_FREETYPE
+  if (FT_Get_Char_Index(myFTFace, 'H') != 0 && loadGlyph('H'))
+    return fromFTPoints<float>(myActiveFTFace->glyph->metrics.height);
+#endif
+  return 0.0f;
+}
+
+// =======================================================================
+// function : LowerXHeightFromSFNT
+// purpose  :
+// =======================================================================
+float Font_FTFont::LowerXHeightFromSFNT() const
+{
+#ifdef HAVE_FREETYPE
+  TT_OS2* anOS2 = (TT_OS2*)FT_Get_Sfnt_Table(myFTFace, FT_SFNT_OS2);
+  if (anOS2 != nullptr && anOS2->sxHeight != 0)
+    return float(anOS2->sxHeight) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+
+  TT_PCLT* aPclt = (TT_PCLT*)FT_Get_Sfnt_Table(myFTFace, FT_SFNT_PCLT);
+  if (aPclt != nullptr && aPclt->xHeight != 0)
+    return float(aPclt->xHeight) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+#endif
+  return 0.0f;
+}
+
+// =======================================================================
+// function : LowerXHeight
+// purpose  :
+// =======================================================================
+float Font_FTFont::LowerXHeight()
+{
+  const float aSize = LowerXHeightFromSFNT();
+  if (aSize != 0.0f)
+    return aSize;
+
+#ifdef HAVE_FREETYPE
+  if (FT_Get_Char_Index(myFTFace, 'x') != 0 && loadGlyph('x'))
+    return fromFTPoints<float>(myActiveFTFace->glyph->metrics.horiBearingY);
+
+  // just some fallback
+  float aScaleY = float(myFTFace->size->metrics.y_scale) / 65535.0f;
+  if (aScaleY != 0.0f)
+    return float(myFTFace->units_per_EM) * 0.45f * aScaleY;
+#endif
+  return 0.0f;
+}
+
+// =======================================================================
 // function : UnderlinePosition
 // purpose  :
 // =======================================================================
@@ -649,11 +725,98 @@ float Font_FTFont::UnderlinePosition() const
 // =======================================================================
 float Font_FTFont::UnderlineThickness() const
 {
+  if (IsSingleStrokeFont())
+    return 0.0f;
+
 #ifdef HAVE_FREETYPE
-  return float(myFTFace->underline_thickness) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+  if (myFTFace->underline_thickness != 0)
+    return float(myFTFace->underline_thickness) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+
+  // just some fallback as 6% of ppem
+  return float(myFTFace->size->metrics.y_ppem) * 0.06f;
 #else
   return 0.0f;
 #endif
+}
+
+// =======================================================================
+// function : StrikeoutPositionFromSFNT
+// purpose  :
+// =======================================================================
+float Font_FTFont::StrikeoutPositionFromSFNT() const
+{
+#ifdef HAVE_FREETYPE
+  TT_OS2* anOS2 = (TT_OS2*)FT_Get_Sfnt_Table(myFTFace, FT_SFNT_OS2);
+  if (anOS2 != nullptr && anOS2->yStrikeoutPosition > 0)
+    return float(anOS2->yStrikeoutPosition) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+#endif
+  return 0.0f;
+}
+
+// =======================================================================
+// function : StrikeoutPosition
+// purpose  :
+// =======================================================================
+float Font_FTFont::StrikeoutPosition()
+{
+#ifdef HAVE_FREETYPE
+  TT_OS2* anOS2 = (TT_OS2*)FT_Get_Sfnt_Table(myFTFace, FT_SFNT_OS2);
+  if (anOS2 != nullptr && anOS2->yStrikeoutPosition > 0)
+    return StrikeoutPositionFromSFNT();
+#endif
+
+  // fallback to the middle of lowercase letter
+  const float anXHeight = LowerXHeight();
+  if (anXHeight > 0.0f)
+    return anXHeight * 0.5f;
+
+  // absolute fallback
+  return Ascender() / 3.0f;
+}
+
+// =======================================================================
+// function : StrikeoutThicknessFromSFNT
+// purpose  :
+// =======================================================================
+float Font_FTFont::StrikeoutThicknessFromSFNT() const
+{
+#ifdef HAVE_FREETYPE
+  TT_OS2* anOS2 = (TT_OS2*)FT_Get_Sfnt_Table(myFTFace, FT_SFNT_OS2);
+  if (anOS2 != nullptr && anOS2->yStrikeoutSize > 0)
+    return float(anOS2->yStrikeoutSize) * (float(myFTFace->size->metrics.y_ppem) / float(myFTFace->units_per_EM));
+#endif
+  return 0.0f;
+}
+
+// =======================================================================
+// function : StrikeoutThickness
+// purpose  :
+// =======================================================================
+float Font_FTFont::StrikeoutThickness()
+{
+  if (IsSingleStrokeFont())
+    return 0.0f;
+
+  const float aSize = StrikeoutThicknessFromSFNT();
+  if (aSize != 0.0f)
+    return aSize;
+
+  return UnderlineThickness();
+}
+
+// =======================================================================
+// function : ItalicAngleFromSFNT
+// purpose  :
+// =======================================================================
+float Font_FTFont::ItalicAngleFromSFNT() const
+{
+#ifdef HAVE_FREETYPE
+  // FreeType returns rightward italic values as negative
+  TT_Postscript* aPS = (TT_Postscript*)FT_Get_Sfnt_Table(myFTFace, FT_SFNT_POST);
+  if (aPS != nullptr && aPS->italicAngle != 0)
+    return -float(aPS->italicAngle / 65536.0 * M_PI / 180.0);
+#endif
+  return 0.0f;
 }
 
 // =======================================================================

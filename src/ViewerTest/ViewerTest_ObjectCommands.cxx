@@ -2526,6 +2526,15 @@ static int VDrawText (Draw_Interpretor& theDI,
           return 1;
         }
       }
+      else if (aType == "topcapheight")
+      {
+        aTextPrs->SetVJustification(Graphic3d_VerticalTextAlignment_TopCapHeight);
+        if (aParam == "-halign")
+        {
+          Message::SendFail() << "Syntax error at '" << aParam << "'";
+          return 1;
+        }
+      }
       else
       {
         Message::SendFail() << "Syntax error at '" << aParam << "'";
@@ -5713,10 +5722,13 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
   TCollection_AsciiString aFontName ("Courier");
   Font_FontAspect  aFontAspect = Font_FA_Regular;
   Standard_Real    aTextHeight = 16.0;
+  Standard_Real    aCapHeight  = -1.0;
   Standard_Real    aShearAngle = RealLast();
   Standard_Real    aWidthScale = RealLast();
   Standard_Real    aSpaceScale = RealLast();
   Standard_Real    aLineScale  = RealLast();
+  Standard_Real    aWrapWidth = 0.0;
+  Standard_Boolean isWordWrapping = Standard_True;
   Standard_Boolean anIsCompositeCurve = Standard_False;
 
   gp_Dir aNormal    = gp::DZ();
@@ -5784,6 +5796,10 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
       {
         aVJustification = Graphic3d_VerticalTextAlignment_TopBaseline;
       }
+      else if (aType == "topcapheight")
+      {
+        aVJustification = Graphic3d_VerticalTextAlignment_TopCapHeight;
+      }
       else
       {
         Message::SendFail() << "Error: wrong syntax at '" << aParam << "'";
@@ -5796,6 +5812,23 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
           && aTextHeight > 0.0)
     {
       ++anArgIt;
+    }
+    else if (aParam == "-capheight"
+          && anArgIt + 1 < theArgNb
+          && Draw::ParseReal(theArgVec[anArgIt + 1], aCapHeight)
+          && aCapHeight > 0.0)
+    {
+      ++anArgIt;
+    }
+    else if (aParam == "-wrapping"
+          && anArgIt + 1 < theArgNb
+          && Draw::ParseReal(theArgVec[anArgIt + 1], aWrapWidth))
+    {
+      ++anArgIt;
+    }
+    else if (aParam == "-wordwrapping" || aParam == "-nowordwrapping")
+    {
+      isWordWrapping = Draw::ParseOnOffNoIterator(theArgNb, theArgVec, anArgIt);
     }
     else if ((aParam == "-widthscale" || aParam == "-widthscaling")
            && anArgIt + 1 < theArgNb
@@ -5881,6 +5914,10 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
     Message::SendFail ("Error: unable to load Font");
     return 1;
   }
+  if (aCapHeight > 0.0)
+  {
+    aFont.SetCapHeight (aCapHeight);
+  }
 
   Font_TextFormatter::FontScaling aScaling;
   aScaling.SizeScaling = (float)aFont.Scale();
@@ -5892,6 +5929,8 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
 
   Handle(Font_TextFormatter) aFormatter = new Font_TextFormatter();
   aFormatter->SetupAlignment (aHJustification, aVJustification);
+  aFormatter->SetWrapping ((float)aWrapWidth);
+  aFormatter->SetWordWrapping (isWordWrapping);
   aFormatter->Append (aText, *aFont.FTFont(), aHJustification, aScaling);
   aFormatter->Format();
 
@@ -7015,7 +7054,7 @@ vdrawtext name text
           [-pos X Y Z]={0 0 0}
           [-color {R G B|name}]=yellow
           [-halign {left|center|right}]=left
-          [-valign {top|center|bottom|topFirstLine|bottomLastLine}}]=bottom
+          [-valign {top|center|bottom|topCapHeight|topFirstLine|bottomLastLine}}]=bottom
           [-angle angle]=0
           [-zoom {0|1}]=0
           [-height height]=16
@@ -7211,15 +7250,35 @@ vmarkerstest: name X Y Z [PointsOnSide=10] [MarkerType=0] [Scale=1.0] [FileName=
 
   addCmd ("text2brep", TextToBRep, /* [text2brep] */ R"(
 text2brep name text
-          [-height height]=16 [-widthScale scale]=1.0 [-shearAngle angleDegrees]=0.0
-          [-aspect {regular|bold|italic|boldItalic}]=regular
-          [-spaceScale scale]=1.0 [-lineScale scale]=1.0
           [-font font]=Courier [-strict {strict|aliases|any}]=any
+          [-aspect {regular|bold|italic|boldItalic}]=regular
+          [-height height]=16 [-capHeight height]
+          [-widthScale scale]=1.0 [-shearAngle angleDegrees]=0.0
+          [-spaceScale scale]=1.0 [-lineScale scale]=1.0
           [-pos X=0 Y=0 Z=0] [-plane NormX NormY NormZ DirX DirY DirZ]
           [-halign {left|center|right}]=left
-          [-valign {top|center|bottom|topFirstLine|bottomLastLine}]=bottom
+          [-valign {top|center|bottom|topCapHeight|topFirstLine|bottomLastLine}]=bottom
+          [-wrapping width]=0 [-wordWrapping {0|1}]=1
           [-composite {on|off}]=off
-Create shape from the given text.
+Create shape from the given text using specified font.
+ name        draw variable to put result shape into
+ text        text to draw
+ -font       font family to load (see also vfont command to list available fonts)
+ -strict     rules for searching font family specified by -font parameter
+ -aspect     font aspect to load from family specified by -font parameter
+ -height     target face size in font metrics
+ -capHeight  target size of capitilized letters in font metrics (alternative to -height)
+ -widthScale width scaling transformation to apply to letters (e.g. emulate bold   style)
+ -shearAngle slant angle   transformation to apply to letters (e.g. emulate italic style)
+ -spaceScale horizontal space scaling factor between letters
+ -lineScale  vertical   space scaling factor between lines
+ -pos        3D anchor point      to place the shape
+ -plane      3D plane orientation to place the shape
+ -halign     horizontal text alignment within each line and relative to 3D anchor point
+ -valign     vertical   text alignment relative to 3D anchor point
+ -wrapping   maximum horizontal length to split long lines
+ -wordWrapping wrap by word when true, wrap by each letter otherwise
+ -composite  option to merge curve C1 curves into single C0 curve
 )" /* [text2brep] */);
 
   addCmd ("vfont", VFont, /* [vfont] */ R"(

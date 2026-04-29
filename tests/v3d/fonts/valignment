@@ -1,0 +1,72 @@
+puts "============"
+puts "Test different text vertical alignment options"
+puts "============"
+puts ""
+
+pload MODELING VISUALIZATION
+dtracelevel trace
+vfont -verbose 1
+vfont add [locate_data_file DejaVuSans.ttf] SansFont
+
+top
+vertex v0   0 0 0
+vertex v1 200 0 0
+edge       e1 v0 v1
+text2brep  t1 "(\$TopAscender_pÜ-Grüße)°" -valign top -font "SansFont"
+ttranslate t1 0 0 0
+bounding   t1 -save t1xmin t1ymin t1zmin t1xmax t1ymax t1zmax
+
+text2brep  t2 "(\$TopCapHeight_pÜ-Grüße)°" -valign topCapHeight -font "SansFont"
+tcopy   e1 e2
+ttranslate t2 e2 0 50 0
+bounding   t2 -save t2xmin t2ymin t2zmin t2xmax t2ymax t2zmax
+
+text2brep  t3 "(\$TopBaseline_pÜ-Grüße)°" -valign topBaseline -font "SansFont"
+tcopy   e1 e3
+ttranslate t3 e3 0 100 0
+bounding   t3 -save t3xmin t3ymin t3zmin t3xmax t3ymax t3zmax
+
+text2brep  t4 "(\$Center_pÜ-Grüße)°" -valign center -font "SansFont"
+tcopy   e1 e4
+ttranslate t4 e4 0 150 0
+bounding   t4 -save t4xmin t4ymin t4zmin t4xmax t4ymax t4zmax
+
+text2brep  t5 "(\$BottomBaseline_pÜ-Grüße)°" -valign bottomLastLine -font "SansFont"
+tcopy   e1 e5
+ttranslate t5 e5 0 200 0
+bounding   t5 -save t5xmin t5ymin t5zmin t5xmax t5ymax t5zmax
+
+text2brep  t6 "(\$BottomDescender_pÜ-Grüße)°" -valign bottom -font "SansFont"
+tcopy   e1 e6
+ttranslate t6 e6 0 250 0
+bounding   t6 -save t6xmin t6ymin t6zmin t6xmax t6ymax t6zmax
+
+fit
+xwd ${imagedir}/${casename}.png
+
+checkreal "YMax Top"            [dval t1ymax]  -0.24 0.1 0.0
+checkreal "YMax topCapHeight"   [dval t2ymax]  52.94 0.1 0.0
+checkreal "YMax topBaseline"    [dval t3ymax] 114.60 0.1 0.0
+checkreal "YMax center"         [dval t4ymax] 159.07 0.1 0.0
+checkreal "YMax bottomLastLine" [dval t5ymax] 214.61 0.1 0.0
+checkreal "YMax bottom"         [dval t6ymax] 268.38 0.1 0.0
+
+# make screenshot with a textured font (with no extra checks)
+vclear
+vinit View1
+vtop
+#vpoint p0 0   0   0
+#vpoint p1 500 600 0
+vdisplay e1 e2 e3 e4 e5 e6 -noselect
+vdrawtext ta "(\$TopAscender_pÜ-Grüße)°"     -font "SansFont" -height 16 -pos 0   0 0 -valign top
+vdrawtext tc "(\$TopCapHeight_pÜ-Grüße)°"    -font "SansFont" -height 16 -pos 0  50 0 -valign topCapHeight
+vdrawtext tb "(\$TopBaseline_pÜ-Grüße)°"     -font "SansFont" -height 16 -pos 0 100 0 -valign topBaseline
+vdrawtext c  "(\$Center_pÜ-Grüße)°"          -font "SansFont" -height 16 -pos 0 150 0 -valign center
+vdrawtext bb "(\$BottomBaseline_pÜ-Grüße)°"  -font "SansFont" -height 16 -pos 0 200 0 -valign bottomLastLine
+vdrawtext bd "(\$BottomDescender_pÜ-Grüße)°" -font "SansFont" -height 16 -pos 0 250 0 -valign bottom
+vfit
+vzoom 0.5
+vdump ${imagedir}/${casename}_gl.png
+
+vsensdis
+vdump ${imagedir}/${casename}_sel.png

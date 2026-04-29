@@ -1,0 +1,39 @@
+puts "============"
+puts "Introduce StdPrs_BRepFont::SetCapHeight() property"
+puts "============"
+puts ""
+
+pload MODELING VISUALIZATION
+dtracelevel trace
+vfont -verbose 1
+vfont add [locate_data_file DejaVuSans.ttf] SansFont
+
+top
+text2brep a1 "N"              -strict strict -font "SansFont" -height    48 -pos 0   0 0
+text2brep a2 "N"              -strict strict -font "SansFont" -capHeight 48 -pos 0  70 0
+text2brep b1 "|TEST@frog.de|" -strict strict -font "SansFont" -height    48 -pos 50  0 0
+text2brep b2 "|TEST@frog.de|" -strict strict -font "SansFont" -capHeight 48 -pos 50 70 0
+fit
+
+bounding a1 -save xmin ymin zmin xmax ymax zmax
+set ha1 [expr [dval ymax]-[dval ymin]]
+bounding a2 -save xmin ymin zmin xmax ymax zmax
+set ha2 [expr [dval ymax]-[dval ymin]]
+
+bounding b1 -save xmin ymin zmin xmax ymax zmax
+set hb1 [expr [dval ymax]-[dval ymin]]
+bounding b2 -save xmin ymin zmin xmax ymax zmax
+set hb2 [expr [dval ymax]-[dval ymin]]
+
+# Different fonts apply different size metrics, and numbers below match only specific font.
+# It seems that "|TEST@frog.de|" sample is close to the "height" metric
+# for "DejaVu Sans" font, but other fonts deviate considerably.
+checkreal "Height of complex text for -height    48" $hb1 48.0 0.001 0.0
+checkreal "Height of complex text for -capHeight 48" $hb2 65.8 0.1   0.0
+
+# "capHeight" metric is more consistent across font families,
+# but also varies and not always fixed to the height of "N" letter.
+checkreal "Height of  'N'  letter for -capHeight 48" $ha2 48.0 0.001 0.0
+checkreal "Height of  'N'  letter for -height    48" $ha1 35.0 0.1   0.0
+
+xwd ${imagedir}/${casename}.png
