@@ -1,0 +1,45 @@
+puts "============"
+puts "Graphic3d_TransformPers handling of Graphic3d_Camera::FOV2d"
+puts "============"
+puts ""
+
+pload MODELING VISUALIZATION
+vinit View1 -width 400 -height 200
+box tl -preview  50 -50 0
+box tr -preview -50 -50 0
+box bl -preview  50  50 0
+box br -preview -50  50 0
+vsetdispmode 1
+vdisplay -noupdate tl -2d topLeft -trsfPersNoFOV2d
+vdisplay -noupdate tr -2d topRight
+vdisplay -noupdate bl -2d bottomLeft
+vdisplay -noupdate br -2d bottomRight -trsfPersNoFOV2d
+vaspects -noupdate tl tr bl br -shadingModel UNLIT
+vaspects -noupdate tl -color BLUE
+vaspects -noupdate tr -color ORANGE
+vaspects -noupdate bl -color GREEN
+vaspects -noupdate br -color RED
+
+proc checkPrs { theName thePos theColor } {
+  if { [vreadpixel {*}$thePos -rgb -name] != "$theColor" } {
+    puts "Error: wrong $theName position FOV2d=[vcamera -fov2d]"
+  }
+  vselect {*}$thePos
+  if { ![string match -nocase "*SEL*" [vstate $theName]] } {
+    puts "Error: wrong $theName selection FOV2d=[vcamera -fov2d]"
+  }
+}
+
+vcamera -fov2d 180
+checkPrs tl {25  25}  BLUE
+checkPrs tr {375 25}  ORANGE
+checkPrs bl {25  175} GREEN
+checkPrs br {375 175} RED
+vdump ${imagedir}/${casename}_180.png
+
+vcamera -fov2d 60
+checkPrs tl {25  25}  BLUE
+checkPrs tr {325 25}  ORANGE
+checkPrs bl {75  175} GREEN
+checkPrs br {375 175} RED
+vdump ${imagedir}/${casename}_60.png

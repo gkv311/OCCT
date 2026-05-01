@@ -32,23 +32,16 @@
 IMPLEMENT_STANDARD_RTTIEXT(AIS_RubberBand, AIS_InteractiveObject)
 
 //=======================================================================
-//function : setupDefaultZLayer
-//purpose  :
-//=======================================================================
-void AIS_RubberBand::setupDefaultZLayer()
-{
-  // special case - size is defined in rendered pixel units, not in device-independent units
-  SetTransformPersistence (new Graphic3d_TransformPers(Graphic3d_TMF_2dPx, Aspect_TOTP_LEFT_LOWER));
-  SetZLayer (Graphic3d_ZLayerId_TopOSD);
-}
-
-//=======================================================================
 //function : Constructor
 //purpose  :
 //=======================================================================
 AIS_RubberBand::AIS_RubberBand()
-: myIsPolygonClosed(Standard_True)
 {
+  // special case - size is defined in rendered pixel units, not in device-independent units
+  myTransformPersistence = new Graphic3d_TransformPers (Graphic3d_TMF_2dPx, Aspect_TOTP_LEFT_LOWER);
+  myTransformPersistence->SetIgnoreFOV2dLimit (true);
+  myDrawer->SetZLayer (Graphic3d_ZLayerId_TopOSD);
+
   myDrawer->SetLineAspect (new Prs3d_LineAspect (Quantity_NOC_WHITE, Aspect_TOL_SOLID, 1.0));
   myDrawer->SetShadingAspect (new Prs3d_ShadingAspect());
   myDrawer->ShadingAspect()->SetMaterial (Graphic3d_NameOfMaterial_Plastified);
@@ -57,8 +50,6 @@ AIS_RubberBand::AIS_RubberBand()
   myDrawer->ShadingAspect()->Aspect()->SetAlphaMode (Graphic3d_AlphaMode_Blend);
   myDrawer->ShadingAspect()->SetTransparency (1.0);
   myDrawer->ShadingAspect()->SetColor (Quantity_NOC_WHITE);
-
-  setupDefaultZLayer();
 }
 
 //=======================================================================
@@ -69,18 +60,12 @@ AIS_RubberBand::AIS_RubberBand (const Quantity_Color& theLineColor,
                                 const Aspect_TypeOfLine theLineType,
                                 const Standard_Real theWidth,
                                 const Standard_Boolean theIsPolygonClosed)
-: myIsPolygonClosed(theIsPolygonClosed)
+: AIS_RubberBand()
 {
-  myDrawer->SetLineAspect (new Prs3d_LineAspect (theLineColor, theLineType, theWidth));
-  myDrawer->SetShadingAspect (new Prs3d_ShadingAspect());
-  myDrawer->ShadingAspect()->SetMaterial (Graphic3d_NameOfMaterial_Plastified);
-  myDrawer->ShadingAspect()->Aspect()->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
-  myDrawer->ShadingAspect()->Aspect()->SetInteriorStyle (Aspect_IS_EMPTY);
-  myDrawer->ShadingAspect()->Aspect()->SetAlphaMode (Graphic3d_AlphaMode_Blend);
-  myDrawer->ShadingAspect()->SetTransparency (1.0);
-  myDrawer->ShadingAspect()->SetColor (Quantity_NOC_WHITE);
-
-  setupDefaultZLayer();
+  myIsPolygonClosed = theIsPolygonClosed;
+  myDrawer->LineAspect()->SetTypeOfLine (theLineType);
+  myDrawer->LineAspect()->SetColor (theLineColor);
+  myDrawer->LineAspect()->SetWidth (theWidth);
 }
 
 //=======================================================================
@@ -93,18 +78,11 @@ AIS_RubberBand::AIS_RubberBand (const Quantity_Color& theLineColor,
                                 const Standard_Real theTransparency,
                                 const Standard_Real theLineWidth,
                                 const Standard_Boolean theIsPolygonClosed)
-: myIsPolygonClosed (theIsPolygonClosed)
+: AIS_RubberBand(theLineColor, theLineType, theLineWidth, theIsPolygonClosed)
 {
-  myDrawer->SetLineAspect (new Prs3d_LineAspect (theLineColor, theLineType, theLineWidth));
-  myDrawer->SetShadingAspect (new Prs3d_ShadingAspect());
-  myDrawer->ShadingAspect()->SetMaterial (Graphic3d_NameOfMaterial_Plastified);
   myDrawer->ShadingAspect()->SetColor (theFillColor);
-  myDrawer->ShadingAspect()->Aspect()->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
-  myDrawer->ShadingAspect()->Aspect()->SetInteriorStyle (Aspect_IS_SOLID);
-  myDrawer->ShadingAspect()->Aspect()->SetAlphaMode (Graphic3d_AlphaMode_Blend);
   myDrawer->ShadingAspect()->SetTransparency (theTransparency);
-
-  setupDefaultZLayer();
+  myDrawer->ShadingAspect()->Aspect()->SetInteriorStyle (Aspect_IS_SOLID);
 }
 
 //=======================================================================
