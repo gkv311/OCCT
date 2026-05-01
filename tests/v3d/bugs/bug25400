@@ -16,14 +16,14 @@ vdump $imagedir/${casename}_default_layer.png
 # the object should not disappear from the screen
 # due to wrong frustum culling operation
 
-vzlayer add
+set aLayerId [vzlayer -add]
 vobjzlayer set b 1
 # vfit is used to redraw the view, the box disappeared after this due to the issue 25400
 vfit
 
 vdump $imagedir/${casename}_new_layer.png
 
-vzlayer del 1
+vzlayer $aLayerId -delete
 # vfit is used to redraw the view, the textured box appeared again after this
 vfit
 

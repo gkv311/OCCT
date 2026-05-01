@@ -26,7 +26,7 @@ set THE_LIGHTS {
   {  0  1  0 MAGENTA3 }
 }
 
-set aLayers [list [vzlayer -add -disable depthClear] [vzlayer -add -disable depthClear] [vzlayer -add -disable depthClear]]
+set aLayers [list [vzlayer -add -depthClear 0] [vzlayer -add -depthClear 0] [vzlayer -add -depthClear 0]]
 for { set aLayIter 0 } { $aLayIter < 3 } { incr aLayIter } {
   set aLayer [lindex $aLayers $aLayIter]
   set aShiftX [expr $aLayIter * 4]
@@ -34,7 +34,7 @@ for { set aLayIter 0 } { $aLayIter < 3 } { incr aLayIter } {
   vdisplay -dispMode 1 -layer $aLayer s$aLayer
   vsetlocation s$aLayer $aShiftX 0 0
   for { set aLightIter 0 } { $aLightIter < 10 } { incr aLightIter } {
-	set aLight [lindex $THE_LIGHTS $aLightIter]
+    set aLight [lindex $THE_LIGHTS $aLightIter]
     set aColor [lindex $aLight 3]
     set aPos [list [expr $aShiftX + [lindex $aLight 0]] [lindex $aLight 1] [lindex $aLight 2]]
     vlight -layer $aLayer -add positional -pos {*}$aPos -color $aColor -headLight 0
