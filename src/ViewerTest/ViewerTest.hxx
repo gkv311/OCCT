@@ -49,6 +49,7 @@ struct ViewerTest_VinitParams
   Graphic3d_Vec2d  Size;
   Aspect_TypeOfTriedronPosition Corner = Aspect_TOTP_LEFT_UPPER;
   Graphic3d_Vec2i  SubviewMargins;
+  Standard_Boolean IsSizeInDips = true;
   Standard_Boolean IsVirtual = false;
   Standard_Boolean IsComposer = false;
   Standard_Boolean ToPreferWayland = false;
