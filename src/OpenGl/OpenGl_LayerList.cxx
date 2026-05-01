@@ -89,7 +89,7 @@ namespace
       for (; myIter.More(); myIter.Next())
       {
         const Handle(Graphic3d_Layer)& aLayer = myIter.Value();
-        if (aLayer->IsImmediate() != myToDrawImmediate)
+        if (!aLayer->LayerSettings().ToDraw() || aLayer->IsImmediate() != myToDrawImmediate)
         {
           continue;
         }

@@ -59,7 +59,7 @@ public:
   Standard_Boolean IsImmediate() const  { return myLayerSettings.IsImmediate(); }
 
   //! Returns settings of the layer object.
-  const Graphic3d_ZLayerSettings& LayerSettings() const { return myLayerSettings; };
+  const Graphic3d_ZLayerSettings& LayerSettings() const { return myLayerSettings; }
 
   //! Sets settings of the layer object.
   Standard_EXPORT void SetLayerSettings (const Graphic3d_ZLayerSettings& theSettings);
