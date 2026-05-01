@@ -1,0 +1,36 @@
+puts "========"
+puts "Visualization, TKOpenGl - add Graphic3d_ZLayerSettings::ToDraw() property"
+puts "========"
+
+pload MODELING VISUALIZATION
+box b 100 200 300
+vinit View1
+vdisplay b -dispMode 1
+vfit
+vviewcube vc
+set toDumpDepth 1
+if { [vdriver -default] == "TKOpenGles" } { set toDumpDepth 0 }
+# default image dump, notice that color buffer dump contains both objects,
+# while depth buffer dump contains only viewcube, as TOPMOST layer clears depth buffer
+vdump $::imagedir/${::casename}_color1.png
+if { $toDumpDepth} { vdump $::imagedir/${::casename}_depth1.png -depth }
+if { [vreadpixel 130 300 -rgb -name] != "GRAY47"        } { puts "Error: viewcube should be drawn1" }
+if { [vreadpixel 200 200 -rgb -name] != "DARKGOLDENROD" } { puts "Error: box should be drawn1" }
+
+# with TOPMOST layer hidden, viewcube disappears from color buffer dump,
+# and in addition is not possible to see DEFAULT layer depth buffer dump
+vzlayer TOPMOST -draw 0
+vdump $::imagedir/${::casename}_color2.png
+if { $toDumpDepth} { vdump $::imagedir/${::casename}_depth2.png -depth }
+if { [vreadpixel 130 300 -rgb -name] != "DARKGOLDENROD" } { puts "Error: viewcube should NOT be drawn2" }
+if { [vreadpixel 200 200 -rgb -name] != "DARKGOLDENROD" } { puts "Error: box should be drawn2" }
+
+# with DEFAULT layer hidden, box disappears from image dumps,
+# notice however, that box is still selectable by mouse move and even highlighted
+# (as highlighting is displayed in TOP layer by default, not DEFAULT)
+vzlayer TOPMOST -draw 1
+vzlayer DEFAULT -draw 0
+vdump $::imagedir/${::casename}_color3.png
+if { $toDumpDepth} { vdump $::imagedir/${::casename}_depth3.png -depth }
+if { [vreadpixel 130 300 -rgb -name] != "GRAY47" } { puts "Error: viewcube should be drawn3" }
+if { [vreadpixel 200 200 -rgb -name] != "BLACK"  } { puts "Error: box should NOT be drawn3" }

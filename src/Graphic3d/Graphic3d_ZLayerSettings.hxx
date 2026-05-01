@@ -27,22 +27,20 @@ struct Graphic3d_ZLayerSettings
 {
 
   //! Default settings.
-  Graphic3d_ZLayerSettings()
-  : myCullingDistance (Precision::Infinite()),
-    myCullingSize     (Precision::Infinite()),
-    myIsImmediate       (Standard_False),
-    myToRaytrace        (Standard_True),
-    myUseEnvironmentTexture (Standard_True),
-    myToEnableDepthTest (Standard_True),
-    myToEnableDepthWrite(Standard_True),
-    myToClearDepth      (Standard_True),
-    myToRenderInDepthPrepass (Standard_True) {}
+  Graphic3d_ZLayerSettings() {}
 
   //! Return user-provided name.
   const TCollection_AsciiString& Name() const { return myName; }
 
   //! Set custom name.
   void SetName (const TCollection_AsciiString& theName) { myName = theName; }
+
+  //! Return true if this layer should be drawn.
+  Standard_Boolean ToDraw() const { return myToDraw; }
+
+  //! Set if layer should be drawn; notice this flag does NOT disable selection of the object.
+  //! Flag is intended for debugging rendering.
+  void SetDraw (const Standard_Boolean theValue) { myToDraw = theValue; }
 
   //! Return lights list to be used for rendering presentations within this Z-Layer; NULL by default.
   //! NULL list (but not empty list!) means that default lights assigned to the View should be used instead of per-layer lights.
@@ -177,6 +175,7 @@ struct Graphic3d_ZLayerSettings
     OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, &myPolygonOffset)
 
     OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myIsImmediate)
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myToDraw)
     OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myToRaytrace)
     OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myUseEnvironmentTexture)
     OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myToEnableDepthTest)
@@ -187,20 +186,43 @@ struct Graphic3d_ZLayerSettings
 
 protected:
 
-  TCollection_AsciiString     myName;                  //!< user-provided name
-  Handle(Graphic3d_LightSet)  myLights;                //!< lights list
-  Handle(TopLoc_Datum3D)      myOriginTrsf;            //!< transformation to the origin
-  gp_XYZ                      myOrigin;                //!< the origin of all objects within the layer
-  Standard_Real               myCullingDistance;       //!< distance to discard objects
-  Standard_Real               myCullingSize;           //!< size to discard objects
-  Graphic3d_PolygonOffset     myPolygonOffset;         //!< glPolygonOffset() arguments
-  Standard_Boolean            myIsImmediate;           //!< immediate layer will be drawn after all normal layers
-  Standard_Boolean            myToRaytrace;            //!< option to render layer within ray-tracing engine
-  Standard_Boolean            myUseEnvironmentTexture; //!< flag to allow/prevent environment texture mapping usage for specific layer
-  Standard_Boolean            myToEnableDepthTest;     //!< option to enable depth test
-  Standard_Boolean            myToEnableDepthWrite;    //!< option to enable write depth values
-  Standard_Boolean            myToClearDepth;          //!< option to clear depth values before drawing the layer
-  Standard_Boolean            myToRenderInDepthPrepass;//!< option to render layer within depth pre-pass
+  //! user-provided name
+  TCollection_AsciiString myName;
+  //! lights list
+  Handle(Graphic3d_LightSet)  myLights;
+
+  //! transformation to the origin
+  Handle(TopLoc_Datum3D) myOriginTrsf;
+  //! the origin of all objects within the layer
+  gp_XYZ myOrigin;
+
+  //! distance to discard objects
+  Standard_Real myCullingDistance = Precision::Infinite();
+  //! size to discard objects
+  Standard_Real myCullingSize = Precision::Infinite();
+
+  //! glPolygonOffset() arguments
+  Graphic3d_PolygonOffset myPolygonOffset;
+
+  //! flag to draw this layer
+  Standard_Boolean myToDraw = Standard_True;
+
+  //! immediate layer will be drawn after all normal layers
+  Standard_Boolean myIsImmediate = Standard_False;
+
+  //! option to render layer within ray-tracing engine
+  Standard_Boolean myToRaytrace = Standard_True;
+  //! flag to allow/prevent environment texture mapping usage for specific layer
+  Standard_Boolean myUseEnvironmentTexture = Standard_True;
+
+  //! option to enable depth test
+  Standard_Boolean myToEnableDepthTest = Standard_True;
+  //! option to enable write depth values
+  Standard_Boolean myToEnableDepthWrite = Standard_True;
+  //! option to clear depth values before drawing the layer
+  Standard_Boolean myToClearDepth = Standard_True;
+  //! option to render layer within depth pre-pass
+  Standard_Boolean myToRenderInDepthPrepass = Standard_True;
 
 };
 

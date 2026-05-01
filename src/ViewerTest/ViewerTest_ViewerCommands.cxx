@@ -4780,6 +4780,10 @@ inline void printZLayerInfo (Draw_Interpretor& theDI,
   {
     theDI << "  Name: " << theLayer.Name() << "\n";
   }
+  if (theLayer.ToDraw())
+  {
+    theDI << "  ToDraw: FALSE\n";
+  }
   if (theLayer.IsImmediate())
   {
     theDI << "  Immediate: TRUE\n";
@@ -5055,6 +5059,12 @@ static int VZLayer (Draw_Interpretor& theDI,
     {
       Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
       aSettings.SetImmediate (Draw::ParseOnOffNoIterator (theArgNb, theArgVec, anArgIter));
+      aViewer->SetZLayerSettings (aLayerId, aSettings);
+    }
+    else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN && anArg == "-draw")
+    {
+      Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
+      aSettings.SetDraw (Draw::ParseOnOffIterator (theArgNb, theArgVec, anArgIter));
       aViewer->SetZLayerSettings (aLayerId, aSettings);
     }
     else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN && anArg == "-depthprepass")
@@ -14790,7 +14800,7 @@ Setup view to draw a tile (a part of virtual bigger viewport).
 vzlayer [layerId] [-get] [-deleteCustom]
         [-add|-delete] [-insertBefore AnotherLayer] [-insertAfter AnotherLayer]
         [-settings]
-        [-immediate {0|1}]
+        [-immediate {0|1}] [-draw {0|1}]
         [-origin X Y Z] [-cullDist Distance] [-cullSize Size]
         [-rayTracing {0|1}] [-depthPrePass {0|1}] [-textureEnv {0|1}]
         [-depthTest {0|1}] [-depthWrite {0|1}] [-depthClear {0|1}]
@@ -14809,6 +14819,7 @@ ZLayer settings:
  -cullDist      specify culling distance from camera eye position
  -cullSize      specify culling size in pixels
  -immediate     put layer into the list of immediate layers
+ -draw          draw this layer or not
  -rayTracing    include/exclude layer from Ray-Tracing
  -depthPrePass  include/exclude layer to/from depth pre-pass
  -depthTest     enable/disable depth test while rendering objects in this layer
