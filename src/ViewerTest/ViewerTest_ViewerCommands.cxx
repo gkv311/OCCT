@@ -639,10 +639,14 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
   if (theParams.Offset.x() != 0)
   {
     aPxTopLeft.x() = theParams.Offset.x();
+    if (theParams.IsSizeInDips)
+      aPxTopLeft.x() *= aDpiScale;
   }
   if (theParams.Offset.y() != 0)
   {
     aPxTopLeft.y() = theParams.Offset.y();
+    if (theParams.IsSizeInDips)
+      aPxTopLeft.y() *= aDpiScale;
   }
   if (theParams.Size.x() != 0)
   {
@@ -654,6 +658,10 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
     {
       aPxSize.x() = aPxSize.x() * double(aScreenSize.x());
     }
+    else if (theParams.IsSizeInDips)
+    {
+      aPxSize.x() *= aDpiScale;
+    }
   }
   if (theParams.Size.y() != 0)
   {
@@ -664,6 +672,10 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
      && theParams.ParentView.IsNull())
     {
       aPxSize.y() = aPxSize.y() * double(aScreenSize.y());
+    }
+    else if (theParams.IsSizeInDips)
+    {
+      aPxSize.y() *= aDpiScale;
     }
   }
 
@@ -1116,6 +1128,14 @@ static int VInit (Draw_Interpretor& theDi, Standard_Integer theArgsNb, const cha
           && Draw::ParseInteger (theArgVec[anArgIt + 2], aParams.SubviewMargins.y()))
     {
       anArgIt += 2;
+    }
+    else if (anArgCase == "-dip" || anArgCase == "-dp")
+    {
+      aParams.IsSizeInDips = Draw::ParseOnOffIterator (theArgsNb, theArgVec, anArgIt);;
+    }
+    else if (anArgCase == "-px")
+    {
+      aParams.IsSizeInDips = !Draw::ParseOnOffIterator(theArgsNb, theArgVec, anArgIt);;
     }
     else if (anArgCase == "-virtual"
           || anArgCase == "-offscreen")
@@ -5925,17 +5945,8 @@ static int VReadPixel (Draw_Interpretor& theDI,
   Image_Format         aFormat     = Image_Format_RGBA;
   Graphic3d_BufferType aBufferType = Graphic3d_BT_RGBA;
 
-  Standard_Integer aWidth, aHeight;
-  aView->Window()->Size (aWidth, aHeight);
-  const Standard_Integer anX = Draw::Atoi (theArgVec[1]);
-  const Standard_Integer anY = Draw::Atoi (theArgVec[2]);
-  if (anX < 0 || anX >= aWidth || anY < 0 || anY > aHeight)
-  {
-    Message::SendFail() << "Error: pixel coordinates (" << anX << "; " << anY << ") are out of view (" << aWidth << " x " << aHeight << ")";
-    return 1;
-  }
-
   bool toShowName = false, toShowHls = false, toShowHex = false, toShow_sRGB = false;
+  bool toConvertToBacking = true;
   for (Standard_Integer anIter = 3; anIter < theArgNb; ++anIter)
   {
     TCollection_AsciiString aParam (theArgVec[anIter]);
@@ -5993,11 +6004,37 @@ static int VReadPixel (Draw_Interpretor& theDI,
     {
       toShowHex = Standard_True;
     }
+    else if (aParam == "-dip" || aParam == "-dp")
+    {
+      toConvertToBacking = Draw::ParseOnOffIterator (theArgNb, theArgVec, anIter);
+    }
+    else if (aParam == "-px")
+    {
+      toConvertToBacking = !Draw::ParseOnOffIterator (theArgNb, theArgVec, anIter);
+    }
     else
     {
       Message::SendFail() << "Syntax error at '" << aParam << "'";
       return 1;
     }
+  }
+
+  Standard_Integer anX = Draw::Atoi (theArgVec[1]);
+  Standard_Integer anY = Draw::Atoi (theArgVec[2]);
+  if (toConvertToBacking)
+  {
+    Graphic3d_Vec2d aPos = aView->Window()->ConvertPointToBacking (Graphic3d_Vec2d (anX, anY));
+    anX = (int )Round (aPos.x());
+    anY = (int )Round (aPos.y());
+  }
+
+  Standard_Integer aWidth = 0, aHeight = 0;
+  aView->Window()->Size (aWidth, aHeight);
+  if (anX < 0 || anX >= aWidth || anY < 0 || anY > aHeight)
+  {
+    Message::SendFail() << "Error: pixel coordinates (" << anX << "; " << anY << ")"
+                        << " are out of view (" << aWidth << " x " << aHeight << ")";
+    return 1;
   }
 
   Image_PixMap anImage;
@@ -6648,6 +6685,7 @@ static Standard_Integer VSelect (Draw_Interpretor& ,
 
   NCollection_Sequence<Graphic3d_Vec2i> aPnts;
   bool toAllowOverlap = false;
+  bool toConvertToBacking = true;
   AIS_SelectionScheme aSelScheme = AIS_SelectionScheme_Replace;
   for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
   {
@@ -6710,6 +6748,16 @@ static Standard_Integer VSelect (Draw_Interpretor& ,
     aCtx->MainSelector()->AllowOverlapDetection (toAllowOverlap);
   }
 
+  const Handle(V3d_View)& aView = ViewerTest::CurrentView();
+  if (toConvertToBacking)
+  {
+    for (Graphic3d_Vec2i& aPntIter : aPnts)
+    {
+      Graphic3d_Vec2d aPos = aView->Window()->ConvertPointToBacking (Graphic3d_Vec2d(aPntIter));
+      aPntIter.SetValues ((int)Round (aPos.x()), (int)Round (aPos.y()));
+    }
+  }
+
   Handle(ViewerTest_EventManager) aCurrentEventManager = ViewerTest::CurrentEventManager();
   if (aPnts.IsEmpty())
   {
@@ -6756,6 +6804,7 @@ static Standard_Integer VMoveTo (Draw_Interpretor& theDI,
   }
 
   Graphic3d_Vec2i aMousePos (IntegerLast(), IntegerLast());
+  bool toConvertToBacking = true;
   for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
   {
     TCollection_AsciiString anArgStr (theArgVec[anArgIter]);
@@ -6781,15 +6830,21 @@ static Standard_Integer VMoveTo (Draw_Interpretor& theDI,
       }
       return 0;
     }
-    else if (aMousePos.x() == IntegerLast()
-          && anArgStr.IsIntegerValue())
+
+    if (anArgStr == "-dip" || anArgStr == "-dp")
     {
-      aMousePos.x() = anArgStr.IntegerValue();
+      toConvertToBacking = true;
     }
-    else if (aMousePos.y() == IntegerLast()
-          && anArgStr.IsIntegerValue())
+    else if (anArgStr == "-px")
     {
-      aMousePos.y() = anArgStr.IntegerValue();
+      toConvertToBacking = false;
+    }
+    else if (aMousePos.x() == IntegerLast()
+          && anArgIter + 1 < theNbArgs
+          && Draw::ParseInteger (theArgVec[anArgIter], aMousePos.x())
+          && Draw::ParseInteger (theArgVec[anArgIter + 1], aMousePos.y()))
+    {
+      ++anArgIter;
     }
     else
     {
@@ -6803,6 +6858,12 @@ static Standard_Integer VMoveTo (Draw_Interpretor& theDI,
   {
     Message::SendFail ("Syntax error: wrong number of arguments");
     return 1;
+  }
+
+  if (toConvertToBacking)
+  {
+    Graphic3d_Vec2d aPos = aView->Window()->ConvertPointToBacking (Graphic3d_Vec2d(aMousePos));
+    aMousePos.SetValues ((int)Round (aPos.x()), (int)Round (aPos.y()));
   }
 
   ViewerTest::CurrentEventManager()->ResetPreviousMoveTo();
@@ -14597,7 +14658,10 @@ with f option returns free memory in bytes.
 
   addCmd ("vreadpixel", VReadPixel, /* [vreadpixel] */ R"(
 vreadpixel xPixel yPixel [{rgb|rgba|sRGB|sRGBa|depth|hls|rgbf|rgbaf}=rgba] [-name|-hex]
+           [-px|-dip]=-dip
 Read pixel value for active view.
+ -px    specify position in backing pixels;
+ -dip   specify position in device-independent pixels (default).
 )" /* [vreadpixel] */);
 
   addCmd ("diffimage", VDiffImage, /* [diffimage] */ R"(
@@ -14628,7 +14692,7 @@ Command for testing reading/writing image libraries.
 
   addCmd ("vselect", VSelect, /* [vselect] */ R"(
 vselect x1 y1 [x2 y2 [x3 y3 ... xn yn]] [-allowoverlap 0|1]
-        [-replace|-replaceextra|-xor|-add|-remove]
+        [-replace|-replaceextra|-xor|-add|-remove] [-px|-dip]=-dip
 Emulate different types of selection:
  1) Single click selection.
  2) Selection with rectangle having corners at pixel positions (x1,y1) and (x2,y2).
@@ -14643,9 +14707,11 @@ Emulate different types of selection:
 )" /* [vselect] */);
 
   addCmd ("vmoveto", VMoveTo, /* [vmoveto] */ R"(
-vmoveto [x y] [-reset]
+vmoveto [x y] [-reset] [-px|-dip]=-dip
 Emulate cursor movement to pixel position (x,y).
- -reset resets current highlighting.
+ -reset resets current highlighting;
+ -px    specify position in backing pixels;
+ -dip   specify position in device-independent pixels (default).
 )" /* [vmoveto] */);
 
   addCmd ("vselaxis", VSelectByAxis, /* [vselaxis] */ R"(
