@@ -26,6 +26,7 @@ enum Graphic3d_TransModeFlags
   Graphic3d_TMF_2d               = 0x0040, //!< object is defined in 2D screen coordinates (pixels) and does not resize, pan and rotate
   Graphic3d_TMF_CameraPers       = 0x0080, //!< object is in front of the camera
   Graphic3d_TMF_DensityDependent = 0x0100, //!< object is defined in canvas pixels, not in density/device-independent pixels
+  Graphic3d_TMF_NoFOV2dLimit     = 0x0200, //!< ignore Graphic3d_Camera::FOV2d() limit
 
   Graphic3d_TMF_ZoomPersDip     = Graphic3d_TMF_ZoomPers,     //!< object does not resize with size in device-independent units
   Graphic3d_TMF_TriedronPersDip = Graphic3d_TMF_TriedronPers, //!< object behaves as trihedron with size in device-independent units
