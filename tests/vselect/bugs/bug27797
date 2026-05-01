@@ -10,9 +10,9 @@ vertex v 100 -300 0
 
 vclear
 vinit View1
-catch { vzlayer del 1 }
-set aLayerId [vzlayer add]
-vzlayer ${aLayerId} -enable depthClear
+vzlayer -deleteCustom
+set aLayerId [vzlayer -add]
+vzlayer ${aLayerId} -depthClear 1
 vaxo
 vdisplay -noupdate -dispMode 1 -highMode 1 b1
 vdisplay -noupdate -dispMode 1 -highMode 1 -layer ${aLayerId} b2

@@ -4901,7 +4901,8 @@ static int VZLayer (Draw_Interpretor& theDI,
     }
     else if (anArg == "-del"
           || anArg == "-delete"
-          || anArg == "del")
+          || anArg == "del"
+          || anArg == "-remove")
     {
       if (aLayerId == Graphic3d_ZLayerId_UNKNOWN)
       {
@@ -4957,6 +4958,20 @@ static int VZLayer (Draw_Interpretor& theDI,
         theDI << aLayeriter.Value() << " ";
       }
 
+      theDI << "\n";
+    }
+    else if (anArg == "-deletecustom" || anArg == "-removecustom")
+    {
+      TColStd_SequenceOfInteger aLayers;
+      aViewer->GetAllZLayers (aLayers);
+      for (Standard_Integer aLayerIter : aLayers)
+      {
+        if (aLayerIter >= 1)
+        {
+          theDI << aLayerIter << " ";
+          aViewer->RemoveZLayer (aLayerIter);
+        }
+      }
       theDI << "\n";
     }
     else if (anArg == "-name")
@@ -5035,6 +5050,68 @@ static int VZLayer (Draw_Interpretor& theDI,
       aSettings.SetCullingSize (aSize);
       aViewer->SetZLayerSettings (aLayerId, aSettings);
     }
+    else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN
+          && (anArg == "-immediate" || anArg == "-noimmediate"))
+    {
+      Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
+      aSettings.SetImmediate (Draw::ParseOnOffNoIterator (theArgNb, theArgVec, anArgIter));
+      aViewer->SetZLayerSettings (aLayerId, aSettings);
+    }
+    else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN && anArg == "-depthprepass")
+    {
+      Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
+      aSettings.SetRenderInDepthPrepass (Draw::ParseOnOffNoIterator (theArgNb, theArgVec, anArgIter));
+      aViewer->SetZLayerSettings (aLayerId, aSettings);
+    }
+    else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN
+          && (anArg == "-depthtest" || anArg == "-nodepthtest"))
+    {
+      Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
+      aSettings.SetEnableDepthTest (Draw::ParseOnOffNoIterator (theArgNb, theArgVec, anArgIter));
+      aViewer->SetZLayerSettings (aLayerId, aSettings);
+    }
+    else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN
+          && (anArg == "-depthwrite" || anArg == "-nodepthwrite"))
+    {
+      Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
+      aSettings.SetEnableDepthWrite (Draw::ParseOnOffNoIterator (theArgNb, theArgVec, anArgIter));
+      aViewer->SetZLayerSettings (aLayerId, aSettings);
+    }
+    else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN
+          && (anArg == "-depthclear" || anArg == "-nodepthclear"))
+    {
+      Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
+      aSettings.SetClearDepth (Draw::ParseOnOffNoIterator (theArgNb, theArgVec, anArgIter));
+      aViewer->SetZLayerSettings (aLayerId, aSettings);
+    }
+    else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN
+          && (anArg == "-textureenv" || anArg == "-notextureenv"))
+    {
+      Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
+      aSettings.SetEnvironmentTexture (Draw::ParseOnOffNoIterator (theArgNb, theArgVec, anArgIter));
+      aViewer->SetZLayerSettings (aLayerId, aSettings);
+    }
+    else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN
+          && (anArg == "-raytracing" || anArg == "-noraytracing"))
+    {
+      Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
+      aSettings.SetRaytracable (Draw::ParseOnOffNoIterator (theArgNb, theArgVec, anArgIter));
+      aViewer->SetZLayerSettings (aLayerId, aSettings);
+    }
+    else if (aLayerId != Graphic3d_ZLayerId_UNKNOWN
+          && (anArg == "-polygonoffset")
+          && (anArgIter + 2 < theArgNb))
+    {
+      Graphic3d_PolygonOffset aParams;
+      aParams.Factor = static_cast<float> (Draw::Atof (theArgVec[++anArgIter]));
+      aParams.Units  = static_cast<float> (Draw::Atof (theArgVec[++anArgIter]));
+      aParams.Mode   = (Abs(aParams.Factor) <= ShortRealSmall() && Abs(aParams.Units) <= ShortRealSmall())
+                     ? Aspect_POM_Fill
+                     : Aspect_POM_None;
+      Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
+      aSettings.SetPolygonOffset (aParams);
+      aViewer->SetZLayerSettings (aLayerId, aSettings);
+    }
     else if (anArg == "-settings"
           || anArg == "settings")
     {
@@ -5052,6 +5129,7 @@ static int VZLayer (Draw_Interpretor& theDI,
       Graphic3d_ZLayerSettings aSettings = aViewer->ZLayerSettings (aLayerId);
       printZLayerInfo (theDI, aSettings);
     }
+    // legacy syntax
     else if (anArg == "-enable"
           || anArg == "enable"
           || anArg == "-disable"
@@ -14709,20 +14787,35 @@ Setup view to draw a tile (a part of virtual bigger viewport).
 )" /* [vtile] */);
 
   addCmd ("vzlayer", VZLayer, /* [vzlayer] */ R"(
-vzlayer [layerId]
-        [-add|-delete|-get|-settings] [-insertBefore AnotherLayer] [-insertAfter AnotherLayer]
+vzlayer [layerId] [-get] [-deleteCustom]
+        [-add|-delete] [-insertBefore AnotherLayer] [-insertAfter AnotherLayer]
+        [-settings]
+        [-immediate {0|1}]
         [-origin X Y Z] [-cullDist Distance] [-cullSize Size]
-        [-enable|-disable {depthTest|depthWrite|depthClear|depthoffset}]
-        [-enable|-disable {positiveOffset|negativeOffset|textureenv|rayTracing}]
+        [-rayTracing {0|1}] [-depthPrePass {0|1}] [-textureEnv {0|1}]
+        [-depthTest {0|1}] [-depthWrite {0|1}] [-depthClear {0|1}]
+        [-polygonOffset factor units]
 ZLayer list management
- -add      add new z layer to viewer and print its id
- -insertBefore add new z layer and insert it before existing one
- -insertAfter  add new z layer and insert it after  existing one
- -delete   delete z layer
- -get      print sequence of z layers
- -settings print status of z layer settings
- -disable  disables given setting
- -enable   enables  given setting
+ -get           print sequence of z layers
+ -add           add new z layer to viewer and print its id
+ -insertBefore  add new z layer and insert it before existing one
+ -insertAfter   add new z layer and insert it after  existing one
+ -delete        delete z layer
+ -deleteCustom  remove all custom z layers
+ZLayer settings:
+ -settings      print layer settings
+ -origin        define origin for more precise transformation
+                distant from absolute {0 0 0} world origin
+ -cullDist      specify culling distance from camera eye position
+ -cullSize      specify culling size in pixels
+ -immediate     put layer into the list of immediate layers
+ -rayTracing    include/exclude layer from Ray-Tracing
+ -depthPrePass  include/exclude layer to/from depth pre-pass
+ -depthTest     enable/disable depth test while rendering objects in this layer
+ -depthWrite    enable/disable depth write while rendering objects in this layer
+ -depthClear    enable/disable depth clear before starting rendering this layer
+ -polygonOffset specify default polygon offset within layer
+ -textureEnv    enable/disable environment texture for the layer
 )" /* [vzlayer] */);
 
   addCmd ("vlayerline", VLayerLine, /* [vlayerline] */ R"(

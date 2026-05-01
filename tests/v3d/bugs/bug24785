@@ -24,16 +24,16 @@ vaspects s -material brass
 vpolygonoffset s 8 0 0
 
 # Create new z-layer for 3d objects
-catch { vzlayer -delete 1 }
-set aLayerId [vzlayer add]
+vzlayer -deleteCustom
+set aLayerId [vzlayer -add]
 vdisplay s -layer $aLayerId
 
 # Disable OpenGL depth test for layer 0 (to eliminate flickering)
 # But depth write is still enabled
-vzlayer DEFAULT   -disable depthTest
+vzlayer DEFAULT   -depthTest 0
 
 # Disable depth buffer clearing for layer 1 (we want correct overlapping with 3d objects)
-vzlayer $aLayerId -disable depthClear
+vzlayer $aLayerId -depthClear 0
 
 # List currently enabled settings of each layer
 vzlayer DEFAULT   -settings
@@ -51,7 +51,7 @@ vpolygonoffset b 8 0 0
 # To handle this situation, depth offset setting was introduced.
 # It implemented with glPolygonOffset calls per layer.
 # Set polygon offset 2 (greater than default value 1 to see the difference).
-vzlayer 1 -enable depthoffset 2 1
+vzlayer $aLayerId -polygonOffset 2 1
 
 vfit
 vdump $imagedir/${casename}.png

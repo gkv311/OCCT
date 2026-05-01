@@ -11,14 +11,14 @@ vdisplay b s
 vsetdispmode b 1
 vsetdispmode s 1
 vfit
-vzlayer add
-vzlayer add
-vzlayer add
-set info1 [ vzlayer get ]
+vzlayer -add
+vzlayer -add
+vzlayer -add
+set info1 [vzlayer -get]
 
-vzlayer del 1
+vzlayer 1 -delete
 
-set info2 [ vzlayer get ]
+set info2 [vzlayer -get]
 
 set status_vzlayer 0
 
@@ -36,7 +36,7 @@ vobjzlayer set s 3
 set info4 [ vobjzlayer get s ]
 set word9 [string compare ${info4} "Z layer id: 3"]
 
-vzlayer del 3
+vzlayer 3 -delete
 set info5 [ vobjzlayer get s ]
 set word10 [string compare ${info5} "Z layer id: 0"]
 
