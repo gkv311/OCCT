@@ -155,9 +155,6 @@ protected:
   //! @return true if array of triangles is successfully filled.
   Standard_EXPORT Standard_Boolean fillTriangles();
 
-  //! Setup default ZLayer.
-  Standard_EXPORT void setupDefaultZLayer();
-
 protected:
 
   NCollection_Sequence<Graphic3d_Vec2i> myPoints; //!< Array of screen points
@@ -165,6 +162,6 @@ protected:
   Handle(Graphic3d_ArrayOfTriangles) myTriangles; //!< Triangles for rubber band filling
   Handle(Graphic3d_ArrayOfPolylines) myBorders; //!< Polylines for rubber band borders
 
-  Standard_Boolean                   myIsPolygonClosed; //!< automatic closing of rubber-band flag
+  Standard_Boolean myIsPolygonClosed = true; //!< automatic closing of rubber-band flag
 };
 #endif

@@ -110,8 +110,11 @@ public:
   //! Return true for Graphic3d_TMF_TriedronPers and Graphic3d_TMF_2d modes.
   Standard_Boolean IsTrihedronOr2d() const { return IsTrihedronOr2d (myMode); }
 
+  //! Return TRUE if position is defined in density/device-independent pixels,
+  //! and FALSE if defined in canvas pixels.
   Standard_Boolean IsDensityIndependent() const { return (myMode & Graphic3d_TMF_DensityDependent) == 0; }
 
+  //! Set if position is defined in density/device-independent pixels.
   void SetDensityIndependent(Standard_Boolean theIsOn)
   {
     if (myMode == Graphic3d_TMF_None)
@@ -120,6 +123,20 @@ public:
     myMode = theIsOn
            ? Graphic3d_TransModeFlags(myMode & ~Graphic3d_TMF_DensityDependent)
            : Graphic3d_TransModeFlags(myMode | Graphic3d_TMF_DensityDependent);
+  }
+
+  //! Return TRUE if Graphic3d_Camera::FOV2d() limit should be ignored.
+  Standard_Boolean ToIgnoreFOV2dLimit() const { return (myMode & Graphic3d_TMF_NoFOV2dLimit) != 0; }
+
+  //! Set if Graphic3d_Camera::FOV2d() limit should be ignored.
+  void SetIgnoreFOV2dLimit(Standard_Boolean theToIgnore)
+  {
+    if (myMode == Graphic3d_TMF_None)
+      throw Standard_ProgramError("Graphic3d_TransformPers::SetIgnoreFOV2dLimit() called for empty persistence");
+
+    myMode = theToIgnore
+      ? Graphic3d_TransModeFlags(myMode | Graphic3d_TMF_NoFOV2dLimit)
+      : Graphic3d_TransModeFlags(myMode & ~Graphic3d_TMF_NoFOV2dLimit);
   }
 
   //! Transformation persistence mode flags.
@@ -400,30 +417,24 @@ void Graphic3d_TransformPers::Apply (const Handle(Graphic3d_Camera)& theCamera,
     gp_XYZ aCenter = theCamera->Center().XYZ() + aForward.XYZ() * (aFocus - theCamera->Distance());
     if ((myParams.Params2d.Corner & (Aspect_TOTP_LEFT | Aspect_TOTP_RIGHT)) != 0)
     {
+      const Standard_Real anNdcX = !ToIgnoreFOV2dLimit() ? theCamera->NDC2dOffsetX() : 0.5;
       const Standard_Real anOffsetX = (Standard_Real(myParams.Params2d.OffsetX) + aJitterComp) * aScale;
       const gp_Dir aSide   = aForward.Crossed (theCamera->Up());
-      const gp_XYZ aDeltaX = aSide.XYZ() * (Abs(aViewDim.X()) * theCamera->NDC2dOffsetX() - anOffsetX);
+      const gp_XYZ aDeltaX = aSide.XYZ() * (Abs(aViewDim.X()) * anNdcX - anOffsetX);
       if ((myParams.Params2d.Corner & Aspect_TOTP_RIGHT) != 0)
-      {
         aCenter += aDeltaX;
-      }
       else
-      {
         aCenter -= aDeltaX;
-      }
     }
     if ((myParams.Params2d.Corner & (Aspect_TOTP_TOP | Aspect_TOTP_BOTTOM)) != 0)
     {
+      const Standard_Real anNdcY = !ToIgnoreFOV2dLimit() ? theCamera->NDC2dOffsetY() : 0.5;
       const Standard_Real anOffsetY = (Standard_Real(myParams.Params2d.OffsetY) + aJitterComp) * aScale;
-      const gp_XYZ aDeltaY = theCamera->Up().XYZ() * (Abs(aViewDim.Y()) * theCamera->NDC2dOffsetY() - anOffsetY);
+      const gp_XYZ aDeltaY = theCamera->Up().XYZ() * (Abs(aViewDim.Y()) * anNdcY - anOffsetY);
       if ((myParams.Params2d.Corner & Aspect_TOTP_TOP) != 0)
-      {
         aCenter += aDeltaY;
-      }
       else
-      {
         aCenter -= aDeltaY;
-      }
     }
 
     NCollection_Mat4<Standard_Real> aWorldView = theCamera->OrientationMatrix();
@@ -446,19 +457,17 @@ void Graphic3d_TransformPers::Apply (const Handle(Graphic3d_Camera)& theCamera,
     gp_XYZ aCenter (aJitterComp * aScale, aJitterComp * aScale, -aFocus);
     if ((myParams.Params2d.Corner & (Aspect_TOTP_LEFT | Aspect_TOTP_RIGHT)) != 0)
     {
-      aCenter.SetX (-aViewDim.X() * theCamera->NDC2dOffsetX() + (Standard_Real(myParams.Params2d.OffsetX) + aJitterComp) * aScale);
+      const Standard_Real anNdcX = !ToIgnoreFOV2dLimit() ? theCamera->NDC2dOffsetX() : 0.5;
+      aCenter.SetX (-aViewDim.X() * anNdcX + (Standard_Real(myParams.Params2d.OffsetX) + aJitterComp) * aScale);
       if ((myParams.Params2d.Corner & Aspect_TOTP_RIGHT) != 0)
-      {
         aCenter.SetX (-aCenter.X());
-      }
     }
     if ((myParams.Params2d.Corner & (Aspect_TOTP_TOP | Aspect_TOTP_BOTTOM)) != 0)
     {
-      aCenter.SetY (-aViewDim.Y() * theCamera->NDC2dOffsetY() + (Standard_Real(myParams.Params2d.OffsetY) + aJitterComp) * aScale);
+      const Standard_Real anNdcY = !ToIgnoreFOV2dLimit() ? theCamera->NDC2dOffsetY() : 0.5;
+      aCenter.SetY (-aViewDim.Y() * anNdcY + (Standard_Real(myParams.Params2d.OffsetY) + aJitterComp) * aScale);
       if ((myParams.Params2d.Corner & Aspect_TOTP_TOP) != 0)
-      {
         aCenter.SetY (-aCenter.Y());
-      }
     }
 
     theWorldView.InitIdentity();

@@ -114,6 +114,7 @@ AIS_ViewController::AIS_ViewController()
   myRubberBand = new AIS_RubberBand (Quantity_NOC_LIGHTBLUE, Aspect_TOL_SOLID, Quantity_NOC_LIGHTBLUE4, 0.5, 1.0);
   myRubberBand->SetZLayer (Graphic3d_ZLayerId_TopOSD);
   myRubberBand->SetTransformPersistence (new Graphic3d_TransformPers (Graphic3d_TMF_2dPx, Aspect_TOTP_LEFT_UPPER));
+  myRubberBand->TransformPersistence()->SetIgnoreFOV2dLimit (true);
   myRubberBand->SetDisplayMode (0);
   myRubberBand->SetMutable (true);
 

@@ -5121,6 +5121,12 @@ static int VDisplay2 (Draw_Interpretor& theDI,
         aTrsfPers = new Graphic3d_TransformPers (aTrsfPers->Mode(), Aspect_TypeOfTriedronPosition (aCorner), Graphic3d_Vec2i (aZ.IntegerValue()));
       }
     }
+    else if ((aNameCase == "-trsfpersnofov2d"
+           || aNameCase == "-persnofov2d") && !aTrsfPers.IsNull())
+    {
+      const bool isNoFOV2d = Draw::ParseOnOffNoIterator(theArgNb, theArgVec, anArgIter);
+      aTrsfPers->SetIgnoreFOV2dLimit(isNoFOV2d);
+    }
     else if (aNameCase == "-layer"
           || aNameCase == "-zlayer")
     {
@@ -6733,6 +6739,7 @@ vdisplay [-noupdate|-update] [-mutable] [-neutral]
             [-2d|-trihedron [{top|bottom|left|right|topLeft
                             |topRight|bottomLeft|bottomRight}
               [offsetX offsetY]]]
+            [-trsfPersNoFOV2d {0|1}]=0
          [-dispMode mode] [-highMode mode]
          [-layer index] [-top|-topmost|-overlay|-underlay]
          [-redisplay] [-erased]
