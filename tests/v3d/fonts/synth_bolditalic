@@ -1,0 +1,64 @@
+puts "============"
+puts "Font_FTFont - synthesize Bold when aspect is unavailable"
+puts "============"
+puts ""
+
+pload MODELING VISUALIZATION
+dtracelevel trace
+vfont -verbose 1
+vfont -add [locate_data_file DejaVuSans.ttf]    SansFont
+vfont -add [locate_data_file bug22149_mona.ttf] MonaFont
+vfont -clearAliases -addAlias cjk MonaFont
+
+top
+text2brep r  "My 好的 Text" -strict strict -font "SansFont" -height 48 -pos 0   0 0 -aspect regular
+text2brep i  "My 好的 Text" -strict strict -font "SansFont" -height 48 -pos 0  70 0 -aspect italic
+text2brep b  "My 好的 Text" -strict strict -font "SansFont" -height 48 -pos 0 140 0 -aspect bold
+text2brep bi "My 好的 Text" -strict strict -font "SansFont" -height 48 -pos 0 210 0 -aspect boldItalic
+fit
+
+# check if Bold is Bold by comparing areas
+proc getArea { theShape } {
+  regexp {Mass +: +([-0-9.+eE]+)} [uplevel #0 sprops $theShape] full m
+  return $m
+}
+set ar  [getArea r]
+set ai  [getArea i]
+set ab  [getArea b]
+set abi [getArea bi]
+if { $ab  < [expr $ar*1.4] } { puts "Error: Bold aspect should be wider than Regular" }
+if { $abi < [expr $ar*1.4] } { puts "Error: Bold-Italic aspect should be wider than Regular" }
+checkreal "Regular      area" $ar  3010.26 1.0 0.0
+checkreal "Italic       area" $ai  2919.45 1.0 0.0
+checkreal "Bold         area" $ab  4679.37 1.0 0.0
+checkreal "Bolid-Italic area" $abi 4557.56 1.0 0.0
+
+# check if Italic is Italic by comparing letter up direction (first edge of letter 'M')
+proc getAxis { theShape } {
+  uplevel #0 explode $theShape E
+  uplevel #0 mkcurve ${theShape}_l ${theShape}_1
+  regexp {Axis   :([-0-9.+eE]+), ([-0-9.+eE]+), ([-0-9.+eE]+)} [uplevel #0 dump ${theShape}_l] full dx dy dz
+  return [list $dx $dy $dz]
+}
+set xr  [getAxis r]
+set xi  [getAxis i]
+set xb  [getAxis b]
+set xbi [getAxis bi]
+checkpoint "Regular    up direction" $xr  {0 1 0} 0.001
+checkpoint "Bold       up direction" $xb  {0 1 0} 0.001
+checkpoint "Italic     up direction" $xi  {0.17 0.98 0} 0.01
+checkpoint "BoldItalic up direction" $xbi {0.17 0.98 0} 0.01
+xwd ${imagedir}/${casename}_brep.png
+
+# make screenshot with a textured font (with no extra checks)
+vclear
+vinit View1
+vtop
+vpoint p0 0   0   0
+vpoint p1 500 500 0
+vdrawtext r  "My 好的 Text" -font "SansFont" -height 48 -pos 0 100 0 -aspect regular
+vdrawtext i  "My 好的 Text" -font "SansFont" -height 48 -pos 0 200 0 -aspect italic
+vdrawtext b  "My 好的 Text" -font "SansFont" -height 48 -pos 0 300 0 -aspect bold
+vdrawtext bi "My 好的 Text" -font "SansFont" -height 48 -pos 0 400 0 -aspect boldItalic
+vfit
+vdump ${imagedir}/${casename}_gl.png
