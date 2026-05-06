@@ -36,28 +36,32 @@ class Font_FTLibrary;
 //! Font initialization parameters.
 struct Font_FTFontParams
 {
-  unsigned int PointSize;                  //!< face size in points (1/72 inch)
-  unsigned int Resolution;                 //!< resolution of the target device in dpi for FT_Set_Char_Size()
-  Font_Hinting FontHinting;                //!< request hinting (exclude FT_LOAD_NO_HINTING flag), Font_Hinting_Off by default;
-                                           //!  hinting improves readability of thin text on low-resolution screen,
-                                           //!  but adds distortions to original font depending on font family and font library version
-  bool         ToSynthesizeItalic;         //!< generate italic style (e.g. for font family having no italic style); FALSE by default
-  bool         IsSingleStrokeFont;         //!< single-stroke (one-line) font, FALSE by default
+  //! Face size in points (1/72 inch).
+  unsigned int PointSize = 0;
+  //! Resolution of the target device in dpi for FT_Set_Char_Size()
+  unsigned int Resolution = 72u;
+  //! Request hinting (exclude FT_LOAD_NO_HINTING flag), Font_Hinting_Off by default;
+  //! hinting improves readability of thin text on low-resolution screen,
+  //! but adds distortions to original font depending on font family and font library version
+  Font_Hinting FontHinting = Font_Hinting_Off;
+
+  //! Emulate 'italic' style (e.g. for font family having no italic style); FALSE by default.
+  //! The current implementation applies 10 degrees shear transformation to the glyphs.
+  bool ToSynthesizeItalic = false;
+  //! Emulate 'bold' style (e.g. for font family having no bold style); FALSE by default.
+  //! The current implementation applies FT_Outline_Embolden/FT_Bitmap_Embolden algorithms.
+  bool ToSynthesizeBold = false;
+  //! Single-stroke (one-line) font, FALSE by default.
+  //! Such fonts can be used only for generating wireframe shapes (e.g. they have no outlines).
+  bool IsSingleStrokeFont = false;
 
   //! Empty constructor.
-  Font_FTFontParams()
-  : PointSize (0), Resolution (72u),
-    FontHinting (Font_Hinting_Off),
-    ToSynthesizeItalic (false),
-    IsSingleStrokeFont (false)  {}
+  Font_FTFontParams() {}
 
   //! Constructor.
   Font_FTFontParams (unsigned int thePointSize,
                      unsigned int theResolution)
-  : PointSize (thePointSize), Resolution (theResolution),
-    FontHinting (Font_Hinting_Off),
-    ToSynthesizeItalic (false),
-    IsSingleStrokeFont (false) {}
+  : PointSize (thePointSize), Resolution (theResolution) {}
 };
 
 DEFINE_STANDARD_HANDLE(Font_FTFont, Standard_Transient)
@@ -219,6 +223,9 @@ public:
 
   //! Return TRUE if italic style should be synthesized; FALSE by default.
   bool ToSynthesizeItalic() const { return myFontParams.ToSynthesizeItalic; }
+
+  //! Return TRUE if bold style should be synthesized; FALSE by default.
+  bool ToSynthesizeBold() const { return myFontParams.ToSynthesizeBold; }
 
   //! Release currently loaded font.
   Standard_EXPORT virtual void Release();

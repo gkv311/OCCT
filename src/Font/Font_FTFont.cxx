@@ -28,6 +28,7 @@
   #include FT_FREETYPE_H
   #include FT_GLYPH_H
   #include FT_TRUETYPE_TABLES_H
+  #include FT_SYNTHESIS_H
 #endif
 
 IMPLEMENT_STANDARD_RTTIEXT(Font_FTFont,Standard_Transient)
@@ -279,7 +280,7 @@ Handle(Font_FTFont) Font_FTFont::FindAndCreate (const TCollection_AsciiString& t
     }
 
     Standard_Integer aFaceId = 0;
-    const TCollection_AsciiString& aPath = aRequestedFont->FontPathAny (aFontAspect, aParams.ToSynthesizeItalic, aFaceId);
+    const TCollection_AsciiString& aPath = aRequestedFont->FontPathAny (aFontAspect, aParams, aFaceId);
     Handle(Font_FTFont) aFont = new Font_FTFont();
     if (aFont->Init (aPath, aParams, aFaceId))
     {
@@ -290,16 +291,20 @@ Handle(Font_FTFont) Font_FTFont::FindAndCreate (const TCollection_AsciiString& t
 #ifdef HAVE_FREETYPE
   else if (theStrictLevel == Font_StrictLevel_Any)
   {
+    aFontAspect = Font_FontAspect_Regular;
     switch (theFontAspect)
     {
       case Font_FontAspect_UNDEFINED:
       case Font_FontAspect_Regular:
+        break;
       case Font_FontAspect_Bold:
-        aFontAspect = Font_FontAspect_Regular;
+        aParams.ToSynthesizeBold = true;
         break;
       case Font_FontAspect_Italic:
+        aParams.ToSynthesizeItalic = true;
+        break;
       case Font_FontAspect_BoldItalic:
-        aFontAspect = Font_FontAspect_Italic;
+        aParams.ToSynthesizeBold = true;
         aParams.ToSynthesizeItalic = true;
         break;
     }
@@ -334,12 +339,17 @@ bool Font_FTFont::FindAndInit (const TCollection_AsciiString& theFontName,
     }
 
     Standard_Integer aFaceId = 0;
-    const TCollection_AsciiString& aPath = aRequestedFont->FontPathAny (myFontAspect, aParams.ToSynthesizeItalic, aFaceId);
+    const TCollection_AsciiString& aPath = aRequestedFont->FontPathAny (myFontAspect, aParams, aFaceId);
     return Init (aPath, aParams, aFaceId);
   }
 #ifdef HAVE_FREETYPE
   else if (theStrictLevel == Font_StrictLevel_Any)
   {
+    if (theFontAspect == Font_FontAspect_Bold
+     || theFontAspect == Font_FontAspect_BoldItalic)
+    {
+      aParams.ToSynthesizeBold = true;
+    }
     if (theFontAspect == Font_FontAspect_Italic
      || theFontAspect == Font_FontAspect_BoldItalic)
     {
@@ -373,10 +383,12 @@ bool Font_FTFont::findAndInitFallback (Font_UnicodeSubset theSubset)
   if (Handle(Font_SystemFont) aRequestedFont = aFontMgr->FindFallbackFont (theSubset, myFontAspect))
   {
     Font_FTFontParams aParams = myFontParams;
+    aParams.ToSynthesizeBold = false;
+    aParams.ToSynthesizeItalic = false;
     aParams.IsSingleStrokeFont = aRequestedFont->IsSingleStrokeFont();
 
     Standard_Integer aFaceId = 0;
-    const TCollection_AsciiString& aPath = aRequestedFont->FontPathAny (myFontAspect, aParams.ToSynthesizeItalic, aFaceId);
+    const TCollection_AsciiString& aPath = aRequestedFont->FontPathAny (myFontAspect, aParams, aFaceId);
     if (myFallbackFaces[theSubset]->Init (aPath, aParams, aFaceId))
     {
       Message::SendTrace (TCollection_AsciiString ("Font_FTFont, using fallback font '") + aRequestedFont->FontName() + "'"
@@ -421,15 +433,19 @@ bool Font_FTFont::loadGlyph (const Standard_Utf32Char theUChar)
     return false;
   }
 
+  bool toEmbolden = myFontParams.ToSynthesizeBold && !myFontParams.IsSingleStrokeFont;
   if (myToUseUnicodeSubsetFallback
   && !HasSymbol (theUChar))
   {
     // try using fallback
     const Font_UnicodeSubset aSubset = CharSubset (theUChar);
+    Handle(Font_FTFont)& aSubsetFont = myFallbackFaces[aSubset];
     if (findAndInitFallback (aSubset)
-     && myFallbackFaces[aSubset]->HasSymbol (theUChar))
+     && aSubsetFont->HasSymbol (theUChar))
     {
-      myActiveFTFace = myFallbackFaces[aSubset]->myFTFace;
+      myActiveFTFace = aSubsetFont->myFTFace;
+      toEmbolden = aSubsetFont->myFontParams.ToSynthesizeBold
+               && !aSubsetFont->myFontParams.IsSingleStrokeFont;
     }
   }
 
@@ -438,6 +454,11 @@ bool Font_FTFont::loadGlyph (const Standard_Utf32Char theUChar)
   {
     return false;
   }
+
+  // synthesize bold style;
+  // have to do this within 'load' method as it slightly modifiers glyph metrics
+  if (toEmbolden)
+    FT_GlyphSlot_Embolden (myActiveFTFace->glyph);
 
   myUChar = theUChar;
   return true;
@@ -457,16 +478,20 @@ bool Font_FTFont::RenderGlyph (const Standard_Utf32Char theUChar)
   myActiveFTFace = myFTFace;
 
 #ifdef HAVE_FREETYPE
+  bool toEmbolden = myFontParams.ToSynthesizeBold && !myFontParams.IsSingleStrokeFont;
   if (theUChar != 0
   &&  myToUseUnicodeSubsetFallback
   && !HasSymbol (theUChar))
   {
     // try using fallback
     const Font_UnicodeSubset aSubset = CharSubset (theUChar);
+    Handle(Font_FTFont)& aSubsetFont = myFallbackFaces[aSubset];
     if (findAndInitFallback (aSubset)
-     && myFallbackFaces[aSubset]->HasSymbol (theUChar))
+     && aSubsetFont->HasSymbol (theUChar))
     {
-      myActiveFTFace = myFallbackFaces[aSubset]->myFTFace;
+      myActiveFTFace = aSubsetFont->myFTFace;
+      toEmbolden = aSubsetFont->myFontParams.ToSynthesizeBold
+               && !aSubsetFont->myFontParams.IsSingleStrokeFont;
     }
   }
 
@@ -477,6 +502,13 @@ bool Font_FTFont::RenderGlyph (const Standard_Utf32Char theUChar)
   {
     return false;
   }
+
+  // synthesize bold style; note that this method is marked as alpha in FreeType
+  // and could be changed in future version (comment suggests to copy-paste
+  // the implementatation and adjust to application needs),
+  // but it remains the same for a very long time - so use it as is for now.
+  if (toEmbolden)
+    FT_GlyphSlot_Embolden (myActiveFTFace->glyph);
 
   FT_Bitmap aBitmap = myActiveFTFace->glyph->bitmap;
   if (aBitmap.buffer == NULL || aBitmap.width == 0 || aBitmap.rows == 0)

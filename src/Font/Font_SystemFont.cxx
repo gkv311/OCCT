@@ -16,6 +16,7 @@
 #include <Font_SystemFont.hxx>
 
 #include <Font_FontMgr.hxx>
+#include <Font_FTFont.hxx>
 #include <OSD_Path.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(Font_SystemFont, Standard_Transient)
@@ -114,4 +115,75 @@ TCollection_AsciiString Font_SystemFont::ToString() const
   }
   aDesc += "]";
   return aDesc;
+}
+
+// =======================================================================
+// function : FontPathAny
+// purpose  :
+// =======================================================================
+const TCollection_AsciiString& Font_SystemFont::FontPathAny (Font_FontAspect theAspect,
+                                                             Font_FTFontParams& theParams,
+                                                             Standard_Integer& theFaceId) const
+{
+  const Font_FontAspect anAspect = theAspect != Font_FontAspect_UNDEFINED ? theAspect : Font_FontAspect_Regular;
+  const TCollection_AsciiString& aPath = myFilePaths[anAspect];
+  theFaceId = myFaceIds[anAspect];
+  if (!aPath.IsEmpty())
+    return aPath;
+
+  // synthesize aspects from closest available
+  if (theAspect == Font_FontAspect_Italic
+  && !myFilePaths[Font_FontAspect_Regular].IsEmpty())
+  {
+    theParams.ToSynthesizeItalic = true;
+    theFaceId = myFaceIds[Font_FontAspect_Regular];
+    return myFilePaths[Font_FontAspect_Regular];
+  }
+  else if (theAspect == Font_FontAspect_Bold
+        && !myFilePaths[Font_FontAspect_Regular].IsEmpty())
+  {
+    theParams.ToSynthesizeBold = true;
+    theFaceId = myFaceIds[Font_FontAspect_Regular];
+    return myFilePaths[Font_FontAspect_Regular];
+  }
+  else if (theAspect == Font_FontAspect_BoldItalic
+        && !myFilePaths[Font_FontAspect_Bold].IsEmpty())
+  {
+    theParams.ToSynthesizeItalic = true;
+    theFaceId = myFaceIds[Font_FontAspect_Bold];
+    return myFilePaths[Font_FontAspect_Bold];
+  }
+  else if (theAspect == Font_FontAspect_BoldItalic
+        && !myFilePaths[Font_FontAspect_Italic].IsEmpty())
+  {
+    theParams.ToSynthesizeBold = true;
+    theFaceId = myFaceIds[Font_FontAspect_Italic];
+    return myFilePaths[Font_FontAspect_Italic];
+  }
+  else if (theAspect == Font_FontAspect_BoldItalic
+        && !myFilePaths[Font_FontAspect_Regular].IsEmpty())
+  {
+    theParams.ToSynthesizeBold = true;
+    theParams.ToSynthesizeItalic = true;
+    theFaceId = myFaceIds[Font_FontAspect_Regular];
+    return myFilePaths[Font_FontAspect_Regular];
+  }
+
+  // return anything at the end
+  if (!myFilePaths[Font_FontAspect_Regular].IsEmpty())
+  {
+    theFaceId = myFaceIds[Font_FontAspect_Regular];
+    return myFilePaths[Font_FontAspect_Regular];
+  }
+
+  for (int anAspectIter = 0; anAspectIter < Font_FontAspect_NB; ++anAspectIter)
+  {
+    if (!myFilePaths[anAspectIter].IsEmpty())
+    {
+      theFaceId = myFaceIds[anAspectIter];
+      return myFilePaths[anAspectIter];
+    }
+  }
+  theFaceId = myFaceIds[Font_FontAspect_Regular];
+  return myFilePaths[Font_FontAspect_Regular];
 }

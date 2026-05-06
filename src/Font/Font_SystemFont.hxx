@@ -21,6 +21,8 @@
 #include <Standard_Transient.hxx>
 #include <TCollection_AsciiString.hxx>
 
+struct Font_FTFontParams;
+
 //! This class stores information about the font, which is merely a file path and cached metadata about the font.
 class Font_SystemFont : public Standard_Transient
 {
@@ -66,53 +68,9 @@ public:
   }
 
   //! Returns any defined font file path.
-  const TCollection_AsciiString& FontPathAny (Font_FontAspect theAspect,
-                                              bool& theToSynthesizeItalic,
-                                              Standard_Integer& theFaceId) const
-  {
-    const Font_FontAspect anAspect = theAspect != Font_FontAspect_UNDEFINED ? theAspect : Font_FontAspect_Regular;
-    const TCollection_AsciiString& aPath = myFilePaths[anAspect];
-    theFaceId = myFaceIds[anAspect];
-    if (!aPath.IsEmpty())
-    {
-      return aPath;
-    }
-
-    if (theAspect == Font_FontAspect_Italic
-     || theAspect == Font_FontAspect_BoldItalic)
-    {
-      if (theAspect == Font_FontAspect_BoldItalic
-      && !myFilePaths[Font_FontAspect_Bold].IsEmpty())
-      {
-        theToSynthesizeItalic = true;
-        theFaceId = myFaceIds[Font_FontAspect_Bold];
-        return myFilePaths[Font_FontAspect_Bold];
-      }
-      else if (!myFilePaths[Font_FontAspect_Regular].IsEmpty())
-      {
-        theToSynthesizeItalic = true;
-        theFaceId = myFaceIds[Font_FontAspect_Regular];
-        return myFilePaths[Font_FontAspect_Regular];
-      }
-    }
-
-    if (!myFilePaths[Font_FontAspect_Regular].IsEmpty())
-    {
-      theFaceId = myFaceIds[Font_FontAspect_Regular];
-      return myFilePaths[Font_FontAspect_Regular];
-    }
-
-    for (int anAspectIter = 0; anAspectIter < Font_FontAspect_NB; ++anAspectIter)
-    {
-      if (!myFilePaths[anAspectIter].IsEmpty())
-      {
-        theFaceId = myFaceIds[anAspectIter];
-        return myFilePaths[anAspectIter];
-      }
-    }
-    theFaceId = myFaceIds[Font_FontAspect_Regular];
-    return myFilePaths[Font_FontAspect_Regular];
-  }
+  Standard_EXPORT const TCollection_AsciiString& FontPathAny (Font_FontAspect theAspect,
+                                                              Font_FTFontParams& theParams,
+                                                              Standard_Integer& theFaceId) const;
 
   //! Return true if the FontName, FontAspect and FontSize are the same.
   Standard_EXPORT Standard_Boolean IsEqual (const Handle(Font_SystemFont)& theOtherFont) const;
