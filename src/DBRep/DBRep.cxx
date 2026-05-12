@@ -843,33 +843,6 @@ static Standard_Integer orientation(Draw_Interpretor& ,
 #include <TCollection_AsciiString.hxx>
 
 //=======================================================================
-// numshapes same as nbshapes but the output is cout
-//=======================================================================
-
-static Standard_Integer numshapes(Draw_Interpretor& di,
-				 Standard_Integer n, const char** a)
-{
-  if (n < 2) return 1;
-
-  Standard_Integer i;
-  TopExp_Explorer ex;
-  for (i = 1; i < n; i++) {
-    TopoDS_Shape S = DBRep::Get(a[i]);
-    if (!S.IsNull()) {
-      BRepTools_ShapeSet BS;
-      BS.Add(S);
-      di <<"Number of shapes in "<<a[i]<<"\n";
-      TCollection_AsciiString Astr; 
-      BS.DumpExtent(Astr);
-      di <<Astr.ToCString();
-      di << "\n" ;
-    }
-  }
-
-  return 0;
-}
-
-//=======================================================================
 // function : DumpExtent
 // purpose  : Dumps the number of sub-shapes in <aStr>.
 //=======================================================================
@@ -932,7 +905,7 @@ static Standard_Integer nbshapes(Draw_Interpretor& di,
         BS.Add(S);
         BS.DumpExtent(Astr);
       }
-      di<<Astr.ToCString();
+      di<<Astr;
     }
   }
 
@@ -1698,7 +1671,7 @@ void  DBRep::BasicCommands(Draw_Interpretor& theCommands)
   theCommands.Add("nbshapes",
                   "\n nbshapes s - shows the number of sub-shapes in <s>;\n nbshapes s -t - shows the number of sub-shapes in <s> counting the same sub-shapes with different location as different sub-shapes.",
                   __FILE__,nbshapes,g);
-  theCommands.Add("numshapes","numshapes s; size of shape",__FILE__,numshapes,g);
+  theCommands.Add("numshapes","Alias for nbshapes",__FILE__, nbshapes,g);
   theCommands.Add("countshapes","countshapes s; count of shape",__FILE__,countshapes,g);
   theCommands.Add("setflags",
                   "setflags shape_name flag1[flag2...]\n sets flags for shape(free, modified, checked, orientable, closed, infinite, convex, locked), for example <setflags a free> or <setflags a -free> if necessary unflag ",
