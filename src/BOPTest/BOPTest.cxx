@@ -77,7 +77,7 @@ void  BOPTest::AllCommands(Draw_Interpretor& theCommands)
   SWDRAW::Init (theCommands);
 }
 // Declare entry point PLUGINFACTORY
-DPLUGIN(BOPTest)
+DPLUGIN2(BOPTest, Tktoptest_Init)
 
 //=======================================================================
 //function : ReportAlerts
