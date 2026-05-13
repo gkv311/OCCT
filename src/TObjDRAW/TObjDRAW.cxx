@@ -594,4 +594,4 @@ void TObjDRAW::Factory(Draw_Interpretor& theDI)
 }
 
 // Declare entry point PLUGINFACTORY
-DPLUGIN(TObjDRAW)
+DPLUGIN2(TObjDRAW, Tktobjdraw_Init)
