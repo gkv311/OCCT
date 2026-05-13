@@ -83,9 +83,9 @@ sage " "
 prism rr p 0 0 20
 fit
 sage " Fusion of this prism with the original part "
-sage "    fuse result rr result"
+sage "    bfuse result rr result"
 sage " "
-fuse result rr result
+bfuse result rr result
 donly result
 nexplode result f
 erase result
