@@ -60,4 +60,4 @@ void DPrsStd::Factory(Draw_Interpretor& theDI)
 }
 
 // Declare entry point PLUGINFACTORY
-DPLUGIN(DPrsStd)
+DPLUGIN2(DPrsStd, Tkdcaf_Init)

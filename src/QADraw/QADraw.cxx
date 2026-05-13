@@ -184,4 +184,4 @@ void QADraw::Factory(Draw_Interpretor& theCommands)
 }
 
 // Declare entry point PLUGINFACTORY
-DPLUGIN(QADraw)
+DPLUGIN2(QADraw, Tkqadraw_Init)

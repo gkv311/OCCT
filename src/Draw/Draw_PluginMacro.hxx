@@ -16,6 +16,11 @@
 #ifndef _Draw_PluginMacro_HeaderFile
 #define _Draw_PluginMacro_HeaderFile
 
+#include <Draw.hxx>
+
+//! @def DPLUGIN
+//! Export function 'PLUGINFACTORY()' for 'pload' command (normal DRAW)
+//! calling the static method 'Factory()' from specified namespace.
 #ifdef OCCT_NO_PLUGINS
 #define DPLUGIN(name)
 #else
@@ -24,5 +29,18 @@ extern "C" Standard_EXPORT void PLUGINFACTORY(Draw_Interpretor& theDI) { \
   name::Factory(theDI); \
 }
 #endif
+
+//! @def DPLUGIN2
+//! Export function 'PLUGINFACTORY()' for 'pload' command (normal DRAW)
+//! and function 'Libraryname_Init()' for 'load' command (external Tcl shell)
+//! both calling the static method 'Factory()' from specified namespace.
+#define DPLUGIN2(fname, tname) \
+DPLUGIN(fname) \
+extern "C" Standard_EXPORT int tname(Tcl_Interp* theInterp) { \
+  Draw_Interpretor& aDI = Draw::GetInterpretor(); \
+  aDI.Set(theInterp); \
+  fname::Factory(aDI); \
+  return 0; \
+}
 
 #endif

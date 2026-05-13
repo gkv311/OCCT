@@ -2112,4 +2112,4 @@ void XDEDRAW::Factory(Draw_Interpretor& theDI)
 }
 
 // Declare entry point PLUGINFACTORY
-DPLUGIN(XDEDRAW)
+DPLUGIN2(XDEDRAW, Tkxdedraw_Init)
