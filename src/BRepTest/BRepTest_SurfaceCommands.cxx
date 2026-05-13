@@ -30,10 +30,11 @@
 #include <BRepBuilderAPI_MakeShell.hxx>
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepOffsetAPI_FindContigousEdges.hxx>
+#include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TCollection_AsciiString.hxx>
-#include <Geom_Surface.hxx>
+#include <Geom_Plane.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 #include <Precision.hxx>
@@ -42,19 +43,6 @@
 
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <Message.hxx>
-
-//-----------------------------------------------------------------------
-// suppressarg : suppress a[d],modifie na--
-//-----------------------------------------------------------------------
-static void suppressarg(Standard_Integer& na,const char** a,const Standard_Integer d) 
-{
-  for(Standard_Integer i=d;i<na;i++) {
-    a[i]=a[i+1];
-    a[i+1]=NULL;
-  }
-  na--;
-}
-
 
 //=======================================================================
 // mkface
@@ -219,99 +207,175 @@ Standard_IMPORT Draw_Color DrawTrSurf_CurveColor(const Draw_Color col);
 Standard_IMPORT void DBRep_WriteColorOrientation ();
 Standard_IMPORT Draw_Color DBRep_ColorOrientation (const TopAbs_Orientation Or);
 
-static Standard_Integer pcurve(Draw_Interpretor& , Standard_Integer n, const char** a)
+//! Display a new 3D edge as curve on surface on XOY plane.
+//! @param[in] theEdge original edge
+//! @param[in] theFace face to find parametric curve
+//! @param[in] theName result drawable name
+//! @param[in] theNewFace a face to create new edge on
+static bool showPCurveForEdge3d(const TopoDS_Edge& theEdge,
+                                const TopoDS_Face& theFace,
+                                const TCollection_AsciiString& theName,
+                                const TopoDS_Face& theNewFace)
 {
-  Standard_Boolean mute = Standard_False;
-  for(Standard_Integer ia=1;ia<n;ia++) {
-    if (!strcasecmp(a[ia],"-mute")) {
-      suppressarg(n,a,ia);
-      mute = Standard_True;
-    }
+  Standard_Real anEdgeRange[2] = {};
+  const Handle(Geom2d_Curve) aPCurve = BRep_Tool::CurveOnSurface(theEdge, theFace, anEdgeRange[0], anEdgeRange[1]);
+  if (aPCurve.IsNull())
+  {
+    const Handle(Poly_Polygon2D) aPol = BRep_Tool::PolygonOnSurface(theEdge, theFace);
+    if (aPol.IsNull())
+      return false;
+
+    TopoDS_Edge aNewEdge;
+    BRep_Builder().MakeEdge(aNewEdge);
+    BRep_Builder().UpdateEdge(aNewEdge, aPol, theNewFace);
+    BRep_Builder().UpdateEdge(aNewEdge, BRep_Tool::Tolerance(theEdge));
+    BRep_Builder().Range(aNewEdge, theNewFace, anEdgeRange[0], anEdgeRange[1]);
+    aNewEdge.Orientation(theEdge.Orientation());
+
+    DBRep::Set(theName.ToCString(), aNewEdge);
+    return true;
   }
 
-  if (n == 2) {
-    // pcurves of a face
-    TopoDS_Shape S = DBRep::Get(a[1],TopAbs_FACE);
-    if (S.IsNull()) return 1;
+  TopoDS_Edge aNewEdge;
+  BRep_Builder().MakeEdge(aNewEdge);
+  BRep_Builder().UpdateEdge(aNewEdge, aPCurve, theNewFace, BRep_Tool::Tolerance(theEdge));
+  BRep_Builder().Range(aNewEdge, theNewFace, anEdgeRange[0], anEdgeRange[1]);
+  aNewEdge.Orientation(theEdge.Orientation());
 
-    if (!mute) DBRep_WriteColorOrientation();
-    Draw_Color col, savecol = DrawTrSurf_CurveColor(Draw_rouge);
+  DBRep::Set(theName.ToCString(), aNewEdge);
+  return true;
+}
 
-    char* name = new char[100];
-    Standard_Real f,l;
-    S.Orientation(TopAbs_FORWARD);
-    TopExp_Explorer ex(S,TopAbs_EDGE);
-    for (Standard_Integer i=1; ex.More(); ex.Next(), i++) {
-      const Handle(Geom2d_Curve) c = BRep_Tool::CurveOnSurface
-	(TopoDS::Edge(ex.Current()),TopoDS::Face(S),f,l);
-      if ( c.IsNull() ) {
-        std::cout << "Error: Edge " << i << " does not have pcurve" << std::endl;
-        continue;
-      }
-      col = DBRep_ColorOrientation(ex.Current().Orientation());
-      DrawTrSurf_CurveColor(col);
+//! Display a 2d curve from the given edge and face.
+//! @param[in] theEdge original edge
+//! @param[in] theFace face to find parametric curve
+//! @param[in] theName result drawable name
+static bool showPCurveForEdge2d(const TopoDS_Edge& theEdge,
+                                const TopoDS_Face& theFace,
+                                const TCollection_AsciiString& theName)
+{
+  Standard_Real anEdgeRange[2] = {};
+  Handle(Geom2d_Curve) aPCurve = BRep_Tool::CurveOnSurface(theEdge, theFace, anEdgeRange[0], anEdgeRange[1]);
+  if (aPCurve.IsNull())
+  {
+    const Handle(Poly_Polygon2D) aPol = BRep_Tool::PolygonOnSurface(theEdge, theFace);
+    if (aPol.IsNull())
+      return false;
 
-      Sprintf(name,"%s_%d",a[1],i);
-      Standard_Real fr = c->FirstParameter(), lr = c->LastParameter();
-      Standard_Boolean IsPeriodic = c->IsPeriodic();
-      if (c->DynamicType() == STANDARD_TYPE(Geom2d_TrimmedCurve))
-      {
-        const Handle(Geom2d_Curve)& aC = Handle(Geom2d_TrimmedCurve)::DownCast (c)->BasisCurve(); 
-        IsPeriodic = aC->IsPeriodic();
-        fr = aC->FirstParameter();
-        lr = aC->LastParameter();
-      }
-      if(!IsPeriodic && 
-        ((fr - f > Precision::PConfusion()) || (l - lr > Precision::PConfusion())))
-      {
-        DrawTrSurf::Set(name, c);
-      }
-      else
-      {
-        DrawTrSurf::Set(name,new Geom2d_TrimmedCurve(c,f,l));
-      }
-    }
-    DrawTrSurf_CurveColor(savecol);
-
+    const Draw_Color aColorBack = DrawTrSurf_CurveColor(DBRep_ColorOrientation(theEdge.Orientation()));
+    DrawTrSurf::Set(theName.ToCString(), aPol);
+    DrawTrSurf_CurveColor(aColorBack);
+    return true;
   }
-  else if (n >= 4) {
-    TopoDS_Shape SE = DBRep::Get(a[2],TopAbs_EDGE);
-    if (SE.IsNull()) return 1;
-    TopoDS_Shape SF = DBRep::Get(a[3],TopAbs_FACE);
-    if (SF.IsNull()) return 1;
 
-    Draw_Color col, savecol = DrawTrSurf_CurveColor(Draw_rouge);
-    Standard_Real f,l;
-    const Handle(Geom2d_Curve) c = BRep_Tool::CurveOnSurface
-      (TopoDS::Edge(SE),TopoDS::Face(SF),f,l);
-    Standard_Real fr = c->FirstParameter(), lr = c->LastParameter();
-    Standard_Boolean IsPeriodic = c->IsPeriodic();
-    if (c->DynamicType() == STANDARD_TYPE(Geom2d_TrimmedCurve))
+  Standard_Real    aCFirst    = aPCurve->FirstParameter();
+  Standard_Real    aCLast     = aPCurve->LastParameter();
+  Standard_Boolean isPeriodic = aPCurve->IsPeriodic();
+  if (Handle(Geom2d_TrimmedCurve) aTrimCurve = Handle(Geom2d_TrimmedCurve)::DownCast(aPCurve))
+  {
+    const Handle(Geom2d_Curve) aBCurve = aTrimCurve->BasisCurve();
+    isPeriodic = aBCurve->IsPeriodic();
+    aCFirst = aBCurve->FirstParameter();
+    aCLast  = aBCurve->LastParameter();
+  }
+
+  if (isPeriodic || ((aCFirst - anEdgeRange[0] <= Precision::PConfusion())
+                    && anEdgeRange[1] - aCLast <= Precision::PConfusion()))
+  {
+    aPCurve = new Geom2d_TrimmedCurve(aPCurve, anEdgeRange[0], anEdgeRange[1]);
+  }
+
+  const Draw_Color aColorBack = DrawTrSurf_CurveColor(DBRep_ColorOrientation(theEdge.Orientation()));
+  DrawTrSurf::Set(theName.ToCString(), aPCurve);
+  DrawTrSurf_CurveColor(aColorBack);
+  return true;
+}
+
+static Standard_Integer pcurve(Draw_Interpretor& theDI,
+                               Standard_Integer theNbArgs,
+                               const char** theArgVec)
+{
+  TopoDS_Edge anEdge;
+  TopoDS_Face aFace;
+  TopoDS_Face aNewFace;
+  Standard_CString aName = nullptr;
+  bool toPrintColorLegend = true;
+  for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArgCase(theArgVec[anArgIter]);
+    anArgCase.LowerCase();
+    if (anArgCase == "-mute")
     {
-      const Handle(Geom2d_Curve)& aC = Handle(Geom2d_TrimmedCurve)::DownCast (c)->BasisCurve(); 
-      IsPeriodic = aC->IsPeriodic();
-      fr = aC->FirstParameter();
-      lr = aC->LastParameter();
+      toPrintColorLegend = false;
     }
-
-    col = DBRep_ColorOrientation(SE.Orientation());
-    DrawTrSurf_CurveColor(col);
-    if(!IsPeriodic && 
-      ((fr - f > Precision::PConfusion()) || (l - lr > Precision::PConfusion())))
+    else if (anArgCase == "-3d")
     {
-      DrawTrSurf::Set(a[1], c);
+      Handle(Geom_Plane) aSurf = new Geom_Plane(gp_Pln(gp::XOY()));
+      BRep_Builder().MakeFace(aNewFace, aSurf, Precision::Confusion());
+    }
+    else if (aName == nullptr
+          && anEdge.IsNull()
+          && anArgIter + 1 < theNbArgs
+          && !DBRep::Get(theArgVec[anArgIter + 1], TopAbs_EDGE).IsNull())
+    {
+      aName  = theArgVec[anArgIter];
+      anEdge = TopoDS::Edge(DBRep::Get(theArgVec[++anArgIter]));
+    }
+    else if (aFace.IsNull()
+          && !DBRep::Get(theArgVec[anArgIter], TopAbs_FACE).IsNull())
+    {
+      if (aName == nullptr)
+        aName = theArgVec[anArgIter];
+
+      aFace = TopoDS::Face(DBRep::Get(theArgVec[anArgIter]));
     }
     else
     {
-      DrawTrSurf::Set(a[1],new Geom2d_TrimmedCurve(c,f,l));
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'\n";
+      return 1;
     }
-    DrawTrSurf_CurveColor(savecol);
   }
-  else { 
+  if (aFace.IsNull())
+  {
+    theDI << "Syntax error: wrong number of arguments";
     return 1;
   }
-    
-  return 0;
+
+  if (!anEdge.IsNull())
+  {
+    const bool isDone = !aNewFace.IsNull()
+                      ? showPCurveForEdge3d(anEdge, aFace, aName, aNewFace)
+                      : showPCurveForEdge2d(anEdge, aFace, aName);
+    if (!isDone)
+      theDI << "Error: Edge " << aName << " does not have pcurve";
+
+    return isDone ? 0 : 1;
+  }
+
+  if (toPrintColorLegend)
+    DBRep_WriteColorOrientation();
+
+  // pcurves of a face
+  aFace.Orientation(TopAbs_FORWARD);
+  TopExp_Explorer anEdgeIter(aFace, TopAbs_EDGE);
+  int aNbDone = 0;
+  for (Standard_Integer anEdgeIndex = 1; anEdgeIter.More(); anEdgeIter.Next(), ++anEdgeIndex)
+  {
+    TCollection_AsciiString anEdgeName = TCollection_AsciiString(aName) + "_" + anEdgeIndex;
+    const bool isDone = !aNewFace.IsNull()
+                      ? showPCurveForEdge3d(TopoDS::Edge(*anEdgeIter), aFace, anEdgeName, aNewFace)
+                      : showPCurveForEdge2d(TopoDS::Edge(*anEdgeIter), aFace, anEdgeName);
+    if (isDone)
+    {
+      ++aNbDone;
+      theDI << anEdgeName << " ";
+    }
+    else
+    {
+      theDI << "Error: Edge " << anEdgeName << " does not have pcurve";
+    }
+  }
+  return aNbDone != 0 ? 0 : 1;
 }
 
 //=======================================================================
@@ -736,9 +800,14 @@ void  BRepTest::SurfaceCommands(Draw_Interpretor& theCommands)
 		  "mkplane facename wirename [OnlyPlane 0/1]",
 		  __FILE__,mkplane,g);
 
-  theCommands.Add("pcurve",
-		  "pcurve [name edgename] facename",
-		  __FILE__,pcurve,g);
+  theCommands.Add("pcurve", R"(
+pcurve [name edgename] facename [-mute] [-3d]
+Display 2D parametric curve for specified edge and face in 2D viewer.
+When edge is not specified, all edges will be displayed for specified face,
+and output variables will be generated from face name.
+ -mute suppress output of color legend;
+ -3d   display a new 3D edge as curve on surface on XOY plane.
+)", __FILE__, pcurve, g);
 
   theCommands.Add("sewing",
 		  "sewing result [tolerance] shape1 shape2 ... [min tolerance] [max tolerance] [switches]",
