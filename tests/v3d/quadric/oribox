@@ -1,0 +1,30 @@
+puts "================================"
+puts "vorishape - command visualizing shape orientation in 3D Viewer"
+puts "Test case visualizes entire box"
+puts "================================"
+
+pload MODELING VISUALIZATION
+box s 100 200 300
+vinit View1
+vdisplay s -dispMode 1
+vfit
+
+voriface s -oriented 0
+vdump $imagedir/${casename}_facescol.png
+
+voriface s -oriented 1
+vdump $imagedir/${casename}_facesdir.png
+
+voriedge s -oriented 0
+vdump $imagedir/${casename}_edgescol.png
+
+voriedge s -oriented 1
+vdump $imagedir/${casename}_edgesdir.png
+
+vorishape s -oriented 0
+vdump $imagedir/${casename}_all.png
+
+axo
+fit
+vori s
+xwd $imagedir/${casename}_axo.png

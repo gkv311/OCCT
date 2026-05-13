@@ -158,6 +158,8 @@
 #include <TColStd_HArray1OfAsciiString.hxx>
 #include <TColStd_HSequenceOfAsciiString.hxx>
 
+#include <array>
+
 extern ViewerTest_DoubleMapOfInteractiveAndName& GetMapOfAIS();
 extern Standard_Boolean VDisplayAISObject (const TCollection_AsciiString& theName,
                                            const Handle(AIS_InteractiveObject)& theAISObj,
@@ -6780,61 +6782,169 @@ static int VPriority (Draw_Interpretor& theDI,
   return 0;
 }
 
-//! Auxiliary class for command vnormals.
+//! Auxiliary class for command vorishape.
 class MyShapeWithNormals : public AIS_ColoredShape
 {
   DEFINE_STANDARD_RTTI_INLINE(MyShapeWithNormals, AIS_ColoredShape);
 public:
 
-  Standard_Real    NormalLength;
-  Standard_Integer NbAlongU;
-  Standard_Integer NbAlongV;
-  Standard_Boolean ToUseMesh;
-  Standard_Boolean ToOrient;
-
-public:
-
   //! Main constructor.
   MyShapeWithNormals (const TopoDS_Shape& theShape)
-  : AIS_ColoredShape (theShape),
-    NormalLength(10),
-    NbAlongU  (1),
-    NbAlongV  (1),
-    ToUseMesh (Standard_False),
-    ToOrient  (Standard_False) {}
+  : AIS_ColoredShape (theShape)
+  {
+    for (Handle(Graphic3d_AspectLine3d)& anOriIter : myOrientAspects)
+      anOriIter = new Graphic3d_AspectLine3d(Quantity_NOC_BLACK, Aspect_TOL_SOLID, 1.0f);
 
-protected:
+    myOrientAspects[TopAbs_FORWARD]->SetColor(Quantity_NOC_RED);
+    myOrientAspects[TopAbs_REVERSED]->SetColor(Quantity_NOC_BLUE);
+    myOrientAspects[TopAbs_INTERNAL]->SetColor(Quantity_NOC_ORANGE);
+    myOrientAspects[TopAbs_EXTERNAL]->SetColor(Quantity_NOC_ROSYBROWN);
+    myOrientAspects[TopAbs_EXTERNAL + 1]->SetColor(Quantity_NOC_GRAY);
+  }
+
+  //! Set surface normal length.
+  void SetNormalLength(Standard_Real theLen)
+  {
+    if (myNormalLength == theLen)
+      return;
+
+    myNormalLength = theLen;
+    if (myToShowFaces)
+      SetToUpdate();
+  }
+
+  //! Set number of normals along surface U.
+  void SetNbAlongU(Standard_Integer theNumber)
+  {
+    if (myNbAlongU == theNumber)
+      return;
+
+    myNbAlongU = theNumber;
+    if (myToShowFaces)
+      SetToUpdate();
+  }
+
+  //! Set number of normals along surface V.
+  void SetNbAlongV(Standard_Integer theNumber)
+  {
+    if (myNbAlongV == theNumber)
+      return;
+
+    myNbAlongV = theNumber;
+    if (myToShowFaces)
+      SetToUpdate();
+  }
+
+  //! Set to show triangulation normals instead of surface normals.
+  void SetUseMesh(bool theToUse)
+  {
+    if (myToUseMesh == theToUse)
+      return;
+
+    myToUseMesh = theToUse;
+    if (myToShowFaces)
+      SetToUpdate();
+  }
+
+  //! Set to apply shape orientation to orient surface normals/curve tangent vectors.
+  void SetApplyOrientation(bool theToApply)
+  {
+    if (myToApplyOri == theToApply)
+      return;
+
+    myToApplyOri = theToApply;
+    SetToUpdate();
+  }
+
+  //! Set to show orienation of edges.
+  void SetShowEdges(bool theToShow)
+  {
+    if (myToShowEdges == theToShow)
+      return;
+
+    myToShowEdges = theToShow;
+    SetToUpdate();
+  }
+
+  //! Set to show orienation of faces.
+  void SetShowFaces(bool theToShow)
+  {
+    if (myToShowFaces== theToShow)
+      return;
+
+    myToShowFaces = theToShow;
+    SetToUpdate();
+  }
+
+private:
 
   //! Compute presentation.
   virtual void Compute (const Handle(PrsMgr_PresentationManager)& thePrsMgr,
                         const Handle(Prs3d_Presentation)& thePrs,
                         const Standard_Integer theMode) Standard_OVERRIDE
   {
-    AIS_ColoredShape::Compute (thePrsMgr, thePrs, theMode);
+    resetColoredEdges();
 
-    NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > > aNormalMap;
-    if (ToUseMesh)
+    int aFaceBoundaryBack = -1;
+    if (myToShowEdges)
     {
-      DBRep_DrawableShape::addMeshNormals (aNormalMap, myshape, NormalLength);
+      computeOrientationOfEdges(thePrs);
+      // suppress face boundaries for coloring edges
+      aFaceBoundaryBack = myDrawer->HasOwnFaceBoundaryDraw()
+                        ? (myDrawer->FaceBoundaryDraw() ? 1 : -1)
+                        : 2;
+      myDrawer->SetFaceBoundaryDraw(false);
+    }
+
+    AIS_ColoredShape::Compute(thePrsMgr, thePrs, theMode);
+
+    resetColoredEdges();
+    if (aFaceBoundaryBack == 1)
+      myDrawer->SetFaceBoundaryDraw(true);
+    else if (aFaceBoundaryBack == 2)
+      myDrawer->UnsetOwnFaceBoundaryDraw();
+
+    if (myToShowFaces)
+      computeOrientationOfFaces(thePrs);
+  }
+
+  //! Add surface(s) normal(s) to indicate orientation of face(s).
+  //! Note: for faces shared between multiple shells the orientation is taken from first inclusion.
+  void computeOrientationOfFaces(const Handle(Prs3d_Presentation)& thePrs)
+  {
+    NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > > aNormalMap;
+    if (myToUseMesh)
+      DBRep_DrawableShape::addMeshNormals (aNormalMap, myshape, myNormalLength);
+    else
+      DBRep_DrawableShape::addSurfaceNormals (aNormalMap, myshape, myNormalLength, myNbAlongU, myNbAlongV);
+
+    Handle(Graphic3d_Group) aPrsGroupRev;
+    Handle(Graphic3d_Group) aPrsGroupFwd = thePrs->NewGroup();
+    if (!myToApplyOri)
+    {
+      aPrsGroupRev = thePrs->NewGroup();
+      aPrsGroupRev->SetGroupPrimitivesAspect(myOrientAspects[TopAbs_REVERSED]);
+      aPrsGroupFwd->SetGroupPrimitivesAspect(myOrientAspects[TopAbs_FORWARD]);
     }
     else
     {
-      DBRep_DrawableShape::addSurfaceNormals (aNormalMap, myshape, NormalLength, NbAlongU, NbAlongV);
+      aPrsGroupFwd->SetGroupPrimitivesAspect(myOrientAspects.back());
     }
 
-    Handle(Graphic3d_Group) aPrsGroup = thePrs->NewGroup();
-    aPrsGroup->SetGroupPrimitivesAspect (myDrawer->ArrowAspect()->Aspect());
-
     const Standard_Real aArrowAngle  = myDrawer->ArrowAspect()->Angle();
-    const Standard_Real aArrowLength = NormalLength * 0.1;
-    for (NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > >::Iterator aFaceIt (aNormalMap);
-         aFaceIt.More(); aFaceIt.Next())
+    const Standard_Real aArrowLength = myNormalLength * 0.1;
+    for (const std::pair<const TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt>>>& aFaceIt : aNormalMap)
     {
-      const Standard_Boolean toReverse = ToOrient && aFaceIt.Key().Orientation() == TopAbs_REVERSED;
-      Handle(Graphic3d_ArrayOfSegments) aSegments = new Graphic3d_ArrayOfSegments (2 * aFaceIt.Value().Size());
-      for (NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> >::Iterator aPntIt (aFaceIt.Value()); aPntIt.More(); aPntIt.Next())
+      const Standard_Boolean toReverse = myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED;
+
+      Handle(Graphic3d_Group)& aPrsGroup = !myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED
+                                         ? aPrsGroupRev
+                                         : aPrsGroupFwd;
+
+      Handle(Graphic3d_ArrayOfSegments) aSegments = new Graphic3d_ArrayOfSegments (2 * aFaceIt.second.Size());
+      for (const std::pair<gp_Pnt, gp_Pnt>& aPntIt : aFaceIt.second)
       {
-        std::pair<gp_Pnt, gp_Pnt> aPair = aPntIt.Value();
+        std::pair<gp_Pnt, gp_Pnt> aPair = aPntIt;
         if (toReverse)
         {
           const gp_Vec aDir = aPair.first.XYZ() - aPair.second.XYZ();
@@ -6850,20 +6960,170 @@ protected:
     }
   }
 
+  //! Reset colored attributes for oriented edges.
+  void resetColoredEdges()
+  {
+    for (TopoDS_Compound& aCompIter : myColoredEdges)
+    {
+      if (!aCompIter.IsNull())
+      {
+        myShapeColors.UnBind(aCompIter);
+        aCompIter.Nullify();
+      }
+    }
+  }
+
+  //! Add curve(s) tangent direction arrows to indicate orientation of edge(s).
+  //! Note: for edges shared between multiple faces the orientation is taken from first inclusion.
+  void computeOrientationOfEdges(const Handle(Prs3d_Presentation)& thePrs)
+  {
+    TopTools_IndexedDataMapOfShapeListOfShape anEdgeMap;
+    TopExp::MapShapesAndAncestors(myshape, TopAbs_EDGE, TopAbs_FACE, anEdgeMap);
+    for (TopTools_IndexedDataMapOfShapeListOfShape::Iterator anEdgeIter(anEdgeMap); anEdgeIter.More(); anEdgeIter.Next())
+    {
+      const TopoDS_Edge& anEdge = TopoDS::Edge(anEdgeIter.Key());
+
+      const Standard_Boolean toReverse = myToApplyOri && anEdge.Orientation() == TopAbs_REVERSED;
+
+      TopoDS_Compound& aComp = myColoredEdges[!myToApplyOri ? anEdge.Orientation() : TopAbs_FORWARD];
+      if (aComp.IsNull())
+        BRep_Builder().MakeCompound(aComp);
+
+      BRep_Builder().Add(aComp, anEdge);
+
+      if (BRep_Tool::Degenerated(anEdge) || !BRep_Tool::IsGeometric(anEdge))
+        continue;
+
+      BRepAdaptor_Curve aCurveAdaptor(anEdge);
+      Standard_Real aFirst = aCurveAdaptor.FirstParameter();
+      Standard_Real aLast  = aCurveAdaptor.LastParameter();
+      if (toReverse)
+        std::swap(aFirst, aLast);
+
+      gp_Pnt anEdgeEnd;
+      gp_Vec anEdgeEndD1;
+      aCurveAdaptor.D1(aLast, anEdgeEnd, anEdgeEndD1);
+      if (toReverse)
+        anEdgeEndD1.Reverse();
+
+      const gp_Dir aCurveDir = anEdgeEndD1.SquareMagnitude() > gp::Resolution() ? gp_Dir(anEdgeEndD1) : gp::DY();
+
+      gp_Dir aSurfNorm = gp::DZ();
+      if (anEdgeIter.Value().Extent() != 0)
+        getSurfaceNormal(aSurfNorm, anEdge, TopoDS::Face(anEdgeIter.Value().First()), anEdgeEnd);
+
+      if (aSurfNorm.IsParallel(aCurveDir, Precision::Angular()))
+        aSurfNorm = gp::DZ();
+
+      if (aSurfNorm.IsParallel(aCurveDir, Precision::Angular()))
+        aSurfNorm = gp::DX();
+
+      // displaying each tangent arrow as a dedicated group
+      // with dedicated transformation-persistence is rather expensive,
+      // but should be tolerable as this presentation is intended for singular faces
+      Handle(Graphic3d_Group) aGroup = thePrs->NewGroup();
+      aGroup->SetTransformPersistence(new Graphic3d_TransformPers(Graphic3d_TMF_ZoomPers, anEdgeEnd));
+      aGroup->SetGroupPrimitivesAspect(!myToApplyOri ? myOrientAspects[anEdge.Orientation()] : myOrientAspects.back());
+
+      static constexpr Standard_Real anArrLen = 25.0;
+
+      const gp_Dir aSideDir = aCurveDir.Crossed(aSurfNorm);
+
+      Handle(Graphic3d_ArrayOfPolylines) aSegs = new Graphic3d_ArrayOfPolylines(3);
+      aSegs->AddVertex(gp::Origin().XYZ() - aCurveDir.XYZ() * anArrLen - aSideDir.XYZ() * anArrLen * 0.5);
+      aSegs->AddVertex(gp::Origin());
+      aSegs->AddVertex(gp::Origin().XYZ() - aCurveDir.XYZ() * anArrLen + aSideDir.XYZ() * anArrLen * 0.5);
+      aGroup->AddPrimitiveArray(aSegs);
+    }
+
+    // colorize edges per orientation group
+    for (size_t anOrientIter = 0; anOrientIter < myColoredEdges.size(); ++anOrientIter)
+    {
+      TopoDS_Compound& aComp = myColoredEdges[anOrientIter];
+      if (aComp.IsNull())
+        continue;
+
+      const Handle(Graphic3d_AspectLine3d)& anAsp =
+        !myToApplyOri ? myOrientAspects[anOrientIter] : myOrientAspects.back();
+
+      const Handle(AIS_ColoredDrawer)& aDrawer = CustomAspects(aComp);
+      setColor(aDrawer, anAsp->Color());
+      aDrawer->SetOwnColor(anAsp->Color());
+    }
+  }
+
+private:
+
+  //! Compute surface normal at the edge end point to orient 2d arrow of curve's tangent vector.
+  static bool getSurfaceNormal(gp_Dir& theNorm,
+                               const TopoDS_Edge& theEdge,
+                               const TopoDS_Face& theFace,
+                               const gp_Pnt& thePnt)
+  {
+    TopLoc_Location aFaceLoc;
+    const Handle(Poly_Triangulation)& aTris = BRep_Tool::Triangulation(theFace, aFaceLoc);
+    if (aTris.IsNull() || !aTris->HasNormals())
+      return false;
+
+    const Handle(Poly_PolygonOnTriangulation)& aPoly = BRep_Tool::PolygonOnTriangulation(theEdge, aTris, aFaceLoc);
+    if (aPoly.IsNull())
+      return false;
+
+    const Standard_Integer anEnds[2] = { aPoly->Node(1), aPoly->Node(aPoly->NbNodes()) };
+
+    const gp_Pnt aPnt1 = aTris->Node(anEnds[0]).Transformed(aFaceLoc);
+    const gp_Pnt aPnt2 = aTris->Node(anEnds[1]).Transformed(aFaceLoc);
+
+    const Standard_Integer anEnd = anEnds[aPnt1.SquareDistance(thePnt) < aPnt2.SquareDistance(thePnt) ? 0 : 1];
+    theNorm = aTris->Normal(anEnd);
+    return true;
+  }
+
+private:
+
+  Standard_Real    myNormalLength = 10;
+  Standard_Integer myNbAlongU = 1;
+  Standard_Integer myNbAlongV = 1;
+  Standard_Boolean myToUseMesh = false;
+  Standard_Boolean myToApplyOri = false;
+  Standard_Boolean myToShowEdges = false;
+  Standard_Boolean myToShowFaces = false;
+
+  std::array<Handle(Graphic3d_AspectLine3d), TopAbs_EXTERNAL + 2> myOrientAspects;
+  std::array<TopoDS_Compound, TopAbs_EXTERNAL + 1> myColoredEdges;
+
 };
 
 //=======================================================================
-//function : VNormals
-//purpose  : Displays/Hides normals calculated on shape geometry or retrieved from triangulation
+//function : VOriShape
+//purpose  : Displays shape orientation
 //=======================================================================
-static int VNormals (Draw_Interpretor& theDI,
+static int VOriShape (Draw_Interpretor& theDI,
                      Standard_Integer  theArgNum,
                      const char**      theArgs)
 {
-  if (ViewerTest::GetAISContext().IsNull())
+  const Handle(AIS_InteractiveContext)& aCtx = ViewerTest::GetAISContext();
+  if (aCtx.IsNull())
   {
     theDI << "Error: no active viewer";
     return 1;
+  }
+
+  Standard_Integer toShowEdges = -1;
+  Standard_Integer toShowFaces = -1;
+  {
+    TCollection_AsciiString aCmdName(theArgs[0]);
+    aCmdName.LowerCase();
+    if (aCmdName == "voriedge")
+    {
+      toShowEdges = 1;
+      toShowFaces = 0;
+    }
+    else if (aCmdName == "voriface" || aCmdName == "vnormals")
+    {
+      toShowEdges = 0;
+      toShowFaces = 1;
+    }
   }
 
   const char*  aShapeName = nullptr;
@@ -6874,6 +7134,8 @@ static int VNormals (Draw_Interpretor& theDI,
   Standard_Real    aLength = -1;
   Standard_Integer aNbAlongU = -1, aNbAlongV = -1;
   Standard_Integer isOriented = -1;
+
+  ViewerTest_AutoUpdater anUpdateTool(aCtx, ViewerTest::CurrentView());
   for (Standard_Integer anArgIter = 1; anArgIter < theArgNum; ++anArgIter)
   {
     TCollection_AsciiString aParam (theArgs[anArgIter]);
@@ -6881,7 +7143,19 @@ static int VNormals (Draw_Interpretor& theDI,
     if (anArgIter == 2
      && Draw::ParseOnOff (aParam.ToCString(), isOn))
     {
-      continue;
+      toShowEdges = toShowFaces = 0;
+    }
+    else if (anUpdateTool.parseRedrawMode(theArgs[anArgIter]))
+    {
+      //
+    }
+    else if (aParam == "-faces" || aParam == "-nofaces")
+    {
+      toShowFaces = Draw::ParseOnOffNoIterator(theArgNum, theArgs, anArgIter) ? 1 : 0;
+    }
+    else if (aParam == "-edges" || aParam == "-noedges")
+    {
+      toShowEdges = Draw::ParseOnOffNoIterator(theArgNum, theArgs, anArgIter) ? 1 : 0;
     }
     else if (aParam == "-usemesh"
           || aParam == "-mesh")
@@ -6965,6 +7239,12 @@ static int VNormals (Draw_Interpretor& theDI,
     return 1;
   }
 
+  if (toShowEdges == -1)
+    toShowEdges = 1;
+
+  if (toShowFaces == -1)
+    toShowFaces = 1;
+
   Handle(AIS_InteractiveObject) aPrs;
   GetMapOfAIS().Find2 (aShapeName, aPrs);
 
@@ -6972,7 +7252,7 @@ static int VNormals (Draw_Interpretor& theDI,
   Handle(AIS_ColoredShape)   aShapeColPrs  = Handle(AIS_ColoredShape)::DownCast (aShapePrs);
   Handle(MyShapeWithNormals) aShapeNormPrs = Handle(MyShapeWithNormals)::DownCast (aShapePrs);
 
-  if (isOn)
+  if (toShowEdges == 1 || toShowFaces == 1)
   {
     if (aShapeNormPrs.IsNull())
     {
@@ -6988,20 +7268,27 @@ static int VNormals (Draw_Interpretor& theDI,
 
       aShapePrs =aShapeNormPrs;
     }
+
+    if (toShowFaces != -1)
+      aShapeNormPrs->SetShowFaces(toShowFaces == 1);
+
+    if (toShowEdges != -1)
+      aShapeNormPrs->SetShowEdges(toShowEdges == 1);
+
     if (isUseMesh != -1)
-      aShapeNormPrs->ToUseMesh =isUseMesh == 1;
+      aShapeNormPrs->SetUseMesh(isUseMesh == 1);
 
     if (isOriented != -1)
-      aShapeNormPrs->ToOrient =isOriented == 1;
+      aShapeNormPrs->SetApplyOrientation(isOriented == 1);
 
     if (aLength != -1)
-      aShapeNormPrs->NormalLength =aLength;
+      aShapeNormPrs->SetNormalLength(aLength);
 
     if (aNbAlongU != -1)
-      aShapeNormPrs->NbAlongU =aNbAlongU;
+      aShapeNormPrs->SetNbAlongU(aNbAlongU);
 
     if (aNbAlongV != -1)
-      aShapeNormPrs->NbAlongV =aNbAlongV;
+      aShapeNormPrs->SetNbAlongV(aNbAlongV);
   }
   else if (!aShapeNormPrs.IsNull())
   {
@@ -7697,11 +7984,36 @@ vpriority [-noupdate|-update] name [value]
 Prints or sets the display priority for an object.
 )" /* [vpriority] */);
 
-  addCmd ("vnormals", VNormals, /* [vnormals] */ R"(
-vnormals Shape [{on|off}=on] [-length {10}] [-nbAlongU {1}] [-nbAlongV {1}] [-nbAlong {1}]
-               [-useMesh] [-oriented {0}1}=0]
-Displays/Hides normals calculated on shape geometry or retrieved from triangulation
+  addCmd ("vorishape", VOriShape, /* [vorishape] */ R"(
+vorishape shape [-edges {0|1}]=1 [-faces {0|1}]=1 [-oriented {0|1}]=0
+                [-useMesh]=0 [-length Value]=10
+                [-nbAlongU Number]=1 [-nbAlongV Number]=1 [-nbAlong Number]=1
+Visualizes shape orientations.
+ -edges    mark orientation of edge by color
+           and display curve tangent arrow at tail
+ -faces    mark orientation of faces as a surface normal vectors
+           at the middle of the its parametric space
+ -oriented apply topological orientation to result direction
+           (curve tangent, surface normal) instead of applying color code
+ -nbAlong  number of normals along U and V to show per face
+ -nbAlongU number of normals along U to show per face
+ -nbAlongV number of normals along V to show per face
+ -useMesh  show triangulation normals instead of splitting UV surface
+ -length   normal vector length scale factor
+)" /* [vorishape] */);
+  addCmd("vnormals", VOriShape, /* [vnormals] */ R"(
+vnormals shape [{on|off}]=on [-oriented {0|1}]=0
+               [-useMesh]=0 [-length Value]=10
+               [-nbAlongU Number]=1 [-nbAlongV Number]=1 [-nbAlong Number]=1
+Displays/Hides normals calculated on shape geometry or retrieved from triangulation.
+Alias for vorishape visualizing orientation of faces.
 )" /* [vnormals] */);
+  addCmd("voriface", VOriShape, /* [voriface] */ R"(
+Alias for vorishape visualizing orientation of faces.
+)" /* [voriface] */);
+  addCmd("voriedge", VOriShape, /* [voriedge] */ R"(
+Alias for vorishape visualizing orientation of edges.
+)" /* [voriedge] */);
 
   addCmd("vtolshape", VTolShape, /* [vtolshape] */ R"(
 vtolshape shape [-edges {0|1}]=1 [-vertices {0|1}]=1
