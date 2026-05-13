@@ -27,3 +27,13 @@ void Draw::Commands (Draw_Interpretor& theCommands)
   Draw::PloadCommands(theCommands);
   Draw::UnitCommands(theCommands);
 }
+
+// This export could be used to load TKDraw from external Tcl shell.
+extern "C" Standard_EXPORT int Tkdraw_Init(Tcl_Interp* theInterp)
+{
+  // TODO this initialization is incomplete
+  Draw_Interpretor& aDI = Draw::GetInterpretor();
+  aDI.Set(theInterp);
+  Draw::Commands(aDI);
+  return 0;
+}
