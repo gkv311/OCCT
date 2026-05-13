@@ -7210,4 +7210,4 @@ void ViewerTest::Factory(Draw_Interpretor& theDI)
 }
 
 // Declare entry point PLUGINFACTORY
-DPLUGIN(ViewerTest)
+DPLUGIN2(ViewerTest, Tkviewertest_Init)

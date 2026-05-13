@@ -2592,5 +2592,5 @@ void XSDRAWSTLVRML::Factory(Draw_Interpretor& theDI)
 }
 
 // Declare entry point PLUGINFACTORY
-DPLUGIN(XSDRAWSTLVRML)
+DPLUGIN2(XSDRAWSTLVRML, Tkxsdraw_Init)
 

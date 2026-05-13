@@ -31,4 +31,8 @@ void OpenGlTest::Factory (Draw_Interpretor& theDI)
 }
 
 // Declare entry point PLUGINFACTORY
-DPLUGIN(OpenGlTest)
+#ifdef HAVE_GLES2
+DPLUGIN2(OpenGlTest, Tkopenglestest_Init)
+#else
+DPLUGIN2(OpenGlTest, Tkopengltest_Init)
+#endif
