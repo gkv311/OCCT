@@ -62,6 +62,11 @@
   #include <pwd.h>
 #endif
 
+// needed for timezone XSI compatibility check
+#if defined(__FreeBSD__)
+  #include <sys/param.h>
+#endif
+
 //=======================================================================
 //function : STEPConstruct_AP203Context
 //purpose  : 
@@ -120,6 +125,10 @@ Handle(StepBasic_DateAndTime) STEPConstruct_AP203Context::DefaultDateAndTime ()
   #if defined(_MSC_VER) && _MSC_VER >= 1600
     long shift = 0;
     _get_timezone (&shift);
+  #elif defined(__FreeBSD__) && (__FreeBSD_version < 1500019)
+    time_t     time_clock  = time(nullptr);
+    struct tm* time_struct = localtime(&time_clock);
+    Standard_Integer shift = Standard_Integer(time_struct->tm_gmtoff);
   #else
     Standard_Integer shift = Standard_Integer(timezone);
   #endif
