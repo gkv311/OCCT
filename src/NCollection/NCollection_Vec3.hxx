@@ -56,9 +56,9 @@ public:
   }
 
   //! Per-component constructor.
-  explicit NCollection_Vec3 (const Element_t theX,
-                             const Element_t theY,
-                             const Element_t theZ)
+  NCollection_Vec3 (const Element_t theX,
+                    const Element_t theY,
+                    const Element_t theZ)
   {
     v[0] = theX;
     v[1] = theY;
