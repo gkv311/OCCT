@@ -52,8 +52,8 @@ public:
   }
 
   //! Per-component constructor.
-  explicit NCollection_Vec2 (const Element_t theX,
-                             const Element_t theY)
+  NCollection_Vec2 (const Element_t theX,
+                    const Element_t theY)
   {
     v[0] = theX;
     v[1] = theY;
