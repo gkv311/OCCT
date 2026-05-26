@@ -417,17 +417,13 @@ Draw_Interpretor& Draw_Interpretor::Append(const TCollection_AsciiString& s)
 
 Draw_Interpretor& Draw_Interpretor::Append(const TCollection_ExtendedString& theString)
 {
-#ifdef TCL_USES_UTF8
-  // Convert string to UTF-8 format for Tcl
-  char *str = new char[theString.LengthOfCString()+1];
-  theString.ToUTF8CString (str);
-  Tcl_AppendResult ( myInterp, str, (Standard_CString)0 );
-  delete[] str;
-#else
+  Standard_Character aFiller = 0;
+#if !defined(TCL_USES_UTF8)
   // put as ascii string, replacing non-ascii characters by '?'
-  TCollection_AsciiString str (theString, '?');
-  Tcl_AppendResult(myInterp,str.ToCString(),(Standard_CString)0);
+  aFiller = '?';
 #endif
+  TCollection_AsciiString str (theString, aFiller);
+  Tcl_AppendResult(myInterp,str.ToCString(),(Standard_CString)0);
   return *this;
 }
 
