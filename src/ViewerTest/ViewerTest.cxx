@@ -4930,6 +4930,9 @@ static int VDisplay2 (Draw_Interpretor& theDI,
   Standard_Integer   anObjHighMode  = -2;
   Standard_Boolean   toSetTrsfPers  = Standard_False;
   Standard_Boolean   toEcho         = Standard_True;
+  Standard_Real      aTransp        = -1.0f;
+  std::unique_ptr<Quantity_Color> aColor;
+  std::unique_ptr<Quantity_Color> aFaceBndColor;
   Standard_Integer   isAutoTriang   = -1;
   Handle(Graphic3d_TransformPers) aTrsfPers;
   TColStd_SequenceOfAsciiString aNamesOfDisplayIO;
@@ -5004,6 +5007,41 @@ static int VDisplay2 (Draw_Interpretor& theDI,
       }
 
       anObjHighMode = Draw::Atoi (theArgVec [anArgIter]);
+    }
+    else if (anArgIter + 1 < theArgNb
+          && aNameCase == "-color")
+    {
+      aColor.reset(new Quantity_Color());
+      Standard_Integer aNbParsed = Draw::ParseColor(theArgNb - anArgIter - 1,
+                                                    theArgVec + anArgIter + 1,
+                                                    *aColor);
+      if (aNbParsed == 0)
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+      anArgIter += aNbParsed;
+    }
+    else if (anArgIter + 1 < theArgNb
+          && (aNameCase == "-faceboundarycolor" || aNameCase == "-boundarycolor"))
+    {
+      aFaceBndColor.reset(new Quantity_Color());
+      Standard_Integer aNbParsed = Draw::ParseColor(theArgNb - anArgIter - 1,
+                                                    theArgVec + anArgIter + 1,
+                                                    *aFaceBndColor);
+      if (aNbParsed == 0)
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+      anArgIter += aNbParsed;
+    }
+    else if (anArgIter + 1 < theArgNb
+          && (aNameCase == "-transparency" || aNameCase == "-transp")
+          && Draw::ParseReal(theArgVec[anArgIter + 1], aTransp)
+          && aTransp >= 0.0 && aTransp <= 1.0)
+    {
+      ++anArgIter;
     }
     else if (aNameCase == "-3d")
     {
@@ -5208,6 +5246,19 @@ static int VDisplay2 (Draw_Interpretor& theDI,
         {
           aCtx->SetTransformPersistence (aShape, aTrsfPers);
         }
+
+        if (aColor.get() != nullptr)
+          aShape->SetColor(*aColor);
+
+        if (aTransp >= 0.0)
+          aShape->SetTransparency(aTransp);
+
+        if (aFaceBndColor.get() != nullptr)
+        {
+          aShape->Attributes()->SetupOwnFaceBoundaryAspect(aCtx->DefaultDrawer());
+          aShape->Attributes()->FaceBoundaryAspect()->SetColor(*aFaceBndColor);
+        }
+
         if (anObjDispMode != -2)
         {
           if (anObjDispMode == -1)
@@ -5288,6 +5339,20 @@ static int VDisplay2 (Draw_Interpretor& theDI,
     {
       aShape->SetHilightMode (anObjHighMode);
     }
+
+    if (aColor.get() != nullptr)
+      aCtx->SetColor (aShape, *aColor, false);
+
+    if (aTransp >= 0.0)
+      aCtx->SetTransparency (aShape, aTransp, false);
+
+    if (aFaceBndColor.get() != nullptr)
+    {
+      aShape->Attributes()->SetupOwnFaceBoundaryAspect(aCtx->DefaultDrawer());
+      aShape->Attributes()->FaceBoundaryAspect()->SetColor(*aFaceBndColor);
+    }
+
+
     Standard_Integer aDispMode = aShape->HasDisplayMode()
                                 ? aShape->DisplayMode()
                                 : (aShape->AcceptDisplayMode (aCtx->DisplayMode())
@@ -6741,6 +6806,7 @@ vdisplay [-noupdate|-update] [-mutable] [-neutral]
               [offsetX offsetY]]]
             [-trsfPersNoFOV2d {0|1}]=0
          [-dispMode mode] [-highMode mode]
+         [-color {ColorName|R G B}] [-transparency Transp] -faceBoundaryColor
          [-layer index] [-top|-topmost|-overlay|-underlay]
          [-redisplay] [-erased]
          [-noecho] [-autoTriangulation {0|1}]
@@ -6771,6 +6837,8 @@ Displays named objects.
  -redisplay   Recomputes presentation of objects.
  -noecho      Avoid printing of command results.
  -autoTriang  Enable/disable auto-triangulation for displayed shape.
+ -color|-transparency|-faceBoundaryColor
+              Sets presentation color/transparency.
 )" /* [vdisplay] */);
 
   addCmd ("vnbdisplayed", VNbDisplayed, /* [vnbdisplayed] */ R"(
