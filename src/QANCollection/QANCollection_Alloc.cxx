@@ -134,6 +134,18 @@ static Standard_Integer QANColStdAllocator2(Draw_Interpretor& di, Standard_Integ
       di << "Test6 : OK\n";
   }
 
+  {
+    // test move constructor with NCollection_StdAllocator
+    typedef std::vector<int, NCollection_StdAllocator<int>> IntVec;
+    IntVec aVec1 = {10, 23, 3};
+    IntVec aVec2;
+    std::swap(aVec1, aVec2);
+    if (aVec2[0] != 10 || aVec2[1] != 23 || aVec2[2] != 3)
+      di << "Test7 : Error\n";
+    else
+      di << "Test7 : OK\n";
+  }
+
   return 0;
 }
 
