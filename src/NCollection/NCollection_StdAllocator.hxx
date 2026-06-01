@@ -42,7 +42,12 @@ public:
   typedef const value_type& const_reference;
   typedef size_t size_type;
   typedef ptrdiff_t difference_type;
+
+  // for C++11 and newer
   typedef std::true_type propagate_on_container_move_assignment;
+  typedef std::true_type propagate_on_container_copy_assignment;
+  typedef std::false_type is_always_equal;
+
   template<typename U> struct rebind {
     typedef NCollection_StdAllocator<U> other;
   };
@@ -51,30 +56,79 @@ public:
   /*! Creates an object using default Open CASCADE allocation mechanism, i.e. which uses
     Standard::Allocate() and Standard::Free() underneath.
   */
-  NCollection_StdAllocator()
-  { myAlloc = NCollection_BaseAllocator::CommonBaseAllocator(); }
+  NCollection_StdAllocator() noexcept
+  : myAlloc(NCollection_BaseAllocator::CommonBaseAllocator())
+  {}
 
   //! Constructor.
   /*! Saves \a theAlloc as an underlying allocator instance.*/
-  NCollection_StdAllocator( const Handle(NCollection_BaseAllocator)& theAlloc)
-  { myAlloc = theAlloc; }
+  explicit NCollection_StdAllocator(const Handle(NCollection_BaseAllocator)& theAlloc) noexcept
+  : myAlloc(theAlloc)
+  {}
 
   //! Copy constructor.
   /*! Copies Allocator() from \a Y.*/
-  template<typename U> NCollection_StdAllocator( const NCollection_StdAllocator<U>& Y)
-  { myAlloc = Y.Allocator(); }
+  NCollection_StdAllocator(const NCollection_StdAllocator& Y) noexcept
+  : myAlloc(Y.myAlloc)
+  {}
+
+  //! Copy constructor.
+  /*! Copies Allocator() from \a Y.*/
+  template<typename U> NCollection_StdAllocator(const NCollection_StdAllocator<U>& Y) noexcept
+  : myAlloc(Y.Allocator())
+  {}
+
+  //! Move constructor.
+  NCollection_StdAllocator(NCollection_StdAllocator&& Y) noexcept
+  : myAlloc(Y.myAlloc)
+  {
+    // TODO why this causes issues?
+    //Y.myAlloc.Nullify();
+  }
+
+  //! Move constructor.
+  /*! Copies Allocator() from \a Y.*/
+  template<typename U> NCollection_StdAllocator(NCollection_StdAllocator<U>&& Y) noexcept
+  : myAlloc(Y.Allocator())
+  {}
 
   //! Assignment operator
-  template<typename U> NCollection_StdAllocator& operator= (const NCollection_StdAllocator<U>& Y)
-  { myAlloc = Y.Allocator(); return *this; }
+  NCollection_StdAllocator& operator=(const NCollection_StdAllocator& Y) noexcept
+  {
+    myAlloc = Y.Allocator();
+    return *this;
+  }
+
+  //! Assignment operator
+  template<typename U> NCollection_StdAllocator& operator=(const NCollection_StdAllocator<U>& Y) noexcept
+  {
+    myAlloc = Y.Allocator();
+    return *this;
+  }
+
+  //! Move operator
+  NCollection_StdAllocator& operator=(NCollection_StdAllocator&& Y) noexcept
+  {
+    myAlloc = Y.myAlloc;
+    // TODO why this causes issues?
+    //Y.myAlloc.Nullify();
+    return *this;
+  }
+
+  //! Move operator
+  template<typename U> NCollection_StdAllocator& operator=(NCollection_StdAllocator<U>&& Y) noexcept
+  {
+    myAlloc = Y.Allocator();
+    return *this;
+  }
 
   //! Returns an object address.
   /*! Returns &x.*/
-  pointer address( reference x ) const { return &x; }
+  pointer address( reference x ) const noexcept { return &x; }
 
   //! Returns an object address.
   /*! Returns &x.*/
-  const_pointer address( const_reference x ) const { return &x; }
+  const_pointer address( const_reference x ) const noexcept { return &x; }
   
   //! Allocates memory for \a n objects.
   /*! Uses underlying allocator to allocate memory.*/
@@ -86,7 +140,7 @@ public:
   void deallocate( pointer p, size_type ) { myAlloc->Free( p ); }
 
   //! Returns the largest value for which method allocate might succeed.
-  size_type max_size() const
+  size_type max_size() const noexcept
   {
     size_type aMax = static_cast<size_type>( -1 ) / sizeof( value_type );
     return aMax;
@@ -94,16 +148,18 @@ public:
 
   //! Constructs an object.
   /*! Uses placement new operator and copy constructor to construct an object.*/
-  void construct( pointer p, const_reference val )
-  { new( static_cast<void*>( p )) value_type( val ); }
+  template<typename U, typename... Args>
+  void construct(U* p, Args&&... args)
+  { ::new(static_cast<void*>(p)) U(std::forward<Args>(args)...); }
 
   //! Destroys the object.
   /*! Uses object destructor.*/
-  void destroy( pointer p ) { p->~value_type(); }
+  template<typename U>
+  void destroy(U* p) { p->~U(); }
 
   //! Returns an underlying NCollection_BaseAllocator instance.
   /*! Returns an object specified in the constructor.*/
-  const Handle(NCollection_BaseAllocator)& Allocator() const { return myAlloc; }
+  const Handle(NCollection_BaseAllocator)& Allocator() const noexcept { return myAlloc; }
 
 protected:
   Handle(NCollection_BaseAllocator) myAlloc;
@@ -139,26 +195,44 @@ public:
   /*! Creates an object using default Open CASCADE allocation mechanism, i.e. which uses
     Standard::Allocate() and Standard::Free() underneath.
   */
-  NCollection_StdAllocator()
+  NCollection_StdAllocator() noexcept
   { myAlloc = NCollection_BaseAllocator::CommonBaseAllocator(); }
 
   //! Constructor.
   /*! Saves \a theAlloc as an underlying allocator instance.*/
-  NCollection_StdAllocator( const Handle(NCollection_BaseAllocator)& theAlloc)
+  explicit NCollection_StdAllocator(const Handle(NCollection_BaseAllocator)& theAlloc) noexcept
   { myAlloc = theAlloc; }
 
   //! Constructor.
   /*! Copies Allocator() from \a X.*/
-  NCollection_StdAllocator( const NCollection_StdAllocator& X) { myAlloc = X.myAlloc; }
+  NCollection_StdAllocator(const NCollection_StdAllocator& X) noexcept
+  : myAlloc(X.myAlloc)
+  {}
+
+  //! Move constructor.
+  /*! Copies Allocator() from \a X.*/
+  NCollection_StdAllocator(NCollection_StdAllocator&& X) noexcept
+  : myAlloc(X.myAlloc)
+  {
+    X.myAlloc.Nullify();
+  }
 
   //! Returns an underlying NCollection_BaseAllocator instance.
   /*! Returns an object specified in the constructor.*/
-  const Handle(NCollection_BaseAllocator)& Allocator() const { return myAlloc; }
+  const Handle(NCollection_BaseAllocator)& Allocator() const noexcept { return myAlloc; }
 
   //! Assignment operator
-  NCollection_StdAllocator& operator=(const NCollection_StdAllocator& X)
+  NCollection_StdAllocator& operator=(const NCollection_StdAllocator& X) noexcept
   {
     myAlloc = X.myAlloc;
+    return *this;
+  }
+
+  //! Move operator
+  NCollection_StdAllocator& operator=(NCollection_StdAllocator&& X) noexcept
+  {
+    myAlloc = X.myAlloc;
+    X.myAlloc.Nullify();
     return *this;
   }
 
@@ -167,11 +241,11 @@ protected:
 };
 
 template<typename T, typename U>
-inline bool operator==( const NCollection_StdAllocator<T>& X, const NCollection_StdAllocator<U>& Y)
+inline bool operator==( const NCollection_StdAllocator<T>& X, const NCollection_StdAllocator<U>& Y) noexcept
 { return !!(X.Allocator() == Y.Allocator()); }
 
 template<typename T, typename U>
-inline bool operator!=( const NCollection_StdAllocator<T>& X, const NCollection_StdAllocator<U>& Y)
+inline bool operator!=( const NCollection_StdAllocator<T>& X, const NCollection_StdAllocator<U>& Y) noexcept
 { return !(X == Y); }
 
 
