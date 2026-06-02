@@ -1,0 +1,78 @@
+puts "============"
+puts "Test mixed text horizontal alignment options"
+puts "============"
+puts ""
+
+pload MODELING VISUALIZATION
+dtracelevel trace
+vfont -verbose 1
+vfont add [locate_data_file DejaVuSans.ttf] SansFont
+
+proc getMinMax { theShape } {
+  uplevel #0 bounding $theShape -save xmin ymin zmin xmax ymax zmax
+  set bmin [list [uplevel #0 dval xmin] [uplevel #0 dval ymin] [uplevel #0 dval zmin]]
+  set bmax [list [uplevel #0 dval xmax] [uplevel #0 dval ymax] [uplevel #0 dval zmax]]
+  return [list $bmin $bmax]
+}
+
+top
+vertex v1_1   0 0 0
+vertex v1_2 100 0 0
+edge e1 v1_1 v1_2
+text2brep t1 \
+ "LEFT BLOCK\n" -font "SansFont" -height 24 -halign LEFT \
+ -append "Left line\n"   -halign LEFT \
+ -append "Center line\n" -halign CENTER \
+ -append "Right line\n"  -halign RIGHT \
+ -append "Mixed " -halign LEFT -height 24 -aspect REGULAR \
+ -append " XXL " -height 48 \
+ -append "italic" -height 24 -aspect ITALIC
+donly     t1 e1
+bounding  t1
+set       t1bnd [getMinMax t1]
+fit
+xwd ${imagedir}/${casename}_left.png
+
+text2brep t2 \
+ "RIGHT BLOCK\n" -font "SansFont" -height 24 -halign RIGHT \
+ -append "Left line\n"   -halign LEFT \
+ -append "Center line\n" -halign CENTER \
+ -append "Right line\n"  -halign RIGHT \
+ -append "Mixed " -halign LEFT -height 24 -aspect REGULAR \
+ -append " XXL " -height 48 \
+ -append "italic" -height 24 -aspect ITALIC
+donly     t2 e1
+bounding  t2
+set       t2bnd [getMinMax t2]
+fit
+xwd ${imagedir}/${casename}_right.png
+
+text2brep t3 \
+ "CENTER BLOCK\n" -font "SansFont" -height 24 -halign CENTER -valign TOP \
+ -append "Left line\n"   -halign LEFT \
+ -append "Center line\n" -halign CENTER \
+ -append "Right line\n"  -halign RIGHT \
+ -append "Mixed " -halign LEFT -height 24 -aspect REGULAR \
+ -append " XXL " -height 48 \
+ -append "italic" -height 24 -aspect ITALIC
+donly     t3 e1
+bounding  t3
+set       t3bnd [getMinMax t3]
+fit
+xwd ${imagedir}/${casename}_center.png
+
+display  t1 t2 t3 e1
+bounding t1
+bounding t2
+bounding t3
+fit
+xwd ${imagedir}/${casename}.png
+
+checkpoint "LEFT BLOCK min"   [lindex $t1bnd 0] {    2.36   -0.34 -0.0000001} 0.1
+checkpoint "LEFT BLOCK max"   [lindex $t1bnd 1] {  258.66  143.53  0.0000001} 0.1
+
+checkpoint "RIGHT BLOCK min"  [lindex $t2bnd 0] { -255.58   -0.34 -0.0000001} 0.1
+checkpoint "RIGHT BLOCK max"  [lindex $t2bnd 1] {    0.73  143.53  0.0000001} 0.1
+
+checkpoint "CENTER BLOCK min" [lindex $t3bnd 0] { -126.61 -148.34 -0.0000001} 0.1
+checkpoint "CENTER BLOCK max" [lindex $t3bnd 1] {  129.69   -4.46  0.0000001} 0.1
