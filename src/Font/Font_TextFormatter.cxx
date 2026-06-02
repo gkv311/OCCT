@@ -306,20 +306,34 @@ void Font_TextFormatter::Format()
   }
 
   // apply horizontal alignment
+  float aBlockMoveX = 0.0f;
+  switch (myAlignX)
+  {
+    default:
+    case Graphic3d_HTA_LEFT:
+      aBlockMoveX = 0.0f;
+      break;
+    case Graphic3d_HTA_RIGHT:
+      aBlockMoveX = -myBndSize.x();
+      break;
+    case Graphic3d_HTA_CENTER:
+      aBlockMoveX = -0.5f * myBndSize.x();
+      break;
+  }
   for (const TextLine& aLineIter : myLines)
   {
-    float aMoveX = 0.0f;
+    float aMoveX = aBlockMoveX;
     switch (aLineIter.AlignX)
     {
       default:
       case Graphic3d_HTA_LEFT:
-        aMoveX = 0.0f;
+        aMoveX += 0.0f;
         break;
       case Graphic3d_HTA_RIGHT:
-        aMoveX = (myBndSize.x() - aLineIter.Pen.x()) - myBndSize.x();
+        aMoveX += (myBndSize.x() - aLineIter.Pen.x());
         break;
       case Graphic3d_HTA_CENTER:
-        aMoveX = 0.5f * (myBndSize.x() - aLineIter.Pen.x()) - 0.5f * myBndSize.x();
+        aMoveX += 0.5f * (myBndSize.x() - aLineIter.Pen.x());
         break;
     }
 

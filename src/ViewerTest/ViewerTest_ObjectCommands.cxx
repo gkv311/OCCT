@@ -5718,26 +5718,80 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
   Standard_Integer anArgIt = 1;
   Standard_CString aName   = theArgVec[anArgIt++];
   Standard_CString aText   = theArgVec[anArgIt++];
+  Standard_Integer aNbBlocks = 1;
 
   TCollection_AsciiString aFontName ("Courier");
+  Font_StrictLevel aStrictLevel = Font_StrictLevel_Any;
   Font_FontAspect  aFontAspect = Font_FA_Regular;
   Standard_Real    aTextHeight = 16.0;
   Standard_Real    aCapHeight  = -1.0;
   Standard_Real    aShearAngle = RealLast();
   Standard_Real    aWidthScale = RealLast();
-  Standard_Real    aSpaceScale = RealLast();
-  Standard_Real    aLineScale  = RealLast();
-  Standard_Real    aWrapWidth = 0.0;
-  Standard_Boolean isWordWrapping = Standard_True;
   Standard_Boolean anIsCompositeCurve = Standard_False;
 
-  gp_Dir aNormal    = gp::DZ();
+  Graphic3d_HorizontalTextAlignment aHJustification = Graphic3d_HTA_LEFT;
+  Handle(Font_TextFormatter) aFormatter = new Font_TextFormatter();
+  aFormatter->SetupAlignment(aHJustification, Graphic3d_VerticalTextAlignment_BottomBaseline);
+  aFormatter->SetWordWrapping(true);
+
+  Font_TextFormatter::FontScaling aScaling;
+
+  // initialize font
+  auto initFont = [&]() -> Handle(Font_BRepFont)
+  {
+    Handle(Font_BRepFont) aFont = new Font_BRepFont();
+    if (aShearAngle != RealLast())
+      aFont->SetShearAngle((float)aShearAngle);
+
+    if (aWidthScale != RealLast())
+      aFont->SetWidthScaling((float)aWidthScale);
+
+    aFont->SetCompositeCurveMode(anIsCompositeCurve);
+    if (!aFont->FindAndInit(aFontName.ToCString(), aFontAspect, aTextHeight, aStrictLevel))
+      return Handle(Font_BRepFont)();
+
+    if (aCapHeight > 0.0)
+      aFont->SetCapHeight(aCapHeight);
+
+    return aFont;
+  };
+
+  // add text to formatter and generate glyph shapes
+  NCollection_Vector<TopoDS_Shape> aGlyphShapes;
+  auto appendText = [&]() -> bool
+  {
+    Handle(Font_BRepFont) aFont = initFont();
+    if (aFont.IsNull())
+    {
+      Message::SendFail("Error: unable to load Font");
+      return false;
+    }
+
+    const Standard_Integer aGlyphFrom = aFormatter->ResultGlyphs().Upper() + 1;
+    aScaling.SizeScaling = (float)aFont->Scale();
+    aFormatter->Append(aText, *aFont->FTFont(), aHJustification, aScaling);
+
+    const Standard_Integer aGlyphTo = aFormatter->ResultGlyphs().Upper();
+    if (aGlyphTo >= 0)
+      aGlyphShapes.SetValue(aGlyphTo, TopoDS_Shape());
+
+    for (Standard_Integer aGlyphIter = aGlyphFrom; aGlyphIter <= aGlyphTo; ++aGlyphIter)
+    {
+      const Font_TextFormatter::TextGlyph& aGlyph = aFormatter->ResultGlyphs()[aGlyphIter];
+      if (Font_TextFormatter::IsCommandSymbol (aGlyph.Char)
+       || Font_TextFormatter::IsSeparatorSymbol (aGlyph.Char))
+        continue;
+
+      aGlyphShapes[aGlyphIter] = aFont->RenderGlyph(aGlyph.Char);
+    }
+    return true;
+  };
+
+  gp_Dir aNormal = gp::DZ();
   gp_Dir aDirection = gp::DX();
   gp_Pnt aPenLoc;
 
-  Graphic3d_HorizontalTextAlignment aHJustification = Graphic3d_HTA_LEFT;
-  Graphic3d_VerticalTextAlignment   aVJustification = Graphic3d_VerticalTextAlignment_BottomBaseline;
-  Font_StrictLevel aStrictLevel = Font_StrictLevel_Any;
+  Standard_Real aRealParam = RealLast();
   for (; anArgIt < theArgNb; ++anArgIt)
   {
     TCollection_AsciiString aParam (theArgVec[anArgIt]);
@@ -5771,11 +5825,15 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
         Message::SendFail() << "Error: wrong syntax at '" << aParam << "'";
         return 1;
       }
+
+      if (aNbBlocks <= 1)
+        aFormatter->SetupAlignment(aHJustification, aFormatter->VerticalTextAlignment());
     }
     else if (aParam == "-valign" && anArgIt + 1 < theArgNb)
     {
       TCollection_AsciiString aType (theArgVec[++anArgIt]);
       aType.LowerCase();
+      Graphic3d_VerticalTextAlignment aVJustification = Graphic3d_VerticalTextAlignment_BottomBaseline;
       if (aType == "top")
       {
         aVJustification = Graphic3d_VerticalTextAlignment_TopAscender;
@@ -5805,6 +5863,7 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
         Message::SendFail() << "Error: wrong syntax at '" << aParam << "'";
         return 1;
       }
+      aFormatter->SetupAlignment(aFormatter->HorizontalTextAlignment(), aVJustification);
     }
     else if (aParam == "-height"
           && anArgIt + 1 < theArgNb
@@ -5822,13 +5881,14 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
     }
     else if (aParam == "-wrapping"
           && anArgIt + 1 < theArgNb
-          && Draw::ParseReal(theArgVec[anArgIt + 1], aWrapWidth))
+          && Draw::ParseReal(theArgVec[anArgIt + 1], aRealParam))
     {
       ++anArgIt;
+      aFormatter->SetWrapping((float)aRealParam);
     }
     else if (aParam == "-wordwrapping" || aParam == "-nowordwrapping")
     {
-      isWordWrapping = Draw::ParseOnOffNoIterator(theArgNb, theArgVec, anArgIt);
+      aFormatter->SetWordWrapping(Draw::ParseOnOffNoIterator(theArgNb, theArgVec, anArgIt));
     }
     else if ((aParam == "-widthscale" || aParam == "-widthscaling")
            && anArgIt + 1 < theArgNb
@@ -5839,17 +5899,19 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
     }
     else if ((aParam == "-spacescale" || aParam == "-spacescaling")
            && anArgIt + 1 < theArgNb
-           && Draw::ParseReal(theArgVec[anArgIt + 1], aSpaceScale)
-           && aSpaceScale > 0.0)
+           && Draw::ParseReal(theArgVec[anArgIt + 1], aRealParam)
+           && aRealParam > 0.0)
     {
       ++anArgIt;
+      aScaling.SpaceScaling = (float)aRealParam;
     }
     else if ((aParam == "-linescale" || aParam == "-linescaling")
            && anArgIt + 1 < theArgNb
-           && Draw::ParseReal(theArgVec[anArgIt + 1], aLineScale)
-           && aLineScale > 0.0)
+           && Draw::ParseReal(theArgVec[anArgIt + 1], aRealParam)
+           && aRealParam > 0.0)
     {
       ++anArgIt;
+      aScaling.LineScaling = (float)aRealParam;
     }
     else if (aParam == "-shearangle"
           && anArgIt + 1 < theArgNb
@@ -5894,6 +5956,14 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
       aZ = Draw::Atof (theArgVec[++anArgIt]);
       aDirection.SetCoord (aX, aY, aZ);
     }
+    else if (aParam == "-append" && anArgIt + 1 < theArgNb)
+    {
+      ++aNbBlocks;
+      if (!appendText())
+        return 1;
+
+      aText = theArgVec[++anArgIt];
+    }
     else
     {
       Message::SendFail() << "Syntax error at '" << theArgVec[anArgIt] << "'";
@@ -5901,42 +5971,35 @@ static int TextToBRep (Draw_Interpretor& /*theDI*/,
     }
   }
 
-  Font_BRepFont aFont;
-  if (aShearAngle != RealLast())
-    aFont.SetShearAngle((float)aShearAngle);
-
-  if (aWidthScale != RealLast())
-    aFont.SetWidthScaling((float)aWidthScale);
-
-  aFont.SetCompositeCurveMode (anIsCompositeCurve);
-  if (!aFont.FindAndInit (aFontName.ToCString(), aFontAspect, aTextHeight, aStrictLevel))
-  {
-    Message::SendFail ("Error: unable to load Font");
+  if (!appendText())
     return 1;
-  }
-  if (aCapHeight > 0.0)
-  {
-    aFont.SetCapHeight (aCapHeight);
-  }
 
-  Font_TextFormatter::FontScaling aScaling;
-  aScaling.SizeScaling = (float)aFont.Scale();
-  if (aSpaceScale != RealLast())
-    aScaling.SpaceScaling = (float)aSpaceScale;
-
-  if (aLineScale != RealLast())
-    aScaling.LineScaling = (float)aLineScale;
-
-  Handle(Font_TextFormatter) aFormatter = new Font_TextFormatter();
-  aFormatter->SetupAlignment (aHJustification, aVJustification);
-  aFormatter->SetWrapping ((float)aWrapWidth);
-  aFormatter->SetWordWrapping (isWordWrapping);
-  aFormatter->Append (aText, *aFont.FTFont(), aHJustification, aScaling);
   aFormatter->Format();
 
+  TopoDS_Compound aResShape;
+  BRep_Builder().MakeCompound(aResShape);
+
   gp_Ax3 aPenAx3(aPenLoc, aNormal, aDirection);
-  Font_BRepTextBuilder aBuilder;
-  TopoDS_Shape aResShape = aBuilder.Perform (aFont, aFormatter, aPenAx3);
+  for (Standard_Integer aGlyphIter = aFormatter->ResultGlyphs().Lower();
+       aGlyphIter <= aFormatter->ResultGlyphs().Upper(); ++aGlyphIter)
+  {
+    const Font_TextFormatter::TextGlyph& aGlyph = aFormatter->ResultGlyphs()[aGlyphIter];
+    const NCollection_Vec2<Standard_ShortReal>& aCorner = aGlyph.Pos;
+
+    TopoDS_Shape aGlyphShape = aGlyphShapes[aGlyphIter];
+    if (!aGlyphShape.IsNull())
+    {
+      gp_Trsf aGlyphTrsf;
+      aGlyphTrsf.SetTranslation(gp_Vec(aCorner.x(), aCorner.y(), 0.0));
+      aGlyphShape.Move(aGlyphTrsf);
+      BRep_Builder().Add(aResShape, aGlyphShape);
+    }
+  }
+
+  gp_Trsf aTextTrsf;
+  aTextTrsf.SetTransformation(gp_Ax3(aPenLoc, aNormal, aDirection), gp_Ax3(gp::XOY()));
+  aResShape.Move(aTextTrsf);
+
   DBRep::Set (aName, aResShape);
   return 0;
 }
@@ -7260,6 +7323,7 @@ text2brep name text
           [-valign {top|center|bottom|topCapHeight|topFirstLine|bottomLastLine}]=bottom
           [-wrapping width]=0 [-wordWrapping {0|1}]=1
           [-composite {on|off}]=off
+          [-append anotherText [<modified font parameters>]]
 Create shape from the given text using specified font.
  name        draw variable to put result shape into
  text        text to draw
@@ -7279,6 +7343,8 @@ Create shape from the given text using specified font.
  -wrapping   maximum horizontal length to split long lines
  -wordWrapping wrap by word when true, wrap by each letter otherwise
  -composite  option to merge curve C1 curves into single C0 curve
+ -append     append current text with current parameters
+             and define next text to be appended with modifies parameters
 )" /* [text2brep] */);
 
   addCmd ("vfont", VFont, /* [vfont] */ R"(
