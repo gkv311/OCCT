@@ -29,6 +29,7 @@
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
 #include <OpenGl_GraphicDriver.hxx>
+#include <OSD.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 
 #include <iostream>
@@ -104,7 +105,9 @@ GlfwOcctView* GlfwOcctView::toView (GLFWwindow* theWin)
 // ================================================================
 void GlfwOcctView::errorCallback (int theError, const char* theDescription)
 {
-  Message::DefaultMessenger()->Send (TCollection_AsciiString ("Error") + theError + ": " + theDescription, Message_Fail);
+  std::stringstream aHexErr;
+  aHexErr << std::hex << theError;
+  Message::DefaultMessenger()->SendFail() << "Error #0x" << aHexErr.str() << ": " << theDescription;
 }
 
 // ================================================================
@@ -138,6 +141,12 @@ void GlfwOcctView::initWindow (int theWidth, int theHeight, const char* theTitle
   const bool toAskCoreProfile = true;
   if (toAskCoreProfile)
   {
+#if defined(HAVE_WAYLAND) || defined(HAVE_EGL)
+    // GLFW will use EGL anyhow in case of Wayland backend,
+    // but due to some GLFW bug glfwGetEGLContext() returns error without this hint
+    glfwWindowHint (GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
+#endif
+
     glfwWindowHint (GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint (GLFW_CONTEXT_VERSION_MINOR, 3);
 #if defined (__APPLE__)
@@ -168,7 +177,15 @@ void GlfwOcctView::initViewer()
     return;
   }
 
+  glfwMakeContextCurrent (myOcctWindow->getGlfwWindow());
   Handle(OpenGl_GraphicDriver) aGraphicDriver = new OpenGl_GraphicDriver (myOcctWindow->GetDisplay(), false);
+#if defined(HAVE_WAYLAND) || defined(HAVE_EGL)
+  if (!aGraphicDriver->InitEglContext (myOcctWindow->NativeEglDisplay(), myOcctWindow->NativeGlContext(), nullptr))
+  {
+    return;
+  }
+#endif
+
   Handle(V3d_Viewer) aViewer = new V3d_Viewer (aGraphicDriver);
   aViewer->SetDefaultLights();
   aViewer->SetLightOn();
@@ -221,12 +238,27 @@ void GlfwOcctView::initDemoScene()
 // ================================================================
 void GlfwOcctView::mainloop()
 {
+  // glfwPollEvents() for continuous rendering (immediate return if there are no new events)
+  // and glfwWaitEvents() for rendering on demand (something actually happened in the viewer)
+  bool isContRedraw = false;
+
+  // window never appears without polling events from Wayland (GLFW bug or something missed?)
+#if defined(HAVE_WAYLAND)
+  isContRedraw = true;
+#endif
+
   while (!glfwWindowShouldClose (myOcctWindow->getGlfwWindow()))
   {
-    // glfwPollEvents() for continuous rendering (immediate return if there are no new events)
-    // and glfwWaitEvents() for rendering on demand (something actually happened in the viewer)
-    //glfwPollEvents();
-    glfwWaitEvents();
+    if (isContRedraw)
+    {
+      OSD::MilliSecSleep (1); // spare CPU a little bit
+      glfwPollEvents();
+    }
+    else
+    {
+      glfwWaitEvents();
+    }
+
     if (!myView.IsNull())
     {
       FlushViewEvents (myContext, myView, true);

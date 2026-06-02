@@ -22,6 +22,7 @@
 #ifndef _GlfwOcctWindow_Header
 #define _GlfwOcctWindow_Header
 
+#include <Aspect_Display.hxx>
 #include <Aspect_DisplayConnection.hxx>
 #include <Aspect_RenderingContext.hxx>
 #include <Aspect_Window.hxx>
@@ -52,6 +53,9 @@ public:
 
   //! Return native OpenGL context.
   Aspect_RenderingContext NativeGlContext() const;
+
+  //! Return native EGL display.
+  Aspect_Display NativeEglDisplay() const;
 
   //! Return cursor position.
   Graphic3d_Vec2i CursorPosition() const;

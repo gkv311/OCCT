@@ -28,6 +28,18 @@
 #elif defined (_WIN32)
   #define GLFW_EXPOSE_NATIVE_WIN32
   #define GLFW_EXPOSE_NATIVE_WGL
+#elif defined(HAVE_EGL) || defined(HAVE_WAYLAND)
+  // GLFW3 could be built either with X11 or Wayland, but not for both at once.
+  // Linux distros provide two exclusive packages 'libglfw3' and 'libglfw3-wayland'
+  // both installing the library with exactly same SONAME.
+  //
+  // When OCCT is built with EGL support (which is a requirement for Wayland)
+  // as well as X11 (USE_XLIB=ON) + Wayland (USE_WAYLAND=ON),
+  // both GLFW3 implementations will also work (through EGL layer).
+  //#if defined(HAVE_WAYLAND)
+  //#define GLFW_EXPOSE_NATIVE_WAYLAND
+  //#endif
+  #define GLFW_EXPOSE_NATIVE_EGL
 #else
   #define GLFW_EXPOSE_NATIVE_X11
   #define GLFW_EXPOSE_NATIVE_GLX
@@ -35,7 +47,7 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-#if !defined(_WIN32) && !defined(__APPLE__)
+#if !defined(_WIN32) && !defined(__APPLE__) && !defined(HAVE_EGL) && !defined(HAVE_WAYLAND)
   #include <Xw_DisplayConnection.hxx>
 #endif
 
@@ -53,12 +65,15 @@ GlfwOcctWindow::GlfwOcctWindow (int theWidth, int theHeight, const TCollection_A
   if (myGlfwWindow != nullptr)
   {
     int aWidth = 0, aHeight = 0;
+    // glfwGetWindowPos() prints error within Wayland backend
+    //#if !defined(HAVE_WAYLAND)
     glfwGetWindowPos (myGlfwWindow, &myXLeft, &myYTop);
+    //#endif
     glfwGetWindowSize(myGlfwWindow, &aWidth, &aHeight);
     myXRight  = myXLeft + aWidth;
     myYBottom = myYTop + aHeight;
 
-  #if !defined(_WIN32) && !defined(__APPLE__)
+  #if !defined(_WIN32) && !defined(__APPLE__) && !defined(HAVE_EGL) && !defined(HAVE_WAYLAND)
     myDisplay = new Xw_DisplayConnection ((Aspect_XDisplay* )glfwGetX11Display());
   #endif
   }
@@ -87,6 +102,10 @@ Aspect_Drawable GlfwOcctWindow::NativeHandle() const
   return (Aspect_Drawable)glfwGetCocoaWindow (myGlfwWindow);
 #elif defined (_WIN32)
   return (Aspect_Drawable)glfwGetWin32Window (myGlfwWindow);
+#elif defined(HAVE_EGL) || defined(HAVE_WAYLAND)
+  // OCCT expects wl_egl_window in case of Wayland (inaccessible from GLFW)
+  // and Window in case of X11, but this handle will be unused anyway
+  return (Aspect_Drawable)glfwGetEGLSurface (myGlfwWindow);
 #else
   return (Aspect_Drawable)glfwGetX11Window (myGlfwWindow);
 #endif
@@ -102,8 +121,23 @@ Aspect_RenderingContext GlfwOcctWindow::NativeGlContext() const
   return (NSOpenGLContext*)glfwGetNSGLContext (myGlfwWindow);
 #elif defined (_WIN32)
   return glfwGetWGLContext (myGlfwWindow);
+#elif defined(HAVE_EGL) || defined(HAVE_WAYLAND)
+  return glfwGetEGLContext (myGlfwWindow);
 #else
   return glfwGetGLXContext (myGlfwWindow);
+#endif
+}
+
+// ================================================================
+// Function : NativeEglDisplay
+// Purpose  :
+// ================================================================
+Aspect_Display GlfwOcctWindow::NativeEglDisplay() const
+{
+#if defined(HAVE_EGL) || defined(HAVE_WAYLAND)
+  return Aspect_Display (glfwGetEGLDisplay());
+#else
+  return 0;
 #endif
 }
 
@@ -143,7 +177,10 @@ Aspect_TypeOfResize GlfwOcctWindow::DoResize()
   if (glfwGetWindowAttrib (myGlfwWindow, GLFW_VISIBLE) == 1)
   {
     int anXPos = 0, anYPos = 0, aWidth = 0, aHeight = 0;
+    // glfwGetWindowPos() prints error within Wayland backend
+    //#if !defined(HAVE_WAYLAND)
     glfwGetWindowPos (myGlfwWindow, &anXPos, &anYPos);
+    //#endif
     glfwGetWindowSize(myGlfwWindow, &aWidth, &aHeight);
     myXLeft   = anXPos;
     myXRight  = anXPos + aWidth;
