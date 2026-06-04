@@ -206,9 +206,9 @@ IFSelect_TransformStandard::IFSelect_TransformStandard ()
   if (CopyOption()) labl.AssignCat("Standard Copy");
   else              labl.AssignCat("On the spot Edition");
   Standard_Integer nb = NbModifiers();
-  if (nb == 0) sprintf(lab," (no Modifier)");
-  if (nb == 1) sprintf(lab," - %s",Modifier(1)->Label().ToCString());
-  if (nb >  1) sprintf(lab," - %d Modifiers",nb);
+  if (nb == 0) Snprintf(lab," (no Modifier)");
+  if (nb == 1) Snprintf(lab," - %s",Modifier(1)->Label().ToCString());
+  if (nb >  1) Snprintf(lab," - %d Modifiers",nb);
   labl.AssignCat(lab);
   return labl;
 }

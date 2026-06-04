@@ -87,8 +87,7 @@ void XmlMDataStd_AsciiStringDriver::Paste (const Handle(TDF_Attribute)& theSourc
   if(aS->ID() != TDataStd_AsciiString::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    aS->ID().ToCString (pGuidStr);
+    aS->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

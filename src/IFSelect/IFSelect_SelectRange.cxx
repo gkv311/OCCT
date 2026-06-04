@@ -83,10 +83,10 @@ IFSelect_SelectRange::IFSelect_SelectRange ()    {  }
   if (!thelower.IsNull()) rankfrom = thelower->Value();
   Standard_Integer rankto   = 0;
   if (!theupper.IsNull()) rankto   = theupper->Value();
-  if (rankfrom == rankto) sprintf(lab,"Rank no %d",rankfrom);
-  else if (rankfrom == 0) sprintf(lab,"Until no %d",rankto);
-  else if (rankto   == 0) sprintf(lab,"From no %d",rankto);
-  else                    sprintf(lab,"From %d Until %d",rankfrom,rankto);
+  if (rankfrom == rankto) Snprintf(lab,"Rank no %d",rankfrom);
+  else if (rankfrom == 0) Snprintf(lab,"Until no %d",rankto);
+  else if (rankto   == 0) Snprintf(lab,"From no %d",rankto);
+  else                    Snprintf(lab,"From %d Until %d",rankfrom,rankto);
 
   return TCollection_AsciiString(lab);
 }

@@ -938,23 +938,23 @@ VrmlData_ErrorStatus VrmlData_Scene::WriteArrIndex
         const Standard_Integer * arrVal = theArrIndex[iBlock]+1;
         switch (nVal) {
         case 1:
-          Sprintf (buf, "%d,", arrVal[0]);
+          Snprintf(buf, "%d,", arrVal[0]);
           break;
         case 2:
-          Sprintf (buf, "%d,%d,", arrVal[0], arrVal[1]);
+          Snprintf(buf, "%d,%d,", arrVal[0], arrVal[1]);
           break;
         case 3:
-          Sprintf (buf, "%d,%d,%d,", arrVal[0], arrVal[1], arrVal[2]);
+          Snprintf(buf, "%d,%d,%d,", arrVal[0], arrVal[1], arrVal[2]);
           break;
         case 4:
-          Sprintf (buf, "%d,%d,%d,%d,",
+          Snprintf(buf, "%d,%d,%d,%d,",
                    arrVal[0], arrVal[1], arrVal[2], arrVal[3]);
           break;
         default:
           if (nVal > 0) {
             char * ptr = &buf[0];
             for (Standard_Integer i = 0; i < nVal; i++) {
-              Sprintf (ptr, "%d,", arrVal[i]);
+              Snprintf(ptr, size_t(sizeof(buf) - (ptr - &buf[0])), "%d,", arrVal[i]);
               if (i == nVal - 1)
                 break;
               ptr = strchr (ptr, ',') + 1;
@@ -987,11 +987,11 @@ VrmlData_ErrorStatus VrmlData_Scene::WriteXYZ
   char buf[240];
   if (IsDummyWrite() == Standard_False) {
     if (isApplyScale && myLinearScale > Precision::Confusion())
-      Sprintf (buf, "%.12g %.12g %.12g%s", theXYZ.X() / myLinearScale,
+      Snprintf(buf, "%.12g %.12g %.12g%s", theXYZ.X() / myLinearScale,
                theXYZ.Y() / myLinearScale, theXYZ.Z() / myLinearScale,
                thePostfix ? thePostfix : "");
     else
-      Sprintf (buf, "%.12g %.12g %.12g%s", theXYZ.X(), theXYZ.Y(), theXYZ.Z(),
+      Snprintf(buf, "%.12g %.12g %.12g%s", theXYZ.X(), theXYZ.Y(), theXYZ.Z(),
                thePostfix ? thePostfix : "");
   }
   return WriteLine (buf);
@@ -1075,7 +1075,7 @@ VrmlData_ErrorStatus VrmlData_Scene::WriteNode
           Handle(VrmlData_UnknownNode) bidNode = new VrmlData_UnknownNode;
           char buf[32];
           do {
-            Sprintf (buf, "_%d",
+            Snprintf(buf, "_%d",
                      ++const_cast<Standard_Integer&>(myAutoNameCounter));
             bidNode->myName = &buf[0];
           } while (myNamedNodes.Contains (bidNode));
@@ -1186,7 +1186,7 @@ void dumpNode (Standard_OStream&                theStream,
     const Handle(VrmlData_Group) aGroup = 
       Handle(VrmlData_Group)::DownCast (theNode);
     char buf[64];
-    Sprintf (buf, "Group (%s)",
+    Snprintf(buf, "Group (%s)",
              aGroup->IsTransform() ? "Transform" : "Group");
     dumpNodeHeader (theStream, theIndent, buf, theNode->Name());
     if (theIndent.IsEmpty() == Standard_False) {
@@ -1203,7 +1203,7 @@ void dumpNode (Standard_OStream&                theStream,
     const Standard_Size nCoord = aNode->Coordinates()->Length();
     const Standard_Size nPoly  = aNode->Polygons (ppDummy);
     char buf[80];
-    Sprintf (buf, "IndexedFaceSet (%" PRIuPTR " vertices, %" PRIuPTR " polygons)",
+    Snprintf(buf, "IndexedFaceSet (%" PRIuPTR " vertices, %" PRIuPTR " polygons)",
              nCoord, nPoly);
 
     dumpNodeHeader (theStream, theIndent, buf, theNode->Name());
@@ -1215,7 +1215,7 @@ void dumpNode (Standard_OStream&                theStream,
     const Standard_Size nPoly  = aNode->Polygons (ppDummy);
 
     char buf[80];
-    Sprintf(buf, "IndexedLineSet (%" PRIuPTR " vertices, %" PRIuPTR " polygons)",
+    Snprintf(buf, "IndexedLineSet (%" PRIuPTR " vertices, %" PRIuPTR " polygons)",
             nCoord, nPoly);
 
     dumpNodeHeader (theStream, theIndent, buf, theNode->Name());
@@ -1234,7 +1234,7 @@ void dumpNode (Standard_OStream&                theStream,
     const Handle(VrmlData_UnknownNode) anUnknown = 
       Handle(VrmlData_UnknownNode)::DownCast (theNode);
     char buf[64];
-    Sprintf (buf, "Unknown (%s)", anUnknown->GetTitle().ToCString());
+    Snprintf(buf, "Unknown (%s)", anUnknown->GetTitle().ToCString());
     dumpNodeHeader (theStream, theIndent, buf, theNode->Name());
   }
 }
