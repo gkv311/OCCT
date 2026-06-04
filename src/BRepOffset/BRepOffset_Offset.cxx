@@ -1420,17 +1420,17 @@ void BRepOffset_Offset::Init(const TopoDS_Vertex&        Vertex,
 
 
 #ifdef OCCT_DEBUG
-  char* name = new char[100];
+  char name[100];
   if (Affich) {
     NbOFFSET++;
     
-    sprintf(name,"VOnSph_%d",NbOFFSET);
+    Snprintf(name,"VOnSph_%d",NbOFFSET);
 #ifdef DRAW
     DBRep::Set(name, Vertex);
 #endif
     Standard_Integer NbEdges = 1;
     for (it.Initialize(LEdge); it.More(); it.Next()) {
-      sprintf(name,"EOnSph_%d_%d",NbOFFSET,NbEdges++);
+      Snprintf(name,"EOnSph_%d_%d",NbOFFSET,NbEdges++);
 #ifdef DRAW
       const TopoDS_Shape& CurE = it.Value();
       DBRep::Set(name, CurE);
@@ -1492,7 +1492,7 @@ void BRepOffset_Offset::Init(const TopoDS_Vertex&        Vertex,
   // POP pour NT
   //  char name[100];
   if (Affich) {
-    sprintf(name,"SPHERE_%d",NbOFFSET);
+    Snprintf(name,"SPHERE_%d",NbOFFSET);
     DrawTrSurf::Set(name, S);
   }
   Standard_Integer CO = 1;
@@ -1511,7 +1511,7 @@ void BRepOffset_Offset::Init(const TopoDS_Vertex&        Vertex,
 
 #ifdef DRAW
     if ( Affich) {
-      sprintf(name,"CURVE_%d_%d",NbOFFSET,CO);
+      Snprintf(name,"CURVE_%d_%d",NbOFFSET,CO);
       DrawTrSurf::Set(name, C);
       CO++;
     }

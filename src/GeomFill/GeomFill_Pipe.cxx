@@ -1073,7 +1073,7 @@ void GeomFill_Pipe::ApproxSurf(const Standard_Boolean WithParameters) {
 	new Geom_BSplineCurve(Poles,Weights,Knots,Mults,Degree);
 #ifdef DRAW
       char name[256];
-      sprintf(name,"SECT_%d",NbSections);
+      Snprintf(name,"SECT_%d",NbSections);
       DrawTrSurf::Set(name,BS);
 #endif
     }
@@ -1108,7 +1108,7 @@ void GeomFill_Pipe::ApproxSurf(const Standard_Boolean WithParameters) {
 	new Geom_BSplineCurve(Poles,Weights,Knots,Mults,Degree);
 #ifdef DRAW
       char name[256];
-      sprintf(name,"sect_%d",i);
+      Snprintf(name,"sect_%d",i);
       DrawTrSurf::Set(name,BS);
 #endif
     }

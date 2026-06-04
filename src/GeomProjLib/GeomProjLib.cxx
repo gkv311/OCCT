@@ -73,9 +73,9 @@ Handle(Geom2d_Curve) GeomProjLib::Curve2d(const Handle(Geom_Curve)& C,
 #ifdef DRAW
   if ( Affich) {
     char name[256];
-    Sprintf(name,"PROJCURV_%d",NBPROJ);
+    Snprintf(name,"PROJCURV_%d",NBPROJ);
     DrawTrSurf::Set(name,C);
-    Sprintf(name,"PROJSURF_%d",NBPROJ);
+    Snprintf(name,"PROJSURF_%d",NBPROJ);
     DrawTrSurf::Set(name,S);
     NBPROJ++;
   }

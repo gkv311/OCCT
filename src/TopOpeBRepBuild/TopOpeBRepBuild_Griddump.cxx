@@ -262,7 +262,7 @@ void TopOpeBRepBuild_Builder::GdumpEDG(const TopoDS_Shape& E,
   GdumpSHAORI(E, (char *) "vertices of ");std::cout<<std::endl;
   TopOpeBRepTool_ShapeExplorer ex(E,TopAbs_VERTEX);
   char strpar[256]; 
-  Sprintf(strpar," #");
+  Snprintf(strpar," #");
   for (; ex.More(); ex.Next()) {
     const TopoDS_Vertex& VV = TopoDS::Vertex(ex.Current());
     TopAbs_Orientation o = VV.Orientation();
@@ -274,7 +274,7 @@ void TopOpeBRepBuild_Builder::GdumpEDG(const TopoDS_Shape& E,
     std::cout<<++n<<" "; TopOpeBRepBuild_Builder::PrintPnt(VV); std::cout<<";";
     Standard_Real par = BRep_Tool::Parameter(VV,EE);
     char spar[255];
-    Sprintf(spar," par%d %f",n,par); 
+    Snprintf(spar," par%d %f",n,par); 
     strcat(strpar,spar);
   }
   if(n) std::cout<<strpar<<std::endl;

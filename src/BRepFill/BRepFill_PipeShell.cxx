@@ -1073,11 +1073,11 @@ void BRepFill_PipeShell::Generated(const TopoDS_Shape&   theShape,
     
 #ifdef DRAW
     if ( Affich) {
-      char*  name = new char[100];
+      char name[100];
       Standard_Integer NBSECT = 0;
       for (Standard_Integer i=1;i<=WSeq.Length();i++) {
         NBSECT++;
-        sprintf(name,"WSeq_%d",NBSECT);
+        Snprintf(name,"WSeq_%d",NBSECT);
         DBRep::Set(name,TopoDS::Wire(WSeq.Value(i)));
       }
     }

@@ -98,19 +98,19 @@ myFace1(Face1),
 #ifdef DRAW
     char name[256];
 
-    sprintf(name,"FACE1_%d",NBCALL);
+    Snprintf(name,"FACE1_%d",NBCALL);
     DBRep::Set(name,myFace1);
 
-    sprintf(name,"FACE2_%d",NBCALL);
+    Snprintf(name,"FACE2_%d",NBCALL);
     DBRep::Set(name,myFace2);
 
-    sprintf(name,"EDGE1_%d",NBCALL);
+    Snprintf(name,"EDGE1_%d",NBCALL);
     DBRep::Set(name,myEdge1);
 
-    sprintf(name,"EDGE2_%d",NBCALL);
+    Snprintf(name,"EDGE2_%d",NBCALL);
     DBRep::Set(name,myEdge2);
 
-    sprintf(name,"BISSEC_%d",NBCALL);
+    Snprintf(name,"BISSEC_%d",NBCALL);
     DrawTrSurf::Set(name,myBis);
 #endif    
   }
@@ -399,10 +399,10 @@ void BRepFill_TrimSurfaceTool::IntersectWith
   if ( Affich) {
     char name[256];  
     Standard_Integer i1 = 0, i2 = 2;
-    sprintf(name,"EdgeOnF1_%d_%d",i1, NBCALL);
+    Snprintf(name,"EdgeOnF1_%d_%d",i1, NBCALL);
     DBRep::Set(name,EdgeOnF1);
 
-    sprintf(name,"EdgeOnF2_%d_%d",i2, NBCALL);
+    Snprintf(name,"EdgeOnF2_%d_%d",i2, NBCALL);
     DBRep::Set(name,EdgeOnF2);
   }
 

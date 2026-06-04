@@ -465,7 +465,7 @@ void BRepOffset_MakeLoops::BuildFaces(const TopTools_ListOfShape&   LF,
 #ifdef DRAW
 	if ( Affich) {
 	  char name[256];
-	  sprintf(name,"CF_%d",NbF++);
+	  Snprintf(name,"CF_%d",NbF++);
 	  DBRep::Set(name,F);
 	}
 #endif

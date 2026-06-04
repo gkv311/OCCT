@@ -701,17 +701,17 @@ Standard_Boolean
   }
 
 #ifdef DRAW
-  char* name = new char[100];
+  char name[100];
   Standard_Integer indc = 1;
   Standard_Boolean onfirst = Standard_True;
   for (Standard_Integer i = 1; i <= ResultPntOn2SLine->NbPoints(); i++)
   {
     const IntSurf_PntOn2S& thePoint = ResultPntOn2SLine->Value(i);
     gp_Pnt curPnt = thePoint.Value();
-    sprintf(name, "p%d_%d", indc, i);
+    Snprintf(name, "p%d_%d", indc, i);
     DrawTrSurf::Set(name, curPnt);
     gp_Pnt2d curPnt2d = thePoint.ValueOnSurface(onfirst);
-    sprintf(name, "pp%d_%d", indc, i);
+    Snprintf(name, "pp%d_%d", indc, i);
     DrawTrSurf::Set(name, curPnt2d);
   }
 #endif

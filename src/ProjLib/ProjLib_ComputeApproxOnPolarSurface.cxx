@@ -1536,7 +1536,7 @@ Handle(Adaptor2d_Curve2d)
     Handle(Adaptor2d_Curve2d) IC2d = new Geom2dAdaptor_Curve(GAC);
 #ifdef OCCT_DEBUG
 //    char name [100];
-//    sprintf(name,"%s_%d","build",compteur++);
+//    Snprintf(name,"%s_%d","build",compteur++);
 //    DrawTrSurf::Set(name,myBSpline);
 #endif
     return IC2d;

@@ -407,12 +407,10 @@ Standard_Boolean GeomFill_CorrectedFrenet::SetCurve(const Handle(Adaptor3d_Curve
       CS.D0(t, TabP(i));
       TI(i) = t;
     }
-    char tname[100];
-    Standard_CString name = tname ;
-    sprintf(name,"Binorm_%d", ++CorrNumber);
+    char name[100];
+    Snprintf(name,"Binorm_%d", ++CorrNumber);
     Handle(Geom_BSplineCurve) BS = new 
       (Geom_BSplineCurve) (TabP, TI, M, 1);
-//    DrawTrSurf::Set(&name[0], BS);
     DrawTrSurf::Set(name, BS);
   }
 #endif
