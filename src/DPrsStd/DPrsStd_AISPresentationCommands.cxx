@@ -181,10 +181,8 @@ static Standard_Integer DPrsStd_AISSet (Draw_Interpretor& di,
     prs->GetDriverGUID().ShallowDump(std::cout);
     std::cout << "\n";
 #endif
-    Standard_Character resS[37];
-    Standard_PCharacter presS;
-    presS=resS;
-    guid.ToCString(presS);
+    Standard_Character resS[Standard_GUID_SIZE_ALLOC];
+    guid.ToCString(resS, sizeof(resS));
     di<<resS;
     return 0; 
   }
@@ -212,10 +210,8 @@ static Standard_Integer DPrsStd_AISDriver (Draw_Interpretor& di,
     if(L.FindAttribute( TPrsStd_AISPresentation::GetID(), prs) ) {
       if( nb == 3 ) {
 	guid = prs->GetDriverGUID();
-	Standard_Character str[37];
-	Standard_PCharacter pstr;
-	pstr=str;
-	guid.ToCString( pstr );
+	Standard_Character str[Standard_GUID_SIZE_ALLOC];
+	guid.ToCString(str, sizeof(str));
 	di << str ;
 	return 0; 
       }
@@ -242,12 +238,8 @@ static Standard_Integer DPrsStd_AISDriver (Draw_Interpretor& di,
 //	  guid = TSketchStd_Edge::GetID();           //"b3aac90a-5b78-11d1-8940-080009dc3333"
 
         prs->SetDriverGUID(guid);
-	Standard_Character resS[37];
-	Standard_PCharacter presS;
-	//modified by NIZNHY-PKV Tue Apr 22 16:15:02 2008f
-	presS=resS;
-	//modified by NIZNHY-PKV Tue Apr 22 16:15:05 2008t
-	guid.ToCString( presS );
+	Standard_Character resS[Standard_GUID_SIZE_ALLOC];
+	guid.ToCString(resS, sizeof(resS));
 	di << resS ;
         return 0;
       }

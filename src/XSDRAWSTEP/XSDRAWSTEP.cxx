@@ -184,7 +184,7 @@ static Standard_Integer stepread (Draw_Interpretor& di, Standard_Integer argc, c
         di<<"Transfer root n0 "<<num<<" : no result\n";
       else {
         nbs = sr.NbShapes();
-        char shname[30];  Sprintf (shname,"%s_%d",rnom.ToCString(),nbs);
+        char shname[30];  Snprintf(shname,"%s_%d",rnom.ToCString(),nbs);
         di<<"Transfer root n0 "<<num<<" OK  -> DRAW Shape: "<<shname<<"\n";
         di<<"Now, "<<nbs<<" Shapes produced\n";
         TopoDS_Shape sh = sr.Shape(nbs);
@@ -199,7 +199,7 @@ static Standard_Integer stepread (Draw_Interpretor& di, Standard_Integer argc, c
         di<<"Transfer entity n0 "<<num<<" : no result\n";
       else {
         nbs = sr.NbShapes();
-        char shname[30];  Sprintf (shname,"%s_%d",rnom.ToCString(),num);
+        char shname[30];  Snprintf(shname,"%s_%d",rnom.ToCString(),num);
         di<<"Transfer entity n0 "<<num<<" OK  -> DRAW Shape: "<<shname<<"\n";
         di<<"Now, "<<nbs<<" Shapes produced\n";
         TopoDS_Shape sh = sr.Shape(nbs);
@@ -249,7 +249,7 @@ static Standard_Integer stepread (Draw_Interpretor& di, Standard_Integer argc, c
           di<<"Transfer entity n0 "<<num<<" : no result\n";
         else {
           nbs = sr.NbShapes();
-          char shname[30];  Sprintf (shname,"%s_%d",rnom.ToCString(),nbs);
+          char shname[30];  Snprintf(shname,"%s_%d",rnom.ToCString(),nbs);
           di<<"Transfer entity n0 "<<num<<" OK  -> DRAW Shape: "<<shname<<"\n";
           di<<"Now, "<<nbs<<" Shapes produced\n";
           TopoDS_Shape sh = sr.Shape(nbs);

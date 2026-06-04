@@ -543,22 +543,19 @@ static Standard_Integer explode(Draw_Interpretor& di,
 				Standard_Integer n, const char** a)
 {
   if (n <= 1) return 1;
-  TopoDS_Shape S = DBRep::Get(a[1]);
+
+  TCollection_AsciiString aName(a[1]);
+  TopoDS_Shape S = DBRep::Get(aName);
   if (S.IsNull()) return 0;
-  char newname[1024];
-  strcpy(newname,a[1]);
-  char* p = newname;
-  while (*p != '\0') p++;
-  *p = '_';
-  p++;
+
   Standard_Integer i = 0;
   if (n == 2) {
     TopoDS_Iterator itr(S);
     while (itr.More()) {
       i++;
-      Sprintf(p,"%d",i);
-      DBRep::Set(newname,itr.Value());
-      di.AppendElement(newname);
+      const TCollection_AsciiString newname = aName + "_" + i;
+      DBRep::Set(newname.ToCString(), itr.Value());
+      di.AppendElement(newname.ToCString());
       itr.Next();
     }
   }
@@ -616,10 +613,10 @@ static Standard_Integer explode(Draw_Interpretor& di,
       const TopoDS_Shape& Sx = ex.Current();
       Standard_Boolean added = M.Add(Sx);
       if (added) {
-	i++;
-	Sprintf(p,"%d",i);
-	DBRep::Set(newname,Sx);
-	di.AppendElement(newname);
+        i++;
+        const TCollection_AsciiString newname = aName + "_" + i;
+        DBRep::Set(newname.ToCString(), Sx);
+        di.AppendElement(newname.ToCString());
       }
     }
   }
@@ -634,14 +631,11 @@ static Standard_Integer nexplode(Draw_Interpretor& di,
 				 Standard_Integer n, const char** a)
 { 
   if (n <= 2) return 1;
-  TopoDS_Shape S = DBRep::Get(a[1]);
+
+  TCollection_AsciiString aName(a[1]);
+  TopoDS_Shape S = DBRep::Get(aName);
   if (S.IsNull()) return 0;
-  char newname[1024];
-  strcpy(newname,a[1]);
-  char* p = newname;
-  while (*p != '\0') p++;
-  *p = '_';
-  p++;
+
   TopAbs_ShapeEnum typ;
   // explode a type
   switch (a[2][0]) {    
@@ -722,9 +716,9 @@ static Standard_Integer nexplode(Draw_Interpretor& di,
   }
   
   for (Index=1 ;Index <= MaxShapes; Index++) {
-    Sprintf(p,"%d",Index);
-    DBRep::Set(newname,aShapes(OrderInd(Index)));
-    di.AppendElement(newname);    
+    const TCollection_AsciiString newname = aName + "_" + Index;
+    DBRep::Set(newname.ToCString(), aShapes(OrderInd(Index)));
+    di.AppendElement(newname.ToCString());
   }
   
   return 0;
@@ -738,21 +732,18 @@ static Standard_Integer exwire(Draw_Interpretor& ,
 			       Standard_Integer n, const char** a)
 {
   if (n <= 1) return 1;
-  TopoDS_Shape S = DBRep::Get(a[1]);
+
+  TCollection_AsciiString aName(a[1]);
+  TopoDS_Shape S = DBRep::Get(aName);
   if (S.IsNull()) return 0;
   if (S.ShapeType() != TopAbs_WIRE) return 0;
-  char newname[1024];
-  strcpy(newname,a[1]);
-  char* p = newname;
-  while (*p != '\0') p++;
-  *p = '_';
-  p++;
+
   Standard_Integer i = 0;
   BRepTools_WireExplorer ex(TopoDS::Wire(S));
   while (ex.More()) {
     i++;
-    Sprintf(p,"%d",i);
-    DBRep::Set(newname,ex.Current());
+    const TCollection_AsciiString newname = aName + "_" + i;
+    DBRep::Set(newname.ToCString(), ex.Current());
     ex.Next();
   }
   return 0;

@@ -1833,9 +1833,8 @@ static Standard_Integer splitc1(Draw_Interpretor& di,
 						 angular_tolerance,
 						 tolerance);
    for (i=0;i<=(tabBS->Length()-1);i++){
-     Sprintf(name,"%s_%d",c[1],i+1);
-     Standard_CString new_name = name ;
-     DrawTrSurf::Set(new_name,
+     Snprintf(name,"%s_%d",c[1],i+1);
+     DrawTrSurf::Set(name,
                      tabBS->Value(i));
      di.AppendElement(name);
    }
@@ -1891,9 +1890,8 @@ static Standard_Integer splitc12d(Draw_Interpretor& di,
 						   angular_tolerance,
 						   tolerance);
    for (i=0;i<=(tabBS->Length()-1);i++){
-     Sprintf(name,"%s_%d",c[1],i+1);
-     Standard_CString new_name = name ;
-     DrawTrSurf::Set(new_name,
+     Snprintf(name,"%s_%d",c[1],i+1);
+     DrawTrSurf::Set(name,
 		     tabBS->Value(i));
      di.AppendElement(name);
    }

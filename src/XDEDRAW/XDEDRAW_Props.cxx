@@ -538,7 +538,7 @@ static Standard_Integer CheckProps (Draw_Interpretor& di, Standard_Integer argc,
     //printf ( "%s%-12.12s", ( wholeDoc ? "" : "Label " ), str.ToCString() );
     //fflush ( stdout );
     char string1[260];
-    Sprintf (string1, "%s%-12.12s", ( wholeDoc ? "" : "Label " ), str.ToCString() );
+    Snprintf(string1, "%s%-12.12s", ( wholeDoc ? "" : "Label " ), str.ToCString() );
     di << string1;
     Handle(TDataStd_Name) N;
     if ( aLabel.FindAttribute ( TDataStd_Name::GetID(), N ) && ! wholeDoc ) {
@@ -564,7 +564,7 @@ static Standard_Integer CheckProps (Draw_Interpretor& di, Standard_Integer argc,
 	//	(Standard_Integer)( Abs ( G.Mass() ) > 1e-10 ? 100. * ( aArea->Get() - G.Mass() ) / G.Mass() : 999. ),
 	//	( wholeDoc ? "" : "\n" ));
 	char string2[260];
-	Sprintf (string2, "%s%9.1f (%3d%%)%s", ( wholeDoc ? "" : "  Area defect:   " ),
+	Snprintf(string2, "%s%9.1f (%3d%%)%s", ( wholeDoc ? "" : "  Area defect:   " ),
 		 aArea->Get() - G.Mass(), 
 		 (Standard_Integer)( Abs ( G.Mass() ) > 1e-10 ? 100. * ( aArea->Get() - G.Mass() ) / G.Mass() : 999. ),
 		 ( wholeDoc ? "" : "\n" ));
@@ -573,14 +573,14 @@ static Standard_Integer CheckProps (Draw_Interpretor& di, Standard_Integer argc,
       catch (Standard_Failure const&) {
 	//printf ( "%-16.16s", "exception" );
 	char string3[260];
-	Sprintf (string3, "%-16.16s", "exception" );
+	Snprintf(string3, "%-16.16s", "exception" );
 	di << string3;
       }
     }
     else if ( wholeDoc ) {
       //printf ( "%16.16s", "" );
       char string4[260];
-      Sprintf (string4, "%16.16s", "" );
+      Snprintf(string4, "%16.16s", "" );
       di << string4;
     }
 
@@ -611,7 +611,7 @@ static Standard_Integer CheckProps (Draw_Interpretor& di, Standard_Integer argc,
 		//  (Standard_Integer)( Abs ( localVolume ) > 1e-10 ? 100. * ( aVolume->Get() - localVolume ) / localVolume : 999. ),
 		//  ( wholeDoc ? "" : "\n" ));
 	  char string5[260];
-	  Sprintf (string5, "%s%9.1f (%3d%%)%s", ( wholeDoc ? "" : "  Volume defect: " ),
+	  Snprintf(string5, "%s%9.1f (%3d%%)%s", ( wholeDoc ? "" : "  Volume defect: " ),
 		   aVolume->Get() - localVolume,
 		   (Standard_Integer)( Abs ( localVolume ) > 1e-10 ? 100. * ( aVolume->Get() - localVolume ) / localVolume : 999. ),
 		   ( wholeDoc ? "" : "\n" ));
@@ -620,7 +620,7 @@ static Standard_Integer CheckProps (Draw_Interpretor& di, Standard_Integer argc,
 	else if ( wholeDoc ) {
 	  //printf ( "%16.16s", "" );
 	  char string6[260];
-	  Sprintf (string6, "%16.16s", "" );
+	  Snprintf(string6, "%16.16s", "" );
 	  di << string6;
 	}
 
@@ -630,12 +630,12 @@ static Standard_Integer CheckProps (Draw_Interpretor& di, Standard_Integer argc,
 	  if ( wholeDoc ) {
 	    //printf ( " %7.2f %7.2f %7.2f", 
 		//    p.X() - pcg.X(), p.Y() - pcg.Y(), p.Z() - pcg.Z() );
-	    Sprintf (string7, " %7.2f %7.2f %7.2f", 
+	    Snprintf(string7, " %7.2f %7.2f %7.2f",
 		    p.X() - pcg.X(), p.Y() - pcg.Y(), p.Z() - pcg.Z() );
 	  } else {
 	    //printf ( "  CG defect: dX=%.3f, dY=%.3f, dZ=%.3f\n", 
 		//    p.X() - pcg.X(), p.Y() - pcg.Y(), p.Z() - pcg.Z() );
-	    Sprintf (string7, "  CG defect: dX=%.3f, dY=%.3f, dZ=%.3f\n", 
+	    Snprintf(string7, "  CG defect: dX=%.3f, dY=%.3f, dZ=%.3f\n",
 		    p.X() - pcg.X(), p.Y() - pcg.Y(), p.Z() - pcg.Z() );
 	  }
 	  di << string7;
@@ -643,14 +643,14 @@ static Standard_Integer CheckProps (Draw_Interpretor& di, Standard_Integer argc,
 	else if ( wholeDoc ) {
 	  //printf ( "%24.24s", "" );
 	  char string8[260];
-	  Sprintf (string8, "%24.24s", "" );
+	  Snprintf(string8, "%24.24s", "" );
 	  di << string8;
 	}
       }
       catch (Standard_Failure const& anException) {
 	//printf ( "%40.40s", "exception" );
 	char string9[260];
-	Sprintf (string9, "%40.40s", "exception" );
+	Snprintf(string9, "%40.40s", "exception" );
 	di << string9;
 #ifdef OCCT_DEBUG
 	//fflush ( stdout );
@@ -664,7 +664,7 @@ static Standard_Integer CheckProps (Draw_Interpretor& di, Standard_Integer argc,
     else if ( wholeDoc ) {
       //printf ( "%40.40s", "" );
       char string10[260];
-      Sprintf (string10, "%40.40s", "" );
+      Snprintf(string10, "%40.40s", "" );
       di << string10;
     }
     //fflush ( stdout );

@@ -194,7 +194,7 @@ static Standard_Integer FromShape(Draw_Interpretor& di, Standard_Integer argc, c
   }
 
   char command[256];
-  Sprintf(command, "fromshape %.200s -1", argv[1]);
+  Snprintf(command, "fromshape %.200s -1", argv[1]);
   NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)> DictWS = thedictws;
   if (DictWS.IsEmpty()) return di.Eval(command);
 

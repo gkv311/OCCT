@@ -237,7 +237,7 @@ Standard_Integer bopsmt(Draw_Interpretor& di,
   const TopTools_ListOfShape& aLC=pPF->Arguments();
   aNb=aLC.Extent();
   if (aNb!=2) {
-    Sprintf (buf, " wrong number of arguments %s\n", aNb);
+    Snprintf(buf, " wrong number of arguments %s\n", aNb);
     di << buf;
     return 0;
   }
@@ -306,7 +306,7 @@ Standard_Integer bopsection(Draw_Interpretor& di,
   const TopTools_ListOfShape& aLC=pPF->Arguments();
   aNb=aLC.Extent();
   if (aNb!=2) {
-    Sprintf (buf, " wrong number of arguments %s\n", aNb);
+    Snprintf(buf, " wrong number of arguments %s\n", aNb);
     di << buf;
     return 0;
   }

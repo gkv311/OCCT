@@ -73,7 +73,7 @@ static Standard_Integer Ascendants (Draw_Interpretor& di, Standard_Integer n, co
   TCollection_AsciiString entry;
   for (;it.More (); it.Next ()) {
     S = it.Shape ();
-    Sprintf (name,"%s_%s_%d",a[2],"old", i++);
+    Snprintf(name,"%s_%s_%d",a[2],"old", i++);
     DBRep::Set (name,it.Shape());
     TDF_Label Label = it.Label ();
     TDF_Tool::Entry(Label,entry);
@@ -113,7 +113,7 @@ static Standard_Integer Descendants (Draw_Interpretor& di, Standard_Integer n, c
   TCollection_AsciiString entry;
   for (;it.More (); it.Next ()) {
     S = it.Shape ();
-    Sprintf (name,"%s_%s_%d",a[2],"new", i++);
+    Snprintf(name,"%s_%s_%d",a[2],"new", i++);
     DBRep::Set (name,it.Shape ());
     TDF_Label Label = it.Label ();
     TDF_Tool::Entry(Label,entry);
@@ -282,11 +282,11 @@ static Standard_Integer Exploreshape (Draw_Interpretor& di, Standard_Integer n, 
   
   for (TNaming_Iterator itL(Lab,Trans) ; itL.More(); itL.Next()) {
     if (!itL.OldShape().IsNull()) {
-      Sprintf(name,"%s%s_%d","old",a[3],NbShapes);
+      Snprintf(name,"%s%s_%d","old",a[3],NbShapes);
       DBRep::Set (name,itL.OldShape());
     }
     if (!itL.NewShape().IsNull()) {    
-      Sprintf(name,"%s_%d",a[3],NbShapes);
+      Snprintf(name,"%s_%d",a[3],NbShapes);
       DBRep::Set (name,itL.NewShape());
     }
     NbShapes++;

@@ -1362,7 +1362,8 @@ static Standard_Integer triedgepoints(Draw_Interpretor& di, Standard_Integer nba
 
   for( Standard_Integer i = 1; i < nbarg; i++ )
   {
-    TopoDS_Shape aShape = DBRep::Get(argv[i]);
+    TCollection_AsciiString aName(argv[i]);
+    TopoDS_Shape aShape = DBRep::Get(aName);
     if ( aShape.IsNull() )
       continue;
 
@@ -1386,13 +1387,6 @@ static Standard_Integer triedgepoints(Draw_Interpretor& di, Standard_Integer nba
     if ( anEdgeMap.Extent() == 0 )
       continue;
 
-    char newname[1024];
-    strcpy(newname,argv[i]);
-    char* p = newname;
-    while (*p != '\0') p++;
-    *p = '_';
-    p++;
-
     Standard_Integer nbEdge = 1;
     for(it.Initialize(anEdgeMap); it.More(); it.Next())
     {
@@ -1409,12 +1403,14 @@ static Standard_Integer triedgepoints(Draw_Interpretor& di, Standard_Integer nba
         if( !aLoc.IsIdentity() )
           P3d.Transform(aLoc.Transformation());
 
+        TCollection_AsciiString newname;
         if( anEdgeMap.Extent() > 1 )
-          Sprintf(p,"%d_%d",nbEdge,j);
+          newname = aName + "_" + nbEdge + "_" + j;
         else
-          Sprintf(p,"%d",j);
-	      DBRep::Set( newname, BRepBuilderAPI_MakeVertex(P3d) );
-	      di.AppendElement(newname);
+          newname = aName + "_" + j;
+
+        DBRep::Set(newname.ToCString(), BRepBuilderAPI_MakeVertex(P3d));
+        di.AppendElement(newname.ToCString());
       }
       nbEdge++;
     }

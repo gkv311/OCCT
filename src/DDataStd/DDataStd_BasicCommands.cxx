@@ -418,8 +418,8 @@ static Standard_Integer DDataStd_GetUAttribute (Draw_Interpretor& di,
       di << "No UAttribute Attribute on label"   << "\n";
     }
     else {
-      char *aStrGUID = new char[37];
-      UA->ID().ToCString(aStrGUID);
+      char aStrGUID[Standard_GUID_SIZE_ALLOC];
+      UA->ID().ToCString(aStrGUID, sizeof(aStrGUID));
       di << aStrGUID;
     }
     return 0;  
@@ -1134,8 +1134,8 @@ static Standard_Integer DDataStd_GetFunction (Draw_Interpretor& di,
     }
     else
     {
-      char *aStrGUID = new char[37];
-      aF->GetDriverGUID().ToCString(aStrGUID);
+      char aStrGUID[Standard_GUID_SIZE_ALLOC];
+      aF->GetDriverGUID().ToCString(aStrGUID, sizeof(aStrGUID));
       Draw::Set(arg[3],aStrGUID);
 
       Draw::Set(arg[4],TCollection_AsciiString(aF->GetFailure()).ToCString());

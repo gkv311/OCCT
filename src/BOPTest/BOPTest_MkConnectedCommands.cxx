@@ -178,7 +178,7 @@ Standard_Integer MakePeriodic(Draw_Interpretor& theDI,
     }
 
     char cDirName[2];
-    sprintf(cDirName, "%c", theArgv[i][1]);
+    Snprintf(cDirName, "%c", theArgv[i][1]);
 
     Standard_Real aPeriod = 0;
     if (theArgc > i + 1)
@@ -267,7 +267,7 @@ Standard_Integer RepeatShape(Draw_Interpretor& theDI,
     }
 
     char cDirName[2];
-    sprintf(cDirName, "%c", theArgv[i][1]);
+    Snprintf(cDirName, "%c", theArgv[i][1]);
 
     Standard_Integer aTimes = 0;
     if (theArgc > i + 1)

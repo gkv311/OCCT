@@ -163,15 +163,10 @@ Standard_Integer subshape(Draw_Interpretor& di, Standard_Integer n, const char**
 {
   if (n <= 2) return 1;
 
-  
-  TopoDS_Shape S = DBRep::Get(a[1]);
+  TCollection_AsciiString aName(a[1]);
+  TopoDS_Shape S = DBRep::Get(aName);
   if (S.IsNull()) return 0;
-  char newname[1024];
-  strcpy(newname,a[1]);
-  char* p = newname;
-  while (*p != '\0') p++;
-  *p = '_';
-  p++;
+
   Standard_Integer i = 0;
   if (n == 3) {
     Standard_Integer isub = Draw::Atoi(a[2]);
@@ -179,10 +174,10 @@ Standard_Integer subshape(Draw_Interpretor& di, Standard_Integer n, const char**
     while (itr.More()) {
       i++;
       if ( i == isub ) {
-	Sprintf(p,"%d",i);
-	DBRep::Set(newname,itr.Value());
-	di.AppendElement(newname);
-	break;
+        const TCollection_AsciiString newname = aName + "_" + i;
+        DBRep::Set(newname.ToCString(), itr.Value());
+        di.AppendElement(newname.ToCString());
+        break;
       }
       itr.Next();
     }
@@ -237,13 +232,13 @@ Standard_Integer subshape(Draw_Interpretor& di, Standard_Integer n, const char**
     TopExp_Explorer ex(S,typ);
     while (ex.More()) {
       if (M.Add(ex.Current())) {
-	i++;
-	if ( i == isub ) {
-	  Sprintf(p,"%d",i);
-	  DBRep::Set(newname,ex.Current());
-	  di.AppendElement(newname);
-	  break;
-	}
+        i++;
+        if ( i == isub ) {
+          const TCollection_AsciiString newname = aName + "_" + i;
+          DBRep::Set(newname.ToCString(), ex.Current());
+          di.AppendElement(newname.ToCString());
+          break;
+        }
       }
       ex.Next();
     }
@@ -303,9 +298,8 @@ Standard_Integer brepintcs(Draw_Interpretor& di, Standard_Integer n, const char*
       nbpi++;
       di<<"Point "<<nbpi<<" : "<<curp.X()<<" "<<curp.Y()<<" "<<curp.Z()<<"\n";
       char name[64];
-      char* temp = name; // pour portage WNT
-      Sprintf(temp, "%s_%d", "brics", nbpi); 
-      DrawTrSurf::Set(temp, curp);
+      Snprintf(name, "%s_%d", "brics", nbpi); 
+      DrawTrSurf::Set(name, curp);
     }
   }
   else {
@@ -323,9 +317,8 @@ Standard_Integer brepintcs(Draw_Interpretor& di, Standard_Integer n, const char*
           aB.Add(aComp, aV);
           di<<"Point "<<nbpi<<" : "<<curp.X()<<" "<<curp.Y()<<" "<<curp.Z()<<"\n";
           char name[64];
-          char* temp = name; // pour portage WNT
-          Sprintf(temp, "%s_%d", "brics", nbpi); 
-          DrawTrSurf::Set(temp, curp);
+          Snprintf(name, "%s_%d", "brics", nbpi); 
+          DrawTrSurf::Set(name, curp);
         }
       }
     }

@@ -65,7 +65,7 @@ static Standard_Integer BUC60897 (Draw_Interpretor& di, Standard_Integer /*argc*
   Standard_Character abuf[16];
 
   Handle(Geom2d_Line) aLine = new Geom2d_Line(gp_Pnt2d(100, 0), gp_Dir2d(-1, 0));
-  Sprintf(abuf,"line");
+  Snprintf(abuf,"line");
   Standard_CString st = abuf;
   DrawTrSurf::Set (st, aLine);
 
@@ -74,7 +74,7 @@ static Standard_Integer BUC60897 (Draw_Interpretor& di, Standard_Integer /*argc*
   aPoints.SetValue(2, gp_Pnt2d(50, 50));
   aPoints.SetValue(3, gp_Pnt2d(0, 100));
   Handle(Geom2d_BezierCurve) aCurve = new Geom2d_BezierCurve(aPoints);
-  Sprintf(abuf,"curve");
+  Snprintf(abuf,"curve");
   DrawTrSurf::Set (st, aCurve);
 
   Geom2dAdaptor_Curve aCLine(aLine);
@@ -98,7 +98,7 @@ static Standard_Integer BUC60897 (Draw_Interpretor& di, Standard_Integer /*argc*
     di << "\ntangency1 : X " << aPnt2d1.X() << " Y " << aPnt2d1.Y();
     di << "\ntangency2 : X " << aPnt2d2.X() << " Y " << aPnt2d2.Y() << "\n";
     
-    Sprintf(abuf,"circle_%d",i);
+    Snprintf(abuf,"circle_%d",i);
     Handle(Geom2d_Curve) circ_res = new Geom2d_Circle(aCirc2d);
     DrawTrSurf::Set (st, circ_res);
   }
@@ -286,7 +286,7 @@ static Standard_Integer BUC60870 (Draw_Interpretor& di, Standard_Integer argc, c
   BRepExtrema_DistShapeShape dst(S1 ,S2, dev );
   if (dst.IsDone()) {
     char named[100];
-    Sprintf(named, "%s%s" ,ns0,"_val");
+    Snprintf(named, "%s%s" ,ns0,"_val");
     char* tempd = named;
     Draw::Set(tempd,dst.Value());
     di << named << " ";
@@ -298,9 +298,9 @@ static Standard_Integer BUC60870 (Draw_Interpretor& di, Standard_Integer argc, c
 	TopoDS_Vertex V =BRepLib_MakeVertex(P1);
 	char namev[100];
 	if (i1==1) {
-	  Sprintf(namev, "%s" ,ns0);
+	  Snprintf(namev, "%s" ,ns0);
 	} else {
-	  Sprintf(namev, "%s%d" ,ns0,i1);
+	  Snprintf(namev, "%s%d" ,ns0,i1);
 	}
 	char* tempv = namev;
 	DBRep::Set(tempv,V);
@@ -309,9 +309,9 @@ static Standard_Integer BUC60870 (Draw_Interpretor& di, Standard_Integer argc, c
 	char name[100];
 	TopoDS_Edge E = BRepLib_MakeEdge (P1, P2);
 	if (i1==1) {
-	  Sprintf(name,"%s",ns0);
+	  Snprintf(name,"%s",ns0);
 	} else {
-	  Sprintf(name,"%s%d",ns0,i1);
+	  Snprintf(name,"%s%d",ns0,i1);
 	}
 	char* temp = name;
 	DBRep::Set(temp,E);
@@ -719,8 +719,6 @@ static Standard_Integer  OCC984 (Draw_Interpretor& di, Standard_Integer argc, co
   LDOMParser aParser;
   LDOM_Document myDOM;
 
-  //Standard_Character  *File = new Standard_Character [100];
-  //Sprintf(File,"%s",argv[1]);
   const char *File = (argv[1]);
 
   if(!aParser.parse(File)) {

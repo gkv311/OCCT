@@ -179,19 +179,13 @@ static Standard_Integer Loc(Draw_Interpretor& theCommands,
   BLoc.PartsOfTool(parts);
 
 #if 0
-  char newname[1024];
-  strcpy(newname, a[1]);
-  char* p = newname;
-  while (*p != '\0') p++;
-  *p = '_';
-  p++;
   TopTools_ListIteratorOfListOfShape its(parts);
   dout.Clear();
   i = 0;
   for (; its.More(); its.Next()) {
     i++;
-    Sprintf(p, "%d", i);
-    DBRep::Set(newname, its.Value());
+    const TCollection_AsciiString newname = TCollection_AsciiString(a[1]) + "_" + i;
+    DBRep::Set(newname.ToCString(), its.Value());
   }
   if (i >= 2) {
     dout.Flush();

@@ -112,36 +112,36 @@ Standard_Integer boptions(Draw_Interpretor& di,
   char buf[128];
   BOPAlgo_GlueEnum aGlue = BOPTest_Objects::Glue();
   //
-  Sprintf(buf, " RunParallel: %s \t\t(%s)\n",  BOPTest_Objects::RunParallel() ? "Yes" : "No",
-               "use \"brunparallel\" command to change");
+  Snprintf(buf, " RunParallel: %s \t\t(%s)\n",  BOPTest_Objects::RunParallel() ? "Yes" : "No",
+                "use \"brunparallel\" command to change");
   di << buf;
-  Sprintf(buf, " NonDestructive: %s \t\t(%s)\n", BOPTest_Objects::NonDestructive() ? "Yes" : "No",
-                "use \"bnondestructive\" command to change");
+  Snprintf(buf, " NonDestructive: %s \t\t(%s)\n", BOPTest_Objects::NonDestructive() ? "Yes" : "No",
+                 "use \"bnondestructive\" command to change");
   di << buf;
-  Sprintf(buf, " FuzzyValue: %g \t\t(%s)\n", BOPTest_Objects::FuzzyValue(),
-               "use \"bfuzzyvalue\" command to change");
+  Snprintf(buf, " FuzzyValue: %g \t\t(%s)\n", BOPTest_Objects::FuzzyValue(),
+                "use \"bfuzzyvalue\" command to change");
   di << buf;
-  Sprintf(buf, " GlueOption: %s \t\t(%s)\n", ((aGlue == BOPAlgo_GlueOff) ? "Off" :
+  Snprintf(buf, " GlueOption: %s \t\t(%s)\n", ((aGlue == BOPAlgo_GlueOff) ? "Off" :
     ((aGlue == BOPAlgo_GlueFull) ? "Full" : "Shift")),
-               "use \"bglue\" command to change");
+                "use \"bglue\" command to change");
   di << buf;
-  Sprintf(buf, " Draw Warning Shapes: %s \t(%s)\n", BOPTest_Objects::DrawWarnShapes() ? "Yes" : "No",
-               "use \"bdrawwarnshapes\" command to change");
+  Snprintf(buf, " Draw Warning Shapes: %s \t(%s)\n", BOPTest_Objects::DrawWarnShapes() ? "Yes" : "No",
+                "use \"bdrawwarnshapes\" command to change");
   di << buf;
-  Sprintf(buf, " Check for invert solids: %s \t(%s)\n", BOPTest_Objects::CheckInverted() ? "Yes" : "No",
-               "use \"bcheckinverted\" command to change");
+  Snprintf(buf, " Check for invert solids: %s \t(%s)\n", BOPTest_Objects::CheckInverted() ? "Yes" : "No",
+                "use \"bcheckinverted\" command to change");
   di << buf;
-  Sprintf(buf, " Use OBB: %s \t\t\t(%s)\n", BOPTest_Objects::UseOBB() ? "Yes" : "No",
-               "use \"buseobb\" command to change");
+  Snprintf(buf, " Use OBB: %s \t\t\t(%s)\n", BOPTest_Objects::UseOBB() ? "Yes" : "No",
+                "use \"buseobb\" command to change");
   di << buf;
-  Sprintf(buf, " Unify Edges: %s \t\t(%s)\n", BOPTest_Objects::UnifyEdges() ? "Yes" : "No",
-               "use \"bsimplify -e\" command to change");
+  Snprintf(buf, " Unify Edges: %s \t\t(%s)\n", BOPTest_Objects::UnifyEdges() ? "Yes" : "No",
+                "use \"bsimplify -e\" command to change");
   di << buf;
-  Sprintf(buf, " Unify Faces: %s \t\t(%s)\n", BOPTest_Objects::UnifyFaces() ? "Yes" : "No",
-               "use \"bsimplify -f\" command to change");
+  Snprintf(buf, " Unify Faces: %s \t\t(%s)\n", BOPTest_Objects::UnifyFaces() ? "Yes" : "No",
+                "use \"bsimplify -f\" command to change");
   di << buf;
-  Sprintf(buf, " Angular: %g \t\t(%s)\n", BOPTest_Objects::Angular(),
-               "use \"bsimplify -a\" command to change");
+  Snprintf(buf, " Angular: %g \t\t(%s)\n", BOPTest_Objects::Angular(),
+                "use \"bsimplify -a\" command to change");
   di << buf;
   //
   return 0;

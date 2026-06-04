@@ -125,7 +125,7 @@ static Standard_Integer OCC24303(Draw_Interpretor& di, Standard_Integer n, const
   {
     gp_Circ2d ct = circCalc.ThisSolution(i);
     Handle (Geom2d_Circle) GSol = new Geom2d_Circle(ct);
-    Sprintf(Buf, "Sol%d",i);
+    Snprintf(Buf, "Sol%d",i);
     DrawTrSurf::Set(Buf, GSol);
   }
 

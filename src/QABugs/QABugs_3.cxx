@@ -227,7 +227,7 @@ static Standard_Integer BUC60792(Draw_Interpretor& di, Standard_Integer /*argc*/
       gccc = new Geom2d_Circle(ccc); 
       TopoDS_Shape sh = BRepBuilderAPI_MakeEdge(gccc, pln).Shape();
       Standard_Character aStr[5];
-      Sprintf(aStr,"sh%d",i);
+      Snprintf(aStr,"sh%d",i);
       DBRep::Set(aStr,sh);
       Handle(AIS_Shape) ais = new AIS_Shape(sh); 
       if( i ==1 ) 

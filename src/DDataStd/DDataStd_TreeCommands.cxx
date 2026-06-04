@@ -317,9 +317,9 @@ static Standard_Integer DDataStd_TreeBrowse (Draw_Interpretor& di,
   TDF_Tool::Label(DF,a[2],lab);
 
   Handle(DDataStd_TreeBrowser) NewTreeNode = new DDataStd_TreeBrowser (lab);
-  char *name = new char[50];
-  if (n == 4) Sprintf(name,"treebrowser_%s",a[3]);
-  else        Sprintf(name,"treebrowser_%s",a[1]);
+  char name[50];
+  if (n == 4) Snprintf(name,"treebrowser_%s",a[3]);
+  else        Snprintf(name,"treebrowser_%s",a[1]);
 
   Draw::Set(name, NewTreeNode);
   TCollection_AsciiString inst1("treebrowser ");
