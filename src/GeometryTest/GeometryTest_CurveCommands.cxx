@@ -499,29 +499,28 @@ static void solution(const Handle(GccInt_Bisec)& Bis,
 {
   char solname[200];
   if ( i == 0) 
-    Sprintf(solname,"%s",name);
+    Snprintf(solname,"%s",name);
   else
-    Sprintf(solname,"%s_%d",name,i);
-  const char* temp = solname; // pour portage WNT
+    Snprintf(solname,"%s_%d",name,i);
 
   switch ( Bis->ArcType()) {
   case GccInt_Lin:
-    DrawTrSurf::Set(temp, new Geom2d_Line(Bis->Line()));
+    DrawTrSurf::Set(solname, new Geom2d_Line(Bis->Line()));
     break;
   case GccInt_Cir:
-    DrawTrSurf::Set(temp, new Geom2d_Circle(Bis->Circle()));
+    DrawTrSurf::Set(solname, new Geom2d_Circle(Bis->Circle()));
     break;
   case GccInt_Ell:
-    DrawTrSurf::Set(temp, new Geom2d_Ellipse(Bis->Ellipse()));
+    DrawTrSurf::Set(solname, new Geom2d_Ellipse(Bis->Ellipse()));
     break;
   case GccInt_Par:
-    DrawTrSurf::Set(temp, new Geom2d_Parabola(Bis->Parabola()));
+    DrawTrSurf::Set(solname, new Geom2d_Parabola(Bis->Parabola()));
     break;
   case GccInt_Hpr:
-    DrawTrSurf::Set(temp, new Geom2d_Hyperbola(Bis->Hyperbola()));
+    DrawTrSurf::Set(solname, new Geom2d_Hyperbola(Bis->Hyperbola()));
     break;
   case GccInt_Pnt:
-    DrawTrSurf::Set(temp, Bis->Point());
+    DrawTrSurf::Set(solname, Bis->Point());
     break;
   }
 }
@@ -551,9 +550,8 @@ static Standard_Integer bisec (Draw_Interpretor& di,
 	  char solname[200];
 	  NbSol = Bis.NbSolutions();
 	  for ( i = 1; i <= NbSol; i++) {
-	    Sprintf(solname,"%s_%d",a[1],i);
-	    const char* temp = solname; // pour portage WNT
-	    DrawTrSurf::Set(temp,new Geom2d_Line(Bis.ThisSolution(i)));
+	    Snprintf(solname,"%s_%d",a[1],i);
+	    DrawTrSurf::Set(solname, new Geom2d_Line(Bis.ThisSolution(i)));
 	  }
 	}
 	else {
@@ -1596,17 +1594,16 @@ static Standard_Integer intersection (Draw_Interpretor& di,
     {
       for (i=1; i<=aNbLines; ++i)
       {
-        Sprintf(buf, "%s_%d",a[1],i);
+        Snprintf(buf, "%s_%d",a[1],i);
         di << buf << " ";
         Result = Inters.Line(i);
-        const char* temp = buf;
-        DrawTrSurf::Set(temp,Result);
+        DrawTrSurf::Set(buf, Result);
       }
     }
     else if (aNbLines == 1)
     {
       Result = Inters.Line(1);
-      Sprintf(buf,"%s",a[1]);
+      Snprintf(buf,"%s",a[1]);
       di << buf << " ";
       DrawTrSurf::Set(a[1],Result);
     }
@@ -1616,10 +1613,9 @@ static Standard_Integer intersection (Draw_Interpretor& di,
     for (i=1; i<=aNbPoints; ++i)
     {
       Point=Inters.Point(i);
-      Sprintf(buf,"%s_p_%d",a[1],i);
+      Snprintf(buf,"%s_p_%d",a[1],i);
       di << buf << " ";
-      const char* temp = buf;
-      DrawTrSurf::Set(temp, Point);
+      DrawTrSurf::Set(buf, Point);
     }
   }// if (GC1.IsNull())
   else
@@ -1649,11 +1645,10 @@ static Standard_Integer intersection (Draw_Interpretor& di,
 
       for (i = 1; i <= nblines; i++, Compt++)
       {
-        Sprintf(newname,"%s_%d",a[1],Compt);
+        Snprintf(newname, "%s_%d", a[1], Compt);
         di << newname << " ";
         Result = Inters.Segment(i);
-        const char* temp = newname; // pour portage WNT
-        DrawTrSurf::Set(temp,Result);
+        DrawTrSurf::Set(newname, Result);
       }
 
       if(nbpoints >= 1)
@@ -1663,24 +1658,23 @@ static Standard_Integer intersection (Draw_Interpretor& di,
 
       for (/*i = 1*/; i <= imax; i++, Compt++)
       {
-        Sprintf(newname,"%s_%d",a[1],i);
+        Snprintf(newname,"%s_%d",a[1],i);
         di << newname << " ";
         Point = Inters.Point(i);
-        const char* temp = newname; // pour portage WNT
-        DrawTrSurf::Set(temp,Point);
+        DrawTrSurf::Set(newname, Point);
       }
     }
     else if (nblines == 1)
     {
       Result = Inters.Segment(1);
-      Sprintf(newname,"%s",a[1]);
+      Snprintf(newname,"%s",a[1]);
       di << newname << " ";
       DrawTrSurf::Set(a[1],Result);
     }
     else if (nbpoints == 1)
     {
       Point = Inters.Point(1);
-      Sprintf(newname,"%s",a[1]);
+      Snprintf(newname,"%s",a[1]);
       di << newname << " ";
       DrawTrSurf::Set(a[1],Point);
     }

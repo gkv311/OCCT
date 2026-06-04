@@ -7431,7 +7431,7 @@ static int VViewParams (Draw_Interpretor& theDi, Standard_Integer theArgsNb, con
   {
     // print all of the available view parameters
     char aText[4096];
-    Sprintf (aText,
+    Snprintf(aText,
              "Scale:  %g\n"
              "Aspect: %g\n"
              "Proj:   %12g %12g %12g\n"
@@ -7477,7 +7477,7 @@ static int VViewParams (Draw_Interpretor& theDi, Standard_Integer theArgsNb, con
           || anArg == "-args")
     {
       char aText[4096];
-      Sprintf (aText,
+      Snprintf(aText,
                "-scale %g "
                "-proj %g %g %g "
                "-up %g %g %g "
@@ -14340,11 +14340,11 @@ static int VColorConvert (Draw_Interpretor& theDI, Standard_Integer theNbArgs, c
     char aBuffer[1024];
     if (hasAlpha || aColor.Alpha() < 1.0f)
     {
-      Sprintf (aBuffer, "%.6f %.6f %.6f %.6f", anOutput[0], anOutput[1], anOutput[2], aColor.Alpha());
+      Snprintf(aBuffer, "%.6f %.6f %.6f %.6f", anOutput[0], anOutput[1], anOutput[2], aColor.Alpha());
     }
     else
     {
-      Sprintf (aBuffer, "%.6f %.6f %.6f", anOutput[0], anOutput[1], anOutput[2]);
+      Snprintf(aBuffer, "%.6f %.6f %.6f", anOutput[0], anOutput[1], anOutput[2]);
     }
     theDI << aBuffer;
   }

@@ -180,7 +180,7 @@ Standard_Integer bfillds(Draw_Interpretor& di,
   //
   if (bShowTime)
   {
-    Sprintf(buf, "  Tps: %7.2lf\n", aTimer.ElapsedTime());
+    Snprintf(buf, "  Tps: %7.2lf\n", aTimer.ElapsedTime());
     di << buf;
   }
   //
@@ -267,7 +267,7 @@ Standard_Integer bbuild(Draw_Interpretor& di,
   //
   if (bShowTime)
   {
-    Sprintf(buf, "  Tps: %7.2lf\n", aTimer.ElapsedTime());
+    Snprintf(buf, "  Tps: %7.2lf\n", aTimer.ElapsedTime());
     di << buf;
   }
   //
@@ -385,7 +385,7 @@ Standard_Integer bbop(Draw_Interpretor& di,
   //
   if (bShowTime) {
     char buf[32];
-    Sprintf(buf, "  Tps: %7.2lf\n", aTimer.ElapsedTime());
+    Snprintf(buf, "  Tps: %7.2lf\n", aTimer.ElapsedTime());
     di << buf;
   }
   //
@@ -465,7 +465,7 @@ Standard_Integer bsplit(Draw_Interpretor& di,
     if (!strcmp(a[2], "-t"))
     {
       char buf[20];
-      Sprintf(buf, "  Tps: %7.2lf\n", aTimer.ElapsedTime());
+      Snprintf(buf, "  Tps: %7.2lf\n", aTimer.ElapsedTime());
       di << buf;
     }
     else

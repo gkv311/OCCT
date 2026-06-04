@@ -55,7 +55,7 @@ namespace {
 void WriteShape(const TopoDS_Shape& shape, const Standard_Integer number)
 {
   char fname[110];
-  sprintf(fname, "Shape_%d",number);
+  Snprintf(fname, "Shape_%d",number);
   std::ofstream f(fname,std::ios::out | std::ios::binary);
   std::cout << "Output file name : " << fname << std::endl;
   f << "DBRep_DrawableShape\n";
@@ -184,7 +184,7 @@ static Standard_Integer igesbrep (Draw_Interpretor& di, Standard_Integer argc, c
 	// save the shape
 	if (shape.IsNull()) { di<<"No Shape produced\n"; continue; }
 	char fname[110];
-	Sprintf(fname, "%s", rnom.ToCString());
+	Snprintf(fname, "%s", rnom.ToCString());
 	di << "Saving shape in variable Draw : " << fname << "\n";
 	if (answer == 3) WriteShape (shape,1);
 	try {
@@ -207,7 +207,7 @@ static Standard_Integer igesbrep (Draw_Interpretor& di, Standard_Integer argc, c
 	  TopoDS_Shape shape = Reader.Shape(inum);
 	  if (shape.IsNull()) { di<<"No Shape produced\n"; continue; }
 	  char fname[110];
-	  Sprintf(fname, "%s_%d", rnom.ToCString(),inum);
+	  Snprintf(fname, "%s_%d", rnom.ToCString(),inum);
 	  di << "Saving shape in variable Draw : " << fname << "\n";
 	  if (answer == 4) WriteShape (shape,inum);
 	  try {
@@ -235,7 +235,7 @@ static Standard_Integer igesbrep (Draw_Interpretor& di, Standard_Integer argc, c
         di<<"Transfer entity n0 "<<nent<<" : no result\n";
       else {
 	nbs = Reader.NbShapes();
-	char shname[30];  Sprintf (shname,"%s_%d",rnom.ToCString(),nent);
+	char shname[30];  Snprintf(shname,"%s_%d",rnom.ToCString(),nent);
 	di<<"Transfer entity n0 "<<nent<<" OK  -> DRAW Shape: "<<shname<<"\n";
 	di<<"Now, "<<nbs<<" Shapes produced\n";
 	TopoDS_Shape sh = Reader.Shape(nbs);
@@ -272,7 +272,7 @@ static Standard_Integer igesbrep (Draw_Interpretor& di, Standard_Integer argc, c
         TopoDS_Shape shape = Reader.OneShape();
         // save the shape
         char fname[110];
-        Sprintf(fname, "%s", rnom.ToCString());
+        Snprintf(fname, "%s", rnom.ToCString());
         di << "Saving shape in variable Draw : " << fname << "\n";
         try {
           OCC_CATCH_SIGNALS
@@ -347,7 +347,7 @@ static Standard_Integer igesbrep (Draw_Interpretor& di, Standard_Integer argc, c
               di<<"Transfer entity n0 "<<nent<<" : no result\n";
 	    else {
 	      nbs = Reader.NbShapes();
-	      char shname[30];  Sprintf (shname,"%s_%d",rnom.ToCString(),nbs);
+	      char shname[30];  Snprintf(shname,"%s_%d",rnom.ToCString(),nbs);
 	      di<<"Transfer entity n0 "<<nent<<" OK  -> DRAW Shape: "<<shname<<"\n";
 	      di<<"Now, "<<nbs<<" Shapes produced\n";
 	      TopoDS_Shape sh = Reader.Shape(nbs);

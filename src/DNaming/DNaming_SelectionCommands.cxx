@@ -206,7 +206,7 @@ static Standard_Integer DNaming_SolveSelection (Draw_Interpretor& di, Standard_I
 	if(!isSolved)
 		di << "!!! Solver is failed\n";
     TopoDS_Shape Res = TNaming_Tool::CurrentShape(SL.NamedShape());
-    Sprintf (name,"%s_%s","new",a[2]);
+    Snprintf (name,"%s_%s","new",a[2]);
     Display (name,Res);
     return 0;
   }

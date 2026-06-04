@@ -64,7 +64,7 @@ static Standard_Integer XSHAPE_edge
     if (curve3d.IsNull()) {
       char nomsh[30];
       nbf ++;
-      Sprintf (nomsh,"faultedge_%d",nbf);
+      Snprintf (nomsh,"faultedge_%d",nbf);
       di<<"Edge sans Curve3d, n0 "<<nbe<<"\n";
       DBRep::Set (nomsh,Edge);
     }
@@ -121,11 +121,11 @@ static Standard_Integer XSHAPE_explorewire
   for (i = 1; i <= nbe; i ++) {
     if (nbs[i] < 1) {
       di<<"Edge n0 "<<i<<" pas vue par WE\n";
-      Sprintf (nomsh,"NOWE_%d",i);
+      Snprintf (nomsh,"NOWE_%d",i);
       DBRep::Set (nomsh,map.FindKey(i));
     } else if (nbs[i] > 1) {
       di<<"Edge n0 "<<i<<" vue par WE : "<<nbs[i]<<" fois\n";
-      Sprintf (nomsh,"MULT_%d",i);
+      Snprintf (nomsh,"MULT_%d",i);
       DBRep::Set (nomsh,map.FindKey(i));
     }
   }

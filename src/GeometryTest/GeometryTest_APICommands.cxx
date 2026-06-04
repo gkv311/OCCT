@@ -55,7 +55,7 @@ static void showProjSolution(Draw_Interpretor& di,
                              const Standard_Boolean isSurface)
 {
   char name[100];
-  Sprintf(name, "%s%d", "ext_", i);
+  Snprintf(name, "%s%d", "ext_", i);
   di << name << " ";
   char* temp = name; // portage WNT
   if (P.Distance(P1) > Precision::Confusion())
@@ -338,9 +338,8 @@ static Standard_Integer surfapp(Draw_Interpretor& di, Standard_Integer n, const 
   Standard_Integer Count = 1;
   for (j = 1; j <= Nv; j++) {
     for (i = 1; i <= Nu; i++) {
-      Sprintf(name, "point_%d", Count++);
-      char* temp = name; // portage WNT
-      DrawTrSurf::Set(temp, Points(i, j));
+      Snprintf(name, "point_%d", Count++);
+      DrawTrSurf::Set(name, Points(i, j));
     }
   }
 
@@ -401,9 +400,8 @@ static Standard_Integer surfint(Draw_Interpretor& di, Standard_Integer n, const 
   Standard_Integer Count = 1;
   for (j = 1; j <= Nv; j++) {
     for (i = 1; i <= Nu; i++) {
-      Sprintf(name, "point_%d", Count++);
-      char* temp = name; // portage WNT
-      DrawTrSurf::Set(temp, Points(i, j));
+      Snprintf(name, "point_%d", Count++);
+      DrawTrSurf::Set(name, Points(i, j));
     }
   }
 
@@ -613,7 +611,6 @@ static Standard_Integer extrema(Draw_Interpretor& di, Standard_Integer n, const 
   }
 
   char aName[100];
-  char* aName2 = aName; // portage WNT
 
   // Output points.
   const Standard_Integer aPntCount = aPnts1.Size();
@@ -640,8 +637,8 @@ static Standard_Integer extrema(Draw_Interpretor& di, Standard_Integer n, const 
     Handle(Geom_Line) aL = new Geom_Line(aP1, gp_Vec(aP1, aP2));
     Handle(Geom_TrimmedCurve) aCT = 
       new Geom_TrimmedCurve(aL, 0., aP1.Distance(aP2));
-    Sprintf(aName, "%s%d", "ext_", aJ);
-    DrawTrSurf::Set(aName2, aCT);
+    Snprintf(aName, "%s%d", "ext_", aJ);
+    DrawTrSurf::Set(aName, aCT);
     di << aName << " ";
   }
 
@@ -651,11 +648,11 @@ static Standard_Integer extrema(Draw_Interpretor& di, Standard_Integer n, const 
     for (Standard_Integer aJ = 1; aJ <= aPntCount; aJ++)
     {
       gp_Pnt aP1 = aPnts1(aJ - 1), aP2 = aPnts2(aJ - 1);
-      Sprintf(aName, "%s%d%s", "ext_", aJ, "_2");
-      DrawTrSurf::Set(aName2, aP1);
+      Snprintf(aName, "%s%d%s", "ext_", aJ, "_2");
+      DrawTrSurf::Set(aName, aP1);
       di << aName << " ";
-      Sprintf(aName, "%s%d%s", "ext_", aJ, "_3");
-      DrawTrSurf::Set(aName2, aP2);
+      Snprintf(aName, "%s%d%s", "ext_", aJ, "_3");
+      DrawTrSurf::Set(aName, aP2);
       di << aName << " ";
     }
 
@@ -666,8 +663,8 @@ static Standard_Integer extrema(Draw_Interpretor& di, Standard_Integer n, const 
         aK < aPrmCount; ++aK)
       {
         Standard_Real aP = aPrms[aJ](aK);
-        Sprintf(aName, "%s%d%s%d", "prm_", aJ + 1, "_", aK + 1);
-        Draw::Set(aName2, aP);
+        Snprintf(aName, "%s%d%s%d", "prm_", aJ + 1, "_", aK + 1);
+        Draw::Set(aName, aP);
         di << aName << " ";
       }
     }
@@ -720,9 +717,8 @@ static Standard_Integer totalextcc(Draw_Interpretor& di, Standard_Integer n, con
       Handle(Geom_Line) L = new Geom_Line(P1,gp_Vec(P1,P2));
       Handle(Geom_TrimmedCurve) CT = 
 	new Geom_TrimmedCurve(L, 0., P1.Distance(P2));
-      Sprintf(name,"%s%d","ext_",1);
-      char* temp = name; // portage WNT
-      DrawTrSurf::Set(temp, CT);
+      Snprintf(name, "%s%d","ext_",1);
+      DrawTrSurf::Set(name, CT);
       di << name << " ";
     }
 

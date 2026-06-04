@@ -59,7 +59,7 @@ static Standard_Integer prj(Draw_Interpretor& di, Standard_Integer n, const char
   for (Standard_Integer i = 1; aPrj.More(); aPrj.Next(), ++i)
   {
     char name[255];
-    Sprintf(name, "%s_%d", a[1], i);
+    Snprintf(name, "%s_%d", a[1], i);
     DBRep::Set(name, aPrj.Current());
     di << name << " ";
   }

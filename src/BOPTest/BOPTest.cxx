@@ -120,7 +120,7 @@ void BOPTest::ReportAlerts(const Handle(Message_Report)& theReport)
           {
             //
             char aName[80];
-            Sprintf(aName, "%ss_%d_%d", (iGravity ? "e" : "w"), aPassedTypes.Extent(), ++aNbShapes);
+            Snprintf(aName, "%ss_%d_%d", (iGravity ? "e" : "w"), aPassedTypes.Extent(), ++aNbShapes);
             DBRep::Set(aName, aShapeAlert->GetShape());
             //
             aShapeList += " ";

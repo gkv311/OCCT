@@ -1159,7 +1159,7 @@ static int check_atof (const NCollection_Array2<char>& theStrings, const char* t
     const char *aStr= &theStrings(i,0);
     char buff[256];
     double aVal = test_func (aStr);
-    Sprintf (buff, theFormat, aVal);
+    Snprintf (buff, theFormat, aVal);
     if (strcasecmp (buff, &theStrings(i,0)))
     {
 #if defined(_MSC_VER) && _MSC_VER < 1900
@@ -1187,7 +1187,7 @@ static Standard_Integer QATestAtof (Draw_Interpretor& di, Standard_Integer argc,
   double aRangeMax = (argc > 4 ? Draw::Atof(argv[4]) : 1e9);
 
   char aFormat[256];
-  Sprintf (aFormat, "%%.%dlg", Max (2, Min (20, aNbDigits)));
+  Snprintf (aFormat, "%%.%dlg", Max (2, Min (20, aNbDigits)));
 
   // prepare data
   const int MAXLEN = 256;
@@ -1205,7 +1205,7 @@ static Standard_Integer QATestAtof (Draw_Interpretor& di, Standard_Integer argc,
 //      double aVal = aRandomDistr (aRandomEngine);
       uint64_t aIVal = ((uint64_t)aRandom.NextInt() << 32) + aRandom.NextInt();
       double aVal = aRangeMin + (aIVal / (double)aMaxUInt64) * (aRangeMax - aRangeMin);
-      Sprintf(&aValuesStr(i,0), aFormat, aVal);
+      Snprintf(&aValuesStr(i,0), aValuesStr.NbColumns(), aFormat, aVal);
     }
   }
   else
@@ -1260,7 +1260,7 @@ static Standard_Integer QATestAtof (Draw_Interpretor& di, Standard_Integer argc,
       } aVal;
 //      aVal.valint = aRandomDistr (aRandomEngine);
       aVal.valint = ((uint64_t)aRandom.NextInt() << 32) + aRandom.NextInt();
-      Sprintf(&aValuesStr(i,0), aFormat, aVal.valdbl);
+      Snprintf(&aValuesStr(i,0), aValuesStr.NbColumns(), aFormat, aVal.valdbl);
     }
   }
 
@@ -1314,7 +1314,7 @@ static Standard_Integer QATestAtof (Draw_Interpretor& di, Standard_Integer argc,
       if (nbErr < 5)
       {
         char aBuff[256];
-        Sprintf (aBuff, "Error parsing %s: %.20lg / %.20lg\n", aStr, aRes, aRef);
+        Snprintf (aBuff, "Error parsing %s: %.20lg / %.20lg\n", aStr, aRes, aRef);
         di << aBuff;
       }
     }
@@ -1324,9 +1324,9 @@ static Standard_Integer QATestAtof (Draw_Interpretor& di, Standard_Integer argc,
       if (nbErr < 5)
       {
         char aBuff[256];
-        Sprintf (aBuff, "Error parsing %s: %.20lg / %.20lg\n", aStr, aRes, aRef);
+        Snprintf (aBuff, "Error parsing %s: %.20lg / %.20lg\n", aStr, aRes, aRef);
         di << aBuff;
-        Sprintf (aBuff, "[Delta = %.8lg, Epsilon = %.8lg]\n", Abs (aRes - aRef), Epsilon (aRef));
+        Snprintf (aBuff, "[Delta = %.8lg, Epsilon = %.8lg]\n", Abs (aRes - aRef), Epsilon (aRef));
         di << aBuff;
       }
     }

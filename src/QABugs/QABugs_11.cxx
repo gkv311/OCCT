@@ -197,35 +197,6 @@ static Standard_Integer OCC136 (Draw_Interpretor& di, Standard_Integer argc, con
   return 0;
 }
 
-static int BUC60610(Draw_Interpretor& di, Standard_Integer argc, const char ** argv) {
-  if(argc < 2){
-    printf("Usage: %s  iges_input [name]\n",argv[0]);
-    return(1);
-  }
-  Standard_Character *Ch = NULL;
-
-  if(argc > 2) {
-    Ch = new Standard_Character[strlen(argv[2])+3];
-  }
-  IGESToBRep_Reader IR;
-  IR.LoadFile (argv[1]);
-  IR.Clear();
-  IR.TransferRoots();
-  TopoDS_Shape aTopShape = IR.OneShape();
-  TopExp_Explorer ex(aTopShape, TopAbs_EDGE);
-  for( ; ex.More(); ex.Next()){
-    const TopoDS_Edge &E = TopoDS::Edge(ex.Current());
-    BRepAdaptor_Curve aCurve(E);
-    GCPnts_UniformDeflection plin(aCurve, 0.1);
-    di << "Num points = " << plin.NbPoints() << "\n";
-    if(argc > 2) {
-      Sprintf(Ch,"%s_%i",argv[2],1);
-      DBRep::Set(Ch,E);
-    }
-  }
-  return (1);
-}
-
 //====================================================
 //
 // Following code is inserted from
@@ -1970,7 +1941,7 @@ static Standard_Integer OCC5739_UniAbs (Draw_Interpretor& di, Standard_Integer a
       double par = aUni.Parameter(i+1);
       gp_Pnt p = adapCurve->Value(par);
       char n[20], *pname=n;
-      Sprintf(n,"%s_%d",name,i+1);
+      Snprintf(n,"%s_%d",name,i+1);
       DrawTrSurf::Set(pname,p);
       di<<pname<<" ";
     }
@@ -3018,7 +2989,7 @@ static Standard_Integer OCC13963 (Draw_Interpretor& di, Standard_Integer argc, c
   gp_XYZ aResult (aOrigin);
   aTrf.Transforms(aResult);
   char sbf[512];
-  Sprintf(sbf, "( %8.3f %8.3f %8.3f ) => ( %8.3f %8.3f %8.3f )\n",
+  Snprintf(sbf, "( %8.3f %8.3f %8.3f ) => ( %8.3f %8.3f %8.3f )\n",
           aOrigin.X(), aOrigin.Y(), aOrigin.Z(),
           aResult.X(), aResult.Y(), aResult.Z());
   di<<sbf;
@@ -4880,7 +4851,6 @@ void QABugs::Commands_11(Draw_Interpretor& theCommands) {
   //theCommands.Add("OCC129", "OCC129 shape islocal", __FILE__, OCC129, group);
 
   theCommands.Add("OCC136", "OCC136", __FILE__, OCC136, group);
-  theCommands.Add("BUC60610","BUC60610 iges_input [name]",__FILE__,BUC60610,group);
 
   theCommands.Add("OCC105","OCC105 shape",__FILE__,OCC105,group); 
   theCommands.Add("OCC9"," result path cur1 cur2 radius [tolerance]:\t test GeomFill_Pipe", __FILE__, pipe_OCC9,group);

@@ -4121,7 +4121,7 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
         }
 
         char aText[1024];
-        Sprintf (aText, "%g ", anObj->LocalTransformation().ScaleFactor());
+        Snprintf(aText, "%g ", anObj->LocalTransformation().ScaleFactor());
         theDI << aText;
         continue;
       }
@@ -4233,7 +4233,7 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
 
       char aText[1024];
       const gp_Quaternion aQuat = anObj->LocalTransformation().GetRotation();
-      Sprintf (aText, "%g %g %g %g ", aQuat.X(), aQuat.Y(), aQuat.Z(), aQuat.W());
+      Snprintf(aText, "%g %g %g %g ", aQuat.X(), aQuat.Y(), aQuat.Z(), aQuat.W());
       theDI << aText;
     }
     else if (anArg == "-setlocation"
@@ -4257,7 +4257,7 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
 
       char aText[1024];
       const gp_XYZ aLoc = anObj->LocalTransformation().TranslationPart();
-      Sprintf (aText, "%g %g %g ", aLoc.X(), aLoc.Y(), aLoc.Z());
+      Snprintf(aText, "%g %g %g ", aLoc.X(), aLoc.Y(), aLoc.Z());
       theDI << aText;
     }
     else if (aCmdName == "vsetlocation")
@@ -4298,7 +4298,7 @@ static Standard_Integer VSetLocation (Draw_Interpretor& theDI,
   const gp_XYZ        aLoc  = aTrsf.TranslationPart();
   const gp_Quaternion aRot  = aTrsf.GetRotation();
   char aText[4096];
-  Sprintf (aText, "Location: %g %g %g\n"
+  Snprintf(aText, "Location: %g %g %g\n"
                   "Rotation: %g %g %g %g\n"
                   "Scale:    %g\n",
                   aLoc.X(), aLoc.Y(), aLoc.Z(),

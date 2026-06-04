@@ -131,7 +131,7 @@ static Standard_Integer tolerance
     di<<"\n";
     char nomsh[30];
     for (i = 1; i <= nb; i ++) {
-      Sprintf (nomsh,"tol_%d",i);
+      Snprintf(nomsh,"tol_%d",i);
       DBRep::Set (nomsh,list->Value(i));
     }
   }
@@ -573,42 +573,42 @@ static Standard_Integer XSHAPE_statshape(Draw_Interpretor& di, Standard_Integer 
   if(analyzer.ModifyBigSplineMode()) {
     sec = analyzer.BigSplineSec();
     for(Standard_Integer i = 1; i <= sec->Length(); i++) {
-      Sprintf(nompart,"%s_bigspl_%d",arg2,i);
+      Snprintf (nompart,"%s_bigspl_%d",arg2,i);
       DBRep::Set (nompart,sec->Value(i));
     }
   }
   if(analyzer.ModifyIndirectMode()) {
     sec = analyzer.IndirectSec();
     for(Standard_Integer i = 1; i <= sec->Length(); i++) {
-      Sprintf(nompart,"%s_indsur_%d",arg2,i);
+      Snprintf (nompart,"%s_indsur_%d",arg2,i);
       DBRep::Set (nompart,sec->Value(i));
     }
   }
   if(analyzer.ModifyOffsetSurfaceMode()) {
     sec = analyzer.OffsetSurfaceSec();
     for(Standard_Integer i = 1; i <= sec->Length(); i++) {
-      Sprintf(nompart,"%s_ofsur_%d",arg2,i);
+      Snprintf (nompart,"%s_ofsur_%d",arg2,i);
       DBRep::Set (nompart,sec->Value(i));
     }
   }
   if(analyzer.ModifyTrimmed3dMode()) {
     sec = analyzer.Trimmed3dSec();
     for(Standard_Integer i = 1; i <= sec->Length(); i++) {
-      Sprintf(nompart,"%s_trc3d_%d",arg2,i);
+      Snprintf (nompart,"%s_trc3d_%d",arg2,i);
       DBRep::Set (nompart,sec->Value(i));
     }
   }
   if(analyzer.ModifyOffsetCurveMode()) {
     sec = analyzer.OffsetCurveSec();
     for(Standard_Integer i = 1; i <= sec->Length(); i++) {
-      Sprintf(nompart,"%s_ofcur_%d",arg2,i);
+      Snprintf (nompart,"%s_ofcur_%d",arg2,i);
       DBRep::Set (nompart,sec->Value(i));
     }
   }
   if(analyzer.ModifyTrimmed2dMode()) {
     sec = analyzer.Trimmed2dSec();
     for(Standard_Integer i = 1; i <= sec->Length(); i++) {
-      Sprintf(nompart,"%s_trc2d_%d",arg2,i);
+      Snprintf (nompart,"%s_trc2d_%d",arg2,i);
       DBRep::Set (nompart,sec->Value(i));
     }
   }
@@ -673,12 +673,12 @@ static Standard_Integer XSHAPE_comptoledge
           "MAX=" << relmax << " AVG=" << relave/num << " MIN=" << relmin << "\n"; 
   if ( prefix && prefix[0] ) {
     char name[21];
-    Sprintf ( name, "%.10s_edge_tol", prefix );
+    Snprintf (name, "%.10s_edge_tol", prefix);
     DBRep::Set (name,edmax);
     di << "Edge with max tolerance saved to " << name;
     if ( edmax.IsSame ( edmaxrel ) ) di << "\n";
     else {
-      Sprintf ( name, "%.10s_edge_rel", prefix );
+      Snprintf (name, "%.10s_edge_rel", prefix);
       DBRep::Set (name,edmaxrel);
       di << "; edge with max relation saved to " << name << "\n";
     }
@@ -689,7 +689,7 @@ static Standard_Integer XSHAPE_comptoledge
 	TopoDS_Edge edge = TopoDS::Edge ( ed.Current() );
 	if ( edge.IsSame ( edmax ) || edge.IsSame ( edmaxrel ) ) {
 	  if ( ! num1 ) di << "Concerned faces saved to shapes ";
-	  Sprintf ( name, "%.10s_%d", prefix, num1+1 );
+	  Snprintf (name, "%.10s_%d", prefix, num1+1);
 	  DBRep::Set (name,face);
 	  //std::cout << ( num1 ? ", " : "" ) << name;
 	  if (num1 == 0) {
@@ -731,11 +731,11 @@ static Standard_Integer freebounds (Draw_Interpretor& di,
 
   char name[100];
   TopoDS_Shape wires = F.GetClosedWires();
-  Sprintf (name, "%s_c", a[1]);
+  Snprintf (name, "%s_c", a[1]);
   DBRep::Set (name, wires);
   di << name << " - closed wires\n";
   wires = F.GetOpenWires();
-  Sprintf (name, "%s_o", a[1]);
+  Snprintf (name, "%s_o", a[1]);
   DBRep::Set (name, wires);
   di << name << " - open wires\n";
 
@@ -758,7 +758,7 @@ static void PrintProps(Standard_Integer i,
   Standard_Real ratio = fbd->Ratio();
   Standard_Real width = fbd->Width();
   Standard_Integer notch = fbd->NbNotches();
-  Sprintf(str," %d\t%12.5f\t%12.5f\t%12.5f\t%12.5f\t%d", i, area, perimeter, ratio, width, notch);
+  Snprintf (str," %d\t%12.5f\t%12.5f\t%12.5f\t%12.5f\t%d", i, area, perimeter, ratio, width, notch);
   di<<str<<"\n";
 }
 
@@ -820,10 +820,10 @@ static Standard_Integer FreeBoundsProps(Draw_Interpretor& di,
   }
 
   char name[100];
-  Sprintf (name, "%s_c",a[1]);
+  Snprintf(name, "%s_c",a[1]);
   di << name << " - closed wires,  ";
   DBRep::Set(name, closed);
-  Sprintf (name, "%s_o",a[1]);
+  Snprintf(name, "%s_o",a[1]);
   di << name << " - closed wires \n";
   DBRep::Set(name, open);
   return 0;
@@ -853,11 +853,11 @@ static Standard_Integer closefreebounds (Draw_Interpretor& di,
 
   char name[100];
   TopoDS_Shape wires = F.GetClosedWires();
-  Sprintf (name, "%s_c", a[1]);
+  Snprintf(name, "%s_c", a[1]);
   DBRep::Set (name, wires);
   di << name << " - closed wires\n";
   wires = F.GetOpenWires();
-  Sprintf (name, "%s_o", a[1]);
+  Snprintf(name, "%s_o", a[1]);
   DBRep::Set (name, wires);
   di << name << " - open wires\n";
 

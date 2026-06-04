@@ -179,7 +179,7 @@ static Standard_Integer QADNaming_CenterOfShape (Draw_Interpretor& di,
     }
     if (all != 0) {
       char s[100];
-      Sprintf(s,"%f %f %f",(float)x/all,(float)y/all,(float)z/all);
+      Snprintf(s,"%f %f %f",(float)x/all,(float)y/all,(float)z/all);
       di<<s;
       return 0;
     }

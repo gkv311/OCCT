@@ -92,13 +92,13 @@ Standard_IMPORT Standard_Integer BRepCheck_Trace(const Standard_Integer phase);
 //function : FindNamed
 //=======================================================================
 static Standard_Boolean FindNamed(const TopoDS_Shape& S,
-				  char*& Name)
+				  const char*& Name)
 {
   for (Standard_Integer i = 1 ;i <= lfaulty.Length(); i++) {
     Handle(DBRep_DrawableShape) DS = 
       Handle(DBRep_DrawableShape)::DownCast(lfaulty(i));
     if (DS->Shape().IsSame(S)) {
-      Name = (char*)DS->Name();
+      Name = DS->Name();
       return Standard_True;
     }
   }
@@ -132,7 +132,7 @@ static void PrintSub(Standard_OStream& OS,
 		     const TopAbs_ShapeEnum Subtype)
      
 {
-  char* Name;
+  const char* Name = nullptr;
   BRepCheck_ListIteratorOfListOfStatus itl;
   TopExp_Explorer exp;
   for (exp.Init(S,Subtype); exp.More(); exp.Next()) {
@@ -148,18 +148,20 @@ static void PrintSub(Standard_OStream& OS,
 	if (itl.Value() != BRepCheck_NoError) {
 	  if (!FindNamed(sub,Name)) {
 	    nbfaulty++;
-	    Name = (char*)malloc(18*sizeof(char));
-	    Sprintf(Name,"%s%d",checkfaultyname,nbfaulty);
-	    DBRep::Set(Name,sub);
-	    lfaulty.Append(Draw::Get((Standard_CString&)Name));
+	    const TCollection_AsciiString aNewName = TCollection_AsciiString(checkfaultyname) + nbfaulty;
+	    DBRep::Set(aNewName.ToCString(), sub);
+	    Handle(Draw_Drawable3D) aDrawable = Draw::GetExisting(aNewName.ToCString());
+	    lfaulty.Append(aDrawable);
+	    Name = aDrawable->Name();
 	  }
 	  OS << "Shape " << Name << " ";
 	  if (!FindNamed(S,Name)) {
 	    nbfaulty++;
-	    Name = (char*)malloc(18*sizeof(char));
-	    Sprintf(Name,"%s%d",checkfaultyname,nbfaulty);
-	    DBRep::Set(Name,S);
-	    lfaulty.Append(Draw::Get((Standard_CString&)Name));
+	    const TCollection_AsciiString aNewName = TCollection_AsciiString(checkfaultyname) + nbfaulty;
+	    DBRep::Set(aNewName.ToCString(), S);
+	    Handle(Draw_Drawable3D) aDrawable = Draw::GetExisting(aNewName.ToCString());
+	    lfaulty.Append(aDrawable);
+	    Name = aDrawable->Name();
 	  }
 	  OS << " on shape " << Name << " :\n";
 	  for (;itl.More(); itl.Next()) {
@@ -184,18 +186,19 @@ static void Print(Standard_OStream& OS,
     Print(OS,Ana,iter.Value());
   }
 
-  char* Name;
+  const char* Name = nullptr;
   TopAbs_ShapeEnum styp = S.ShapeType();
   BRepCheck_ListIteratorOfListOfStatus itl;
   if (!Ana.Result(S).IsNull() && !theMap.IsBound(S)) {
     itl.Initialize(Ana.Result(S)->Status());
     if (itl.Value() != BRepCheck_NoError) {
       if (!FindNamed(S,Name)) {
-	nbfaulty++;
-	Name = (char*)malloc(18*sizeof(char));
-	Sprintf(Name,"%s%d",checkfaultyname,nbfaulty);
-	DBRep::Set(Name,S);
-	lfaulty.Append(Draw::Get((Standard_CString&)Name));
+        nbfaulty++;
+        const TCollection_AsciiString aNewName = TCollection_AsciiString(checkfaultyname) + nbfaulty;
+        DBRep::Set(aNewName.ToCString(), S);
+        Handle(Draw_Drawable3D) aDrawable = Draw::GetExisting(aNewName.ToCString());
+        lfaulty.Append(aDrawable);
+        Name = aDrawable->Name();
       }
       OS << "On Shape " << Name << " :\n";
 	
@@ -310,7 +313,6 @@ static Standard_Integer checksection(Draw_Interpretor& di,
     if (!theVertices.Add(exp.Current())) 
       theVertices.Remove(exp.Current());
   }
-  //std::cout << " nb alone Vertices : " << theVertices.Extent() << std::endl;
   di << " nb alone Vertices : " << theVertices.Extent() << "\n";
 
   if (aCompareValue >= 0)
@@ -326,17 +328,14 @@ static Standard_Integer checksection(Draw_Interpretor& di,
     }
   }
 
-  char Name[32];
-  Standard_Integer ipp=0;
-  TopTools_MapIteratorOfMapOfShape itvx;
-  for (itvx.Initialize(theVertices); itvx.More(); itvx.Next()) {
-    ipp++;
-    Sprintf(Name,"alone_%d",ipp);
-    DBRep::Set(Name, itvx.Key());
-    //std::cout << Name << " " ;
-    di << Name << " " ;
+  Standard_Integer ipp = 0;
+  TopTools_MapOfShape::Iterator itvx;
+  for (itvx.Initialize(theVertices); itvx.More(); itvx.Next())
+  {
+    const TCollection_AsciiString aName = TCollection_AsciiString("alone_") + (++ipp);
+    DBRep::Set(aName.ToCString(), itvx.Key());
+    di << aName << " ";
   }
-  //std::cout << std::endl;
   di << "\n";
   return 0;
 }
@@ -745,91 +744,29 @@ void StructuralDump(Draw_Interpretor& theCommands,
     }
   }
 
-  BRep_Builder B;
-  if(slv->Length()>0) {
-    TopoDS_Compound comp;
-    B.MakeCompound(comp);
-    Standard_Integer nb = slv->Length();
-    for(i=1; i<=nb; i++)
-      B.Add(comp,slv->Value(i));
-    char aName[20];
-    Sprintf(aName,"%s_v",Pref);
-    DBRep::Set(aName,comp);
-    if (nb > 9)
-      theCommands<<"VERTEX	: "<<nb<<" Items -> compound named "<<aName<<"\n";
-    else
-      theCommands<<"VERTEX	:  "<<nb<<" Items -> compound named "<<aName<<"\n";
-  }
-  if(sle->Length()>0) {
-    TopoDS_Compound comp;
-    B.MakeCompound(comp);
-    Standard_Integer nb = sle->Length();
-    for(i=1; i<=nb; i++)
-      B.Add(comp,sle->Value(i));
-    char aName[20];
-    Sprintf(aName,"%s_e",Pref);
-    DBRep::Set(aName,comp);
-    if (nb > 9)
-      theCommands<<"EDGE	: "<<nb<<" Items -> compound named "<<aName<<"\n";
-    else
-      theCommands<<"EDGE	:  "<<nb<<" Items -> compound named "<<aName<<"\n";
-  }
-  if(slw->Length()>0) {
-    TopoDS_Compound comp;
-    B.MakeCompound(comp);
-    Standard_Integer nb = slw->Length();
-    for(i=1; i<=nb; i++)
-      B.Add(comp,slw->Value(i));
-    char aName[20];
-    Sprintf(aName,"%s_w",Pref);
-    DBRep::Set(aName,comp);
-    if (nb > 9)
-      theCommands<<"WIRE	: "<<nb<<" Items -> compound named "<<aName<<"\n";
-    else
-      theCommands<<"WIRE	:  "<<nb<<" Items -> compound named "<<aName<<"\n";
-  }
-  if(slf->Length()>0) {
-    TopoDS_Compound comp;
-    B.MakeCompound(comp);
-    Standard_Integer nb = slf->Length();
-    for(i=1; i<=nb; i++)
-      B.Add(comp,slf->Value(i));
-    char aName[20];
-    Sprintf(aName,"%s_f",Pref);
-    DBRep::Set(aName,comp);
-    if (nb > 9)
-      theCommands<<"FACE	: "<<nb<<" Items -> compound named "<<aName<<"\n";
-    else
-      theCommands<<"FACE	:  "<<nb<<" Items -> compound named "<<aName<<"\n";
-  }
-  if(sls->Length()>0) {
-    TopoDS_Compound comp;
-    B.MakeCompound(comp);
-    Standard_Integer nb = sls->Length();
-    for(i=1; i<=nb; i++)
-      B.Add(comp,sls->Value(i));
-    char aName[20];
-    Sprintf(aName,"%s_s",Pref);
-    DBRep::Set(aName,comp);
-    if (nb > 9)
-      theCommands<<"SHELL	: "<<nb<<" Items -> compound named "<<aName<<"\n";
-    else
-      theCommands<<"SHELL	:  "<<nb<<" Items -> compound named "<<aName<<"\n";
-  }
-  if(slo->Length()>0) {
-    TopoDS_Compound comp;
-    B.MakeCompound(comp);
-    Standard_Integer nb = slo->Length();
-    for(i=1; i<=nb; i++)
-      B.Add(comp,slo->Value(i));
-    char aName[20];
-    Sprintf(aName,"%s_o",Pref);
-    DBRep::Set(aName,comp);
-    if (nb > 9)
-      theCommands<<"SOLID	: "<<nb<<" Items -> compound named "<<aName<<"\n";
-    else
-      theCommands<<"SOLID	:  "<<nb<<" Items -> compound named "<<aName<<"\n";
-  }
+  const auto makeCompound = [&theCommands](const TopTools_SequenceOfShape& theShapes,
+                                           const TCollection_AsciiString& theName,
+                                           const char* theGroup) -> void
+  {
+    if (theShapes.IsEmpty())
+      return;
+
+    TopoDS_Compound aComp;
+    BRep_Builder().MakeCompound(aComp);
+    for (const TopoDS_Shape& aShapeIter : theShapes)
+      BRep_Builder().Add(aComp, aShapeIter);
+
+    DBRep::Set(theName.ToCString(), aComp);
+    theCommands << theGroup << (theShapes.Length() > 9 ? " " : "  ")
+                << theShapes.Length() << " Items -> compound named " << theName << "\n";
+  };
+
+  makeCompound(slv->Sequence(), TCollection_AsciiString(Pref) + "_v", "VERTEX	:");
+  makeCompound(slv->Sequence(), TCollection_AsciiString(Pref) + "_e", "EDGE	:");
+  makeCompound(slw->Sequence(), TCollection_AsciiString(Pref) + "_w", "WIRE	:");
+  makeCompound(slf->Sequence(), TCollection_AsciiString(Pref) + "_f", "FACE	:");
+  makeCompound(sls->Sequence(), TCollection_AsciiString(Pref) + "_s", "SHELL	:");
+  makeCompound(slo->Sequence(), TCollection_AsciiString(Pref) + "_o", "SOLID	:");
 }
 
 //=======================================================================
@@ -1398,38 +1335,28 @@ static Standard_Integer shapeG2continuity (Draw_Interpretor& di, Standard_Intege
 static Standard_Integer clintedge(Draw_Interpretor& di,
 					 Standard_Integer narg, const char** a)
 {
-  char newname[255];
-
-  if (narg < 2) {
-    //std::cout << "Usage: clintedge shape" << std::endl;
+  if (narg < 2)
+  {
     di << "Usage: clintedge shape\n";
     return 1;
   }
+
   TopoDS_Shape S = DBRep::Get(a[1]);
 
   TopTools_DataMapOfShapeListOfShape mymap;
   TopOpeBRepTool_PurgeInternalEdges mypurgealgo(S);
   Standard_Integer nbedges = mypurgealgo.NbEdges();
-  if (nbedges > 0)
+  if (nbedges == 0)
   {
-    //std::cout<<nbedges<<" internal (or external) edges to be removed"<<std::endl;
-    di<<nbedges<<" internal (or external) edges to be removed\n";
-
-    Standard_Integer i = 1;
-    char* temp = newname;
-
-    Sprintf(newname,"%s_%d",a[1],i);
-    DBRep::Set(temp,mypurgealgo.Shape());
-    //std::cout<<newname<<" ";
-    di<<newname<<" ";
-
-    //std::cout<<std::endl;
-    di<<"\n";
-  }
-  else
     di << "no internal (or external) edges\n";
-    //std::cout << "no internal (or external) edges"<<std::endl;
+    return 0;
+  }
 
+  di << nbedges << " internal (or external) edges to be removed\n";
+
+  const TCollection_AsciiString newname = TCollection_AsciiString(a[1]) + "_1";
+  DBRep::Set(newname.ToCString(), mypurgealgo.Shape());
+  di << newname << " \n";
   return 0;
 }
 
@@ -1441,34 +1368,30 @@ static Standard_Integer clintedge(Draw_Interpretor& di,
 static Standard_Integer facintedge(Draw_Interpretor& di,
 					 Standard_Integer narg, const char** a)
 {
-  char newname[255];
-
-  if (narg < 2) {
-    //std::cout << "Usage: facintedge shape" << std::endl;
+  if (narg < 2)
+  {
     di << "Usage: facintedge shape\n";
     return 1;
   }
+
   TopoDS_Shape S = DBRep::Get(a[1]);
 
   TopTools_DataMapOfShapeListOfShape mymap;
   TopOpeBRepTool_PurgeInternalEdges mypurgealgo(S);
   mypurgealgo.Faces(mymap);
 
-  Standard_Integer i = 1;
-  char* temp = newname;
+  Standard_Integer i = 0;
+  TopTools_DataMapOfShapeListOfShape::Iterator itFacEdg;
+  for (itFacEdg.Initialize(mymap); itFacEdg.More(); itFacEdg.Next())
+  {
+    const TCollection_AsciiString newname =
+      TCollection_AsciiString(a[1]) + "_" + (++i);
 
-  TopTools_DataMapIteratorOfDataMapOfShapeListOfShape itFacEdg;
-  for (itFacEdg.Initialize(mymap); itFacEdg.More(); itFacEdg.Next()) {
-      Sprintf(newname,"%s_%d",a[1],i);
-      DBRep::Set(temp,itFacEdg.Key());
-      //std::cout<<newname<<" ";
-      di<<newname<<" ";
-      i++;
-    }
+    DBRep::Set(newname.ToCString(), itFacEdg.Key());
+    di << newname << " ";
+  }
 
-  //std::cout<<std::endl;
-  di<<"\n";
-
+  di << "\n";
   return 0;
 }
 
@@ -1479,42 +1402,30 @@ static Standard_Integer facintedge(Draw_Interpretor& di,
 static Standard_Integer fuseedge(Draw_Interpretor& di,
 					 Standard_Integer narg, const char** a)
 {
-  char newname[255];
-
-  if (narg < 2) {
-    //std::cout << "Usage: fuseedge shape" << std::endl;
+  if (narg < 2)
+  {
     di << "Usage: fuseedge shape\n";
     return 1;
   }
+
   TopoDS_Shape S = DBRep::Get(a[1]);
 
   TopTools_DataMapOfIntegerListOfShape mymap;
   //TopOpeBRepTool_FuseEdges myfusealgo(S);
   BRepLib_FuseEdges myfusealgo(S);
   myfusealgo.SetConcatBSpl();
-  Standard_Integer nbvertices;
-  nbvertices = myfusealgo.NbVertices();
-
-  if (nbvertices > 0) {
-
-    //std::cout<<nbvertices<<" vertices to be removed"<<std::endl;
-    di<<nbvertices<<" vertices to be removed\n";
-
-    Standard_Integer i = 1;
-    char* temp = newname;
-
-    Sprintf(newname,"%s_%d",a[1],i);
-    DBRep::Set(temp,myfusealgo.Shape());
-    //std::cout<<newname<<" ";
-    di<<newname<<" ";
-
-    //std::cout<<std::endl;
-    di<<"\n";
-  }
-  else
+  const Standard_Integer nbvertices = myfusealgo.NbVertices();
+  if (nbvertices == 0)
+  {
     di << "no vertices to remove\n";
-    //std::cout << "no vertices to remove"<<std::endl;
+    return 0;
+  }
 
+  di << nbvertices << " vertices to be removed\n";
+
+  const TCollection_AsciiString newname = TCollection_AsciiString(a[1]) + "_1";
+  DBRep::Set(newname.ToCString(), myfusealgo.Shape());
+  di << newname << " \n";
   return 0;
 }
 
@@ -1526,41 +1437,36 @@ static Standard_Integer fuseedge(Draw_Interpretor& di,
 static Standard_Integer listfuseedge(Draw_Interpretor& di,
 					 Standard_Integer narg, const char** a)
 {
-  char newname[255];
-
-  if (narg < 2) {
-    //std::cout << "Usage: listfuseedge shape" << std::endl;
+  if (narg < 2)
+  {
     di << "Usage: listfuseedge shape\n";
     return 1;
   }
+
   TopoDS_Shape S = DBRep::Get(a[1]);
 
   TopTools_DataMapOfIntegerListOfShape mymap;
   BRepLib_FuseEdges myfusealgo(S);
   myfusealgo.Edges(mymap);
 
-  Standard_Integer i;
-  char* temp = newname;
+  TopTools_DataMapOfIntegerListOfShape::Iterator itLstEdg;
+  for (itLstEdg.Initialize(mymap); itLstEdg.More(); itLstEdg.Next())
+  {
+    const Standard_Integer& iLst = itLstEdg.Key();
+    const TopTools_ListOfShape& LmapEdg = itLstEdg.Value();
 
-  TopTools_DataMapIteratorOfDataMapOfIntegerListOfShape itLstEdg;
-  for (itLstEdg.Initialize(mymap); itLstEdg.More(); itLstEdg.Next()) {
-      const Standard_Integer& iLst = itLstEdg.Key();
-      const TopTools_ListOfShape& LmapEdg = mymap.Find(iLst);
-      TopTools_ListIteratorOfListOfShape itEdg; 
-      i = 1;
-      for (itEdg.Initialize(LmapEdg); itEdg.More(); itEdg.Next()) {
-	Sprintf(newname,"%s_%d_%d",a[1],iLst,i);
-	DBRep::Set(temp,itEdg.Value());
-	//std::cout<<newname<<" ";
-	di<<newname<<" ";
-	i++;
-      }
+    Standard_Integer i = 0;
+    for (const TopoDS_Shape& itEdg : LmapEdg)
+    {
+      const TCollection_AsciiString newname =
+        TCollection_AsciiString(a[1]) + "_" + iLst + "_" + (++i);
 
+      DBRep::Set(newname.ToCString(), itEdg);
+      di << newname << " ";
     }
+  }
 
-  //std::cout<<std::endl;
-  di<<"\n";
-
+  di << "\n";
   return 0;
 }
 

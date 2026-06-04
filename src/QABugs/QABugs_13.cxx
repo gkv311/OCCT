@@ -188,20 +188,20 @@ static Standard_Integer OCC332bug (Draw_Interpretor& di, Standard_Integer argc, 
   if (!mkEdge.IsDone()) return 0;
   TopoDS_Wire SpineWire = BRepBuilderAPI_MakeWire(mkEdge.Edge()).Wire();
 
-  Sprintf (name,"SpineWire");
+  Snprintf(name,"SpineWire");
   DBRep::Set(name,SpineWire);
 
-  Sprintf (name,"Wire1_");
+  Snprintf(name,"Wire1_");
   DBRep::Set(name,Wire1_);
 
-  Sprintf (name,"outerWire1_");
+  Snprintf(name,"outerWire1_");
   DBRep::Set(name,outerWire1_);
 
   // SUPPORT:
   // - There is no need to create 2nd circles
-  //Sprintf (name,"Wire2_");
+  //Snprintf (name,"Wire2_");
   //DBRep::Set(name,Wire2_);
-  //Sprintf (name,"outerWire2_");
+  //Snprintf (name,"outerWire2_");
   //DBRep::Set(name,outerWire2_);
 
   di.Eval("fit");
@@ -277,7 +277,7 @@ static Standard_Integer OCC332bug (Draw_Interpretor& di, Standard_Integer argc, 
   mkPipe1.MakeSolid();
   gasSolid = mkPipe1.Shape();
 
-  Sprintf (name,"gasSolid_");
+  Snprintf(name,"gasSolid_");
   DBRep::Set(name,gasSolid);
 
   //getFaces.Clear();
@@ -299,7 +299,7 @@ static Standard_Integer OCC332bug (Draw_Interpretor& di, Standard_Integer argc, 
   B.MakeSolid(wallSolid);
   B.Add(wallSolid,TubeShell);
 
-  Sprintf (name,"wallSolid_");
+  Snprintf(name,"wallSolid_");
   DBRep::Set(name,wallSolid);
 
   // Now calculated the volume of the outside tube.
@@ -371,7 +371,7 @@ static Standard_Integer OCC332bug (Draw_Interpretor& di, Standard_Integer argc, 
   while (getFaces.More())
     {
       i++;
-      Sprintf(name,"Face%d",i);
+      Snprintf(name,"Face%d",i);
       di << "Face named " << name << "\n";
       DBRep::Set(name,getFaces.Current());
       getFaces.Next();
@@ -504,19 +504,19 @@ static Standard_Integer OCC544 (Draw_Interpretor& di, Standard_Integer argc, con
     return 1;
   TopoDS_Wire SpineWire = BRepBuilderAPI_MakeWire(mkEdge.Edge()).Wire();
 
-  Sprintf (name,"SpineWire");
+  Snprintf(name,"SpineWire");
   DBRep::Set(name,SpineWire);
 
-  Sprintf (name,"Wire1_");
+  Snprintf(name,"Wire1_");
   DBRep::Set(name,Wire1_);
 
-  Sprintf (name,"outerWire1_");
+  Snprintf(name,"outerWire1_");
   DBRep::Set(name,outerWire1_);
 
-  Sprintf (name,"Wire2_");
+  Snprintf(name,"Wire2_");
   DBRep::Set(name,Wire2_);
 
-  Sprintf (name,"outerWire2_");
+  Snprintf(name,"outerWire2_");
   DBRep::Set(name,outerWire2_);
 
   di.Eval("fit");
@@ -525,10 +525,10 @@ static Standard_Integer OCC544 (Draw_Interpretor& di, Standard_Integer argc, con
 
   TopExp::Vertices(SpineWire, Location2, Location1);
 
-  Sprintf (name,"Location1");
+  Snprintf(name,"Location1");
   DBRep::Set(name,Location1);
 
-  Sprintf (name,"Location2");
+  Snprintf(name,"Location2");
   DBRep::Set(name,Location2);
 
   // Make inner pipe shell
@@ -551,16 +551,16 @@ static Standard_Integer OCC544 (Draw_Interpretor& di, Standard_Integer argc, con
   if (!mkPipe2.IsDone()) 
     return 1;
 
-//    Sprintf(name,"w1-first");
+//    Snprintf(name,"w1-first");
 //    DBRep::Set(name,mkPipe1.FirstShape());
 
-//    Sprintf(name,"w1-last");
+//    Snprintf(name,"w1-last");
 //    DBRep::Set(name,mkPipe1.LastShape());
 
-//    Sprintf(name,"w2-first");
+//    Snprintf(name,"w2-first");
 //    DBRep::Set(name,mkPipe2.FirstShape());
 
-//    Sprintf(name,"w2-last");
+//    Snprintf(name,"w2-last");
 //    DBRep::Set(name,mkPipe2.LastShape());
 
   BRepOffsetAPI_Sewing SewIt(1.0e-4);
@@ -686,7 +686,7 @@ static Standard_Integer OCC544 (Draw_Interpretor& di, Standard_Integer argc, con
 	  {
 	    di << "Next shell found in compound\n";
 	    di << "B.Add(wallSolid,TopoDS::Shell(getShel.Current()));\n";
-	    Sprintf(name,"shell%d", i++);
+      Snprintf(name,"shell%d", i++);
 	    DBRep::Set(name,getShel.Current());
 	    B.Add(wallSolid,TopoDS::Shell(getShel.Current()));
 	    getShel.Next();
@@ -695,7 +695,7 @@ static Standard_Integer OCC544 (Draw_Interpretor& di, Standard_Integer argc, con
     }
   }
 
-  Sprintf(name,"result");
+  Snprintf(name,"result");
   DBRep::Set(name,wallSolid);
 
   // Now calculated the volume of the outside tube.
@@ -936,7 +936,7 @@ static Standard_Integer OCC817 (Draw_Interpretor& di, Standard_Integer argc, con
       if (err)
       {
         char astr[80];
-        Sprintf(astr,"e_%d",l);
+        Snprintf(astr,"e_%d",l);
         DBRep::Set(astr,commonShape);
       }
     }

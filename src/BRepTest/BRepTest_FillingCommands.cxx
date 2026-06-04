@@ -173,7 +173,7 @@ static Standard_Integer plate (Draw_Interpretor & di,Standard_Integer n,const ch
     B.UpdateVertex(TopExp::LastVertex(E), ErrG0);
     BRepLib::BuildCurve3d(E);
     char name[100];
-    Sprintf(name,"Edge_%d", i);
+    Snprintf(name,"Edge_%d", i);
     DBRep::Set(name, E);
     MW.Add(E);
     if (MW.IsDone()==Standard_False) {

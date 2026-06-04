@@ -5706,7 +5706,7 @@ static Standard_Integer VState (Draw_Interpretor& theDI,
       char anInfoStr[512];
       if (aPickData.Normal.SquareModulus() > ShortRealEpsilon())
       {
-        Sprintf (anInfoStr,
+        Snprintf(anInfoStr,
                  " Depth: %g Distance: %g Point: %g %g %g Normal: %g %g %g",
                  aPickData.Depth,
                  aPickData.MinDist,
@@ -5715,7 +5715,7 @@ static Standard_Integer VState (Draw_Interpretor& theDI,
       }
       else
       {
-        Sprintf (anInfoStr,
+        Snprintf(anInfoStr,
                  " Depth: %g Distance: %g Point: %g %g %g",
                  aPickData.Depth,
                  aPickData.MinDist,
