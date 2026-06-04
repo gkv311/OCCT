@@ -421,9 +421,8 @@ Standard_Boolean ChFi3d_Builder::CompleteData
   ChFi3d_SettraceDRAWFIL(Standard_True);
   if (ChFi3d_GettraceDRAWFIL()) {
     IndexOfConge++;
-//    char name[100];
-    char* name = new char[100];
-    sprintf(name,"%s_%d","Surf",IndexOfConge);
+    char name[100];
+    Snprintf(name,"%s_%d","Surf",IndexOfConge);
     DrawTrSurf::Set(name,Surfcoin);
   }
 #endif
@@ -720,9 +719,8 @@ Standard_Boolean ChFi3d_Builder::StoreData(Handle(ChFiDS_SurfData)& Data,
   ChFi3d_SettraceDRAWFIL(Standard_True);
   if (ChFi3d_GettraceDRAWFIL()) {
     IndexOfConge++;
-//    char name[100];
-    char* name=new char[100];
-    sprintf(name,"%s_%d","Surf",IndexOfConge);
+    char name[100];
+    Snprintf(name,"%s_%d","Surf",IndexOfConge);
     DrawTrSurf::Set(name,Surf);
   }
 #endif

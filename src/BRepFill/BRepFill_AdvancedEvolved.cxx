@@ -398,9 +398,9 @@ void BRepFill_AdvancedEvolved::Perform(const TopoDS_Wire& theSpine,
 
 #ifdef BRepFill_AdvancedEvolved_DEBUG
   char aBuff[10000];
-  Sprintf(aBuff, "%s%s", myDebugShapesPath, "spine.nbv");
+  Snprintf(aBuff, "%s%s", myDebugShapesPath, "spine.nbv");
   BinTools::Write(theSpine, aBuff);
-  Sprintf(aBuff, "%s%s", myDebugShapesPath, "profile.nbv");
+  Snprintf(aBuff, "%s%s", myDebugShapesPath, "profile.nbv");
   BinTools::Write(theProfile, aBuff);
 
   std::streamsize aPrecVal = std::cout.precision();
@@ -682,7 +682,7 @@ void BRepFill_AdvancedEvolved::BuildSolid()
 
 #ifdef BRepFill_AdvancedEvolved_DEBUG
   char aBuff[10000];
-  Sprintf(aBuff, "%s%s", myDebugShapesPath, "shape2.nbv");
+  Snprintf(aBuff, "%s%s", myDebugShapesPath, "shape2.nbv");
   BinTools::Write(myPipeShell, aBuff);
 #endif
 
@@ -716,14 +716,14 @@ void BRepFill_AdvancedEvolved::BuildSolid()
       aBB.Add(aDebComp, aF);
     }
 
-    Sprintf(aBuff, "%s%s", myDebugShapesPath, "shape3.nbv");
+    Snprintf(aBuff, "%s%s", myDebugShapesPath, "shape3.nbv");
     BinTools::Write(aDebComp, aBuff);
 #endif
 
     // Split interfered faces
     PerformBoolean(aLF, myPipeShell);
 #ifdef BRepFill_AdvancedEvolved_DEBUG
-    Sprintf(aBuff, "%s%s", myDebugShapesPath, "shape4.nbv");
+    Snprintf(aBuff, "%s%s", myDebugShapesPath, "shape4.nbv");
     BinTools::Write(myPipeShell, aBuff);
 #endif
   }
@@ -761,7 +761,7 @@ void BRepFill_AdvancedEvolved::BuildSolid()
     aBB.Add(aDebComp, aF);
   }
 
-  Sprintf(aBuff, "%s%s", myDebugShapesPath, "shape5.nbv");
+  Snprintf(aBuff, "%s%s", myDebugShapesPath, "shape5.nbv");
   BinTools::Write(aDebComp, aBuff);
 #endif
 

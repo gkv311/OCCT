@@ -52,7 +52,7 @@
 Standard_Boolean AffichLoop  = Standard_True;
 Standard_Integer NbLoops     = 0;
 Standard_Integer NbWires     = 1;
-static char* name = new char[100];
+static char name[100];
 #endif
 
 //=======================================================================
@@ -525,21 +525,21 @@ void BRepAlgo_Loop::Perform()
     std::cout <<"NewLoop"<<std::endl;
     NbLoops++;
 #ifdef DRAW
-    sprintf(name,"FLoop_%d",NbLoops);
+    Snprintf(name,"FLoop_%d",NbLoops);
     DBRep::Set(name,myFace);
     Standard_Integer NbEdges = 1;
 #endif
     for (itl.Initialize(myEdges); itl.More(); itl.Next()) { 
       const TopoDS_Edge& E = TopoDS::Edge(itl.Value());
 #ifdef DRAW
-      sprintf(name,"EEE_%d_%d",NbLoops,NbEdges++);
+      Snprintf(name,"EEE_%d_%d",NbLoops,NbEdges++);
       DBRep::Set(name,E);
 #endif
     }
     for (itl.Initialize(myConstEdges); itl.More(); itl.Next()) {
       const TopoDS_Edge& E = TopoDS::Edge(itl.Value());    
 #ifdef DRAW
-      sprintf(name,"EEE_%d_%d",NbLoops,NbEdges++);
+      Snprintf(name,"EEE_%d_%d",NbLoops,NbEdges++);
       DBRep::Set(name,E);
 #endif
     }
@@ -599,7 +599,7 @@ void BRepAlgo_Loop::Perform()
       for (itl.Initialize(MVE(iV)); itl.More(); itl.Next()) {
         TopoDS_Edge& E = TopoDS::Edge(itl.Value());
         if (Done.Add(E)) {
-          sprintf(name,"EEC_%d_%d",NbLoops,NbEdges++);
+          Snprintf(name,"EEC_%d_%d",NbLoops,NbEdges++);
           DBRep::Set(name,E);
         }
       }
@@ -710,7 +710,7 @@ void BRepAlgo_Loop::Perform()
 
 #ifdef DRAW
     if (AffichLoop) {
-      sprintf(name,"NW_%d_%d",NbLoops,NbWires++);	
+      Snprintf(name,"NW_%d_%d",NbLoops,NbWires++);
       DBRep::Set(name,NW);
     }
 #endif
