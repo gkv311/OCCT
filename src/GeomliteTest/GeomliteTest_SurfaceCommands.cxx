@@ -640,7 +640,7 @@ static Standard_Integer tobezier(Draw_Interpretor& di,
 {
   if ( n < 3) return 1;
   Standard_Integer i,j,NbU,NbV,NbArc;
-  char* name = new char[100];
+  char name[100];
   
   Handle(Geom2d_BSplineCurve) C2d = 
     DrawTrSurf::GetBSplineCurve2d(a[2]);
@@ -664,9 +664,8 @@ static Standard_Integer tobezier(Draw_Interpretor& di,
 	di << NbU << " X " << NbV << " patches in the result\n";
 	for (i = 1; i <= NbU; i++) {
 	  for (j = 1; j <= NbV; j++) {
-	    Sprintf(name,"%s_%i_%i",a[1],i,j);
-	    char *temp = name ;
-	    DrawTrSurf::Set(temp,Conv.Patch(i,j));
+	    Snprintf(name,"%s_%i_%i",a[1],i,j);
+	    DrawTrSurf::Set(name, Conv.Patch(i,j));
 	  }
 	}
       }
@@ -677,9 +676,8 @@ static Standard_Integer tobezier(Draw_Interpretor& di,
 	di << NbU << " X " << NbV << " patches in the result\n";
 	for (i = 1; i <= NbU; i++) {
 	  for (j = 1; j <= NbV; j++) {
-	    Sprintf(name,"%s_%i_%i",a[1],i,j);
-	    char *temp = name ;
-	    DrawTrSurf::Set(temp,Conv.Patch(i,j));
+	    Snprintf(name,"%s_%i_%i",a[1],i,j);
+	    DrawTrSurf::Set(name, Conv.Patch(i,j));
 	  }
 	}
       }
@@ -694,9 +692,8 @@ static Standard_Integer tobezier(Draw_Interpretor& di,
 	NbArc = Conv.NbArcs();
 	di << NbArc << " arcs in the result\n";
 	for (i = 1; i <= NbArc; i++) {
-	  Sprintf(name,"%s_%i",a[1],i);
-	  char *temp = name ;
-	  DrawTrSurf::Set(temp,Conv.Arc(i));
+	  Snprintf(name,"%s_%i",a[1],i);
+	  DrawTrSurf::Set(name, Conv.Arc(i));
 	}
       }
       else {
@@ -704,9 +701,8 @@ static Standard_Integer tobezier(Draw_Interpretor& di,
 	NbArc = Conv.NbArcs();
 	di << NbArc << " arcs in the result\n";
 	for (i = 1; i <= NbArc; i++) {
-	  Sprintf(name,"%s_%i",a[1],i);
-	  char *temp = name ;
-	  DrawTrSurf::Set(temp,Conv.Arc(i));
+	  Snprintf(name,"%s_%i",a[1],i);
+	  DrawTrSurf::Set(name, Conv.Arc(i));
 	}
       }
     }
@@ -721,9 +717,8 @@ static Standard_Integer tobezier(Draw_Interpretor& di,
       NbArc = Conv.NbArcs();
       di << NbArc << " arcs in the result\n";
       for (i = 1; i <= NbArc; i++) {
-	Sprintf(name,"%s_%i",a[1],i);
-	char *temp = name ;
-	DrawTrSurf::Set(temp,Conv.Arc(i));
+	Snprintf(name,"%s_%i",a[1],i);
+	DrawTrSurf::Set(name, Conv.Arc(i));
       }
     }
     else {
@@ -731,9 +726,8 @@ static Standard_Integer tobezier(Draw_Interpretor& di,
       NbArc = Conv.NbArcs();
       di << NbArc << " arcs in the result\n";
       for (i = 1; i <= NbArc; i++) {
-	Sprintf(name,"%s_%i",a[1],i);
-	char *temp = name ;
-	DrawTrSurf::Set(temp,Conv.Arc(i));
+	Snprintf(name,"%s_%i",a[1],i);
+	DrawTrSurf::Set(name, Conv.Arc(i));
       }
     }
   }

@@ -69,7 +69,7 @@ static Standard_Integer solutions(Draw_Interpretor& di,
   if (ct3.IsDone()) {
     for (Standard_Integer i = 1 ; i <= ct3.NbSolutions() ; i++) {
       Handle(Geom2d_Circle) C = new Geom2d_Circle(ct3.ThisSolution(i));
-      Sprintf(solname,"%s_%d",name,i);
+      Snprintf(solname,"%s_%d",name,i);
       DrawTrSurf::Set(solname, C);
       di << solname << " ";
     }
@@ -92,7 +92,7 @@ static Standard_Integer solutions(Draw_Interpretor& di,
   if (ct3.IsDone()) {
     for (Standard_Integer i = 1 ; i <= ct3.NbSolutions() ; i++) {
       Handle(Geom2d_Circle) C = new Geom2d_Circle(ct3.ThisSolution(i));
-      Sprintf(solname,"%s_%d",name,i);
+      Snprintf(solname,"%s_%d",name,i);
       DrawTrSurf::Set(solname, C);
       di << solname << " ";
     }
@@ -122,7 +122,7 @@ static Standard_Integer solutions(Draw_Interpretor& theDI,
     for (Standard_Integer i = 1; i <= theCt2.NbSolutions(); i++)
     {
       Handle(Geom2d_Circle) C = new Geom2d_Circle(theCt2.ThisSolution(i));
-      Sprintf(solname, "%s_%d", theName, i);
+      Snprintf(solname, "%s_%d", theName, i);
       DrawTrSurf::Set(solname, C);
       theDI << solname << " ";
     }
@@ -347,9 +347,8 @@ static Standard_Integer lintang (Draw_Interpretor& di,Standard_Integer n, const 
     if (ct3.IsDone()) {
       for (Standard_Integer i = 1 ; i <= ct3.NbSolutions() ; i++) {
         Handle(Geom2d_Line) LS = new Geom2d_Line(ct3.ThisSolution(i));
-        Sprintf(solname,"%s_%d",a[1],i);
-        char* temp = solname; // pour portage WNT
-        DrawTrSurf::Set(temp,LS);
+        Snprintf(solname,"%s_%d",a[1],i);
+        DrawTrSurf::Set(solname, LS);
         di << solname << " ";
       }
     }
@@ -365,9 +364,8 @@ static Standard_Integer lintang (Draw_Interpretor& di,Standard_Integer n, const 
     if (ct3.IsDone()) {
       for (Standard_Integer i = 1 ; i <= ct3.NbSolutions() ; i++) {
         Handle(Geom2d_Line) LS = new Geom2d_Line(ct3.ThisSolution(i));
-        Sprintf(solname,"%s_%d",a[1],i);
-        char* temp = solname; // pour portage WNT
-        DrawTrSurf::Set(temp,LS);
+        Snprintf(solname,"%s_%d",a[1],i);
+        DrawTrSurf::Set(solname, LS);
         di << solname << " ";
       }
     }

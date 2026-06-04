@@ -1310,7 +1310,7 @@ static Standard_Integer wexplo (Draw_Interpretor&,
   Standard_Integer k = 1;
   while (we.More()) {
     TopoDS_Edge E = we.Current();
-    Sprintf(name,"WEDGE_%d",k);	
+    Snprintf(name,"WEDGE_%d",k);
 	  DBRep::Set(name,E);
     we.Next();
     k++;

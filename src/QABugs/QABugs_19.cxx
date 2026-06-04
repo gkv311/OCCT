@@ -1237,7 +1237,7 @@ static Standard_Integer OCC24005 (Draw_Interpretor& theDI, Standard_Integer theN
   {
     for (Standard_Integer i=1; i<=aNbCurves; ++i)
     {
-      Sprintf(buf, "%s_%d",theArgv[1],i);
+      Snprintf(buf, "%s_%d",theArgv[1],i);
       theDI << buf << " ";
       
       const IntTools_Curve& aIC = aCvsX(i);
@@ -1249,7 +1249,7 @@ static Standard_Integer OCC24005 (Draw_Interpretor& theDI, Standard_Integer theN
   {
     const IntTools_Curve& aIC = aCvsX(1);
     const Handle(Geom_Curve)& aC3D= aIC.Curve();
-    Sprintf(buf, "%s",theArgv[1]);
+    Snprintf(buf, "%s",theArgv[1]);
     theDI << buf << " ";
     DrawTrSurf::Set(buf,aC3D);
   }
@@ -1259,7 +1259,7 @@ static Standard_Integer OCC24005 (Draw_Interpretor& theDI, Standard_Integer theN
     const IntTools_PntOn2Faces& aPi=aPntsX(i);
     const gp_Pnt& aP=aPi.P1().Pnt();
     
-    Sprintf(buf,"%s_p_%d",theArgv[1],i);
+    Snprintf(buf,"%s_p_%d",theArgv[1],i);
     theDI << buf << " ";
     DrawTrSurf::Set(buf, aP);
   }
@@ -3881,10 +3881,10 @@ static Standard_Integer OCC26407 (Draw_Interpretor& theDI, Standard_Integer theA
   }
   DBRep::Set(theArgVec[1], face);
   char buf[256];
-  sprintf(buf, "isos %s 0", theArgVec[1]);
+  Snprintf(buf, "isos %s 0", theArgVec[1]);
   theDI.Eval(buf);
 
-  sprintf(buf, "triangles %s", theArgVec[1]);
+  Snprintf(buf, "triangles %s", theArgVec[1]);
   theDI.Eval(buf);
 
   theDI.Eval("smallview; fit");
@@ -3939,7 +3939,7 @@ static Standard_Integer OCC26485 (Draw_Interpretor& theDI, Standard_Integer theA
       if (aNormal.X() == 0 && aNormal.Y() == 0 && aNormal.Z() == 1)
       {
         char buf[256];
-        sprintf(buf, "fail_%d", i+1);
+        Snprintf(buf, "fail_%d", i+1);
         theDI << "Failed. Point " << buf << ": "
               << aPoint.X() << " "
               << aPoint.Y() << " "
@@ -4286,14 +4286,14 @@ Standard_Integer OCC26525 (Draw_Interpretor& di,
   }
 
   aNbPoints=aHInter.NbPoints();
-  sprintf (buf, " Number of intersection points found: %d", aNbPoints);
+  Snprintf(buf, " Number of intersection points found: %d", aNbPoints);
   di <<  buf << "\n";
   for (i=1; i<=aNbPoints; ++i)
   {
     const IntCurveSurface_IntersectionPoint& aIP=aHInter.Point(i);
     aIP.Values(aP, aU, aV, aT, aTC);
     //
-    sprintf (buf, "point %s_%d %lg %lg %lg  ", a[1], i, aP.X(), aP.Y(), aP.Z());
+    Snprintf(buf, "point %s_%d %lg %lg %lg  ", a[1], i, aP.X(), aP.Y(), aP.Z());
     di << buf << "\n";
   }
 

@@ -194,13 +194,13 @@ static void PrintHist(const TopoDS_Shape& S,
   B.Add(C,S);
   char localname[100];
   if(nbgen<10){
-    Sprintf(localname,"generated_00%d", nbgen++);
+    Snprintf(localname,"generated_00%d", nbgen++);
   }
   else if(nbgen<100){
-    Sprintf(localname,"generated_0%d", nbgen++);
+    Snprintf(localname,"generated_0%d", nbgen++);
   }
   else {
-    Sprintf(localname,"generated_%d", nbgen++);
+    Snprintf(localname,"generated_%d", nbgen++);
   }
   for(; It.More(); It.Next()){
     B.Add(C,It.Value());
@@ -485,7 +485,6 @@ static Standard_Integer blend1(Draw_Interpretor& di, Standard_Integer narg, cons
  
     nb=aRakk.NbSurface();
     char localname [100];
-    char *temp; 
     
     // affichage du type d'arret 
     
@@ -529,49 +528,40 @@ static Standard_Integer blend1(Draw_Interpretor& di, Standard_Integer narg, cons
       di<<"precision "<< i << "= "<<aRakk.TolApp3d(i)<<"\n";
       
       // display resulting surfaces  
-      Sprintf(localname, "%s%d" ,ns0,i);
-      temp = localname;
-      DrawTrSurf::Set(temp,aRakk.SurfaceFillet(i));
+      Snprintf(localname, "%s%d" ,ns0,i);
+      DrawTrSurf::Set(localname, aRakk.SurfaceFillet(i));
       di << localname<< " ";
       
       // display curves 3d 
-      Sprintf(localname, "%s%d" ,"courb1",i);
-      temp =localname; 
-      DrawTrSurf::Set(temp,aRakk.CurveOnFace1(i));
+      Snprintf(localname, "%s%d" ,"courb1",i);
+      DrawTrSurf::Set(localname, aRakk.CurveOnFace1(i));
       di << localname<< " ";
-      Sprintf(localname, "%s%d" ,"courb2",i);
-      temp =localname;
-      DrawTrSurf::Set(temp,aRakk.CurveOnFace2(i));
+      Snprintf(localname, "%s%d" ,"courb2",i);
+      DrawTrSurf::Set(localname, aRakk.CurveOnFace2(i));
       di << localname<< " ";     
       
       // display supports 
-      Sprintf(localname, "%s%d" ,"face1",i);
-      temp =localname ;
-      DBRep::Set(temp,aRakk.SupportFace1(i));
+      Snprintf(localname, "%s%d" ,"face1",i);
+      DBRep::Set(localname, aRakk.SupportFace1(i));
       di << localname<< " ";
-      Sprintf(localname, "%s%d" ,"face2",i);
-      temp =localname; 
-      DBRep::Set(temp,aRakk.SupportFace2(i));
+      Snprintf(localname, "%s%d" ,"face2",i);
+      DBRep::Set(localname, aRakk.SupportFace2(i));
       di << localname<< " ";
       
       // display Pcurves on faces 
-      Sprintf(localname, "%s%d" ,"pcurveonface1",i);
-      temp =localname ;
-      DrawTrSurf::Set(temp,aRakk.PCurveOnFace1(i));
+      Snprintf(localname, "%s%d" ,"pcurveonface1",i);
+      DrawTrSurf::Set(localname, aRakk.PCurveOnFace1(i));
       di << localname<< " ";
-      Sprintf(localname, "%s%d" ,"pcurveonface2",i);
-      temp =localname; 
-      DrawTrSurf::Set(temp,aRakk.PCurveOnFace2(i));
+      Snprintf(localname, "%s%d" ,"pcurveonface2",i);
+      DrawTrSurf::Set(localname, aRakk.PCurveOnFace2(i));
       di << localname<< " ";
       
       // display Pcurves on the fillet
-      Sprintf(localname, "%s%d" ,"pcurveonconge1",i);
-      temp =localname;
-      DrawTrSurf::Set(temp,aRakk.PCurve1OnFillet(i));
+      Snprintf(localname, "%s%d" ,"pcurveonconge1",i);
+      DrawTrSurf::Set(localname, aRakk.PCurve1OnFillet(i));
       di << localname<< " ";
-      Sprintf(localname, "%s%d" ,"pcurveonconge2",i);
-      temp =localname; 
-      DrawTrSurf::Set(temp,aRakk.PCurve2OnFillet(i));
+      Snprintf(localname, "%s%d" ,"pcurveonconge2",i);
+      DrawTrSurf::Set(localname,aRakk.PCurve2OnFillet(i));
       di << localname<< " ";
       
     } }
@@ -583,9 +573,8 @@ static Standard_Integer blend1(Draw_Interpretor& di, Standard_Integer narg, cons
     for (j=1;j<=s;j++)
      {Handle(Geom_TrimmedCurve) Sec;
      aRakk.Section(i,j,Sec);
-    Sprintf(localname, "%s%d%d" ,"sec",i,j);
-     temp =localname;
-    DrawTrSurf::Set (temp,Sec);
+    Snprintf(localname, "%s%d%d" ,"sec",i,j);
+    DrawTrSurf::Set (localname, Sec);
     di << localname<< " ";}
    }}
  }
@@ -678,7 +667,7 @@ Standard_Integer rollingball(Draw_Interpretor& di, Standard_Integer n, const cha
       di << "   " << From << "     " << To << "\n";
       for (Standard_Integer j = From; j <= To; j++) {
 	const TopoDS_Shape& CurF = Roll.Face(j);
-	Sprintf(localname,"%s_%d_%d",a[1],i,j);
+	Snprintf(localname,"%s_%d_%d",a[1],i,j);
 	DBRep::Set(localname,CurF);
       }
     }

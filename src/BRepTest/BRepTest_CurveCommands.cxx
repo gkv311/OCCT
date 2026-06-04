@@ -1275,7 +1275,7 @@ static Standard_Integer profile2d(Draw_Interpretor& di,
   Standard_Boolean close = Standard_True;
   Standard_Boolean first = Standard_True;
   Standard_Boolean stayfirst = Standard_False;
-  char*  name = new char[100];
+  char name[100];
 
   while (i < n) {
 
@@ -1444,7 +1444,7 @@ again:
         Handle(Geom2d_TrimmedCurve) ct = 
           new Geom2d_TrimmedCurve(l,0,length);
         NbCurves++;
-        Sprintf(name,"%s_%d",a[1],NbCurves);
+        Snprintf(name,"%s_%d",a[1],NbCurves);
         DrawTrSurf::Set(name,ct);
         di.AppendElement(name);
         x += length*dx;
@@ -1470,7 +1470,7 @@ again:
         Handle(Geom2d_TrimmedCurve) ct = 
           new Geom2d_TrimmedCurve(c,0,angle);
         NbCurves++;
-        Sprintf(name,"%s_%d",a[1],NbCurves);
+        Snprintf(name,"%s_%d",a[1],NbCurves);
         DrawTrSurf::Set(name,ct);	
         di.AppendElement(name);
         gp_Pnt2d p;
@@ -1598,9 +1598,8 @@ Standard_Integer mkoffset(Draw_Interpretor& di,
     }
     else
     {
-      Sprintf(name,"%s_%d", a[1], Compt++);
-      char* temp = name; // portage WNT
-      DBRep::Set(temp,Paral.Shape());
+      Snprintf(name,"%s_%d", a[1], Compt++);
+      DBRep::Set(name, Paral.Shape());
     }
   }
 
@@ -1673,9 +1672,8 @@ Standard_Integer openoffset(Draw_Interpretor& di,
     }
     else
     {
-      Sprintf(name,"%s_%d", a[1], Compt++);
-      char* temp = name; // portage WNT
-      DBRep::Set(temp,Paral.Shape());
+      Snprintf(name,"%s_%d", a[1], Compt++);
+      DBRep::Set(name, Paral.Shape());
     }
   }
 
@@ -1695,8 +1693,8 @@ Standard_Integer pickface(Draw_Interpretor& di,
   TopoDS_Shape S = DBRep::Get(pick_name,TopAbs_FACE);
   if (S.IsNull()) return 1;
 
-  char* name = new char[100];
-  Sprintf(name,"PickedFace %s",pick_name);
+  char name[100];
+  Snprintf(name,"PickedFace %s",pick_name);
   DBRep::Set(name,S);
   di.AppendElement(name);
   return 0;
@@ -1752,7 +1750,7 @@ Standard_Integer edgeintersector(Draw_Interpretor& di,
     gp_Pnt           P    = P2D.Value();
     TopoDS_Vertex    V    = BRepLib_MakeVertex(P);
     NbV ++;
-    Sprintf(name,"%s_%d",a[1],NbV);
+    Snprintf(name,"%s_%d",a[1],NbV);
     DBRep::Set(name,V);
     for (Standard_Integer i = 1; i <= 2; i++) {
       //---------------------------------------------------------------
