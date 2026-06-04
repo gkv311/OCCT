@@ -586,7 +586,7 @@ void GeomFill_SweepSectionGenerator::Section
 #ifdef DRAW
     if ( Affich) {
       char name[256];
-      sprintf(name,"SECTION_%d",++NbSECTIONS);
+      Snprintf(name,"SECTION_%d",++NbSECTIONS);
       DrawTrSurf::Set(name,myFirstSect->Transformed(cumulTR));
     }
 #endif
@@ -674,7 +674,7 @@ void GeomFill_SweepSectionGenerator::Section
 #ifdef DRAW
       if ( Affich) {
         char name[256];
-	sprintf(name,"SECTION_%d",++NbSECTIONS);
+	Snprintf(name,"SECTION_%d",++NbSECTIONS);
 	DrawTrSurf::Set(name,BS);
       }
 #endif

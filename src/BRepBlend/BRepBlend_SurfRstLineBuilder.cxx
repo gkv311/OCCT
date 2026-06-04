@@ -144,7 +144,7 @@ static void Drawsect(const Standard_Real param,
 #ifdef DRAW
   char tname[100];
   Standard_CString name = tname ;
-  sprintf(name,"%s_%d","Section",IndexOfSection);
+  Snprintf(name,"%s_%d","Section",IndexOfSection);
   DrawTrSurf::Set(name,sect);
 #endif
 }

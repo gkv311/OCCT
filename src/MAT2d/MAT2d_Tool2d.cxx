@@ -228,20 +228,18 @@ Standard_Integer MAT2d_Tool2d::TangentBefore(const Standard_Integer anitem,
   if ( type != STANDARD_TYPE(Geom2d_CartesianPoint)){
     curve = Handle(Geom2d_Curve)::DownCast(theCircuit->Value(anitem));
 #ifdef DRAW
-    char  *name = new char[100];
-    sprintf(name, "c%d", anitem);
+    char name[100];
+    Snprintf(name, "c%d", anitem);
     DrawTrSurf::Set(name, curve);
-    delete [] name;
 #endif
     theGeomVecs.Bind(theNumberOfVecs,curve->DN(curve->LastParameter(),1));
   }
   else {
     curve = Handle(Geom2d_Curve)::DownCast(theCircuit->Value(item));
 #ifdef DRAW
-    char  *name = new char[100];
-    sprintf(name, "c%d", item);
+    char name[100];
+    Snprintf(name, "c%d", item);
     DrawTrSurf::Set(name, curve);
-    delete [] name;
 #endif
     Standard_Real param = (IsOpenResult && anitem == theCircuit->NumberOfItems())?
       curve->LastParameter() : curve->FirstParameter();
@@ -276,10 +274,9 @@ Standard_Integer MAT2d_Tool2d::TangentAfter(const Standard_Integer anitem,
   if ( type != STANDARD_TYPE(Geom2d_CartesianPoint)){
     curve     = Handle(Geom2d_Curve)::DownCast(theCircuit->Value(anitem));
 #ifdef DRAW
-    char  *name = new char[100];
-    sprintf(name, "c%d", anitem);
+    char name[100];
+    Snprintf(name, "c%d", anitem);
     DrawTrSurf::Set(name, curve);
-    delete [] name;
 #endif
     thevector = curve->DN(curve->FirstParameter(),1);
   }
@@ -291,10 +288,9 @@ Standard_Integer MAT2d_Tool2d::TangentAfter(const Standard_Integer anitem,
     
     curve     = Handle(Geom2d_Curve)::DownCast(theCircuit->Value(item));
 #ifdef DRAW
-    char  *name = new char[100];
-    sprintf(name, "c%d", item);
+    char name[100];
+    Snprintf(name, "c%d", item);
     DrawTrSurf::Set(name, curve);
-    delete [] name;
 #endif
     Standard_Real param = (IsOpenResult && anitem == 1)?
       curve->FirstParameter() : curve->LastParameter();
@@ -421,11 +417,10 @@ void MAT2d_Tool2d::CreateBisector(const Handle(MAT_Bisector)& abisector)
   abisector->Sense(1);
 
 #ifdef DRAW
-  char  *name = new char[100];
-  sprintf(name, "b%d", theNumberOfBisectors);
+  char name[100];
+  Snprintf(name, "b%d", theNumberOfBisectors);
   DrawTrSurf::Set(name, bisector.Value());
   Dump(abisector->BisectorNumber(),1);
-  delete [] name;
 #endif
 
 #ifdef OCCT_DEBUG
@@ -438,10 +433,9 @@ void MAT2d_Tool2d::CreateBisector(const Handle(MAT_Bisector)& abisector)
       BasisCurve = Handle(Bisector_BisecAna)
         ::DownCast(bisector.Value()->BasisCurve())->Geom2dCurve();
 #ifdef DRAW
-      char  *name = new char[100];
-      sprintf(name,"BISSEC_%d",abisector->BisectorNumber());
+      char name[100];
+      Snprintf(name,"BISSEC_%d",abisector->BisectorNumber());
       DrawTrSurf::Set(name,BasisCurve);
-      delete [] name;
 #endif
     }
   }

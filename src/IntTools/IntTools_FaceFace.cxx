@@ -528,7 +528,7 @@ void IntTools_FaceFace::Perform (const TopoDS_Face& aF1,
     if(!myListOfPnts.IsEmpty()) {
       char aBuff[10000];
 
-      Sprintf(aBuff,"bopcurves <face1 face2> -2d");
+      Snprintf(aBuff,"bopcurves <face1 face2> -2d");
       IntSurf_ListIteratorOfListOfPntOn2S IterLOP1(myListOfPnts);
       for(;IterLOP1.More(); IterLOP1.Next())
       {
@@ -536,7 +536,7 @@ void IntTools_FaceFace::Perform (const TopoDS_Face& aF1,
         Standard_Real u1, v1, u2, v2;
         aPt.Parameters(u1, v1, u2, v2);
 
-        Sprintf(aBuff, "%s -p %+10.20f %+10.20f %+10.20f %+10.20f", aBuff, u1, v1, u2, v2);
+        Snprintf(aBuff, "%s -p %+10.20f %+10.20f %+10.20f %+10.20f", aBuff, u1, v1, u2, v2);
       }
 
       std::cout << aBuff << std::endl;

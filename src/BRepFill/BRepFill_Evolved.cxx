@@ -653,7 +653,7 @@ void BRepFill_Evolved::ElementaryPerform (const TopoDS_Face&              Sp,
 #ifdef DRAW
   if (AffichEdge) {	  
     char name[100];
-    sprintf(name,"PROFIL_%d",++NbPROFILS);	
+    Snprintf(name,"PROFIL_%d",++NbPROFILS);	
     DBRep::Set(name,Pr);
   }
 #endif
@@ -947,7 +947,7 @@ void BRepFill_Evolved::ElementaryPerform (const TopoDS_Face&              Sp,
 #ifdef DRAW
         if (AffichEdge) {
           char name[100];
-          sprintf(name,"ARCEDGE_%d_%d_%d",i,vv,Ti);	
+          Snprintf(name,"ARCEDGE_%d_%d_%d",i,vv,Ti);	
           DBRep::Set(name,CurrentEdge);
         }
 #endif
@@ -1097,7 +1097,7 @@ void BRepFill_Evolved::ElementaryPerform (const TopoDS_Face&              Sp,
 #ifdef DRAW	    
             if (AffichEdge) {
               char name[100];
-              sprintf(name,"PAREDGE_%d_%d",++NbEDGES,k);	
+              Snprintf(name,"PAREDGE_%d_%d",++NbEDGES,k);	
               DBRep::Set(name,aSeqOfShape.Value(k));
             }
 #endif	    
@@ -1135,7 +1135,7 @@ void BRepFill_Evolved::ElementaryPerform (const TopoDS_Face&              Sp,
 #ifdef DRAW	    
           if (AffichEdge) {	  
             char name[100];
-            sprintf(name,"PAREDGE_%d_%d",++NbEDGES,k);	
+            Snprintf(name,"PAREDGE_%d_%d",++NbEDGES,k);	
             DBRep::Set(name,aSeqOfShape.Value(k));
           }
 #endif
@@ -1219,7 +1219,7 @@ void BRepFill_Evolved::ElementaryPerform (const TopoDS_Face&              Sp,
   if (AffichEdge) {	  
     std::cout <<" End of construction of an elementary volevo."<<std::endl;	    
     char name[100];
-    sprintf(name,"VEVO_%d",++NbVEVOS);	
+    Snprintf(name,"VEVO_%d",++NbVEVOS);	
     DBRep::Set(name,myShape);
   }
 #endif
@@ -1325,7 +1325,7 @@ void BRepFill_Evolved::PlanarPerform (const TopoDS_Face&              Sp,
       Standard_Integer k = 0;
       for (; it.More(); it.Next()) {
         char name[100];
-        sprintf(name,"PARALI_%d",++k);	
+        Snprintf(name,"PARALI_%d",++k);	
         DBRep::Set(name,it.Value());
       }
     }
@@ -1429,7 +1429,7 @@ void BRepFill_Evolved::VerticalPerform (const TopoDS_Face&              Sp,
 #ifdef DRAW  
     if (AffichEdge) {	  
       char name[100];
-      sprintf(name,"PARALI_%d",++NbVEVOS);	
+      Snprintf(name,"PARALI_%d",++NbVEVOS);	
       DBRep::Set(name,Base);
     }
 #endif
@@ -1438,7 +1438,7 @@ void BRepFill_Evolved::VerticalPerform (const TopoDS_Face&              Sp,
 #ifdef DRAW  
     if (AffichEdge) {	  
       char name[100];
-      sprintf(name,"PRISM_%d",NbVEVOS);	
+      Snprintf(name,"PRISM_%d",NbVEVOS);	
       DBRep::Set(name,PS.Shape());
     }
 #endif
@@ -1702,7 +1702,7 @@ void BRepFill_Evolved::PrepareSpine(TopoDS_Face&                 WorkSpine,
 #ifdef DRAW
   if (AffichEdge) {
     char name[100];
-    sprintf(name,"workspine");	
+    Snprintf(name,"workspine");	
     DBRep::Set(name,WorkSpine);
   }
 #endif 
@@ -2177,9 +2177,9 @@ void BRepFill_Evolved::MakePipe(const TopoDS_Edge& SE,
 #ifdef DRAW
   if (AffichGeom) {
     char name[100];
-    sprintf(name,"EVOLBASE_%d",++NbFACES);
+    Snprintf(name,"EVOLBASE_%d",++NbFACES);
     DBRep::Set(name,SE);
-    sprintf(name,"EVOLPROF_%d",NbFACES);
+    Snprintf(name,"EVOLPROF_%d",NbFACES);
     DBRep::Set(name,GenProf);
   }
 #endif
@@ -2190,7 +2190,7 @@ void BRepFill_Evolved::MakePipe(const TopoDS_Edge& SE,
 #ifdef DRAW
   if (AffichGeom) {
     char name[100];
-    sprintf(name,"EVOL_%d",++NbFACES);
+    Snprintf(name,"EVOL_%d",++NbFACES);
     DBRep::Set(name,Pipe.Shape());
   }
 #endif
@@ -2268,13 +2268,13 @@ void BRepFill_Evolved::MakeRevol(const TopoDS_Edge&   SE,
 #ifdef DRAW  
   if (AffichGeom) {
     char name[100];
-    sprintf(name,"EVOLBASE_%d",++NbFACES);
+    Snprintf(name,"EVOLBASE_%d",++NbFACES);
     DrawTrSurf::Set(name,new Geom_Line(AxeRev));
     //    DrawTrSurf::Set(name,new Geom_Line(AxeRev));
-    sprintf(name,"EVOLPROF_%d",NbFACES);
+    Snprintf(name,"EVOLPROF_%d",NbFACES);
     DBRep::Set(name,GenProf);
 
-    sprintf(name,"EVOL_%d",NbFACES);
+    Snprintf(name,"EVOL_%d",NbFACES);
     DBRep::Set(name,Rev.Shape());
   }
 #endif
@@ -2371,10 +2371,10 @@ void BRepFill_Evolved::TransformInitWork(const TopLoc_Location& LS,
 #ifdef DRAW
   if (AffichEdge) {
     char name[100];
-    sprintf(name,"movedspine");
+    Snprintf(name,"movedspine");
     TopoDS_Face SL = mySpine;
     DBRep::Set(name,SL);    
-    sprintf(name,"movedprofile");
+    Snprintf(name,"movedprofile");
     TopoDS_Wire PL = myProfile;
     DBRep::Set(name,PL);
   }
@@ -2569,7 +2569,7 @@ void TrimFace(const TopoDS_Face&              Face,
     std::cout << " TrimFace " << ++NbTRIMFACES;
     std::cout << " : " << NB << " edges within the restriction" << std::endl;
     for ( Standard_Integer j = 1; j <= NB; j++) {
-      sprintf(name,"TRIMEDGE_%d_%d",NbTRIMFACES,j);
+      Snprintf(name,"TRIMEDGE_%d_%d",NbTRIMFACES,j);
       DBRep::Set(name,TopoDS::Edge(TheEdges.Value(j)));
     }
   }

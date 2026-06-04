@@ -491,11 +491,11 @@ void Blend_Walking::InternalPerform(Blend_Function& Func,
 #ifdef DRAW
         Standard_Integer nbpts = line->NbPoints();
         char name [100];
-        sprintf(name, "pg%d", nbpts);
+        Snprintf(name, "pg%d", nbpts);
         DrawTrSurf::Set(name, PtOnGuide);
-        sprintf(name, "p1_%d", nbpts);
+        Snprintf(name, "p1_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS1());
-        sprintf(name, "p2_%d", nbpts);
+        Snprintf(name, "p2_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS2());
 #endif
 
@@ -569,11 +569,11 @@ void Blend_Walking::InternalPerform(Blend_Function& Func,
 #ifdef DRAW
         Standard_Integer nbpts = line->NbPoints();
         char name [100];
-        sprintf(name, "pg%d", nbpts);
+        Snprintf(name, "pg%d", nbpts);
         DrawTrSurf::Set(name, PtOnGuide);
-        sprintf(name, "p1_%d", nbpts);
+        Snprintf(name, "p1_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS1());
-        sprintf(name, "p2_%d", nbpts);
+        Snprintf(name, "p2_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS2());
 #endif
 
@@ -616,11 +616,11 @@ void Blend_Walking::InternalPerform(Blend_Function& Func,
 #ifdef DRAW
         Standard_Integer nbpts = line->NbPoints();
         char name [100];
-        sprintf(name, "pg%d", nbpts);
+        Snprintf(name, "pg%d", nbpts);
         DrawTrSurf::Set(name, PtOnGuide);
-        sprintf(name, "p1_%d", nbpts);
+        Snprintf(name, "p1_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS1());
-        sprintf(name, "p2_%d", nbpts);
+        Snprintf(name, "p2_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS2());
 #endif
 
@@ -652,11 +652,11 @@ void Blend_Walking::InternalPerform(Blend_Function& Func,
 #ifdef DRAW
         Standard_Integer nbpts = line->NbPoints();
         char name [100];
-        sprintf(name, "pg%d", nbpts);
+        Snprintf(name, "pg%d", nbpts);
         DrawTrSurf::Set(name, PtOnGuide);
-        sprintf(name, "p1_%d", nbpts);
+        Snprintf(name, "p1_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS1());
-        sprintf(name, "p2_%d", nbpts);
+        Snprintf(name, "p2_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS2());
 #endif
 
@@ -689,11 +689,11 @@ void Blend_Walking::InternalPerform(Blend_Function& Func,
 #ifdef DRAW
         Standard_Integer nbpts = line->NbPoints();
         char name [100];
-        sprintf(name, "pg%d", nbpts);
+        Snprintf(name, "pg%d", nbpts);
         DrawTrSurf::Set(name, PtOnGuide);
-        sprintf(name, "p1_%d", nbpts);
+        Snprintf(name, "p1_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS1());
-        sprintf(name, "p2_%d", nbpts);
+        Snprintf(name, "p2_%d", nbpts);
         DrawTrSurf::Set(name, previousP.PointOnS2());
 #endif
 

@@ -404,7 +404,7 @@ void IntPatch_ALineToWLine::MakeWLine(const Handle(IntPatch_ALine)& theALine,
       std::cout << " +++ DUMP ALine (begin) +++++" << std::endl;
       const Standard_Integer NbSamples = 20;
       const Standard_Real aStep = (theLPar - theFPar) / NbSamples;
-      char* name = new char[100];
+      char name[100];
       
       for (Standard_Integer ii = 0; ii <= NbSamples; ii++)
       {
@@ -412,7 +412,7 @@ void IntPatch_ALineToWLine::MakeWLine(const Handle(IntPatch_ALine)& theALine,
         const gp_Pnt aPP(theALine->Value(aPrm));
         std::cout << "vertex v" << ii << " " << aPP.X() << " " << aPP.Y() << " " << aPP.Z() << std::endl;
 
-        sprintf(name, "p%d_%d", ii, ind);
+        Snprintf(name, "p%d_%d", ii, ind);
         Draw::Set(name, aPP);
       }
       std::cout << " --- DUMP ALine (end) -----" << std::endl;

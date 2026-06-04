@@ -60,10 +60,8 @@ static void Drawsect(const TheSurface& surf,
     (TP,TW,TK,TMul,hd);
   IndexOfSection++;
 
-  //POP pour NT
-  //char name[100];
-  char* name = new char[100];
-  sprintf(name,"%s_%d","Section",IndexOfSection);
+  char name[100];
+  Snprintf(name,"%s_%d","Section",IndexOfSection);
 #ifdef DRAW
   DrawTrSurf::Set(name,sect);
 #endif

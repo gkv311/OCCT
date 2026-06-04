@@ -257,13 +257,13 @@ void Bisector_Bisec::Perform(const Handle(Geom2d_Curve)& afirstcurve   ,
 #ifdef DRAW  
   if(Affich) 
   {
-    sprintf( name, "c1_%d", ++nbb );
+    Snprintf( name, "c1_%d", ++nbb );
     DrawTrSurf::Set( name, afirstcurve );
-    sprintf( name, "c2_%d", nbb );
+    Snprintf( name, "c2_%d", nbb );
     DrawTrSurf::Set( name, asecondcurve );
-    sprintf( name, "p%d", nbb );
+    Snprintf( name, "p%d", nbb );
     DrawTrSurf::Set( name, apoint );
-    sprintf( name, "b%d", nbb );
+    Snprintf( name, "b%d", nbb );
     DrawTrSurf::Set( name, thebisector );
   }
 #endif
@@ -405,13 +405,13 @@ void Bisector_Bisec::Perform(const Handle(Geom2d_Curve)& afirstcurve  ,
 #ifdef DRAW
   if(Affich)
   {
-  sprintf( name, "c1_%d", ++nbb );
+  Snprintf( name, "c1_%d", ++nbb );
   DrawTrSurf::Set( name, afirstcurve );
-  sprintf( name, "c2_%d", nbb );
+  Snprintf( name, "c2_%d", nbb );
   DrawTrSurf::Set( name, asecondpoint->Pnt2d() );
-  sprintf( name, "p%d", nbb );
+  Snprintf( name, "p%d", nbb );
   DrawTrSurf::Set( name, apoint );
-  sprintf( name, "b%d", nbb );
+  Snprintf( name, "b%d", nbb );
   DrawTrSurf::Set( name, thebisector );
   }
 #endif
@@ -549,13 +549,13 @@ void Bisector_Bisec::Perform(const Handle(Geom2d_Point)& afirstpoint  ,
 #ifdef DRAW
   if(Affich)
   {
-  sprintf( name, "c1_%d", ++nbb );
+  Snprintf( name, "c1_%d", ++nbb );
   DrawTrSurf::Set( name, afirstpoint->Pnt2d() );
-  sprintf( name, "c2_%d", nbb );
+  Snprintf( name, "c2_%d", nbb );
   DrawTrSurf::Set( name, asecondcurve );
-  sprintf( name, "p%d", nbb );
+  Snprintf( name, "p%d", nbb );
   DrawTrSurf::Set( name, apoint );
-  sprintf( name, "b%d", nbb );
+  Snprintf( name, "b%d", nbb );
   DrawTrSurf::Set( name, thebisector );
   }
 #endif
@@ -599,13 +599,13 @@ void Bisector_Bisec::Perform(const Handle(Geom2d_Point)& afirstpoint  ,
 #ifdef DRAW
   if(Affich)
   {
-  sprintf( name, "c1_%d", ++nbb );
+  Snprintf( name, "c1_%d", ++nbb );
   DrawTrSurf::Set( name, afirstpoint->Pnt2d() );
-  sprintf( name, "c2_%d", nbb );
+  Snprintf( name, "c2_%d", nbb );
   DrawTrSurf::Set( name, asecondpoint->Pnt2d() );
-  sprintf( name, "p%d", nbb );
+  Snprintf( name, "p%d", nbb );
   DrawTrSurf::Set( name, apoint );
-  sprintf( name, "b%d", nbb );
+  Snprintf( name, "b%d", nbb );
   DrawTrSurf::Set( name, thebisector );
   }
 #endif

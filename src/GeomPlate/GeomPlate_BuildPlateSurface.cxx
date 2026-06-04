@@ -301,7 +301,7 @@ Handle(Geom2d_Curve)  GeomPlate_BuildPlateSurface::ProjectCurve(const Handle(Ada
 #ifdef DRAW
  if (Affich) {
    char name[256];
-   sprintf(name,"proj_%d",++NbProj);
+   Snprintf(name,"proj_%d",++NbProj);
    DrawTrSurf::Set(name, Curve2d);
  }
 #endif
@@ -1654,7 +1654,7 @@ void GeomPlate_BuildPlateSurface::ComputeSurfInit(const Message_ProgressRange& t
 #ifdef DRAW
       if (Affich) {
 	char name[256];
-	sprintf(name,"planinit_%d",NbPlan+1);
+	Snprintf(name,"planinit_%d",NbPlan+1);
 	DrawTrSurf::Set(name, mySurfInit);
       }
 #endif
@@ -1752,7 +1752,7 @@ void GeomPlate_BuildPlateSurface::ComputeSurfInit(const Message_ProgressRange& t
 #ifdef DRAW
   if (Affich) {
     char name[256];
-    sprintf(name,"surfinit_%d",++NbPlan);
+    Snprintf(name,"surfinit_%d",++NbPlan);
     DrawTrSurf::Set(name, mySurfInit);
   }
 #endif
@@ -1969,7 +1969,7 @@ Intersect(Handle(GeomPlate_HArray1OfSequenceOfReal)& PntInter,
 		      {
 			Handle(Draw_Marker3D) mark = new (Draw_Marker3D)(P1, Draw_X, Draw_vert);
                         char name[256];
-			sprintf(name,"mark_%d",++NbMark);
+			Snprintf(name,"mark_%d",++NbMark);
 			Draw::Set(name, mark); 
 		      }
 #endif	
@@ -2454,7 +2454,7 @@ VerifSurface(const Standard_Integer NbBoucle)
 	      Handle(Draw_Marker3D) mark = 
 		new (Draw_Marker3D)(P, Draw_X, Draw_orange);
               char name[256];
-	      sprintf(name,"mark_%d",++NbMark);
+	      Snprintf(name,"mark_%d",++NbMark);
 	      Draw::Set(name, mark);
 	      if (!LinCont->ProjectedCurve().IsNull())
                 P2d = LinCont->ProjectedCurve()->Value(U);
@@ -2464,7 +2464,7 @@ VerifSurface(const Standard_Integer NbBoucle)
                  else    
 		    P2d = ProjectPoint(P);
               }
-	      sprintf(name,"mark2d_%d",++NbMark);
+	      Snprintf(name,"mark2d_%d",++NbMark);
 	      Handle(Draw_Marker2D) mark2d = 
 		new (Draw_Marker2D)(P2d, Draw_X, Draw_orange);
 	      Draw::Set(name, mark2d);
@@ -2485,7 +2485,7 @@ VerifSurface(const Standard_Integer NbBoucle)
 		Handle(Draw_Marker3D) mark = 
 		  new Draw_Marker3D(P, Draw_X, Draw_or);
                 char name[256];
-		sprintf(name,"mark_%d",++NbMark);
+		Snprintf(name,"mark_%d",++NbMark);
 		Draw::Set(name, mark);
 	      }
 #endif

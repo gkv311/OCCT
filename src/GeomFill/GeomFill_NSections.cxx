@@ -650,7 +650,7 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
   if (Affich) {
 #ifdef DRAW
     char name[256];
-    sprintf(name,"NS_Surf_%d",NbSurf);
+    Snprintf(name,"NS_Surf_%d",NbSurf);
     DrawTrSurf::Set(name,BS);
     std::cout<<std::endl<<"RESULTAT de ComputeSurface : NS_Surf_"<<NbSurf<<std::endl<<std::endl;
 #endif

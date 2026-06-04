@@ -67,16 +67,14 @@ static void Drawsect(const TheSurface& surf1,
   Handle(Geom_BSplineCurve) sect = new Geom_BSplineCurve
     (TP,TW,TK,TMul,hd);
  
-  //POP pour NT
-  //char name[100];
-  char* name = new char[100];
+  char name[100];
   if ((State==Blend_StepTooLarge) ||(State==Blend_SamePoints)) {
     IndexOfRejection ++;
-    sprintf(name,"%s_%d","Rejection",IndexOfRejection);
+    Snprintf(name,"%s_%d","Rejection",IndexOfRejection);
   }
   else {
     IndexOfSection++;
-    sprintf(name,"%s_%d","Section",IndexOfSection);
+    Snprintf(name,"%s_%d","Section",IndexOfSection);
   }
 #ifdef DRAW
   Handle(DrawTrSurf_BSplineCurve) BS 
