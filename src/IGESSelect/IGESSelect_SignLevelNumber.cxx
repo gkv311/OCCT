@@ -56,8 +56,8 @@ static TCollection_AsciiString laval;
     }
 //    if (level < 0) return (thecountmode ? " NO LEVEL" : "/0/");
     laval.Clear();
-    if (thecountmode) sprintf (carlev,"%7d",level);
-    else sprintf (carlev,"/%d/",level);
+    if (thecountmode) Snprintf(carlev,"%7d",level);
+    else Snprintf(carlev,"/%d/",level);
     laval.AssignCat (carlev);
   }
   else if (thecountmode) return "LEVEL LIST";
@@ -66,7 +66,7 @@ static TCollection_AsciiString laval;
     laval.Clear();
     laval.AssignCat("LIST:/");
     for (i = 1; i <= nblev; i ++) {
-      sprintf(carlev,"%d/",levelist->LevelNumber(i));
+      Snprintf(carlev,"%d/",levelist->LevelNumber(i));
       laval.AssignCat(carlev);
     }
   }

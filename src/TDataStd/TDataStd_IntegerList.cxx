@@ -358,7 +358,7 @@ Standard_OStream& TDataStd_IntegerList::Dump (Standard_OStream& anOS) const
 {  
   anOS << "\nIntegerList: ";
   Standard_Character sguid[Standard_GUID_SIZE_ALLOC];
-  myID.ToCString(sguid);
+  myID.ToCString(sguid, sizeof(sguid));
   anOS << sguid;
   anOS << std::endl;
   return anOS;

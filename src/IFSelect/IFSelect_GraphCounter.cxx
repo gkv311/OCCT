@@ -58,7 +58,7 @@ IFSelect_GraphCounter::IFSelect_GraphCounter
     case 8: Add (ent,"8"); break;
     case 9: Add (ent,"9"); break;
     default :
-      sprintf (val,"%d",n);
+      Snprintf(val,"%d",n);
       Add (ent,val);
       break;
     }

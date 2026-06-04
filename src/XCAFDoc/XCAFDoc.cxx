@@ -485,7 +485,7 @@ TCollection_AsciiString XCAFDoc::AttributeInfo (const Handle(TDF_Attribute)& the
     Handle(XCAFDoc_Color) val = Handle(XCAFDoc_Color)::DownCast ( theAtt );
     Quantity_ColorRGBA C = val->GetColorRGBA();
     char string[260];
-    Sprintf ( string, "%s (%g, %g, %g, %g)", C.GetRGB().StringName ( C.GetRGB().Name() ),
+    Snprintf ( string, "%s (%g, %g, %g, %g)", C.GetRGB().StringName ( C.GetRGB().Name() ),
       C.GetRGB().Red(), C.GetRGB().Green(), C.GetRGB().Blue(), C.Alpha());
     anInfo = string;
   }

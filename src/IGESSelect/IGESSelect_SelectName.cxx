@@ -66,7 +66,7 @@ IGESSelect_SelectName::IGESSelect_SelectName ()    {  }
 {
   char labl [50];
   if (!thename.IsNull()) {
-    sprintf (labl,"IGES Entity, Name : %s",thename->ToCString());
+    Snprintf(labl,"IGES Entity, Name : %s",thename->ToCString());
     return TCollection_AsciiString(labl);
   }
   else  return TCollection_AsciiString ("IGES Entity, Name : (undefined)");

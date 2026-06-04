@@ -108,7 +108,7 @@ Standard_CString  XSControl_SignTransferStatus::Value
       }
       bnd = bnd->NextResult();
     }
-//    if (stat == 11) sprintf(themes,"Result:%s",binder->ResultTypeName());
+//    if (stat == 11) Snprintf(themes,"Result:%s",binder->ResultTypeName());
     if (stat == 12) themes().AssignCat("/Warning");
     if (stat == 13) themes().AssignCat("/Fail");
   }

@@ -166,7 +166,8 @@ char * LDOM_CharReference::Encode (const char* theSrc, Standard_Size& theLen,
   if (!aCount)
     theLen = (endSrc - theSrc);
   else {
-    char * ptrDest = new char [(endSrc - theSrc) + aCount * 5 + 1];
+    const size_t aBufLen = (endSrc - theSrc) + aCount * 5 + 1;
+    char * ptrDest = new char[aBufLen];
     aDest = ptrDest;
     for (ptrSrc = theSrc; ptrSrc < endSrc; ptrSrc++) {
       const unsigned int iSrc = (unsigned int ) *(const unsigned char* )ptrSrc;
@@ -174,7 +175,7 @@ char * LDOM_CharReference::Encode (const char* theSrc, Standard_Size& theLen,
       if (aCode == NORMAL_C)                    // normal (regular) character
         * ptrDest++ = * ptrSrc;
       else if (aCode == CHAR_REF) {             // character reference
-        sprintf (ptrDest, "&#x%02x;", iSrc);
+        snprintf (ptrDest, aBufLen - (ptrDest - aDest), "&#x%02x;", iSrc);
         ptrDest += 6;
       } else                                    // predefined entity reference
         if (isAttribute == Standard_False && aCode == ENTI_QUOT)

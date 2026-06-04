@@ -737,7 +737,7 @@ void XmlMDataStd_NamedDataDriver::Paste(const Handle(TDF_Attribute)& theSource,
       Standard_Integer j = anArr1.Lower();
       for(;;) {
         char aValueChar[32];
-        Sprintf(aValueChar, "%.15g", anArr1.Value(j));
+        Snprintf(aValueChar, "%.15g", anArr1.Value(j));
         TCollection_AsciiString aValueStr3(aValueChar);
         aValueStr2 += aValueStr3;
         if (j >= anArr1.Upper()) break;

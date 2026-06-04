@@ -315,7 +315,7 @@ Standard_OStream& TDataStd_IntegerArray::Dump (Standard_OStream& anOS) const
   }
   anOS << " Delta is " << (myIsDelta ? "ON":"OFF");
   Standard_Character sguid[Standard_GUID_SIZE_ALLOC];
-  myID.ToCString(sguid);
+  myID.ToCString(sguid, sizeof(sguid));
   anOS << sguid;
   anOS << std::endl;
 

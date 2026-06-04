@@ -253,7 +253,7 @@ TopoDS_Shape  IGESToBRep_TopoCurve::TransferCompositeCurveGeneral(const Handle(I
       Message_Msg Msg1045("IGES_1045"); //"The entities of the CompositeCurve are the same: %d & %d"
       Msg1045.Arg(i);
       SendWarning(start,Msg1045);
-      //sprintf (mess, "The entities of the CompositeCurve are the same: %d & %d", i-1, i);
+      //Snprintf (mess, "The entities of the CompositeCurve are the same: %d & %d", i-1, i);
       //AddWarning (start, mess);
       continue;
     }
@@ -298,7 +298,7 @@ TopoDS_Shape  IGESToBRep_TopoCurve::TransferCompositeCurveGeneral(const Handle(I
 	    Msg1050.Arg(i);
 	    SendWarning(start,Msg1050);
 	    
-	    //  sprintf(mess, "Curve %dd needs to be reversed : %d", ( is2d ? 2 : 3 ), i);//:13
+	    //  Snprintf(mess, "Curve %dd needs to be reversed : %d", ( is2d ? 2 : 3 ), i);//:13
 	  //  AddWarning(start, mess);
 	  }
 	  if (distmin > precision) {

@@ -574,7 +574,7 @@ Handle(TCollection_HAsciiString) STEPConstruct_ContextTool::GetProductName () co
   for ( Standard_Integer i=1; i <= myLevel.Length(); i++ ) {
     PdtName->AssignCat ((char*)( i >1 ? "." : " " ));
     char buf[100];
-    sprintf ( buf, "%d", myLevel.Value(i) );
+    Snprintf( buf, "%d", myLevel.Value(i) );
     PdtName->AssignCat ( buf );
   }
 

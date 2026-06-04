@@ -131,7 +131,7 @@ VrmlData_ErrorStatus VrmlData_Box::Write (const char * thePrefix) const
   if (OK (aStatus, Scene().WriteLine (thePrefix, header, GlobalIndent())))
   {
     char buf[128];
-    Sprintf (buf, "size %.12g %.12g %.12g", mySize.X(), mySize.Y(), mySize.Z());
+    Snprintf (buf, "size %.12g %.12g %.12g", mySize.X(), mySize.Y(), mySize.Z());
     Scene().WriteLine (buf);
     aStatus = WriteClosing();
   }
@@ -233,12 +233,12 @@ VrmlData_ErrorStatus VrmlData_Cone::Write (const char * thePrefix) const
   {
     char buf[128];
     if ((myBottomRadius - 1.)*(myBottomRadius - 1.) > Precision::Confusion()) {
-      Sprintf (buf, "bottomRadius %.12g", myBottomRadius);
+      Snprintf(buf, "bottomRadius %.12g", myBottomRadius);
       aStatus = Scene().WriteLine (buf);
     }
     if (OK(aStatus) &&
         (myHeight - 2.)*(myHeight - 2.) > Precision::Confusion()) {
-      Sprintf (buf, "height       %.12g", myHeight);
+      Snprintf(buf, "height       %.12g", myHeight);
       aStatus = Scene().WriteLine (buf);
     }
     if (OK(aStatus) && myHasBottom == Standard_False)
@@ -367,12 +367,12 @@ VrmlData_ErrorStatus VrmlData_Cylinder::Write (const char * thePrefix) const
   {
     char buf[128];
     if ((myRadius - 1.)*(myRadius - 1.) > Precision::Confusion()) {
-      Sprintf (buf, "radius   %.12g", myRadius);
+      Snprintf(buf, "radius   %.12g", myRadius);
       aStatus = Scene().WriteLine (buf);
     }
     if (OK(aStatus) &&
         (myHeight - 2.)*(myHeight - 2.) > Precision::Confusion()) {
-      Sprintf (buf, "height   %.12g", myHeight);
+      Snprintf(buf, "height   %.12g", myHeight);
       aStatus = Scene().WriteLine (buf);
     }
     if (OK(aStatus) && myHasBottom == Standard_False)
@@ -468,7 +468,7 @@ VrmlData_ErrorStatus VrmlData_Sphere::Write (const char * thePrefix) const
   if (OK (aStatus, Scene().WriteLine (thePrefix, header, GlobalIndent())))
   {
     char buf[128];
-    Sprintf (buf, "radius   %.12g", myRadius);
+    Snprintf(buf, "radius   %.12g", myRadius);
     Scene().WriteLine (buf);
     aStatus = WriteClosing();
   }

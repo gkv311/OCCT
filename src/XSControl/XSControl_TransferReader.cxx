@@ -1082,24 +1082,25 @@ const Handle(TopTools_HSequenceOfShape) & XSControl_TransferReader::ShapeResultL
 //function : 
 //purpose  : 
 //=======================================================================
-static Standard_Integer BinderStatus (const Handle(Transfer_Binder)& binder, char* mess)
+template<size_t messSize>
+static Standard_Integer BinderStatus (const Handle(Transfer_Binder)& binder, char(&mess)[messSize])
 {
   Standard_Integer stat = 0;
   mess[0] = '\0';
-  if (binder.IsNull())  {  sprintf (mess,"(no data recorded)");  return 0;  }
+  if (binder.IsNull())  {  Snprintf (mess, messSize, "(no data recorded)");  return 0;  }
   Interface_CheckStatus cst = binder->Check()->Status();
   if (cst == Interface_CheckOK) {
     stat = 11;
-    if (binder->HasResult()) sprintf(mess,"%s",binder->ResultTypeName());
-    else { sprintf(mess,"(no result)"); stat = 1; }
+    if (binder->HasResult()) Snprintf (mess, messSize, "%s", binder->ResultTypeName());
+    else { Snprintf(mess, messSize,"(no result)"); stat = 1; }
   } else if (cst == Interface_CheckWarning) {
     stat = 12;
-    if (binder->HasResult()) sprintf(mess,"%s  (+ warning)",binder->ResultTypeName());
-    else { sprintf(mess,"(warning)"); stat = 2; }
+    if (binder->HasResult()) Snprintf (mess, messSize, "%s  (+ warning)", binder->ResultTypeName());
+    else { Snprintf(mess, messSize,"(warning)"); stat = 2; }
   } else if (cst == Interface_CheckFail) {
     stat = 13;
-    if (binder->HasResult()) sprintf(mess,"%s  (+ FAIL)",binder->ResultTypeName());
-    else { sprintf(mess,"(FAIL)"); stat = 3; }
+    if (binder->HasResult()) Snprintf (mess, messSize, "%s  (+ FAIL)", binder->ResultTypeName());
+    else { Snprintf(mess, messSize, "(FAIL)"); stat = 3; }
   }
   return stat;
 }
@@ -1257,7 +1258,6 @@ void XSControl_TransferReader::PrintStatsOnList(const Handle(Transfer_TransientP
 	  TCollection_AsciiString mest (model->TypeName(ent,Standard_False));
 	  mest.AssignCat("	-> ");
 	  mest.AssignCat(mess);
-          //sprintf(mest,"%s	-> %s",model->TypeName(ent,Standard_False),mess);
 	  counter->Add (ent,mest.ToCString());
 	}
       }

@@ -422,10 +422,9 @@ void LDOM_XmlWriter::WriteAttribute (Standard_OStream& theOStream, const LDOM_No
       myABuffer    = new char [aLength+1];
       myABufferLen = aLength;
     }
-    sprintf (myABuffer, "%c%s%c%c%d%c", chSpace, aName, chEqual, chDoubleQuote, anIntValue, chDoubleQuote);
+    Snprintf (myABuffer, myABufferLen + 1, "%c%s%c%c%d%c",
+              chSpace, aName, chEqual, chDoubleQuote, anIntValue, chDoubleQuote);
     aLength = strlen (myABuffer);
-
-  
   }
   else // String attribute value
   {
@@ -453,8 +452,9 @@ void LDOM_XmlWriter::WriteAttribute (Standard_OStream& theOStream, const LDOM_No
       myABufferLen = aLength;
     }
 
-    sprintf (myABuffer, "%c%s%c%c%s%c", chSpace, aName, chEqual, chDoubleQuote, encStr, chDoubleQuote);
-    
+    Snprintf (myABuffer, myABufferLen + 1, "%c%s%c%c%s%c",
+              chSpace, aName, chEqual, chDoubleQuote, encStr, chDoubleQuote);
+
     if (encStr != aValue)
     {
       delete [] encStr;

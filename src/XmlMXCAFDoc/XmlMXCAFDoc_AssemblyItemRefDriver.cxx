@@ -100,8 +100,8 @@ void XmlMXCAFDoc_AssemblyItemRefDriver::Paste(const Handle(TDF_Attribute)& theSo
   if (aThis->IsGUID())
   {
     Standard_GUID aGUID = aThis->GetGUID();
-    Standard_Character aGUIDStr[Standard_GUID_SIZE + 1];
-    aGUID.ToCString(aGUIDStr);
+    Standard_Character aGUIDStr[Standard_GUID_SIZE_ALLOC];
+    aGUID.ToCString(aGUIDStr, sizeof(aGUIDStr));
     aGUIDStr[Standard_GUID_SIZE] = '\0';
     XmlObjMgt_DOMString anAttrGUID(aGUIDStr);
     theTarget.Element().setAttribute(::AttrGUID(), anAttrGUID);

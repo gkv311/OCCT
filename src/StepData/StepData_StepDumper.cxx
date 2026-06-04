@@ -158,7 +158,7 @@ Standard_Boolean  StepData_StepDumper::Dump
       S <<" (proper ident):  num:#ident  num:#ident  ..."<<std::endl;
       for (i = 1; i <= nb; i ++)  {
 	if (ids.Value(i) <= 0 || ids.Value(i) == i) continue;
-	sprintf (unid,"%d:#%d",i,ids.Value(i));
+	Snprintf(unid,"%d:#%d",i,ids.Value(i));
 	nbc = (Standard_Integer) strlen (unid);  nbr = ((80-nbc) %4) +2;
 	nbl +=  nbc;
 	if (nbl+nbr0 > 79) { nbl  = nbc;  S <<std::endl; }

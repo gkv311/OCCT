@@ -445,7 +445,7 @@ static void take_time (const Standard_Integer isReset, const char * aHeader,
   if (isReset) tmbuf0 = tmbuf;
   else {
     char take_tm_buf [64];
-    Sprintf (take_tm_buf, "%9.2f s ++++",
+    Snprintf(take_tm_buf, "%9.2f s ++++",
              double(tmbuf.time - tmbuf0.time) +
              double(tmbuf.millitm - tmbuf0.millitm)/1000.);
     aMessage += take_tm_buf;

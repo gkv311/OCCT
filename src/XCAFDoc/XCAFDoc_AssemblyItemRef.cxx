@@ -223,8 +223,8 @@ void XCAFDoc_AssemblyItemRef::SetGUID(const Standard_GUID& theAttrGUID)
 {
   Backup();
   myExtraRef = ExtraRef_AttrGUID;
-  Standard_Character aGUIDStr[Standard_GUID_SIZE + 1];
-  theAttrGUID.ToCString(aGUIDStr); 
+  Standard_Character aGUIDStr[Standard_GUID_SIZE_ALLOC];
+  theAttrGUID.ToCString(aGUIDStr, sizeof(aGUIDStr));
   aGUIDStr[Standard_GUID_SIZE] = '\0';
   myExtraId.Clear();
   myExtraId.AssignCat(aGUIDStr);

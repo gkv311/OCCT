@@ -164,7 +164,7 @@ void  IGESSolid_ToolBooleanTree::OwnCheck
     if (!ent->Operand(i).IsNull()) continue;
     if (ent->Operation(i) < 1 || ent->Operation(i) > 3) {
       char mess[80];
-      sprintf(mess,"Item no. %d Incorrect",i);
+      Snprintf(mess,"Item no. %d Incorrect",i);
       ach->AddFail(mess);
     }
   }

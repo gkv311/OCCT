@@ -466,7 +466,7 @@ VrmlData_ErrorStatus VrmlData_IndexedFaceSet::Write
       aStatus = aScene.WriteLine ("convex      FALSE");
     if (OK(aStatus) && CreaseAngle() > Precision::Confusion()) {
       char buf[64];
-      Sprintf (buf, "%.9g", CreaseAngle());
+      Snprintf(buf, "%.9g", CreaseAngle());
       aStatus = aScene.WriteLine ("creaseAngle", buf);
     }
 

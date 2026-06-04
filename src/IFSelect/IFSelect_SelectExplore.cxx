@@ -95,7 +95,7 @@ IFSelect_SelectExplore::IFSelect_SelectExplore (const Standard_Integer level)
   if (thelevel == 0) labl.AssignCat("(Recursive)");
   else if (thelevel > 0) {
     char lab[30];
-    sprintf (lab,"(Level %d)",thelevel);
+    Snprintf(lab,"(Level %d)",thelevel);
     labl.AssignCat(lab);
   }
   labl.AssignCat(ExploreLabel());

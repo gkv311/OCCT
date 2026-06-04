@@ -414,7 +414,7 @@ void  IGESDimen_ToolNewGeneralNote::OwnCheck
       if (ent->NbCharacters(i) != ent->Text(i)->Length())
 	{
 	  char mess[80];
-	  sprintf(mess,"%d : Number of Characters != Length of Text String",i);
+	  Snprintf(mess,"%d : Number of Characters != Length of Text String",i);
           ach->AddFail(mess);
 	}
 
@@ -423,7 +423,7 @@ void  IGESDimen_ToolNewGeneralNote::OwnCheck
 	  ((charcode < 1001) || (charcode > 1003)))
 	{
 	  char mess[80];
-	  sprintf(mess, "%d : Character Set Code != 1, 1001, 1002, 1003",i);
+	  Snprintf(mess, "%d : Character Set Code != 1, 1001, 1002, 1003",i);
           ach->AddFail(mess);
 	}
 
@@ -431,7 +431,7 @@ void  IGESDimen_ToolNewGeneralNote::OwnCheck
       if ((chardisp < 0) || (chardisp > 1))
 	{
 	  char mess[80];
-	  sprintf(mess, "%d : Character Display != 0, 1",i);
+	  Snprintf(mess, "%d : Character Display != 0, 1",i);
           ach->AddFail(mess);
 	}
 
@@ -439,7 +439,7 @@ void  IGESDimen_ToolNewGeneralNote::OwnCheck
       if ((mflag < 0) || (mflag > 2))
 	{
 	  char mess[80];
-	  sprintf(mess, "%d : Mirror flag != 0, 1, 2",i);
+	  Snprintf(mess, "%d : Mirror flag != 0, 1, 2",i);
           ach->AddFail(mess);
 	}
 
@@ -447,7 +447,7 @@ void  IGESDimen_ToolNewGeneralNote::OwnCheck
       if ((rflag < 0) || (rflag > 1))
 	{
 	  char mess[80];
-	  sprintf(mess, "%d : Rotate flag != 0, 1",i);
+	  Snprintf(mess, "%d : Rotate flag != 0, 1",i);
 	  ach->AddFail(mess);
 	}
     }

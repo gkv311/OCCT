@@ -508,7 +508,7 @@ Standard_Boolean IGESData_ParamReader::ReadBoolean
   Standard_Integer flag = atoi (FP.CValue());
   if (flag != 0 && flag != 1) {
     char ssem[100];
-    sprintf(ssem," : Value is not 0/1, but %s",FP.CValue());
+    Snprintf(ssem," : Value is not 0/1, but %s",FP.CValue());
     if (exact) {
       AddFail (mess,ssem," : Value is not 0/1, but %s");
       thelast = Standard_True;
@@ -922,7 +922,7 @@ Standard_Boolean IGESData_ParamReader::ReadInts
       val->SetValue (ind,0);    ind ++;    // DEFAULT : rien a dire
     } else {
       char ssem[100];
-      sprintf(ssem," : not an Integer, rank %d",i);
+      Snprintf(ssem," : not an Integer, rank %d",i);
       AddFail (mess,ssem," : not an Integer, rank %d");
       return Standard_False;
     }
@@ -1158,11 +1158,11 @@ Standard_Boolean IGESData_ParamReader::ReadEnts
   //  Messages ?
   char mest[80];
   if (nbneg > 0) {
-    sprintf(mest,"Skipped Negative Pointer(s), count %d",nbneg);
+    Snprintf (mest,"Skipped Negative Pointer(s), count %d",nbneg);
     AddWarning (mest,"Skipped Negative Pointer(s), count %d");
   }
   if (nbnul > 0) {
-    sprintf(mest,"Skipped Null Type Entity(ies), count %d",nbnul);
+    Snprintf (mest,"Skipped Null Type Entity(ies), count %d",nbnul);
     AddWarning (mest,"Skipped Null Type Entity(ies), count %d");
   }
   return Standard_True;
@@ -1259,7 +1259,7 @@ Standard_Boolean IGESData_ParamReader::ReadingReal (const Standard_Integer num,
       if (testconv > 0) {
      //   char ssem[100];
         pbrealint = num;
-     //   sprintf(ssem,": Integer converted to Real, 1st rank=%d",num);
+     //   Snprintf (ssem,": Integer converted to Real, 1st rank=%d",num);
      //   AddWarning (mess,ssem,"At least one Integer converted to Real, 1st rank=%d");
       }
     }
@@ -1285,7 +1285,7 @@ Standard_Boolean IGESData_ParamReader::ReadingReal (const Standard_Integer num,
       if (testconv > 0) {
        // char ssem[100];
         pbrealform = num;
-      //  sprintf(ssem,"Real with no decimal point (added), 1st rank=%d",num);
+      //  Snprintf (ssem,"Real with no decimal point (added), 1st rank=%d",num);
       //  AddWarning (mess,ssem,"Real with no decimal point (added), 1st rank=%d");
       }
     }
@@ -1299,7 +1299,7 @@ Standard_Boolean IGESData_ParamReader::ReadingReal (const Standard_Integer num,
     val = 0.0;    // DEFAULT
   } else {
    // char ssem[100];
-  //  sprintf(ssem,": not given as Real, rank %d",num);
+  //  Snprintf (ssem,": not given as Real, rank %d",num);
   //  AddFail (mess,ssem,": not given as Real, rank %d");
   /*  TCollection_AsciiString mess = amsg.Value();
     if ((mess.Search("ter %d"))||(mess.Search("tre %d")))
@@ -1327,7 +1327,7 @@ Standard_Boolean IGESData_ParamReader::ReadingReal
       if (testconv > 0) {
 	char ssem[100];
 	pbrealint = num;
-	sprintf(ssem,": Integer converted to Real, 1st rank=%d",num);
+  Snprintf (ssem,": Integer converted to Real, 1st rank=%d",num);
 	AddWarning (mess,ssem,"At least one Integer converted to Real, 1st rank=%d");
       }
     }
@@ -1353,7 +1353,7 @@ Standard_Boolean IGESData_ParamReader::ReadingReal
       if (testconv > 0) {
 	char ssem[100];
 	pbrealform = num;
-	sprintf(ssem,"Real with no decimal point (added), 1st rank=%d",num);
+  Snprintf (ssem,"Real with no decimal point (added), 1st rank=%d",num);
 	AddWarning (mess,ssem,"Real with no decimal point (added), 1st rank=%d");
       }
     }
@@ -1368,7 +1368,7 @@ Standard_Boolean IGESData_ParamReader::ReadingReal
   } else {
     val = 0.0;    // DEFAULT
     char ssem[100];
-    sprintf(ssem,": not given as Real, rank %d",num);
+    Snprintf (ssem,": not given as Real, rank %d",num);
     AddFail (mess,ssem,": not given as Real, rank %d");
     return Standard_False;
   }

@@ -243,7 +243,7 @@ Standard_OStream& TDataStd_Real::Dump (Standard_OStream& anOS) const
   Standard_ENABLE_DEPRECATION_WARNINGS
   anOS << myValue; 
   Standard_Character sguid[Standard_GUID_SIZE_ALLOC];
-  myID.ToCString(sguid);
+  myID.ToCString(sguid, sizeof(sguid));
   anOS << sguid;
   return anOS;
 }

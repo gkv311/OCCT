@@ -38,7 +38,7 @@ static char theval[10];
   j = igesent->SubordinateStatus ();
   k = igesent->UseFlag ();
   l = igesent->HierarchyStatus ();
-  sprintf (theval,"%d,%d,%d,%d",i,j,k,l);
+  Snprintf(theval,"%d,%d,%d,%d",i,j,k,l);
   return theval;
 }
 

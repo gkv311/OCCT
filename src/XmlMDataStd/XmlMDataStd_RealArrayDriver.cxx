@@ -197,7 +197,7 @@ void XmlMDataStd_RealArrayDriver::Paste (const Handle(TDF_Attribute)& theSource,
       Standard_Integer i(aL), nbChars(0);
       while (i <= anU)
       {
-        nbChars += Sprintf(buf, "%.17g ", realArray.Value(i++)) + 1/*a space*/;
+        nbChars += Snprintf(buf, "%.17g ", realArray.Value(i++)) + 1/*a space*/;
       }
       if (nbChars)
         str.Allocate(nbChars);
@@ -207,7 +207,7 @@ void XmlMDataStd_RealArrayDriver::Paste (const Handle(TDF_Attribute)& theSource,
   Standard_Integer i = aL;
   for (;;) 
   {
-    iChar += Sprintf(&(str[iChar]), "%.17g ", realArray.Value(i));
+    iChar += Snprintf(&(str[iChar]), str.Size() - iChar, "%.17g ", realArray.Value(i));
     if (i >= anU)
       break;
     ++i;
@@ -222,8 +222,7 @@ void XmlMDataStd_RealArrayDriver::Paste (const Handle(TDF_Attribute)& theSource,
   if(aRealArray->ID() != TDataStd_RealArray::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    aRealArray->ID().ToCString (pGuidStr);
+    aRealArray->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

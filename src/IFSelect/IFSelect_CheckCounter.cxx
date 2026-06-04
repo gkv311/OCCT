@@ -67,7 +67,7 @@ void  IFSelect_CheckCounter::Analyse(const Interface_CheckIterator& list,
 {
   Standard_Integer i,nb,num, nbe = (model.IsNull() ? 0 : model->NbEntities());
   char mess[300];
-  sprintf (mess,"Check %s",list.Name());
+  Snprintf(mess,"Check %s",list.Name());
   SetName (mess);
   for (list.Start(); list.More(); list.Next()) {
     num = list.Number();
@@ -84,15 +84,15 @@ void  IFSelect_CheckCounter::Analyse(const Interface_CheckIterator& list,
 	Interface_InterfaceModel::ClassName(ent->DynamicType()->Name());
     }
     for (i = 1; i <= nb; i ++) {
-      if (ent.IsNull())  sprintf(mess,"F: %s",check->CFail(i,original));
-      else sprintf(mess,"F:%s: %s",tystr,check->CFail(i,original));
+      if (ent.IsNull())  Snprintf(mess,"F: %s",check->CFail(i,original));
+      else Snprintf(mess,"F:%s: %s",tystr,check->CFail(i,original));
       Add (ent,mess);
     }
     nb = 0;
     if (!failsonly) nb = check->NbWarnings();
     for (i = 1; i <= nb; i ++) {
-      if (ent.IsNull())  sprintf(mess,"W: %s",check->CWarning(i,original));
-      else sprintf(mess,"W:%s: %s",tystr,check->CWarning(i,original));
+      if (ent.IsNull())  Snprintf(mess,"W: %s",check->CWarning(i,original));
+      else Snprintf(mess,"W:%s: %s",tystr,check->CWarning(i,original));
       Add (ent,mess);
     }
   }

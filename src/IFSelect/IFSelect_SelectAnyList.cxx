@@ -99,10 +99,10 @@ void  IFSelect_SelectAnyList::SetRange
   if (HasLower())  rankfrom = LowerValue();
   Standard_Integer rankto   = 0;
   if (HasUpper())  rankto   = UpperValue();
-  if (rankfrom == rankto) sprintf(lab," (no %d)",rankfrom);
-  else if (rankfrom == 0) sprintf(lab," (-> %d)",rankfrom);
-  else if (rankto   == 0) sprintf(lab," (%d ->)",rankto);
-  else                    sprintf(lab," (%d -> %d)",rankfrom,rankto);
+  if (rankfrom == rankto) Snprintf(lab," (no %d)",rankfrom);
+  else if (rankfrom == 0) Snprintf(lab," (-> %d)",rankfrom);
+  else if (rankto   == 0) Snprintf(lab," (%d ->)",rankto);
+  else                    Snprintf(lab," (%d -> %d)",rankfrom,rankto);
 
   TCollection_AsciiString labl("In List ");
   labl.AssignCat(ListLabel());

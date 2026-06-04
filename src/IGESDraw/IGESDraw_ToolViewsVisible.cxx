@@ -207,7 +207,7 @@ void IGESDraw_ToolViewsVisible::OwnCheck
   }
   if (!res) return;
   char mess[80];
-  sprintf(mess,"Mismatch for %d Entities displayed",res);
+  Snprintf(mess,"Mismatch for %d Entities displayed",res);
   ach->AddFail(mess,"Mismatch for %d Entities displayed");
 }
 

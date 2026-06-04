@@ -190,8 +190,8 @@ IGESSelect_Activator::IGESSelect_Activator()
 	return IFSelect_RetError;
       }
       char signature[20];
-      if (argc == 2) sprintf(signature,"%s",arg1);
-      else sprintf(signature,"%s %s",arg1,arg2);
+      if (argc == 2) Snprintf(signature,"%s",arg1);
+      else Snprintf(signature,"%s %s",arg1,arg2);
       Handle(IFSelect_SelectSignature) sel = new IFSelect_SelectSignature
 	(new IGESSelect_IGESTypeForm, signature,(argc > 2));
       return pilot->RecordItem (sel);

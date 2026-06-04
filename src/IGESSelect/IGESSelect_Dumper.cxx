@@ -96,9 +96,9 @@ IGESSelect_Dumper::IGESSelect_Dumper ()    {  }
     if (hasrange) {
       char flotrange[20];
       file.SendText(forminrange.ToCString());
-      Sprintf(flotrange,"%f",rangemin);
+      Snprintf(flotrange,"%f",rangemin);
       file.SendText(flotrange);
-      Sprintf(flotrange,"%f",rangemax);
+      Snprintf(flotrange,"%f",rangemax);
       file.SendText(flotrange);
     }
     return Standard_True;
@@ -112,7 +112,7 @@ IGESSelect_Dumper::IGESSelect_Dumper ()    {  }
     Standard_Integer np = sp->GlobalNumber();
     Handle(TCollection_HAsciiString) val = sp->Value();
     char intext[10];
-    sprintf(intext,"%d",np);
+    Snprintf(intext,"%d",np);
     file.SendText(intext);
     file.SendItem(val);
     return Standard_True;
@@ -163,8 +163,8 @@ IGESSelect_Dumper::IGESSelect_Dumper ()    {  }
     else  return Standard_False;
     // Attention, 2 termes possibles pour la signature
     char sig[40];
-    if (file.NbParams() == 2) sprintf(sig,"%s",file.ParamValue(2).ToCString());
-    else sprintf(sig,"%s %s",file.ParamValue(2).ToCString(),file.ParamValue(3).ToCString());
+    if (file.NbParams() == 2) Snprintf(sig,"%s",file.ParamValue(2).ToCString());
+    else Snprintf(sig,"%s %s",file.ParamValue(2).ToCString(),file.ParamValue(3).ToCString());
 //    item = new IGESSelect_SelectIGESTypeForm(sig,exact);
 //    return Standard_True;
   }

@@ -282,7 +282,7 @@ void IGESData_IGESWriter::SendStartLine (const Standard_CString startline)
     throw Interface_InterfaceError("IGESWriter : OwnParams");
   thepnum.SetValue(themodel->Number(anent),thepars->Length()+1);
   thecurr.Clear();
-  sprintf(text,"%d",anent->TypeNumber());
+  Snprintf(text,"%d",anent->TypeNumber());
   AddString(text);
   thestep = IGESData_ReadOwn;
 }
@@ -383,7 +383,7 @@ void IGESData_IGESWriter::SendStartLine (const Standard_CString startline)
 {
   char text[20];
   AddChar(thesep);
-  sprintf(text,"%d",val);
+  Snprintf(text,"%d",val);
   AddString(text);
 }
 
@@ -502,7 +502,7 @@ Standard_Boolean IGESData_IGESWriter::Print (Standard_OStream& S) const
     nbs = thestar->Length();
     for (i = 1; i <= nbs; i ++) {
       char finlin[20];
-      sprintf(finlin,"S%7.7d",i);
+      Snprintf(finlin,"S%7.7d",i);
       line = thestar->Value(i);
 
       if (fnes) writefnes (S,line->ToCString());
@@ -522,7 +522,7 @@ Standard_Boolean IGESData_IGESWriter::Print (Standard_OStream& S) const
   Standard_Integer nbg = thehead->Length();
   for (i = 1; i <= nbg && isGood ;i++) {
     char finlin[20];
-    sprintf(finlin,"G%7.7d",i);
+    Snprintf(finlin,"G%7.7d",i);
     line = thehead->Value(i);
 
     if (fnes) writefnes (S,line->ToCString());
@@ -552,13 +552,13 @@ Standard_Boolean IGESData_IGESWriter::Print (Standard_OStream& S) const
 			    res1,res2,lab,num);
     v[1]  = thepnum.Value(i);  // debut en P
     v[15] = thepnum.Value(i+1)-thepnum.Value(i);  // nb de lignes en P
-    sprintf(ligne,"%8d%8d%8d%8d%8d%8d%8d%8d%2.2d%2.2d%2.2d%2.2dD%7.7d",
+    Snprintf(ligne,"%8d%8d%8d%8d%8d%8d%8d%8d%2.2d%2.2d%2.2d%2.2dD%7.7d",
 	    v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],
 	    v[8],v[9],v[10],v[11] ,2*i-1);
     if (fnes) writefnes (S,ligne);
     else S << ligne;
     S << "\n";
-    sprintf(ligne,"%8d%8d%8d%8d%8d%8s%8s%8s%8sD%7.7d",
+    Snprintf(ligne,"%8d%8d%8d%8d%8d%8s%8s%8s%8sD%7.7d",
 	    v[0],v[13],v[14],v[15],v[16],res1,res2,lab,num,2*i);
     if (fnes) writefnes (S,ligne);
     else S << ligne;
@@ -581,7 +581,7 @@ Standard_Boolean IGESData_IGESWriter::Print (Standard_OStream& S) const
   for (i = 1; i <= nbd && isGood; i ++) {
     for (Standard_Integer j = thepnum.Value(i); j < thepnum.Value(i+1); j ++) {
       char finlin[32];
-      sprintf(finlin," %7.7dP%7.7d",2*i-1,j);
+      Snprintf(finlin," %7.7dP%7.7d",2*i-1,j);
       line = thepars->Value(j);
 //      line->LeftJustify(MaxcarsP,' ');  remplace par plus economique ! :
 
@@ -602,7 +602,7 @@ Standard_Boolean IGESData_IGESWriter::Print (Standard_OStream& S) const
   if(!isGood)
     return isGood;
 //  Terminal Section (pas trop compliquee, ma foi)
-  sprintf (ligne,
+  Snprintf (ligne,
     "S%7dG%7dD%7dP%7d                                        T0000001",
 	   nbs,nbg,nbd*2,thepnum.Value(thepnum.Length())-1);
 //   12345678- 16- 24- 32  56789 123456789 123456789 123456789 12

@@ -121,6 +121,6 @@ static char intval[20];
     case 9 : return "9";
     default : break;
   }
-  sprintf (intval,"%d",val);
+  Snprintf(intval,"%d",val);
   return intval;
 }
