@@ -299,9 +299,8 @@ void ChFi3d_CheckSurfData(const TopOpeBRepDS_DataStructure& DStr,
     B.Add(F,W);
 
 #ifdef DRAW
-//    char name[100];
-    char* name = new char[100];
-    sprintf(name,"fillet_%d",NbSD++);
+    char name[100];
+    Snprintf(name,"fillet_%d",NbSD++);
     DBRep::Set(name,F);
 #endif
   }
