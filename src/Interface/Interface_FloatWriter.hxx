@@ -27,7 +27,7 @@
 
 //! This class converts a floating number (Real) to a string
 //! It can be used if the standard C-C++ output functions
-//! (sprintf or std::cout<<) are not convenient. That is to say :
+//! (Snprintf or std::cout<<) are not convenient. That is to say :
 //! - to suppress trailing '0' and 'E+00' (if desired)
 //! - to control exponent output and floating point output
 //!
@@ -90,22 +90,41 @@ public:
   //! options. Returns the useful Length of produced string.
   //! It calls the class method Convert.
   //! Warning : <text> is assumed to be wide enough (20-30 is correct)
-  //! And, even if declared in, its content will be modified
-  Standard_EXPORT Standard_Integer Write (const Standard_Real val, const Standard_CString text) const;
-  
+  template<size_t textSize>
+  Standard_Integer Write (const Standard_Real val,
+                          char(&text)[textSize]) const
+  {
+    return Convert (val, text, textSize, thezerosup, therange1, therange2, themainform, therangeform);
+  }
+
   //! This class method converts a Real Value to a string, given
   //! options given as arguments. It can be called independently.
-  //! Warning : even if declared in, content of <text> will be modified
-  Standard_EXPORT static Standard_Integer Convert (const Standard_Real val, const Standard_CString text, const Standard_Boolean zerosup, const Standard_Real Range1, const Standard_Real Range2, const Standard_CString mainform, const Standard_CString rangeform);
-
-
-
+  //! Content of <text> will be modified.
+  template<size_t textSize>
+  static Standard_Integer Convert(
+    const Standard_Real val,
+    char(&text)[textSize],
+    const Standard_Boolean zerosup,
+    const Standard_Real Range1,
+    const Standard_Real Range2,
+    const Standard_CString mainform,
+    const Standard_CString rangeform)
+  {
+    return Convert(val, text, textSize, zerosup,
+                   Range1, Range2, mainform, rangeform);
+  }
 
 protected:
 
-
-
-
+  Standard_EXPORT static Standard_Integer Convert(
+    const Standard_Real val,
+    char* text,
+    const size_t textSize,
+    const Standard_Boolean zerosup,
+    const Standard_Real Range1,
+    const Standard_Real Range2,
+    const Standard_CString mainform,
+    const Standard_CString rangeform);
 
 private:
 

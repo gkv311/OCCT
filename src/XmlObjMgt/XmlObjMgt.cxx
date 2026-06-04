@@ -116,8 +116,9 @@ Standard_Boolean XmlObjMgt::SetExtendedString
   } else {
     const Standard_Integer aLen = theString.Length();
 //    const Standard_ExtCharacter * aString = theString.ToExtString();
-    char * buf0 = new char [4 * (aLen + 1) + 3];
-    Sprintf (&buf0[0], "##%04x", 0xfeff);          // set UNICODE header
+    const size_t aBufLen = 4 * (aLen + 1) + 3;
+    char * buf0 = new char[aBufLen];
+    Snprintf (buf0, aBufLen, "##%04x", 0xfeff);          // set UNICODE header
     char * buf = &buf0[6];
 //     Standard_Integer i = 0;
 //     while (i <= (aLen - 4)) {

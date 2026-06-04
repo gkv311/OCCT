@@ -341,7 +341,7 @@ Standard_Boolean RWStl::writeASCII (const Handle(Poly_Triangulation)& theMesh,
       aVNorm.SetCoord (0.0, 0.0, 0.0);
     }
 
-    Sprintf (aBuffer,
+    Snprintf (aBuffer,
           " facet normal % 12e % 12e % 12e\n"
           "   outer loop\n"
           "     vertex % 12e % 12e % 12e\n"

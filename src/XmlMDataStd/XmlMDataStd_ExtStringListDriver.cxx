@@ -150,8 +150,7 @@ void XmlMDataStd_ExtStringListDriver::Paste(const Handle(TDF_Attribute)& theSour
   if(anExtStringList->ID() != TDataStd_ExtStringList::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    anExtStringList->ID().ToCString (pGuidStr);
+    anExtStringList->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

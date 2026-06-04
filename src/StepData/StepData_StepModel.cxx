@@ -201,9 +201,9 @@ Handle(TCollection_HAsciiString) StepData_StepModel::StringLabel
   Standard_Integer num = (theidnums.IsNull() ? 0 : Number(ent));
   Standard_Integer  nid = (!num ? 0 : theidnums->Value(num));
 
-  if      (nid > 0) sprintf (text, "#%d",nid);
-  else if (num > 0) sprintf (text, "(#%d)",num);
-  else              sprintf (text, "(#0..)");
+  if      (nid > 0) Snprintf(text, "#%d",nid);
+  else if (num > 0) Snprintf(text, "(#%d)",num);
+  else              Snprintf(text, "(#0..)");
 
   label = new TCollection_HAsciiString(text);
   return label;

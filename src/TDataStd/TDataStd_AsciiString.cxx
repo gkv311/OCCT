@@ -196,7 +196,7 @@ Standard_OStream& TDataStd_AsciiString::Dump(Standard_OStream& theOS) const
   anOS << myString;
   anOS << " Name=|"<<myString<<"|";
   Standard_Character sguid[Standard_GUID_SIZE_ALLOC];
-  myID.ToCString(sguid);
+  myID.ToCString(sguid, sizeof(sguid));
   anOS << sguid << "|" <<std::endl;
   return anOS;
 }

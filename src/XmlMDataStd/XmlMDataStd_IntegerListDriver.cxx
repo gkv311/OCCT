@@ -141,19 +141,20 @@ void XmlMDataStd_IntegerListDriver::Paste(const Handle(TDF_Attribute)& theSource
 
   Standard_Integer anU = anIntList->Extent();
   theTarget.Element().setAttribute(::LastIndexString(), anU);
-  NCollection_LocalArray<Standard_Character> str(12 * anU + 1);
+  // Allocation of 12 chars for each integer including the space.
+  // An example: -2 147 483 648
+  static constexpr size_t anItemLen = 12;
+  NCollection_LocalArray<Standard_Character> str(anItemLen * anU + 1);
   if(anU == 0)
     str[0] = 0;
   else if (anU >= 1)
   {
-    // Allocation of 12 chars for each integer including the space.
-    // An example: -2 147 483 648
     Standard_Integer iChar = 0;
     TColStd_ListIteratorOfListOfInteger itr(anIntList->List());
     for (; itr.More(); itr.Next())
     {
       const Standard_Integer& intValue = itr.Value();
-      iChar += Sprintf(&(str[iChar]), "%d ", intValue);
+      iChar += Snprintf(&(str[iChar]), str.Size() - iChar, "%d ", intValue);
     }  
   }
   // No occurrence of '&', '<' and other irregular XML characters
@@ -162,8 +163,7 @@ void XmlMDataStd_IntegerListDriver::Paste(const Handle(TDF_Attribute)& theSource
   if(anIntList->ID() != TDataStd_IntegerList::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    anIntList->ID().ToCString (pGuidStr);
+    anIntList->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

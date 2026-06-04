@@ -414,7 +414,7 @@ void IGESGeom_ToolBoundary::OwnCheck(const Handle(IGESGeom_Boundary)& ent,
       if (ent->NbParameterCurves(i) != 0)
 	{
           char mess[80];
-	  sprintf(mess,"Nb. Parameter Space Curve %d !=0 while Boundary Type=0",i);
+	  Snprintf(mess,"Nb. Parameter Space Curve %d !=0 while Boundary Type=0",i);
 	  ach.SendFail(mess);
 	}
 */

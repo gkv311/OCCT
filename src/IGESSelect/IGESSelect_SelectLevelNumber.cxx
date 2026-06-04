@@ -67,6 +67,6 @@ IGESSelect_SelectLevelNumber::IGESSelect_SelectLevelNumber ()    {  }
   if (numlev == 0) return TCollection_AsciiString
     ("IGES Entity attached to no Level");
 
-  sprintf(labl,"IGES Entity, Level Number admitting %d",numlev);
+  Snprintf(labl,"IGES Entity, Level Number admitting %d",numlev);
   return TCollection_AsciiString (labl);
 }

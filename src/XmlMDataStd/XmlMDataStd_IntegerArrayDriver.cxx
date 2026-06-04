@@ -172,15 +172,16 @@ void XmlMDataStd_IntegerArrayDriver::Paste
 
   // Allocation of 12 chars for each integer including the space.
   // An example: -2 147 483 648
+  static constexpr size_t anItemLen = 12;
   Standard_Integer iChar = 0;
   NCollection_LocalArray<Standard_Character> str;
   if (intArray.Length())
-    str.Allocate(12 * intArray.Length() + 1);
+    str.Allocate(anItemLen * intArray.Length() + 1);
 
   Standard_Integer i = aL;
   for (;;) 
   {
-    iChar += Sprintf(&(str[iChar]), "%d ", intArray.Value(i));
+    iChar += Snprintf(&(str[iChar]), str.Size() - iChar, "%d ", intArray.Value(i));
     if (i >= anU)
       break;
     ++i;
@@ -195,8 +196,7 @@ void XmlMDataStd_IntegerArrayDriver::Paste
   if(anIntArray->ID() != TDataStd_IntegerArray::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    anIntArray->ID().ToCString (pGuidStr);
+    anIntArray->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

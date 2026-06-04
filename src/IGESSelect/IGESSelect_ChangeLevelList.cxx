@@ -95,11 +95,11 @@ IGESSelect_ChangeLevelList::IGESSelect_ChangeLevelList ()
   Standard_Integer newl = 0;
   if (yanew) newl = thenew->Value();
 
-  if (yaold) sprintf(labl,"Changes Level Lists containing %d", oldl);
-  else       sprintf(labl,"Changes all Level Lists in D.E. %d", oldl);
+  if (yaold) Snprintf(labl,"Changes Level Lists containing %d", oldl);
+  else       Snprintf(labl,"Changes all Level Lists in D.E. %d", oldl);
   TCollection_AsciiString label(labl);
-  if (yanew) sprintf(labl," to Number %d",newl);
-  else       sprintf(labl," to Number = first value in List");
+  if (yanew) Snprintf(labl," to Number %d",newl);
+  else       Snprintf(labl," to Number = first value in List");
   label.AssignCat(labl);
   return label;
 }

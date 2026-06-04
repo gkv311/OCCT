@@ -96,11 +96,8 @@ void XmlMFunction_FunctionDriver::Paste (const Handle(TDF_Attribute)& theSource,
   if (!aF.IsNull())
   {
     //convert GUID into attribute value
-    Standard_Character aGuidStr [40];
-    Standard_PCharacter pGuidStr;
-    //
-    pGuidStr=aGuidStr;
-    aF->GetDriverGUID().ToCString(pGuidStr);
+    Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
+    aF->GetDriverGUID().ToCString(aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute(::GuidString(), aGuidStr);
 
     //integer value of failure
