@@ -618,8 +618,8 @@ Handle(TCollection_HAsciiString) IGESData_IGESModel::StringLabel(const Handle(St
   else {
     char text[20];
     Standard_Integer num = Number(ent);
-    if (num > 0) sprintf(text,"D%d",2*num-1);
-    else         sprintf(text,"D0...");
+    if (num > 0) Snprintf(text,"D%d",2*num-1);
+    else         Snprintf(text,"D0...");
     label = new TCollection_HAsciiString(text);
   }
   return label;

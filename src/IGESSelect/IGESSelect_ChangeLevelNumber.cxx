@@ -84,8 +84,8 @@ IGESSelect_ChangeLevelNumber::IGESSelect_ChangeLevelNumber ()
   Standard_Integer newl = 0;
   if (!thenew.IsNull()) newl = thenew->Value();
 
-  if (yaold) sprintf(labl,"Changes Level Number %d to %d",oldl,newl);
-  else       sprintf(labl,"Changes all Level Numbers positive and zero to %d",
+  if (yaold) Snprintf(labl,"Changes Level Number %d to %d",oldl,newl);
+  else       Snprintf(labl,"Changes all Level Numbers positive and zero to %d",
 		     newl);
   return TCollection_AsciiString(labl);
 }

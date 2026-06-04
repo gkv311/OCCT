@@ -182,7 +182,14 @@ operator Standard_CString() const;
   //! Another format can be provided, as follows :
   //! C:%d ...   C like format, preceded by  C:
   //! S:...      format to call system (not yet implemented)
-  Standard_EXPORT static void TDate (const Standard_CString text, const Standard_Integer yy, const Standard_Integer mm, const Standard_Integer dd, const Standard_Integer hh, const Standard_Integer mn, const Standard_Integer ss, const Standard_CString format = "");
+  template<size_t textSize>
+  static void TDate (char(&text)[textSize],
+                     Standard_Integer yy, Standard_Integer mm, Standard_Integer dd,
+                     Standard_Integer hh, Standard_Integer mn, Standard_Integer ss,
+                     Standard_CString format = "")
+  {
+    TDate (text, textSize, yy, mm, dd, hh, mn, ss, format);
+  }
   
   //! Decodes a date to numeric integer values
   //! Returns True if OK, False if text does not fit with required
@@ -221,9 +228,10 @@ operator Standard_CString() const;
 
 protected:
 
-
-
-
+  Standard_EXPORT static void TDate(char* text, size_t textSize,
+                                    Standard_Integer yy, Standard_Integer mm, Standard_Integer dd,
+                                    Standard_Integer hh, Standard_Integer mn, Standard_Integer ss,
+                                    Standard_CString format);
 
 private:
 

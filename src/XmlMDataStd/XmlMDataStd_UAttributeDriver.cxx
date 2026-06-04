@@ -77,10 +77,8 @@ void XmlMDataStd_UAttributeDriver::Paste(const Handle(TDF_Attribute)& theSource,
     Handle(TDataStd_UAttribute)::DownCast(theSource);
 
   //convert GUID into attribute value
-  Standard_Character aGuidStr [40];
-  Standard_PCharacter pGuidStr;
-  pGuidStr=aGuidStr;
-  aName->ID().ToCString (pGuidStr);
+  Standard_Character aGuidStr[Standard_GUID_SIZE_ALLOC];
+  aName->ID().ToCString (aGuidStr, sizeof(aGuidStr));
 
   theTarget.Element().setAttribute (::GuidString(), aGuidStr);
 }

@@ -46,7 +46,7 @@ Interface_MSG::Interface_MSG
     : thekey (key) , theval (NULL)
 {
   char mess[300];
-  sprintf (mess, Interface_MSG::Translated(thekey), i1);
+  Snprintf(mess, Interface_MSG::Translated(thekey), i1);
   theval = new char[strlen (mess) + 1];
   strcpy (theval,mess);
 }
@@ -57,7 +57,7 @@ Interface_MSG::Interface_MSG
     : thekey (key) , theval (NULL)
 {
   char mess[300];
-  sprintf (mess, Interface_MSG::Translated(thekey), i1,i2);
+  Snprintf(mess, Interface_MSG::Translated(thekey), i1,i2);
   theval = new char[strlen (mess) + 1];
   strcpy (theval,mess);
 }
@@ -68,7 +68,7 @@ Interface_MSG::Interface_MSG
     : thekey (key) , theval (NULL)
 {
   char mess[300];
-  sprintf (mess, Interface_MSG::Translated(thekey),
+  Snprintf(mess, Interface_MSG::Translated(thekey),
 	   (intervals < 0 ? r1 : Interface_MSG::Intervalled(r1,intervals)) );
   theval = new char[strlen (mess) + 1];
   strcpy (theval,mess);
@@ -80,7 +80,7 @@ Interface_MSG::Interface_MSG
     : thekey (key) , theval (NULL)
 {
   char mess[300];
-  sprintf (mess, Interface_MSG::Translated(thekey), str);
+  Snprintf(mess, Interface_MSG::Translated(thekey), str);
   theval = new char[strlen (mess) + 1];
   strcpy (theval,mess);
 }
@@ -92,7 +92,7 @@ Interface_MSG::Interface_MSG
     : thekey (key) , theval (NULL)
 {
   char mess[300];
-  sprintf (mess, Interface_MSG::Translated(thekey), val, str);
+  Snprintf(mess, Interface_MSG::Translated(thekey), val, str);
   theval = new char[strlen (mess) + 1];
   strcpy (theval,mess);
 }
@@ -318,14 +318,10 @@ Standard_Real  Interface_MSG::Intervalled
 
 //  ###########    DATES    ############
 
-void  Interface_MSG::TDate (const Standard_CString text,
-                            const Standard_Integer yy,
-                            const Standard_Integer mm,
-                            const Standard_Integer dd,
-                            const Standard_Integer hh,
-                            const Standard_Integer mn,
-                            const Standard_Integer ss,
-                            const Standard_CString format)
+void  Interface_MSG::TDate (char* text, size_t textSize,
+                            Standard_Integer yy, Standard_Integer mm, Standard_Integer dd,
+                            Standard_Integer hh, Standard_Integer mn, Standard_Integer ss,
+                            Standard_CString format)
 {
 //  valeurs nulles : en tete (avec au moins une non nulle, la derniere)
 //  -> completees avec les valeurs actuelle (system date)
@@ -354,11 +350,11 @@ void  Interface_MSG::TDate (const Standard_CString text,
       }
     }
   }
-  char *pText=(char *)text;
+
   if (!format || format[0] == '\0')
-    sprintf(pText,"%4.4d-%2.2d-%2.2d:%2.2d-%2.2d-%2.2d",y2,m2,d2,h2,n2,s2);
+    Snprintf(text, textSize, "%4.4d-%2.2d-%2.2d:%2.2d-%2.2d-%2.2d", y2, m2, d2, h2, n2, s2);
   else if ((format[0] == 'c' || format[0] == 'C') && format[1] == ':')
-    sprintf (pText,&format[2],y2,m2,d2,h2,n2,s2);
+    Snprintf(text, textSize, &format[2], y2, m2, d2, h2, n2, s2);
 }
 
 

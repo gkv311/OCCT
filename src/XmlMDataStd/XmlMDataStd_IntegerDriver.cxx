@@ -90,8 +90,7 @@ void XmlMDataStd_IntegerDriver::Paste (const Handle(TDF_Attribute)& theSource,
   if(anInt->ID() != TDataStd_Integer::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    anInt->ID().ToCString (pGuidStr);
+    anInt->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

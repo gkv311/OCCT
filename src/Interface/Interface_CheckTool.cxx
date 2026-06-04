@@ -43,7 +43,7 @@ static int errh = 1;
 static void raisecheck (Standard_Failure& theException,Handle(Interface_Check)& ach)
 {
   char mess[100];
-  sprintf (mess,"** Exception Raised during Check : %s **",
+  Snprintf(mess,"** Exception Raised during Check : %s **",
 	   theException.ExceptionType());
   ach->AddFail(mess);
 #ifdef _WIN32

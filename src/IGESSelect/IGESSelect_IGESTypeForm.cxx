@@ -51,11 +51,11 @@ static char typeval [30];    // une seule reponse a la fois ...
   Standard_Integer typenum = igesent->TypeNumber();
   Standard_Integer formnum = igesent->FormNumber();
   if (unk) {
-    if (theform) sprintf (typeval,"%d %d (?)",typenum,formnum);
-    else         sprintf (typeval,"%d (?)",typenum);
+    if (theform) Snprintf(typeval,"%d %d (?)",typenum,formnum);
+    else         Snprintf(typeval,"%d (?)",typenum);
   } else {
-    if (theform) sprintf (typeval,"%d %d",typenum,formnum);
-    else         sprintf (typeval,"%d",   typenum);
+    if (theform) Snprintf(typeval,"%d %d",typenum,formnum);
+    else         Snprintf(typeval,"%d",   typenum);
   }
   return &typeval[0];
 }

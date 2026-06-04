@@ -151,13 +151,13 @@ static IFSelect_ReturnStatus XSControl_tpdraw
       else sout<<" ent.n0 "<<num;
       sout<<", item transfert n0 "<<index;
       if (nbvar == 0) {
-	if      (argc > 3 && mode  > 0) sprintf (nomvar,"%s",arg3);
-	else if (argc > 2 && mode == 0) sprintf (nomvar,"%s",arg2);
-	else                            sprintf (nomvar,"tp_%d",i);
+	if      (argc > 3 && mode  > 0) Snprintf(nomvar,"%s",arg3);
+	else if (argc > 2 && mode == 0) Snprintf(nomvar,"%s",arg2);
+	else                            Snprintf(nomvar,"tp_%d",i);
       } else {
-	if      (argc > 3 && mode  > 0) sprintf (nomvar,"%s_%d",arg3,nbvar);
-	else if (argc > 2 && mode == 0) sprintf (nomvar,"%s_%d",arg2,nbvar);
-	else                            sprintf (nomvar,"tp_%d",i);
+	if      (argc > 3 && mode  > 0) Snprintf(nomvar,"%s_%d",arg3,nbvar);
+	else if (argc > 2 && mode == 0) Snprintf(nomvar,"%s_%d",arg2,nbvar);
+	else                            Snprintf(nomvar,"tp_%d",i);
       }
       sout<<" -> 1 DRAW Shape: "<<nomvar<<std::endl;
       XSControl::Vars(pilot)->SetShape(nomvar,sh);
@@ -174,9 +174,9 @@ static IFSelect_ReturnStatus XSControl_tpdraw
       for (Standard_Integer j = 1; j <= nbs; j ++)  {
 	sh = slb->Shape(j);  if (nbvar < 0) nbvar = 0;  nbvar ++;
 	if (sh.IsNull()) { sout<<" (no Shape recorded)"<<std::endl; continue; }
-	if      (argc > 3 && mode  > 0) sprintf (nomvar,"%s_%d",arg3,nbvar);
-	else if (argc > 2 && mode == 0) sprintf (nomvar,"%s_%d",arg2,nbvar);
-	else                        sprintf (nomvar,"tp_%d_%d",i,nbvar);
+	if      (argc > 3 && mode  > 0) Snprintf(nomvar,"%s_%d",arg3,nbvar);
+	else if (argc > 2 && mode == 0) Snprintf(nomvar,"%s_%d",arg2,nbvar);
+	else                        Snprintf(nomvar,"tp_%d_%d",i,nbvar);
 	sout<<" "<<nomvar;
 	XSControl::Vars(pilot)->SetShape(nomvar,sh);
       }
@@ -195,13 +195,13 @@ static IFSelect_ReturnStatus XSControl_tpdraw
       if (geom.IsNull()) { sout<<std::endl; continue; }
       nbvar ++;
       if (nbvar == 0) {
-	if      (argc > 3 && mode  > 0) sprintf (nomvar,"%s",arg3);
-	else if (argc > 2 && mode == 0) sprintf (nomvar,"%s",arg2);
-	else                            sprintf (nomvar,"tp_%d",i);
+	if      (argc > 3 && mode  > 0) Snprintf(nomvar,"%s",arg3);
+	else if (argc > 2 && mode == 0) Snprintf(nomvar,"%s",arg2);
+	else                            Snprintf(nomvar,"tp_%d",i);
       } else {
-	if      (argc > 3 && mode  > 0) sprintf (nomvar,"%s_%d",arg3,nbvar);
-	else if (argc > 2 && mode == 0) sprintf (nomvar,"%s_%d",arg2,nbvar);
-	else                            sprintf (nomvar,"tp_%d",i);
+	if      (argc > 3 && mode  > 0) Snprintf(nomvar,"%s_%d",arg3,nbvar);
+	else if (argc > 2 && mode == 0) Snprintf(nomvar,"%s_%d",arg2,nbvar);
+	else                            Snprintf(nomvar,"tp_%d",i);
       }
       char* nomv = nomvar;
       XSControl::Vars(pilot)->Set (nomv,geom);
@@ -630,7 +630,7 @@ static IFSelect_ReturnStatus XSControl_trimport
     if (iscomp) B.Add (C,sh);
     else {
       char nomsh[50];
-      sprintf (nomsh,"%s_%d",rnom.ToCString(),nbs);
+      Snprintf(nomsh,"%s_%d",rnom.ToCString(),nbs);
       XSControl::Vars(pilot)->SetShape(nomsh,sh);
     }
   }
@@ -779,7 +779,7 @@ Standard_Integer  XSControl_FuncShape::MoreShapes
     sout<<"Shapes DRAW named : "<<nom<<n1<<" to "<<nom<<n2;
     for (i = n1; i <= n2 ; i ++) {
       const char* nomshh = &nomsh[0];
-      sprintf (nomsh,"%s%d",nom,i);
+      Snprintf(nomsh,"%s%d",nom,i);
       TopoDS_Shape Shape = session->Vars()->GetShape(nomshh);
       if (Shape.IsNull()) continue;
       list->Append(Shape);

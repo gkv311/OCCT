@@ -326,7 +326,7 @@ void StepFile_ReadData::RecordListStart()
     default:
     {
       char aBufSub[10];
-      if (myNumSub > 9) Sprintf(aBufSub, "$%d", myNumSub);
+      if (myNumSub > 9) Snprintf(aBufSub, "$%d", myNumSub);
       else { aBufSub[0] = '$'; aBufSub[1] = (char)(myNumSub + 48); aBufSub[2] = '\0'; }
       aSubRec->myIdent = RecordNewText(aBufSub);
     }

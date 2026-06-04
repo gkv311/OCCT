@@ -306,8 +306,8 @@ void StepData_StepWriter::SendEntity(const Standard_Integer num,
   if (thelabmode > 0) idtrue = themodel->IdentLabel(anent);
   if (thelabmode == 1) idnum = idtrue;
   if (idnum == 0) idnum = num;
-  if (thelabmode < 2 || idnum == idtrue) sprintf(lident,"#%d = ",idnum); //skl 29.01.2003
-  else sprintf(lident,"%d:#%d = ",idnum,idtrue); //skl 29.01.2003
+  if (thelabmode < 2 || idnum == idtrue) Snprintf(lident,"#%d = ",idnum); //skl 29.01.2003
+  else Snprintf(lident,"%d:#%d = ",idnum,idtrue); //skl 29.01.2003
 
 //  SendIdent repris , lident vient d etre calcule
   thecurr.Clear();
@@ -437,7 +437,7 @@ void StepData_StepWriter::Indent (const Standard_Boolean onent)
 void StepData_StepWriter::SendIdent(const Standard_Integer ident)
 {
   char lident[12];
-  sprintf(lident,"#%d =",ident);
+  Snprintf(lident,"#%d =",ident);
   thecurr.Clear();
   thecurr.Add (lident);
   themult = Standard_False;
@@ -753,7 +753,7 @@ void StepData_StepWriter::Send (const Standard_Integer val)
 {
   char lval[12];
   AddParam();
-  sprintf(lval,"%d",val);
+  Snprintf(lval,"%d",val);
   AddString(lval,(Standard_Integer) strlen(lval));
 }
 
@@ -910,8 +910,8 @@ void StepData_StepWriter::Send (const Handle(Standard_Transient)& val)
     if (thelabmode > 0) idtrue = themodel->IdentLabel(val);
     if (thelabmode == 1) idnum = idtrue;
     if (idnum == 0) idnum = num;
-    if (thelabmode < 2 || idnum == idtrue) sprintf(lident,"#%d",idnum);
-    else sprintf(lident,"%d:#%d",idnum,idtrue);
+    if (thelabmode < 2 || idnum == idtrue) Snprintf(lident,"#%d",idnum);
+    else Snprintf(lident,"%d:#%d",idnum,idtrue);
     AddParam();
     AddString(lident,(Standard_Integer) strlen(lident));
   }

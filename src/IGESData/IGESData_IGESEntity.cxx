@@ -387,7 +387,7 @@ Handle(TCollection_HAsciiString) IGESData_IGESEntity::NameValue () const
     if (!HasShortLabel()) return nom;
     if (theSubScriptN < 0) return theShortLabel;
     char lenom[50];
-    sprintf (lenom,"%s(%d)",theShortLabel->ToCString(),theSubScriptN);
+    Snprintf(lenom,"%s(%d)",theShortLabel->ToCString(),theSubScriptN);
     nom = new TCollection_HAsciiString (lenom);
   }
   else if (nbname > 0) {

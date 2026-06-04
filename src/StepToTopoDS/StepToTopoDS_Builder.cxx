@@ -657,7 +657,7 @@ void StepToTopoDS_Builder::Init
     //:o7 abv 18 Feb 99: bm1_sy_fuel.stp #1427(1,2) protection against null entity
     if ( ent.IsNull() ) {
       char buff[100];
-      sprintf ( buff, "Entity %d is a Null entity", i );
+      Snprintf( buff, "Entity %d is a Null entity", i );
       TP->AddWarning (GCS,buff);
       continue;
     } 

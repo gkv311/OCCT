@@ -142,8 +142,9 @@ void XmlMDataStd_BooleanListDriver::Paste(const Handle(TDF_Attribute)& theSource
 
   Standard_Integer anU = aBooleanList->Extent();
   theTarget.Element().setAttribute(::LastIndexString(), anU);
-  // Allocation of 1 char for each boolean value + a space. 
-  NCollection_LocalArray<Standard_Character> str(2 * anU + 1);
+  // Allocation of 1 char for each boolean value + a space.
+  static constexpr size_t anItemLen = 2;
+  NCollection_LocalArray<Standard_Character> str(anItemLen * anU + 1);
   if(anU == 0) str[0] = 0;
   else if (anU >= 1)
   {
@@ -152,7 +153,7 @@ void XmlMDataStd_BooleanListDriver::Paste(const Handle(TDF_Attribute)& theSource
     for (; itr.More(); itr.Next())
     {
       const Standard_Byte& byte = itr.Value();
-      iChar += Sprintf(&(str[iChar]), "%d ", byte);
+      iChar += Snprintf(&(str[iChar]), str.Size() - iChar, "%d ", byte);
     }
   }
   XmlObjMgt::SetStringValue (theTarget, (Standard_Character*)str, Standard_True);
@@ -160,8 +161,7 @@ void XmlMDataStd_BooleanListDriver::Paste(const Handle(TDF_Attribute)& theSource
   if(aBooleanList->ID() != TDataStd_BooleanList::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    aBooleanList->ID().ToCString (pGuidStr);
+    aBooleanList->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

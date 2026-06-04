@@ -247,7 +247,7 @@ void IGESGeom_ToolPlane::OwnCheck(const Handle(IGESGeom_Plane)& ent,
       C * ent->SymbolAttach().Z() - D;
   if ( ec > eps || ec < -eps) {
     char mess[80];
-    Sprintf(mess,"Symbol Attach not in the Plane, gap/equation over %f",
+    Snprintf(mess,"Symbol Attach not in the Plane, gap/equation over %f",
 	    Interface_MSG::Intervalled(ec));
     ach.SendWarning(mess,"Symbol Attach not in the Plane");
 

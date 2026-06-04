@@ -70,8 +70,8 @@ IFSelect_SelectSent::IFSelect_SelectSent
   if (thecnt == 2 &&  thelst) lab.AssignCat ("Sent several times entities");
   if (thecnt == 2 && !thelst) lab.AssignCat ("Sent just twice entities");
   if (thecnt > 2) {
-    if (thelst) sprintf (lb,"Sent at least %d times entities", thecnt);
-    else        sprintf (lb,"Sent just %d times entities", thecnt);
+    if (thelst) Snprintf(lb,"Sent at least %d times entities", thecnt);
+    else        Snprintf(lb,"Sent just %d times entities", thecnt);
     lab.AssignCat (lb);
   }
   return lab;

@@ -89,15 +89,14 @@ void XmlMDataStd_RealDriver::Paste (const Handle(TDF_Attribute)& theSource,
 {
   Handle(TDataStd_Real) anAtt = Handle(TDataStd_Real)::DownCast(theSource);
   char aValueChar[32];
-  Sprintf(aValueChar, "%.17g", anAtt->Get());
+  Snprintf(aValueChar, "%.17g", anAtt->Get());
   TCollection_AsciiString aValueStr(aValueChar);
   // No occurrence of '&', '<' and other irregular XML characters
   XmlObjMgt::SetStringValue (theTarget, aValueStr.ToCString(), Standard_True);
   if(anAtt->ID() != TDataStd_Real::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    anAtt->ID().ToCString (pGuidStr);
+    anAtt->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

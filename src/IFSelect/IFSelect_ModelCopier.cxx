@@ -178,7 +178,7 @@ IFSelect_ModelCopier::IFSelect_ModelCopier ()    {  }
 //	checks.Print (sout,Standard_False);
 //      }
       if (!res) {
-	char mess[100];  sprintf(mess,"Split Send (WriteFile) abandon on file n0.%d",i);
+	char mess[100];  Snprintf(mess,"Split Send (WriteFile) abandon on file n0.%d",i);
 	checks.CCheck(0)->AddFail (mess);
 	Message::SendInfo() << "  **  Sending File n0."<<i<<" has failed, abandon  **"<<std::endl;
 	return checks;
@@ -235,7 +235,7 @@ IFSelect_ModelCopier::IFSelect_ModelCopier ()    {  }
 //      checks.Print (sout,model,Standard_False);
 //    }
     if (!res) {
-      char mess[100];  sprintf(mess,"Split Send (WriteFile) abandon on file n0.%d",i);
+      char mess[100];  Snprintf(mess,"Split Send (WriteFile) abandon on file n0.%d",i);
       checks.CCheck(0)->AddFail (mess);
       Message::SendInfo() << "  **  Sending File "<<filename<<" has failed, abandon  **"<<std::endl;
       checks.SetName ("X-STEP WorkSession : Split Send (only Write)");

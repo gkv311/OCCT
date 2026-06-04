@@ -335,14 +335,14 @@ IFSelect_ShareOut::IFSelect_ShareOut ()
       while (nbpa <= npac)  {  nbpa *= 10; nbch ++;  }
     }
     if (nbch > 1) {
-      sprintf(format,"_ %d.%dd",nbch,nbch);
+      Snprintf(format,"_ %d.%dd",nbch,nbch);
       format[1] = '%';
     } else if (npac >= num || num >= 1) {
-      sprintf(format,"_ d");
+      Snprintf(format,"_ d");
       format[1] = '%';
     }
     if (format[1] == '%') {
-      sprintf (suffixe,format,num);
+      Snprintf(suffixe,format,num);
       res.AssignCat (suffixe);
     }
   }

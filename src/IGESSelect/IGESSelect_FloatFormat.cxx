@@ -37,9 +37,9 @@ IGESSelect_FloatFormat::IGESSelect_FloatFormat ()
   } else {
     char format[20];
     char pourcent = '%'; char point = '.';
-    Sprintf(format,  "%c%d%c%dE",pourcent,digits+2,point,digits);
+    Snprintf(format,  "%c%d%c%dE",pourcent,digits+2,point,digits);
     themainform.AssignCat  (format);
-    Sprintf(format,  "%c%d%c%df",pourcent,digits+2,point,digits);
+    Snprintf(format,  "%c%d%c%df",pourcent,digits+2,point,digits);
     theformrange.AssignCat (format);
   }
   therangemin = 0.1; therangemax = 1000.;
@@ -91,7 +91,7 @@ IGESSelect_FloatFormat::IGESSelect_FloatFormat ()
   lab.AssignCat (themainform);
   if (theformrange.Length() > 0) {
     char mess[30];
-//    Sprintf(mess,", in range %f %f %s",
+//    Snprintf(mess,", in range %f %f %s",
 //	    therangemin,therangemax,theformrange.ToCString());
 //    lab.AssignCat(mess);
 //    ... FloatFormat a droit aussi a un beau format pour son propre compte ...

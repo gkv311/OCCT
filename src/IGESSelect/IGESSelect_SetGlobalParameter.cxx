@@ -56,7 +56,7 @@ IGESSelect_SetGlobalParameter::IGESSelect_SetGlobalParameter
   Handle(Interface_ParamSet) oldset = GS.Params();
   if (thenum <= 0 || thenum > oldset->NbParams()) {
     char mess[80];
-    sprintf(mess,"Set IGES Global Parameter : Number %d incorrect",thenum);
+    Snprintf(mess,"Set IGES Global Parameter : Number %d incorrect",thenum);
     ctx.CCheck()->AddFail(mess);
     return;
   }
@@ -71,8 +71,8 @@ IGESSelect_SetGlobalParameter::IGESSelect_SetGlobalParameter
     TCollection_AsciiString  IGESSelect_SetGlobalParameter::Label () const
 {
   char mess[80];
-  if (theval.IsNull()) sprintf(mess,"Set IGES Global Parameter (undefined)");
-  else sprintf(mess,"Set IGES Global Parameter Number %d to %s",
+  if (theval.IsNull()) Snprintf(mess,"Set IGES Global Parameter (undefined)");
+  else Snprintf(mess,"Set IGES Global Parameter Number %d to %s",
 	       thenum,theval->ToCString());
   return TCollection_AsciiString (mess);
 }

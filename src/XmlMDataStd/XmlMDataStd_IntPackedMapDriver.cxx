@@ -150,14 +150,15 @@ void XmlMDataStd_IntPackedMapDriver::Paste (const Handle(TDF_Attribute)& theSour
   {
     // Allocation of 12 chars for each integer including the space.
     // An example: -2 147 483 648
+    static constexpr size_t anItemLen = 12;
     Standard_Integer iChar = 0;
-    NCollection_LocalArray<Standard_Character> str(12 * aSize + 1);
+    NCollection_LocalArray<Standard_Character> str(anItemLen * aSize + 1);
 
     TColStd_MapIteratorOfPackedMapOfInteger anIt(aS->GetMap());
     for(;anIt.More();anIt.Next()) 
     {
       const Standard_Integer intValue = anIt.Key();
-      iChar += Sprintf(&(str[iChar]), "%d ", intValue);
+      iChar += Snprintf(&(str[iChar]), str.Size() - iChar, "%d ", intValue);
     }
 
     // No occurrence of '&', '<' and other irregular XML characters

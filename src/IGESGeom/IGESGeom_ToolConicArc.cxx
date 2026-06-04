@@ -221,7 +221,7 @@ void IGESGeom_ToolConicArc::OwnCheck(const Handle(IGESGeom_ConicArc)& ent,
   //Standard_Real eq = (A*x*x + B*x*y + C*y*y + D*x + E*y + F);
   // These messages are transferred in the translation procedure
 /*  if (eq < -eps || eq > eps) {
-    Sprintf(mess,"Start point does not satisfy conic equation, gap over %f",
+    Snprintf(mess,"Start point does not satisfy conic equation, gap over %f",
 	    Interface_MSG::Intervalled(eq));
     ach.AddFail(mess,"Start point does not satisfy conic equation, gap over %f");
 
@@ -232,7 +232,7 @@ void IGESGeom_ToolConicArc::OwnCheck(const Handle(IGESGeom_ConicArc)& ent,
   //y = ent->EndPoint().Y();
   //eq = (A*x*x + B*x*y + C*y*y + D*x + E*y + F);
 /*  if (eq < -eps || eq > eps) {
-    Sprintf(mess,"End point does not satisfy conic equation, gap over %f",
+    Snprintf(mess,"End point does not satisfy conic equation, gap over %f",
 	    Interface_MSG::Intervalled(eq));
     ach.AddFail(mess,"End point does not satisfy conic equation, gap over %f");
   }

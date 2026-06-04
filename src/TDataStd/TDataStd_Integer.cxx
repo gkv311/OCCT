@@ -196,7 +196,7 @@ Standard_OStream& TDataStd_Integer::Dump (Standard_OStream& anOS) const
   anOS << "Integer:: "<< this <<" : ";
   anOS << myValue; 
   Standard_Character sguid[Standard_GUID_SIZE_ALLOC];
-  myID.ToCString(sguid);
+  myID.ToCString(sguid, sizeof(sguid));
   anOS << sguid;
 //
   anOS <<"\nAttribute fields: ";

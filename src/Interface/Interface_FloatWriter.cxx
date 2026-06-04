@@ -50,8 +50,8 @@ Interface_FloatWriter::Interface_FloatWriter (const Standard_Integer chars)
     strcpy(therangeform ,"%f");
   } else {
     char pourcent = '%'; char point = '.';
-    Sprintf(themainform,  "%c%d%c%dE",pourcent,chars+2,point,chars);
-    Sprintf(therangeform, "%c%d%c%df",pourcent,chars+2,point,chars);
+    Snprintf(themainform,  "%c%d%c%dE",pourcent,chars+2,point,chars);
+    Snprintf(therangeform, "%c%d%c%df",pourcent,chars+2,point,chars);
   }
   therange1 = 0.1; therange2 = 1000.;
   thezerosup = Standard_True;
@@ -73,23 +73,13 @@ Interface_FloatWriter::Interface_FloatWriter (const Standard_Integer chars)
     Standard_CString  Interface_FloatWriter::FormatForRange () const
       {  const Standard_CString rangeform = Standard_CString(&therangeform[0]); return rangeform;  }
 
-//  ########################################################################
-
-    Standard_Integer Interface_FloatWriter::Write
-  (const Standard_Real val, const Standard_CString text) const
-{
-  const Standard_CString mainform  = Standard_CString(themainform);
-  const Standard_CString rangeform = Standard_CString(therangeform);
-  return Convert
-    (val,text,thezerosup,therange1,therange2,mainform,rangeform);
-}
-
 //=======================================================================
 //function : Convert
 //purpose  : 
 //=======================================================================
 Standard_Integer Interface_FloatWriter::Convert (const Standard_Real val, 
-						 const Standard_CString text,
+						 char* text,
+						 const size_t textSize,
 						 const Standard_Boolean zsup, 
 						 const Standard_Real R1, 
 						 const Standard_Real R2,
@@ -98,18 +88,17 @@ Standard_Integer Interface_FloatWriter::Convert (const Standard_Real val,
 {
 //    Valeur flottante, expurgee de "0000" qui trainent et de "E+00"
   const Standard_Integer anMasSize = 5; // change 6 to 5: index 5 is not used below
-  char lxp[anMasSize], *pText; 
+  char lxp[anMasSize];
   int i0 = 0, j0 = 0;
 
   for (Standard_Integer i = 0; i < anMasSize; ++i)
     lxp[i] = '\0';
 
-  pText=(char *)text;
   //
   if ( (val >= R1 && val <  R2) || (val <= -R1 && val > -R2) ) 
-    Sprintf(pText,rangeform,val);
-  else 
-    Sprintf(pText,mainform,val);
+    Snprintf(text, textSize, rangeform, val);
+  else
+    Snprintf(text, textSize, mainform, val);
   
   if (zsup) 
   {
@@ -127,7 +116,7 @@ Standard_Integer Interface_FloatWriter::Convert (const Standard_Real val,
         if (lxp[1] == '+' && lxp[2] == '0' && lxp[3] == '0' &&  lxp[4] == '\0') 
 	        lxp[0] = '\0';
 
-	      pText[i] = '\0';
+	      text[i] = '\0';
       }
       if (text[i] == '\0') break;
     }
@@ -139,15 +128,15 @@ Standard_Integer Interface_FloatWriter::Convert (const Standard_Real val,
       if (text[j] != '0') 
 	      break;
 
-      pText[j] = '\0';
+      text[j] = '\0';
     }
 
-    pText[j0+1] = lxp[0]; 
-    pText[j0+2] = lxp[1]; 
-    pText[j0+3] = lxp[2];
-    pText[j0+4] = lxp[3]; 
-    pText[j0+5] = lxp[4]; 
-    pText[j0+6] = '\0';
+    text[j0+1] = lxp[0];
+    text[j0+2] = lxp[1];
+    text[j0+3] = lxp[2];
+    text[j0+4] = lxp[3];
+    text[j0+5] = lxp[4];
+    text[j0+6] = '\0';
   }
   return (Standard_Integer)strlen(text);
 }

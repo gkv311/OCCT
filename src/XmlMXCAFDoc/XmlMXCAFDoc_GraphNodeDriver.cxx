@@ -146,11 +146,8 @@ void XmlMXCAFDoc_GraphNodeDriver::Paste (const Handle(TDF_Attribute)& theSource,
   if (aS.IsNull()) return;
   
   // graph id
-  Standard_Character aGuidStr [40];
-  Standard_PCharacter pGuidStr;
-  //
-  pGuidStr=(Standard_PCharacter)aGuidStr;
-  aS->ID().ToCString (pGuidStr);
+  Standard_Character aGuidStr[Standard_GUID_SIZE_ALLOC];
+  aS->ID().ToCString (aGuidStr, sizeof(aGuidStr));
   theTarget.Element().setAttribute(::TreeIdString(), aGuidStr);
 
   Standard_Integer aNb;

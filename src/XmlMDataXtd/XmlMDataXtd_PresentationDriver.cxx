@@ -195,10 +195,8 @@ void XmlMDataXtd_PresentationDriver::Paste
   if (aTPrs.IsNull()) return;
 
   //convert GUID into attribute value
-  Standard_Character aGuidStr [40];
-  Standard_PCharacter pGuidStr;
-  pGuidStr=aGuidStr;
-  aTPrs->GetDriverGUID().ToCString (pGuidStr);
+  Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
+  aTPrs->GetDriverGUID().ToCString (aGuidStr, sizeof(aGuidStr));
   theTarget.Element().setAttribute(::GuidString(), aGuidStr);
 
   // is displayed
