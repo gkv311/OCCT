@@ -490,11 +490,11 @@ void BRepFill_MultiLine::Curves(Handle(Geom_Curve)& Curve,
 #ifdef DRAW
     if ( AffichCurve) {
       char name[100];
-      sprintf(name,"C2_%d",NbProj);
+      Snprintf(name,"C2_%d",NbProj);
       DrawTrSurf::Set(name,TLine);
-      sprintf(name,"C3_%d",NbProj);
+      Snprintf(name,"C3_%d",NbProj);
       DrawTrSurf::Set(name,Curve);
-      sprintf(name,"SS_%d",NbProj);
+      Snprintf(name,"SS_%d",NbProj);
       DrawTrSurf::Set(name,Plane);
       NbProj++;
     }
