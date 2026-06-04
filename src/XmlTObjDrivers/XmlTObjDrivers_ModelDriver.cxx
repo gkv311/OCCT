@@ -104,8 +104,7 @@ void XmlTObjDrivers_ModelDriver::Paste
   Handle(TObj_Model) aModel = aTModel->Model();
 
   // Store model GUID.
-  Standard_PCharacter aPGuidString = new Standard_Character[256];
-  aModel->GetGUID().ToCString( aPGuidString );
-  XmlObjMgt::SetExtendedString (Target, aPGuidString);
-  delete []aPGuidString;
+  char aGuidString[Standard_GUID_SIZE_ALLOC];
+  aModel->GetGUID().ToCString(aGuidString, sizeof(aGuidString));
+  XmlObjMgt::SetExtendedString (Target, aGuidString);
 }

@@ -244,12 +244,12 @@ Standard_CString  Interface_Static::CDef
   if (part[0] == 'i') {
     Standard_Integer ilim;
     if (!stat->IntegerLimit((part[2] == 'a'),ilim)) return "";
-    Sprintf(defmess,"%d",ilim);  return defmess;
+    Snprintf(defmess,"%d",ilim);  return defmess;
   }
   if (part[0] == 'r') {
     Standard_Real rlim;
     if (!stat->RealLimit((part[2] == 'a'),rlim)) return "";
-    Sprintf(defmess,"%f",rlim);  return defmess;
+    Snprintf(defmess,"%f",rlim);  return defmess;
   }
   if (part[0] == 'u') return stat->UnitDef();
   return "";

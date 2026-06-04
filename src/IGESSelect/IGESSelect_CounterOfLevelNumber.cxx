@@ -80,7 +80,7 @@ IGESSelect_CounterOfLevelNumber::IGESSelect_CounterOfLevelNumber
 //  if (level == 0) Add(ent," NO LEVEL");
 //  else {
     char signature[30];
-    sprintf (signature,"%7d",level);
+    Snprintf(signature,"%7d",level);
     Add (ent,signature);
 //  }
 }
@@ -124,7 +124,7 @@ IGESSelect_CounterOfLevelNumber::IGESSelect_CounterOfLevelNumber
 //  puis ceux de AddLevel pour calculer la signature
   if (level < 0) return new TCollection_HAsciiString ("LEVEL LIST");
   char signature[30];
-  sprintf (signature,"%7d",level);
+  Snprintf(signature,"%7d",level);
   return new TCollection_HAsciiString (signature);
 }
 

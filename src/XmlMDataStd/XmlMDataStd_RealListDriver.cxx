@@ -153,7 +153,8 @@ void XmlMDataStd_RealListDriver::Paste(const Handle(TDF_Attribute)& theSource,
   theTarget.Element().setAttribute(::LastIndexString(), anU);
   // Allocation of 25 chars for each double value including the space:
   // An example: -3.1512678732195273e+020
-  NCollection_LocalArray<Standard_Character> str(25 * anU + 1);
+  static constexpr size_t anItemLen = 25;
+  NCollection_LocalArray<Standard_Character> str(anItemLen * anU + 1);
   if(anU == 0) str[0] = 0;
   else if (anU >= 1)
   {   
@@ -162,7 +163,7 @@ void XmlMDataStd_RealListDriver::Paste(const Handle(TDF_Attribute)& theSource,
     for (; itr.More(); itr.Next())
     {
       const Standard_Real& realValue = itr.Value();
-      iChar += Sprintf(&(str[iChar]), "%.17g ", realValue);
+      iChar += Snprintf(&(str[iChar]), str.Size() - iChar, "%.17g ", realValue);
     }
   }
   XmlObjMgt::SetStringValue (theTarget, (Standard_Character*)str, Standard_True);
@@ -170,8 +171,7 @@ void XmlMDataStd_RealListDriver::Paste(const Handle(TDF_Attribute)& theSource,
   if(aRealList->ID() != TDataStd_RealList::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    aRealList->ID().ToCString (pGuidStr);
+    aRealList->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

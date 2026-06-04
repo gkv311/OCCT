@@ -120,9 +120,8 @@ void XmlMDataStd_TreeNodeDriver::Paste
   if (aS->ID() != TDataStd_TreeNode::GetDefaultTreeID() ||
       theRelocTable.GetHeaderData()->StorageVersion().IntegerValue() < TDocStd_FormatVersion_VERSION_8)
   {
-    Standard_Character aGuidStr [40];
-    Standard_PCharacter pGuidStr=aGuidStr;
-    aS->ID().ToCString (pGuidStr);
+    Standard_Character aGuidStr[Standard_GUID_SIZE_ALLOC];
+    aS->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute(::TreeIdString(), aGuidStr);
   }
 
@@ -130,10 +129,11 @@ void XmlMDataStd_TreeNodeDriver::Paste
   int nbChildren = aS->NbChildren();
   
   // Allocate 11 digits for each ID (an integer) of the child + a space.
+  static constexpr size_t anItemLen = 11;
   Standard_Integer iChar = 0;
   NCollection_LocalArray<Standard_Character> str;
   if (nbChildren)
-    str.Allocate(11 * nbChildren + 1);
+    str.Allocate(anItemLen * nbChildren + 1);
 
   // form the string of numbers for the list of children
   Handle(TDataStd_TreeNode) aF = aS->First();
@@ -146,7 +146,7 @@ void XmlMDataStd_TreeNodeDriver::Paste
     }
 
     // Add number to the long string.
-    iChar += Sprintf(&(str[iChar]), "%d ", aNb);
+    iChar += Snprintf(&(str[iChar]), str.Size() - iChar, "%d ", aNb);
 
     // next child
     aF = aF->Next();

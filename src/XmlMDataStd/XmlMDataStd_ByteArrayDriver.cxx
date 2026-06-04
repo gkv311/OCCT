@@ -176,7 +176,8 @@ void XmlMDataStd_ByteArrayDriver::Paste(const Handle(TDF_Attribute)& theSource,
     const TColStd_Array1OfByte& arr = hArr->Array1();
 
     // Allocate 4 characters (including a space ' ') for each byte (unsigned char) from the array.
-    NCollection_LocalArray<Standard_Character> str(4 * arr.Length() + 1);
+    static constexpr size_t anItemLen = 4;
+    NCollection_LocalArray<Standard_Character> str(anItemLen * arr.Length() + 1);
 
     // Char counter in the array of chars.
     Standard_Integer iChar = 0;
@@ -186,7 +187,7 @@ void XmlMDataStd_ByteArrayDriver::Paste(const Handle(TDF_Attribute)& theSource,
     for (; iByte <= arr.Upper(); ++iByte)
     {
       const Standard_Byte& byte = arr.Value(iByte);
-      iChar += Sprintf(&(str[iChar]), "%d ", byte);
+      iChar += Snprintf(&(str[iChar]), str.Size() - iChar, "%d ", byte);
     }
 
     // Transfer the string (array of chars) to XML.
@@ -195,8 +196,7 @@ void XmlMDataStd_ByteArrayDriver::Paste(const Handle(TDF_Attribute)& theSource,
   if(aByteArray->ID() != TDataStd_ByteArray::GetID()) {
     //convert GUID
     Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-    Standard_PCharacter pGuidStr = aGuidStr;
-    aByteArray->ID().ToCString (pGuidStr);
+    aByteArray->ID().ToCString (aGuidStr, sizeof(aGuidStr));
     theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
   }
 }

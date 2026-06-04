@@ -387,12 +387,9 @@ Standard_OStream& TDF_Attribute::Dump(Standard_OStream& anOS) const
   if (IsValid())     anOS<<" Valid";
   if (IsBackuped())  anOS<<" Backuped";
   if (IsForgotten()) anOS<<" Forgotten";
-  char toto[45];
-  Standard_PCharacter pStr;
-  //
-  pStr=toto;
-  ID().ToCString(pStr);
-  anOS<<";\tID = "<<toto<<std::endl;
+  char aGuid[Standard_GUID_SIZE_ALLOC];
+  ID().ToCString(aGuid, sizeof(aGuid));
+  anOS << ";\tID = " << aGuid << std::endl;
   return anOS;
 }
 

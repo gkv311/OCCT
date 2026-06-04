@@ -91,7 +91,6 @@ void XmlMDataStd_GenericExtStringDriver::Paste (const Handle(TDF_Attribute)& the
   XmlObjMgt::SetExtendedString (theTarget, aStr->Get());
   //convert GUID
   Standard_Character aGuidStr [Standard_GUID_SIZE_ALLOC];
-  Standard_PCharacter pGuidStr = aGuidStr;
-  aStr->ID().ToCString (pGuidStr);
+  aStr->ID().ToCString (aGuidStr, sizeof(aGuidStr));
   theTarget.Element().setAttribute (::AttributeIDString(), aGuidStr);
 }

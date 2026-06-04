@@ -64,6 +64,6 @@ IGESSelect_AddFileComment::IGESSelect_AddFileComment  ()
 {
   Standard_Integer nb = NbLines();
   char labl[80];
-  sprintf (labl, "Add %d Comment Lines (Start Section)",nb);
+  Snprintf (labl, "Add %d Comment Lines (Start Section)",nb);
   return TCollection_AsciiString (labl);
 }
