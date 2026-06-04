@@ -210,23 +210,23 @@ static Standard_Integer DrawDim_VARIABLES (Draw_Interpretor& di,
       TopExp::Vertices(TopoDS::Edge(ex.Current()),vf,vl);
       if (M.Add(vf)) {
 	i++;
-	char* p = (char *)malloc(100);
-	Sprintf(p,"%s_%dv",a[1],i);
+	char p[100];
+	Snprintf(p, "%s_%dv", a[1], i);
 	DBRep::Set(p,vf);
 	di.AppendElement(p);
 	DrawDim::DrawShapeName (vf,p);
       }
       if (M.Add(vl)) {
 	i++;
-	char *p = (char *)malloc(100);
-	Sprintf(p,"%s_%dv",a[1],i);
+	char p[100];
+	Snprintf(p,"%s_%dv",a[1],i);
 	DBRep::Set(p,vl);
 	di.AppendElement(p);	
 	DrawDim::DrawShapeName (vl,p);
       }
       i++;
-      char *p = (char *)malloc(100);
-      Sprintf(p,"%s_%de",a[1],i);
+      char p[100];
+      Snprintf(p,"%s_%de",a[1],i);
       DBRep::Set(p,ex.Current());
       di.AppendElement(p);
       DrawDim::DrawShapeName (ex.Current(),p);

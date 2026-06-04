@@ -159,7 +159,7 @@ void XSDRAW::LoadDraw (Draw_Interpretor& theCommands)
     (const Standard_CString command, const Standard_CString varname)
 {
   char mess[100];
-  Sprintf (mess,command,varname);
+  Snprintf(mess,command,varname);
   thepilot->Execute (mess);
   return 1;  // stat ?
 }

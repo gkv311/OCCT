@@ -144,7 +144,7 @@ static Standard_Integer QADNaming_SolveSelection (Draw_Interpretor& di, Standard
     Standard_Boolean done = SL.Solve(valid);
     TopoDS_Shape Res = TNaming_Tool::CurrentShape(SL.NamedShape());
     //TopoDS_Shape Res = TNaming_Tool::CurrentShape(NS);
-    Sprintf (name,"%s_%s","new",a[2]);
+    Snprintf(name,"%s_%s","new",a[2]);
     Display (name,Res);
     return done?0:1;
   }

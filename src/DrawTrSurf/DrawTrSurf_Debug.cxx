@@ -66,7 +66,7 @@ Standard_EXPORT const char* DrawTrSurf_SetPnt (const char* theNameStr, void* the
   try {
     const gp_Pnt& aP = *(gp_Pnt*)thePntPtr;
     static char buff[256];
-    sprintf (buff, "Point (%.16g, %.16g, %.16g) set to DRAW variable %.80s", aP.X(), aP.Y(), aP.Z(), theNameStr);
+    Snprintf (buff, "Point (%.16g, %.16g, %.16g) set to DRAW variable %.80s", aP.X(), aP.Y(), aP.Z(), theNameStr);
     DrawTrSurf::Set (theNameStr, aP);
     return buff;
   }
@@ -86,7 +86,7 @@ Standard_EXPORT const char* DrawTrSurf_SetPnt2d (const char* theNameStr, void* t
   try {
     const gp_Pnt2d& aP = *(gp_Pnt2d*)thePnt2dPtr;
     static char buff[256];
-    sprintf (buff, "Point (%.16g, %.16g) set to DRAW variable %.80s", aP.X(), aP.Y(), theNameStr);
+    Snprintf (buff, "Point (%.16g, %.16g) set to DRAW variable %.80s", aP.X(), aP.Y(), theNameStr);
     DrawTrSurf::Set (theNameStr, aP);
     return buff;
   }

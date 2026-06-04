@@ -501,7 +501,7 @@ static Standard_Integer getFreeShapes (Draw_Interpretor& di, Standard_Integer ar
     for ( Standard_Integer i = 1; i<= Labels.Length(); i++) {
       TopoDS_Shape S = STool->GetShape ( Labels.Value(i) );
       char string[260];
-      Sprintf ( string, "%s_%d", argv[2], i );
+      Snprintf( string, "%s_%d", argv[2], i );
       DBRep::Set ( string, S );
       di << string << " ";
     }

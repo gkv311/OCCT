@@ -992,7 +992,7 @@ static Standard_Integer simulsweep(Draw_Interpretor& di,
   // Calculate the result
   Sweep->Simulate(N, List);
   for (ii = 1, it.Initialize(List); it.More(); it.Next(), ii++) {
-    Sprintf(name, "%s_%d", a[1], ii);
+    Snprintf(name, "%s_%d", a[1], ii);
     DBRep::Set(name, it.Value());
   }
 

@@ -73,7 +73,7 @@ static Standard_Integer BUC60842 (Draw_Interpretor& di, Standard_Integer /*argc*
 
   gp_Pln pln = plne->Pln();
   Handle(Geom2d_Curve) curve2d = GeomAPI::To2d (ell, pln);
-  Sprintf(abuf,"ell");
+  Snprintf(abuf,"ell");
   DrawTrSurf::Set(st,curve2d);
   if(!aContext.IsNull()) {
     Handle(AIS_Shape) aisp = 
@@ -82,7 +82,7 @@ static Standard_Integer BUC60842 (Draw_Interpretor& di, Standard_Integer /*argc*
   }
 
   Handle(Geom2d_Curve) fromcurve2d = GeomAPI::To2d (cir, pln);
-  Sprintf(abuf,"cil");
+  Snprintf(abuf,"cil");
   DrawTrSurf::Set(st,fromcurve2d);
   if(!aContext.IsNull()) {
     Handle(AIS_Shape) aisp = 
@@ -96,7 +96,7 @@ static Standard_Integer BUC60842 (Draw_Interpretor& di, Standard_Integer /*argc*
   Geom2dGcc_Lin2d2Tan lintan (qcur, qfromcur, 0.1, 0.0, 0.0);
   Standard_Integer i=0;
   for(i=0;i<lintan.NbSolutions();i++) {
-    Sprintf(abuf,"lintan_%d",i);
+    Snprintf(abuf,"lintan_%d",i);
     Handle(Geom2d_Line) glin = new Geom2d_Line(lintan.ThisSolution(i));
     DrawTrSurf::Set(st,glin);
     if(!aContext.IsNull()) {
@@ -425,7 +425,7 @@ static Standard_Integer OCC353 (Draw_Interpretor& di, Standard_Integer , const c
     res = sol.NbSolutions();
     for(Standard_Integer i=1;i<=res;i++) {
       Handle(Geom2d_Circle) aC = new Geom2d_Circle(sol.ThisSolution(i));
-      Sprintf(buf,"Result_%d",i);
+      Snprintf(buf,"Result_%d",i);
       st = buf;
       DrawTrSurf::Set(st,aC);
     }
@@ -761,7 +761,7 @@ static Standard_Integer OCC813 (Draw_Interpretor& di, Standard_Integer argc,cons
 
   Standard_Integer i;
   for(i=1;i<=lintan.NbSolutions();i++) {
-    Sprintf(abuf,"lintan_%d",i);
+    Snprintf(abuf,"lintan_%d",i);
     Handle(Geom2d_Line) glin = new Geom2d_Line(lintan.ThisSolution(i));
     DrawTrSurf::Set(st,glin);
     if(!aContext.IsNull()) {
@@ -838,7 +838,7 @@ static Standard_Integer OCC814 (Draw_Interpretor& di, Standard_Integer argc,cons
 
   Standard_Integer i;
   for(i=1;i<=lintan.NbSolutions();i++) {
-    Sprintf(abuf,"lintan_%d",i);
+    Snprintf(abuf,"lintan_%d",i);
     Handle(Geom2d_Line) glin = new Geom2d_Line(lintan.ThisSolution(i));
     DrawTrSurf::Set(st,glin);
     if(!aContext.IsNull()) {
@@ -917,7 +917,7 @@ static Standard_Integer OCC884 (Draw_Interpretor& di, Standard_Integer argc, con
   { 
     gp_Pnt pt = points3d(i); 
     di << "Info: Intersecting pt : (" << pt.X() << ", " << pt.Y() << ", " << pt.Z() << ")\n";
-    Sprintf(str,"p_%d",i);
+    Snprintf(str,"p_%d",i);
     DrawTrSurf::Set(aName,pt);
   }
 

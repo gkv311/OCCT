@@ -1275,11 +1275,11 @@ static Standard_Integer SurfaceGenOCC26675_1( Draw_Interpretor& theDI,
 
   char buff[1024];
 
-  Sprintf(buff, "%s_1", theArgVal[1]);
+  Snprintf(buff, "%s_1", theArgVal[1]);
   DrawTrSurf::Set(buff, aS1);
   theDI << buff << " ";
 
-  Sprintf(buff, "%s_2", theArgVal[1]);
+  Snprintf(buff, "%s_2", theArgVal[1]);
   DrawTrSurf::Set(buff, aS2);
   theDI << buff << "\n";
 
