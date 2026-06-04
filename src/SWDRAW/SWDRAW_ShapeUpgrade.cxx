@@ -653,7 +653,7 @@ static Standard_Integer DT_SplitCurve (Draw_Interpretor& di,
   Standard_Integer NbC=theCurves->Length();
   for (Standard_Integer icurv=1; icurv<=NbC; icurv++) {
     char name[100];
-    Sprintf(name,"%s%s%d",a[1],"_",icurv);
+    Snprintf(name,"%s%s%d",a[1],"_",icurv);
     char* newname = name;
     DrawTrSurf::Set(newname, theCurves->Value(icurv));
     di.AppendElement(newname);
@@ -698,7 +698,7 @@ static Standard_Integer DT_SplitCurve2d (Draw_Interpretor& di,
   Standard_Integer NbC=theCurves->Length();
   for (Standard_Integer icurv=1; icurv<=NbC; icurv++) {
     char name[100];
-        Sprintf(name,"%s%s%d",a[1],"_",icurv);
+    Snprintf(name,"%s%s%d",a[1],"_",icurv);
     char* newname = name;
     DrawTrSurf::Set(newname, theCurves->Value(icurv));
     di.AppendElement(newname);
@@ -885,7 +885,7 @@ di << "transfert resultat\n";
   for (Standard_Integer irow=1; irow<=NbRow; irow++) {
     for (Standard_Integer icol=1; icol<=NbCol; icol++) {
       char name[100];
-      Sprintf(name,"%s%s%d%s%d",a[1],"_",irow,"_",icol);
+      Snprintf(name,"%s%s%d%s%d",a[1],"_",irow,"_",icol);
       char* newname = name;
       DrawTrSurf::Set(newname, theSurfaces->Value(irow, icol));
       di.AppendElement(newname);

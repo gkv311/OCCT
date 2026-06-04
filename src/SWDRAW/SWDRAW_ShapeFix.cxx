@@ -516,7 +516,7 @@ static Standard_Integer fixshape (Draw_Interpretor& di, Standard_Integer argc, c
     if ( mess < 0 )
     {
       char buff[256];
-      Sprintf ( buff, "%s_%s", res, "m" );
+      Snprintf (buff, "%s_%s", res, "m");
       di << " Modified shapes saved in compound: " << buff;
       DBRep::Set (buff, aCompound);
     }

@@ -55,13 +55,13 @@ static Standard_Integer OCC527(Draw_Interpretor& di, Standard_Integer argc, cons
 
     // 3. Explode entry shape on faces and build sections from Zmin to Zmax with step aStep
     const Standard_Real Zmin = -40.228173882121, Zmax = 96.408126285268, aStep = 1.0;
-    char str[100]; str[0] = 0; Sprintf(str,"Test range: [%f, %f] with step %f\n",Zmin,Zmax,aStep); di << str;
+    char str[100]; str[0] = 0; Snprintf(str,"Test range: [%f, %f] with step %f\n",Zmin,Zmax,aStep); di << str;
     int nbf = 0;
     TopExp_Explorer aExp1;
     for (aExp1.Init(aShape,TopAbs_FACE); aExp1.More(); aExp1.Next())
     {
       // Process one face
-      str[0] = 0; Sprintf(str,"Face #%d: \t",nbf++); di << str;
+      str[0] = 0; Snprintf(str,"Face #%d: \t",nbf++); di << str;
       TopoDS_Face aFace = TopoDS::Face(aExp1.Current());
       
       // Build BndBox in order to avoid try of building section 
@@ -104,9 +104,9 @@ static Standard_Integer OCC527(Draw_Interpretor& di, Standard_Integer argc, cons
               // If section was built check distance between vertexes and plane of the one
               str[0] = 0;
               if (dist > toler)
-                Sprintf(str, "Dist=%f, Toler=%f, Param=%f FAULTY\n", dist, toler, gzmax);
+                Snprintf(str, "Dist=%f, Toler=%f, Param=%f FAULTY\n", dist, toler, gzmax);
               else
-                Sprintf(str, "Dist=%f, Toler=%f, Param=%f\n", dist, toler, gzmax);
+                Snprintf(str, "Dist=%f, Toler=%f, Param=%f\n", dist, toler, gzmax);
               di << str;
             }
             if (lmaxdist > gmaxdist)

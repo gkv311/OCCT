@@ -116,7 +116,7 @@ static Standard_Integer distmini(Draw_Interpretor& di, Standard_Integer n, const
     di << "\"distmini\" command returns:\n";
 
     char named[100];
-    Sprintf(named, "%s%s" ,ns0,"_val");
+    Snprintf(named, "%s%s" ,ns0,"_val");
     char* tempd = named;
     Draw::Set(tempd,dst.Value());
     di << named << " ";
@@ -129,30 +129,21 @@ static Standard_Integer distmini(Draw_Interpretor& di, Standard_Integer n, const
       if (dst.Value()<=1.e-9) 
       {
         TopoDS_Vertex V =BRepLib_MakeVertex(P1);
-        char namev[100];
-        if (i1==1) 
-          Sprintf(namev, "%s" ,ns0);
-        else
-          Sprintf(namev, "%s%d" ,ns0,i1);
-        char* tempv = namev;
-        DBRep::Set(tempv,V);
+        TCollection_AsciiString namev(ns0);
+        if (i1 != 1)
+          namev += i1;
+
+        DBRep::Set(namev.ToCString(), V);
         di << namev << " ";
       }
       else
       {
-        char name[100];
+        TCollection_AsciiString name(ns0);
         TopoDS_Edge E = BRepLib_MakeEdge (P1, P2);
-        if (i1==1)
-        {
-          Sprintf(name,"%s",ns0);
-        }
-        else
-        {
-          Sprintf(name,"%s%d",ns0,i1);
-        }
-        
-        char* temp = name;
-        DBRep::Set(temp,E);
+        if (i1 != 1)
+          name += i1;
+
+        DBRep::Set(name.ToCString(), E);
         di << name << " " ;
       }
     }
