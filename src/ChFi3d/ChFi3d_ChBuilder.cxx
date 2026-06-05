@@ -1780,10 +1780,8 @@ void ChFi3d_ChBuilder::ExtentTwoCorner(const TopoDS_Vertex&        V,
   Standard_Integer Sens = 0;
   ChFiDS_ListIteratorOfListOfStripe itel(LS);
   Standard_Boolean FF = Standard_True;
-  Standard_Boolean isfirst[2];
-  Standard_Integer Iedge[2];
-  Iedge[0] = 1;
-  Iedge[1] = 1;
+  Standard_Boolean isfirst[2] = { false, false };
+  Standard_Integer Iedge[2] = { 1, 1 };
   Handle(ChFiDS_Stripe) Stripe[2];
   Handle(ChFiDS_Spine) Spine[2];
 

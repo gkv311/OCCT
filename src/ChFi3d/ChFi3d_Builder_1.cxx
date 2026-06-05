@@ -216,7 +216,7 @@ static TopoDS_Edge MakeOffsetEdge(const TopoDS_Edge&         theEdge,
   }
   //Projection of extremities onto <IntCurve>
   GeomAdaptor_Curve GAcurve(IntCurve);
-  Standard_Real Params [2];
+  Standard_Real Params[2] = {};
   for (Standard_Integer ind_end = 0; ind_end < 2; ind_end++)
   {
     if (ind_end == 1 && aBAcurve.IsClosed()/*HGuide->IsPeriodic()*//*HGuide->IsClosed()*/)
