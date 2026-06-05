@@ -36,7 +36,7 @@ AIS_ViewController::AIS_ViewController()
   myToAskNextFrame    (false),
   myIsContinuousRedraw(false),
   myMinCamDistance    (1.0),
-  myRotationMode      (AIS_RotationMode_BndBoxActive),
+  myRotationMode      (AIS_RotationMode_PickLast),
   myNavigationMode    (AIS_NavigationMode_Orbit),
   myMouseAccel           (1.0f),
   myOrbitAccel           (1.0f),
