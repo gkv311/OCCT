@@ -33,6 +33,22 @@
   #endif
 #endif
 
+//! @def Standard_PRINTF_FORMAT
+//! This macro defines format attributes to printf-style functions.
+//! The first argument specifies index (starting from 1) of 'format' argument,
+//! and second one the index of variadic list (or 0 in case of va_list).
+//!
+//! MinGW requires special handling due to different format specifiers on different platforms.
+//! The macro __MINGW_PRINTF_FORMAT maps to either gnu_printf or ms_printf
+//! depending on where we are compiling to avoid warnings on format specifiers that are legal.
+#if defined(__MINGW64__) || defined(__MINGW32__)
+  #define Standard_PRINTF_FORMAT(fmtpos, attrpos) __attribute__((__format__(__MINGW_PRINTF_FORMAT, fmtpos, attrpos)))
+#elif defined(__GNUC__) || defined(__clang__)
+  #define Standard_PRINTF_FORMAT(fmtpos, attrpos) __attribute__((__format__(__printf__, fmtpos, attrpos)))
+#else
+  #define Standard_PRINTF_FORMAT(fmtpos, attrpos)
+#endif
+
 // C++ only definitions
 #ifdef __cplusplus
 
@@ -83,17 +99,19 @@ Standard_EXPORT double Atof (const char* theStr);
 Standard_EXPORT double Strtod (const char* theStr, char** theNextPtr);
 
 //! Equivalent of standard C function printf() that always uses C locale
-Standard_EXPORT int Printf (const char* theFormat, ...);
+Standard_EXPORT int Printf (const char* theFormat, ...) Standard_PRINTF_FORMAT(1, 2);
 
 //! Equivalent of standard C function fprintf() that always uses C locale
-Standard_EXPORT int Fprintf (FILE* theFile, const char* theFormat, ...);
+Standard_EXPORT int Fprintf (FILE* theFile, const char* theFormat, ...) Standard_PRINTF_FORMAT(2, 3);
 
 //! Equivalent of standard C function sprintf() that always uses C locale
 Standard_DEPRECATED("Snprintf should be used instead")
-Standard_EXPORT int Sprintf (char* theBuffer, const char* theFormat, ...);
+Standard_EXPORT int Sprintf (char* theBuffer, const char* theFormat, ...) Standard_PRINTF_FORMAT(2, 3);
 
 //! Equivalent of standard C function snprintf() that always uses C locale
-Standard_EXPORT int Snprintf(char* theBuffer, const size_t theSize, const char* theFormat, ...);
+Standard_EXPORT int Snprintf(char* theBuffer,
+                             const size_t theSize,
+                             const char* theFormat, ...) Standard_PRINTF_FORMAT(3, 4);
 
 //! Equivalent of standard C function vsprintf() that always uses C locale.
 //! Note that this function does not check buffer bounds and should be used with precaution measures
@@ -103,7 +121,9 @@ Standard_EXPORT int Snprintf(char* theBuffer, const size_t theSize, const char* 
 //! @param[in] theArgList  argument list for specified format
 //! @return the total number of characters written, or a negative number on error
 Standard_DEPRECATED("Vsnprintf should be used instead")
-Standard_EXPORT int Vsprintf (char* theBuffer, const char* theFormat, va_list theArgList);
+Standard_EXPORT int Vsprintf (char* theBuffer,
+                              const char* theFormat,
+                              va_list theArgList) Standard_PRINTF_FORMAT(2, 0);
 
 //! Equivalent of standard C function vsnprintf() that always uses C locale.
 //! The function truncates the text when it doesn't fits into buffer bounds.
@@ -112,14 +132,17 @@ Standard_EXPORT int Vsprintf (char* theBuffer, const char* theFormat, va_list th
 //! @param[in]      theFormat   format to apply
 //! @param[in]      theArgList  argument list for specified format
 //! @return the total number of characters written, or a negative number on error
-Standard_EXPORT int Vsnprintf(char* theBuffer, const size_t theSize, const char* theFormat, va_list theArgList);
+Standard_EXPORT int Vsnprintf(char* theBuffer,
+                              const size_t theSize,
+                              const char* theFormat,
+                              va_list theArgList) Standard_PRINTF_FORMAT(3, 0);
 
 #ifdef __cplusplus
 }
 
 //! Helper C++ template for fixed-size buffers.
 template<size_t theSize>
-inline int Snprintf(char(&theBuffer)[theSize], const char* theFormat, ...)
+inline int Standard_PRINTF_FORMAT(2, 3) Snprintf(char(&theBuffer)[theSize], const char* theFormat, ...)
 {
   va_list argp;
   va_start(argp, theFormat);
