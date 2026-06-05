@@ -213,11 +213,11 @@ void ChFi3d_ChBuilder::PerformThreeCorner(const Standard_Integer Jndex)
   const TopoDS_Vertex& Vtx = myVDataMap.FindKey(Jndex);
   ChFiDS_ListIteratorOfListOfStripe It;
 //  Standard_Integer Index[3],pivot,deb,fin,ii,jj,kk;
-  Standard_Integer Index[3],pivot=0,deb=0,fin=0,ii;
+  Standard_Integer Index[3]={}, pivot=0,deb=0,fin=0,ii=0;
   Handle(ChFiDS_Stripe) CD[3];
   TopoDS_Face face[3];
   Standard_Integer jf[3][3];
-  Standard_Boolean sameside[3], oksea[3];
+  Standard_Boolean sameside[3] = {}, oksea[3] = {};
   for(Standard_Integer g = 0; g <= 2; g++){oksea[g] = Standard_False;}
   Standard_Integer i[3][3];
   Standard_Integer sens[3];
