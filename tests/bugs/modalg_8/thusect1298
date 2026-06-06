@@ -1,0 +1,47 @@
+puts "========================"
+puts "Modeling - Fix out-of-range in BRepFill_CompatibleWires::SameNumberByPolarMethod on mismatched ThruSections profiles"
+puts "========================"
+puts ""
+
+# algorithm is expected to fail, but NOT to crash - disable signals
+puts "REQUIRED ALL: Algorithm has failed"
+dsetsignal unset
+
+pload MODELING
+
+set pp {
+{{-0.0502 2.1681 -3.7500} {-0.0162 0.2239 -3.7500} {0.0463 0.2250 -3.7500} {0.0357 0.8300 -3.7500} {0.0123 2.1692 -3.7500}}
+{{-0.0162 0.2239 -2.9167} {0.0007 -0.7416 -2.9167} {0.0632 -0.7405 -2.9167} {0.0556 -0.3053 -2.9167} {0.0463 0.2250 -2.9167}}
+{{-0.0451 -1.2651 -2.0833} {0.0174 -1.2640 -2.0833} {0.0689 -1.0639 -2.0833} {0.0632 -0.7405 -2.0833} {0.0007 -0.7416 -2.0833}}
+{{-0.1048 -1.3334 -1.2500} {-0.0423 -1.3323 -1.2500} {0.0174 -1.2640 -1.2500} {-0.0451 -1.2651 -1.2500}}
+{{-0.1048 -1.3334 +1.2500} {-0.0423 -1.3323 +1.2500} {0.0174 -1.2640 +1.2500} {-0.0451 -1.2651 +1.2500}}
+{{-0.0451 -1.2651 +2.0833} {0.0174 -1.2640 +2.0833} {0.0689 -1.0639 +2.0833} {0.0632 -0.7405 +2.0833} {0.0007 -0.7416 +2.0833}}
+{{-0.0162 0.2239 +2.9167} {0.0007 -0.7416 +2.9167} {0.0632 -0.7405 +2.9167} {0.0556 -0.3053 +2.9167} {0.0463 0.2250 +2.9167}}
+{{-0.0502 2.1681 +3.7500} {-0.0162 0.2239 +3.7500} {0.0463 0.2250 +3.7500} {0.0357 0.8300 +3.7500} {0.0123 2.1692 +3.7500}}
+}
+
+# cannot use 'polyline' command, as it doesn't has 'close' flag
+set ww {}
+for {set i 0} {$i < [llength $pp]} {incr i} {
+  set ppi [lindex $pp $i]
+  for {set j 0} {$j < [llength $ppi]} {incr j} {
+    vertex v$j {*}[lindex $ppi $j]
+  }
+
+  set ee {}
+  for {set j 1} {$j < [llength $ppi]} {incr j} {
+    edge e$j v[expr $j-1] v$j
+    lappend ee e$j
+  }
+  edge e0 v[expr [llength $ppi]-1] v0
+  lappend ee e0
+
+  wire w$i {*}$ee
+  lappend ww w$i
+}
+
+thrusections res 1 0 {*}$ww
+
+top
+fit
+xwd $imagedir/${test_image}_1.png
