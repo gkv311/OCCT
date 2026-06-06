@@ -1159,11 +1159,18 @@ void BRepFill_CompatibleWires::
     gp_Pnt PPs = Curve.Value(0.1*(U1+9*U2));
     TopTools_ListIteratorOfListOfShape itF(MapVLV(VF)),itL(MapVLV(VL));
     Standard_Integer rang = ideb;
-    while (rang < i) {
+    while (rang < i && itF.More() && itL.More()) {
       itF.Next();
       itL.Next();
       rang++;
     }
+    if (!itF.More() || !itL.More())
+    {
+      // correspondence chain shorter than the section index - fail gracefully
+      myStatus = BRepFill_ThruSectionErrorStatus_Failed;
+      return;
+    }
+
     TopoDS_Vertex V1 = TopoDS::Vertex(itF.Value()), V2 = TopoDS::Vertex(itL.Value());
     TopoDS_Edge Esol;
     Standard_Real scalmax=0.;
