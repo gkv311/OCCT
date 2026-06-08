@@ -24,6 +24,7 @@
 #include <OSD_Path.hxx>
 #include <Precision.hxx>
 #include <Standard_Overflow.hxx>
+#include <TColStd_PackedMapOfInteger.hxx>
 
 #include <NCollection_Vector.hxx>
 #include <NCollection_IncAllocator.hxx>
@@ -844,6 +845,175 @@ static Standard_Integer QANColTestIndexedDataMap(Draw_Interpretor& di, Standard_
   return 0;
 }
 
+#define QA_COMPARE(val1, val2) \
+  di << "Checking " #val1 " == " #val2 << \
+        ((val1) == (val2) ? ": OK\n" : ": Error\n")
+
+template<class T>
+void TestIntegerMap(Draw_Interpretor& di)
+{
+  // input data
+  constexpr int aLeftLower = 1;
+  constexpr int aLeftUpper = 10;
+  constexpr int aRightLower = 5;
+  constexpr int aRightUpper = 15;
+
+  // define arguments
+  T aMapLeft;
+  for (int aKeyIter = aLeftLower; aKeyIter <= aLeftUpper; ++aKeyIter)
+    aMapLeft.Add(aKeyIter);
+
+  T aMapRight;
+  for (int aKeyIter = aRightLower; aKeyIter <= aRightUpper; ++aKeyIter)
+    aMapRight.Add(aKeyIter);
+
+  QA_COMPARE(aMapLeft.Contains(aMapRight), false);
+  QA_COMPARE(aMapRight.Contains(aMapLeft), false);
+
+  // validate Union operation
+  T aMapUnion;
+  aMapUnion.Union(aMapLeft, aMapRight);
+  QA_COMPARE(aMapUnion.Extent(), aRightUpper - aLeftLower + 1);
+  for (int aKeyIter = aLeftLower; aKeyIter <= aRightUpper; ++aKeyIter)
+    QA_COMPARE(aMapUnion.Contains(aKeyIter), true);
+
+  // validate Intersection operation
+  T aMapSect;
+  aMapSect.Intersection(aMapLeft, aMapRight);
+  QA_COMPARE(aMapSect.Extent(), aLeftUpper - aRightLower + 1);
+  for (int aKeyIter = aRightLower; aKeyIter <= aLeftUpper; ++aKeyIter)
+    QA_COMPARE(aMapSect.Contains(aKeyIter), true);
+
+  QA_COMPARE(aMapLeft.Contains(aMapSect), true);
+  QA_COMPARE(aMapRight.Contains(aMapSect), true);
+
+  // validate Substruction operation
+  T aMapSubsLR;
+  aMapSubsLR.Subtraction(aMapLeft, aMapRight);
+  QA_COMPARE(aMapSubsLR.Extent(), aRightLower - aLeftLower);
+  for (int aKeyIter = aLeftLower; aKeyIter < aRightLower; ++aKeyIter)
+    QA_COMPARE(aMapSubsLR.Contains(aKeyIter), true);
+
+  T aMapSubsRL;
+  aMapSubsRL.Subtraction(aMapRight, aMapLeft);
+  QA_COMPARE(aMapSubsRL.Extent(), aRightUpper - aLeftUpper);
+  for (int aKeyIter = aLeftUpper + 1; aKeyIter < aRightUpper; ++aKeyIter)
+    QA_COMPARE(aMapSubsRL.Contains(aKeyIter), true);
+
+  // validate Difference operation
+  T aMapDiff;
+  aMapDiff.Difference(aMapLeft, aMapRight);
+  QA_COMPARE(aMapDiff.Extent(), aRightLower - aLeftLower + aRightUpper - aLeftUpper);
+  for (int aKeyIter = aLeftLower; aKeyIter < aRightLower; ++aKeyIter)
+    QA_COMPARE(aMapDiff.Contains(aKeyIter), true);
+
+  for (int aKeyIter = aLeftUpper + 1; aKeyIter < aRightUpper; ++aKeyIter)
+    QA_COMPARE(aMapDiff.Contains(aKeyIter), true);
+
+  // validate Exchange operation
+  {
+    T aMapSwap;
+    aMapSwap.Exchange(aMapSect);
+    for (int aKeyIter = aRightLower; aKeyIter <= aLeftUpper; ++aKeyIter)
+      QA_COMPARE(aMapSwap.Contains(aKeyIter), true);
+
+    QA_COMPARE(aMapSect.IsEmpty(), true);
+    aMapSwap.Add(34);
+    aMapSect.Add(43);
+
+    T aMapCopy(aMapSwap);
+    QA_COMPARE(aMapCopy.IsEqual(aMapSwap), true);
+    aMapCopy.Remove(34);
+    aMapCopy.Add(43);
+    QA_COMPARE(aMapCopy.IsEqual(aMapSwap), false);
+  }
+
+  // validate Differ operation of exactly same maps
+  {
+    T aDiffMap1;
+    for (int i = 0; i < 4; ++i)
+      aDiffMap1.Add(i);
+
+    T aDiffMap2;
+    for (int i = 0; i < 4; ++i)
+      aDiffMap2.Add(i);
+
+    aDiffMap1.Differ(aDiffMap2);
+    QA_COMPARE(aDiffMap1.IsEmpty(), true);
+  }
+
+  // validate Differ operation of non-overlapped maps
+  {
+    T aDiffMap1;
+    for (int i = 0; i < 4; ++i)
+      aDiffMap1.Add(i);
+
+    // the indices are deliberatly selected to be put
+    // into different buckets of TColStd_PackedMapOfInteger,
+    // e.g. packedKeyIndex() -> theKey>>5
+    T aDiffMap2;
+    for (int i = 32; i < 36; ++i)
+      aDiffMap2.Add(i);
+
+    aDiffMap1.Differ(aDiffMap2);
+    QA_COMPARE(aDiffMap1.Extent(), 8);
+    for (int i = 0; i < 36; ++i)
+      QA_COMPARE(aDiffMap1.Contains(i), i < 4 || i >= 32);
+  }
+
+  // validate Differ operation of overlapped maps
+  {
+    T aDiffMap1;
+    for (int i = 0; i < 4; ++i)
+      aDiffMap1.Add(i);
+
+    T aDiffMap2;
+    for (int i = 2; i < 6; ++i)
+      aDiffMap2.Add(i);
+
+    aDiffMap1.Differ(aDiffMap2);
+    QA_COMPARE(aDiffMap1.Extent(), 4);
+    for (int i = 0; i < 6; ++i)
+      QA_COMPARE(aDiffMap1.Contains(i), i < 2 || i >= 4);
+  }
+}
+
+//=======================================================================
+//function : QANColTestIntMapBooleans
+//purpose  :
+//=======================================================================
+static Standard_Integer QANColTestIntMapBooleans(Draw_Interpretor& theDI,
+                                                 Standard_Integer theNbArgs,
+                                                 const char** )
+{
+  if (theNbArgs != 1)
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
+
+  TestIntegerMap<NCollection_Map<Standard_Integer>>(theDI);
+  return 0;
+}
+
+//=======================================================================
+//function : QANColTestPackedIntMapBooleans
+//purpose  :
+//=======================================================================
+static Standard_Integer QANColTestPackedIntMapBooleans(Draw_Interpretor& theDI,
+                                                       Standard_Integer theNbArgs,
+                                                       const char**)
+{
+  if (theNbArgs != 1)
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
+
+  TestIntegerMap<TColStd_PackedMapOfInteger>(theDI);
+  return 0;
+}
+
 //=======================================================================
 //function : QANColTestList
 //purpose  : 
@@ -1389,7 +1559,15 @@ void QANCollection::CommandsTest(Draw_Interpretor& theCommands) {
     __FILE__, QANColTestArray1, group);
   theCommands.Add("QANColTestArray2",         "QANColTestArray2 LowerRow UpperRow LowerCol UpperCol",
     __FILE__, QANColTestArray2, group);  
-  theCommands.Add("QANColTestMap",            "QANColTestMap",            __FILE__, QANColTestMap,            group);  
+  theCommands.Add("QANColTestMap",            "QANColTestMap",            __FILE__, QANColTestMap,            group);
+  theCommands.Add("QANColTestIntMapBooleans",
+                  "Check Boolean logical operations on NCollection_Map<int>\n"
+                  "(Union, Intersection, Difference, Subtraction)",
+                  __FILE__, QANColTestIntMapBooleans, group);
+  theCommands.Add("QANColTestPackedIntMapBooleans",
+                  "Check Boolean logical operations on TColStd_PackedMapOfInteger\n"
+                  "(Union, Intersection, Difference, Subtraction)",
+                  __FILE__, QANColTestPackedIntMapBooleans, group);
   theCommands.Add("QANColTestDataMap",        "QANColTestDataMap",        __FILE__, QANColTestDataMap,        group);  
   theCommands.Add("QANColTestDoubleMap",      "QANColTestDoubleMap",      __FILE__, QANColTestDoubleMap,      group);  
   theCommands.Add("QANColTestIndexedMap",     "QANColTestIndexedMap",     __FILE__, QANColTestIndexedMap,     group);  

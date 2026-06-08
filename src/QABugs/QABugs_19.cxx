@@ -1401,103 +1401,6 @@ static Standard_Integer OCC24137 (Draw_Interpretor& theDI, Standard_Integer theN
   return 0;
 }
 
-//! Check boolean operations on NCollection_Map
-static Standard_Integer OCC24271 (Draw_Interpretor& di,
-                                  Standard_Integer  /*theArgNb*/,
-                                  const char**      /*theArgVec*/)
-{
-  // input data
-  const Standard_Integer aLeftLower  = 1;
-  const Standard_Integer aLeftUpper  = 10;
-  const Standard_Integer aRightLower = 5;
-  const Standard_Integer aRightUpper = 15;
-
-  // define arguments
-  NCollection_Map<Standard_Integer> aMapLeft;
-  for (Standard_Integer aKeyIter = aLeftLower; aKeyIter <= aLeftUpper; ++aKeyIter)
-  {
-    aMapLeft.Add (aKeyIter);
-  }
-
-  NCollection_Map<Standard_Integer> aMapRight;
-  for (Standard_Integer aKeyIter = aRightLower; aKeyIter <= aRightUpper; ++aKeyIter)
-  {
-    aMapRight.Add (aKeyIter);
-  }
-
-  QCOMPARE (aMapLeft .Contains (aMapRight), Standard_False);
-  QCOMPARE (aMapRight.Contains (aMapLeft),  Standard_False);
-
-  // validate Union operation
-  NCollection_Map<Standard_Integer> aMapUnion;
-  aMapUnion.Union (aMapLeft, aMapRight);
-  QCOMPARE (aMapUnion.Extent(), aRightUpper - aLeftLower + 1);
-  for (Standard_Integer aKeyIter = aLeftLower; aKeyIter <= aRightUpper; ++aKeyIter)
-  {
-    QCOMPARE (aMapUnion.Contains (aKeyIter), Standard_True);
-  }
-
-  // validate Intersection operation
-  NCollection_Map<Standard_Integer> aMapSect;
-  aMapSect.Intersection (aMapLeft, aMapRight);
-  QCOMPARE (aMapSect.Extent(), aLeftUpper - aRightLower + 1);
-  for (Standard_Integer aKeyIter = aRightLower; aKeyIter <= aLeftUpper; ++aKeyIter)
-  {
-    QCOMPARE (aMapSect.Contains (aKeyIter), Standard_True);
-  }
-  QCOMPARE (aMapLeft .Contains (aMapSect), Standard_True);
-  QCOMPARE (aMapRight.Contains (aMapSect), Standard_True);
-
-  // validate Substruction operation
-  NCollection_Map<Standard_Integer> aMapSubsLR;
-  aMapSubsLR.Subtraction (aMapLeft, aMapRight);
-  QCOMPARE (aMapSubsLR.Extent(), aRightLower - aLeftLower);
-  for (Standard_Integer aKeyIter = aLeftLower; aKeyIter < aRightLower; ++aKeyIter)
-  {
-    QCOMPARE (aMapSubsLR.Contains (aKeyIter), Standard_True);
-  }
-
-  NCollection_Map<Standard_Integer> aMapSubsRL;
-  aMapSubsRL.Subtraction (aMapRight, aMapLeft);
-  QCOMPARE (aMapSubsRL.Extent(), aRightUpper - aLeftUpper);
-  for (Standard_Integer aKeyIter = aLeftUpper + 1; aKeyIter < aRightUpper; ++aKeyIter)
-  {
-    QCOMPARE (aMapSubsRL.Contains (aKeyIter), Standard_True);
-  }
-
-  // validate Difference operation
-  NCollection_Map<Standard_Integer> aMapDiff;
-  aMapDiff.Difference (aMapLeft, aMapRight);
-  QCOMPARE (aMapDiff.Extent(), aRightLower - aLeftLower + aRightUpper - aLeftUpper);
-  for (Standard_Integer aKeyIter = aLeftLower; aKeyIter < aRightLower; ++aKeyIter)
-  {
-    QCOMPARE (aMapDiff.Contains (aKeyIter), Standard_True);
-  }
-  for (Standard_Integer aKeyIter = aLeftUpper + 1; aKeyIter < aRightUpper; ++aKeyIter)
-  {
-    QCOMPARE (aMapDiff.Contains (aKeyIter), Standard_True);
-  }
-
-  // validate Exchange operation
-  NCollection_Map<Standard_Integer> aMapSwap;
-  aMapSwap.Exchange (aMapSect);
-  for (Standard_Integer aKeyIter = aRightLower; aKeyIter <= aLeftUpper; ++aKeyIter)
-  {
-    QCOMPARE (aMapSwap.Contains (aKeyIter), Standard_True);
-  }
-  QCOMPARE (aMapSect.IsEmpty(), Standard_True);
-  aMapSwap.Add (34);
-  aMapSect.Add (43);
-
-  NCollection_Map<Standard_Integer> aMapCopy (aMapSwap);
-  QCOMPARE (aMapCopy.IsEqual (aMapSwap), Standard_True);
-  aMapCopy.Remove (34);
-  aMapCopy.Add    (43);
-  QCOMPARE (aMapCopy.IsEqual (aMapSwap), Standard_False);
-
-  return 0;
-}
-
 #define QVERIFY(val1) \
   di << "Checking " #val1 " == Standard_True" << \
         ((val1) == Standard_True ? ": OK\n" : ": Error\n")
@@ -5350,7 +5253,6 @@ void QABugs::Commands_19(Draw_Interpretor& theCommands) {
   theCommands.Add ("OCC11758", "OCC11758", __FILE__, OCC11758, group);
   theCommands.Add ("OCC24005", "OCC24005 result", __FILE__, OCC24005, group);
   theCommands.Add ("OCC24137", "OCC24137 face vertex U V [N]", __FILE__, OCC24137, group);
-  theCommands.Add ("OCC24271", "Boolean operations on NCollection_Map", __FILE__, OCC24271, group);
   theCommands.Add ("OCC23972", "OCC23972", __FILE__, OCC23972, group);
   theCommands.Add ("OCC24370", "OCC24370 edge pcurve surface prec", __FILE__, OCC24370, group);
   theCommands.Add ("OCC24533", "OCC24533", __FILE__, OCC24533, group);
