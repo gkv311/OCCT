@@ -1,3 +1,10 @@
 puts "Check NCollection_Map functionality"
 
+# common map operations
 QANColTestMap
+
+# Boolean logical operations on NCollection_Map<int>
+QANColTestIntMapBooleans
+
+# Boolean logical operations on TColStd_PackedMapOfInteger
+QANColTestPackedIntMapBooleans
