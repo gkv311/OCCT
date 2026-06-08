@@ -794,6 +794,7 @@ Standard_Boolean TColStd_PackedMapOfInteger::Subtract
               if (q)  q->SetNext (pNext);
               else    myData1[i]  = pNext;
               delete p1;
+              p1 = nullptr;
             }
             else if ( aNewData != p1->Data() )
             {
@@ -942,52 +943,62 @@ Standard_Boolean TColStd_PackedMapOfInteger::Differ(const TColStd_PackedMapOfInt
     return Standard_True;
   }
 
-  size_t aNewExtent (0);
+  size_t aNewExtent = myExtent;
   const Standard_Integer nBuckets2 = theMap.myNbBuckets;
   Standard_Boolean isChanged = Standard_False;
   // Iteration by other map
   for (Standard_Integer i = 0; i <= nBuckets2; i++)
   {
-      TColStd_intMapNode * q  = 0L;
+    TColStd_intMapNode* q = nullptr;
     const TColStd_intMapNode* p2 = theMap.myData1[i];
-    while (p2 != 0L)
+    while (p2 != nullptr)
     {
       // Find aKey - the base address of currently iterated block
       const Standard_Integer aKey = p2->Key();
       const Standard_Integer aKeyInt = packedKeyIndex (aKey);
-        
+
       // Find the corresponding block in the 1st map
       TColStd_intMapNode* p1 = myData1[HashCode (aKeyInt, myNbBuckets)];
-      TColStd_intMapNode* pNext = p1->Next();
+      bool isDeletedP1 = false;
       while (p1)
       {
-        if (p1->IsEqual(aKeyInt))
+        TColStd_intMapNode* pNext = p1->Next();
+        if (!p1->IsEqual(aKeyInt))
         {
-          const unsigned int aNewData = p1->Data() ^ p2->Data();
-          // Store the block - result of operation
-          if (aNewData == 0)
-          {
-            // no match - the block has to be removed
-            --myNbPackedMapNodes;
-            if (q)  q->SetNext (pNext);
-            else    myData1[i]  = pNext;
-            delete p1;
-          }
-          else if ( aNewData != p1->Data() )
-          {
-            p1->ChangeData() = aNewData;
-            isChanged = Standard_True;
-            aNewExtent += TColStd_Population (p1->ChangeMask(), aNewData);
-            q = p1;
-          }
-          break;
+          p1 = pNext;
+          continue;
         }
-        p1 = pNext;
+
+        const unsigned int aNewData = p1->Data() ^ p2->Data();
+        // Store the block - result of operation
+        if (aNewData == 0)
+        {
+          // no match - the block has to be removed
+          isChanged = true;
+          aNewExtent -= p1->NbValues();
+          --myNbPackedMapNodes;
+          if (q)  q->SetNext (pNext);
+          else    myData1[i]  = pNext;
+          delete p1;
+          p1 = nullptr;
+          isDeletedP1 = true;
+        }
+        else if (aNewData != p1->Data())
+        {
+          isChanged = true;
+          aNewExtent -= p1->NbValues();
+          p1->ChangeData() = aNewData;
+          aNewExtent += TColStd_Population (p1->ChangeMask(), aNewData);
+          q = p1;
+        }
+        break;
       }
       // Add the block from the 2nd map only in the case when the similar
       // block has not been found in the 1st map
-      if (p1 == 0L)
+      if (p1 == nullptr && !isDeletedP1)
       {
+        isChanged = true;
+        aNewExtent += p2->NbValues();
         if (Resizable())
         {
           ReSize (myNbPackedMapNodes);
@@ -996,12 +1007,11 @@ Standard_Boolean TColStd_PackedMapOfInteger::Differ(const TColStd_PackedMapOfInt
         myData1[aHashCode] = new TColStd_intMapNode (p2->Mask(), p2->Data(),
                                                      myData1[aHashCode]);
         ++myNbPackedMapNodes;
-        aNewExtent += p2->NbValues();
-        isChanged = Standard_True;
       }
       p2 = p2->Next();
     }
   }
+
   myExtent = aNewExtent;
   return isChanged;
 }

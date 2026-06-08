@@ -460,6 +460,27 @@ public:
   { return IsSubset(MM); }
 
   /**
+   * Returns True if @p theOther is subset of this map, i.e. all elements
+   * contained in @p theOther are contained also in this map.
+   * If @p theOther is empty than this method always returns true.
+   */
+  Standard_Boolean Contains(const TColStd_PackedMapOfInteger& theOther) const
+  {
+    return theOther.IsSubset(*this);
+  }
+
+  /**
+   * Swaps contents with another map (without memory re-allocations).
+   */
+  void Exchange(TColStd_PackedMapOfInteger& theOther)
+  {
+    std::swap(myData1, theOther.myData1);
+    std::swap(myNbBuckets, theOther.myNbBuckets);
+    std::swap(myNbPackedMapNodes, theOther.myNbPackedMapNodes);
+    std::swap(myExtent, theOther.myExtent);
+  }
+
+  /**
    * Returns True if this map has common items with the given one.
    */
   Standard_EXPORT Standard_Boolean HasIntersection (const TColStd_PackedMapOfInteger&) const;
