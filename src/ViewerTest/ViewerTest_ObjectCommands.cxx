@@ -6022,8 +6022,14 @@ static int VFont (Draw_Interpretor& theDI,
                   const char**      theArgVec)
 {
   Handle(Font_FontMgr) aMgr = Font_FontMgr::GetInstance();
-  bool toPrintList = theArgNb < 2, toPrintNames = false;
+  bool toPrintList = theArgNb < 2;
+  bool toPrintNames = false;
+  bool toPrintMetrics = false;
+  double aMetricsHeight = 1.0;
+  bool isCapHeight = false;
+  Font_FontAspect  aFontAspect = Font_FA_Undefined;
   Font_StrictLevel aStrictLevel = Font_StrictLevel_Any;
+  Font_NListOfSystemFont aPrintFontList;
   for (Standard_Integer anArgIter = 1; anArgIter < theArgNb; ++anArgIter)
   {
     const TCollection_AsciiString anArg (theArgVec[anArgIter]);
@@ -6050,7 +6056,25 @@ static int VFont (Draw_Interpretor& theDI,
     else if (anArgCase == "-names")
     {
       toPrintList = true;
-      toPrintNames = true;
+      toPrintNames = Draw::ParseOnOffIterator(theArgNb, theArgVec, anArgIter);
+    }
+    else if (anArgCase == "-info")
+    {
+      toPrintList = true;
+      toPrintNames = !Draw::ParseOnOffIterator(theArgNb, theArgVec, anArgIter);
+    }
+    else if (anArgCase == "-metrics")
+    {
+      toPrintList = true;
+      toPrintMetrics = Draw::ParseOnOffIterator(theArgNb, theArgVec, anArgIter);
+    }
+    else if (anArgIter + 1 < theArgNb
+          && (anArgCase == "-height" || anArgCase == "-capheight")
+          && Draw::ParseReal(theArgVec[anArgIter + 1], aMetricsHeight)
+          && aMetricsHeight > 0.0)
+    {
+      isCapHeight = anArgCase == "-capheight";
+      ++anArgIter;
     }
     else if (anArgIter + 1 < theArgNb
           && (anArgCase == "-find"
@@ -6059,7 +6083,6 @@ static int VFont (Draw_Interpretor& theDI,
            || anArgCase == "find"))
     {
       const TCollection_AsciiString aFontName (theArgVec[++anArgIter]);
-      Font_FontAspect aFontAspect = Font_FA_Undefined;
       if (++anArgIter < theArgNb)
       {
         anArgCase = theArgVec[anArgIter];
@@ -6070,23 +6093,21 @@ static int VFont (Draw_Interpretor& theDI,
         }
       }
 
-      const bool toFindAll   = (anArgCase == "-findall");
-      const bool toPrintInfo = (anArgCase == "-findinfo");
-      TCollection_AsciiString aResult;
+      toPrintNames = anArgCase != "-findinfo";
+
+      const bool toFindAll = (anArgCase == "-findall");
       if (toFindAll
        || aFontName.Search ("*") != -1)
       {
-        const Font_NListOfSystemFont aFonts = aMgr->GetAvailableFonts();
+        const Font_NListOfSystemFont aFontsAll = aMgr->GetAvailableFonts();
         std::vector<Handle(Font_SystemFont)> aFontsSorted;
-        aFontsSorted.reserve (aFonts.Size());
-        for (Font_NListOfSystemFont::Iterator aFontIter (aFonts); aFontIter.More(); aFontIter.Next())
-        {
-          aFontsSorted.push_back (aFontIter.Value());
-        }
+        aFontsSorted.reserve (aFontsAll.Size());
+        for (const Handle(Font_SystemFont)& aFontIter : aFontsAll)
+          aFontsSorted.push_back (aFontIter);
+
         std::stable_sort (aFontsSorted.begin(), aFontsSorted.end(), FontComparator());
-        for (std::vector<Handle(Font_SystemFont)>::iterator aFontIter = aFontsSorted.begin(); aFontIter != aFontsSorted.end(); ++aFontIter)
+        for (const Handle(Font_SystemFont)& aFont : aFontsSorted)
         {
-          const Handle(Font_SystemFont)& aFont = *aFontIter;
           const TCollection_AsciiString aCheck = TCollection_AsciiString ("string match -nocase \"") + aFontName + "\" \"" + aFont->FontName() + "\"";
           if (theDI.Eval (aCheck.ToCString()) == 0
           && *theDI.Result() != '1')
@@ -6094,33 +6115,20 @@ static int VFont (Draw_Interpretor& theDI,
             theDI.Reset();
             continue;
           }
-
           theDI.Reset();
-          if (!aResult.IsEmpty())
-          {
-            aResult += "\n";
-          }
 
-          aResult += toPrintInfo ? aFont->ToString() : aFont->FontName();
+          aPrintFontList.Append(aFont);
           if (!toFindAll)
-          {
             break;
-          }
         }
       }
       else if (Handle(Font_SystemFont) aFont = aMgr->FindFont (aFontName, aStrictLevel, aFontAspect))
       {
-        aResult = toPrintInfo ? aFont->ToString() : aFont->FontName();
+        aPrintFontList.Append(aFont);
       }
 
-      if (!aResult.IsEmpty())
-      {
-        theDI << aResult;
-      }
-      else
-      {
+      if (aPrintFontList.IsEmpty())
         Message::SendFail() << "Error: font '" << aFontName << "' is not found";
-      }
     }
     else if (anArgIter + 1 < theArgNb
           && (anArgCase == "-add"
@@ -6131,8 +6139,8 @@ static int VFont (Draw_Interpretor& theDI,
       ++anArgIter;
       Standard_CString aFontPath = theArgVec[anArgIter++];
       TCollection_AsciiString aFontName;
-      Font_FontAspect  aFontAspect = Font_FA_Undefined;
       Standard_Integer isSingelStroke = -1;
+      aFontAspect = Font_FontAspect_UNDEFINED;
       for (; anArgIter < theArgNb; ++anArgIter)
       {
         anArgCase = theArgVec[anArgIter];
@@ -6269,45 +6277,74 @@ static int VFont (Draw_Interpretor& theDI,
     }
     else
     {
-      Message::SendFail() << "Warning! Unknown argument '" << anArg << "'";
+      theDI << "Syntax error at '" << anArg << "'";
+      return 1;
     }
   }
 
-  if (toPrintList)
+  if (toPrintList && aPrintFontList.IsEmpty())
   {
     // just print the list of available fonts
-    Standard_Boolean isFirst = Standard_True;
-    const Font_NListOfSystemFont aFonts = aMgr->GetAvailableFonts();
+    const Font_NListOfSystemFont aFontsAll = aMgr->GetAvailableFonts();
     std::vector<Handle(Font_SystemFont)> aFontsSorted;
-    aFontsSorted.reserve (aFonts.Size());
-    for (Font_NListOfSystemFont::Iterator aFontIter (aFonts); aFontIter.More(); aFontIter.Next())
-    {
-      aFontsSorted.push_back (aFontIter.Value());
-    }
-    std::stable_sort (aFontsSorted.begin(), aFontsSorted.end(), FontComparator());
-    for (std::vector<Handle(Font_SystemFont)>::iterator aFontIter = aFontsSorted.begin(); aFontIter != aFontsSorted.end(); ++aFontIter)
-    {
-      const Handle(Font_SystemFont)& aFont = *aFontIter;
+    aFontsSorted.reserve(aFontsAll.Size());
+    for (const Handle(Font_SystemFont)& aFontIter : aFontsAll)
+      aFontsSorted.push_back(aFontIter);
 
+    std::stable_sort(aFontsSorted.begin(), aFontsSorted.end(), FontComparator());
+    for (const Handle(Font_SystemFont)& aFontIter : aFontsSorted)
+      aPrintFontList.Append(aFontIter);
+  }
+
+  if (!aPrintFontList.IsEmpty())
+  {
+    bool isFirst = true;
+    for (const Handle(Font_SystemFont)& aSysFont : aPrintFontList)
+    {
+      if (!isFirst)
+        theDI << "\n";
+
+      isFirst = false;
       if (toPrintNames)
       {
-        if (!isFirst)
-        {
-          theDI << "\n";
-        }
-        theDI << "\"" << aFont->FontName() << "\"";
+        if (aPrintFontList.Size() == 1 && !toPrintMetrics)
+          theDI << aSysFont->FontName();
+        else
+          theDI << "\"" << aSysFont->FontName() << "\"";
       }
       else
       {
-        if (!isFirst)
-        {
-          theDI << "\n";
-        }
-        theDI << aFont->ToString();
+        theDI << aSysFont->ToString();
       }
-      isFirst = Standard_False;
+
+      if (!toPrintMetrics)
+        continue;
+
+      const Handle(StdPrs_BRepFont) aBRepFont =
+        StdPrs_BRepFont::FindAndCreate(aSysFont->FontName(), aFontAspect, aMetricsHeight, Font_StrictLevel_Strict);
+      if (aBRepFont.IsNull())
+      {
+        theDI << "Error: unable to load font '" << aSysFont->FontName() << "'";
+        return 1;
+      }
+      if (isCapHeight)
+        aBRepFont->SetCapHeight(aMetricsHeight);
+
+      const Handle(Font_FTFont)& anFTFont = aBRepFont->FTFont();
+
+      const double aScale = aBRepFont->Scale();
+      theDI << "\n  FontSize:           " << aBRepFont->FontSize()
+            << "\n  CapHeight:          " << anFTFont->CapHeightFromSFNT() * aScale
+            << "\n  xHeight:            " << anFTFont->LowerXHeightFromSFNT() * aScale
+            << "\n  Ascender:           " << aBRepFont->Ascender()
+            << "\n  Descender:          " << aBRepFont->Descender()
+            << "\n  LineSpacing:        " << aBRepFont->LineSpacing()
+            << "\n  ItalicAngle:        " << (anFTFont->ItalicAngleFromSFNT() * 180.0 / M_PI)
+            << "\n  UnderlinePosition:  " << aBRepFont->UnderlinePosition()
+            << "\n  UnderlineThickness: " << aBRepFont->UnderlineThickness()
+            << "\n  UnderlinePosition:  " << anFTFont->StrikeoutPositionFromSFNT() * aScale
+            << "\n  UnderlineThickness: " << anFTFont->StrikeoutThicknessFromSFNT() * aScale;
     }
-    return 0;
   }
 
   return 0;
@@ -7353,9 +7390,10 @@ vfont [-add pathToFont [fontName] [regular,bold,italic,boldItalic=undefined] [si
       [-verbose {on|off}]
       [-findAll fontNameMask] [-findInfo fontName]
       [-unicodeFallback {on|off}]
-      [-clear] [-init] [-list] [-names]
+      [-clear] [-init] [-list] [-names {0|1}]=0 [-info {0|1}]=1
       [-aliases [aliasName]] [-addAlias Alias FontName] [-removeAlias Alias FontName]
       [-clearAlias Alias] [-clearAliases]
+      [-metrics {0|1}]=0 [-height|-capHeight size]=1.0
 Work with font registry - register font, list available fonts, find font.
  -findAll  is same as -find, but can print more than one font when mask is passed.
  -findInfo is same as -find, but prints complete font information instead of family name.

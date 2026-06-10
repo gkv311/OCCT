@@ -114,6 +114,9 @@ TCollection_AsciiString Font_SystemFont::ToString() const
     }
   }
   aDesc += "]";
+  if (myIsSingleLine)
+    aDesc += " [singleStroke: 1]";
+
   return aDesc;
 }
 
