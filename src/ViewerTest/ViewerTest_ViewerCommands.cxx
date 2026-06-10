@@ -6224,13 +6224,8 @@ public:
     {
       myDrawer->SetShadingAspect (new Prs3d_ShadingAspect());
       const Handle(Graphic3d_AspectFillArea3d)& aFillAspect = myDrawer->ShadingAspect()->Aspect();
-      Graphic3d_MaterialAspect aMat;
-      aMat.SetMaterialType (Graphic3d_MATERIAL_PHYSIC);
-      aMat.SetAmbientColor  (Quantity_NOC_BLACK);
-      aMat.SetDiffuseColor  (Quantity_NOC_WHITE);
-      aMat.SetSpecularColor (Quantity_NOC_BLACK);
-      aMat.SetEmissiveColor (Quantity_NOC_BLACK);
-      aFillAspect->SetFrontMaterial (aMat);
+      aFillAspect->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
+      aFillAspect->SetInteriorColor (Quantity_NOC_WHITE);
       aFillAspect->SetTextureMap (new Graphic3d_Texture2D (theImage));
       aFillAspect->SetTextureMapOn();
     }
@@ -6241,24 +6236,20 @@ public:
       myDrawer->SetTextAspect (aTextAspect);
     }
     {
-      const gp_Dir aNorm (0.0, 0.0, 1.0);
-      myTris = new Graphic3d_ArrayOfTriangles (4, 6, true, false, true);
+      const gp_Dir aNorm = gp::DZ();
+      myTris = new Graphic3d_ArrayOfTriangles (4, 6, Graphic3d_ArrayFlags_VertexTexel | Graphic3d_ArrayFlags_VertexNormal);
       myTris->AddVertex (gp_Pnt(-myWidth * 0.5, -myHeight * 0.5, 0.0), aNorm, gp_Pnt2d (0.0, 0.0));
-      myTris->AddVertex (gp_Pnt( myWidth * 0.5, -myHeight * 0.5, 0.0), aNorm, gp_Pnt2d (1.0, 0.0));
       myTris->AddVertex (gp_Pnt(-myWidth * 0.5,  myHeight * 0.5, 0.0), aNorm, gp_Pnt2d (0.0, 1.0));
       myTris->AddVertex (gp_Pnt( myWidth * 0.5,  myHeight * 0.5, 0.0), aNorm, gp_Pnt2d (1.0, 1.0));
-      myTris->AddEdge (1);
-      myTris->AddEdge (2);
-      myTris->AddEdge (3);
-      myTris->AddEdge (3);
-      myTris->AddEdge (2);
-      myTris->AddEdge (4);
+      myTris->AddVertex (gp_Pnt( myWidth * 0.5, -myHeight * 0.5, 0.0), aNorm, gp_Pnt2d (1.0, 0.0));
+      myTris->AddQuadTriangleEdges (1, 2, 3, 4);
 
-      myRect = new Graphic3d_ArrayOfPolylines (4);
+      myRect = new Graphic3d_ArrayOfPolylines (5);
       myRect->AddVertex (myTris->Vertice (1));
+      myRect->AddVertex (myTris->Vertice (2));
       myRect->AddVertex (myTris->Vertice (3));
       myRect->AddVertex (myTris->Vertice (4));
-      myRect->AddVertex (myTris->Vertice (2));
+      myRect->AddVertex (myTris->Vertice (1));
     }
   }
 
@@ -6274,19 +6265,21 @@ public:
     {
       case 0:
       {
-        Handle(Graphic3d_Group) aGroup = thePrs->NewGroup();
-        aGroup->AddPrimitiveArray (myTris);
-        aGroup->SetGroupPrimitivesAspect (myDrawer->ShadingAspect()->Aspect());
-        aGroup->AddPrimitiveArray (myRect);
-        aGroup->SetGroupPrimitivesAspect (myDrawer->LineAspect()->Aspect());
+        Handle(Graphic3d_Group) aTriGroup = thePrs->NewGroup();
+        aTriGroup->SetGroupPrimitivesAspect (myDrawer->ShadingAspect()->Aspect());
+        aTriGroup->AddPrimitiveArray(myTris);
+
+        Handle(Graphic3d_Group) aLineGroup = thePrs->NewGroup();
+        aLineGroup->SetGroupPrimitivesAspect (myDrawer->LineAspect()->Aspect());
+        aLineGroup->AddPrimitiveArray (myRect);
         return;
       }
       case 1:
       {
         Prs3d_Text::Draw (thePrs->NewGroup(), myDrawer->TextAspect(), myLabel, gp_Pnt(0.0, 0.0, 0.0));
         Handle(Graphic3d_Group) aGroup = thePrs->NewGroup();
-        aGroup->AddPrimitiveArray (myRect);
         aGroup->SetGroupPrimitivesAspect (myDrawer->LineAspect()->Aspect());
+        aGroup->AddPrimitiveArray (myRect);
         return;
       }
     }
