@@ -26,10 +26,6 @@
 #include "../Shaders/Shaders_DeclarationsImpl_glsl.pxx"
 #include "../Shaders/Shaders_Declarations_glsl.pxx"
 
-#ifdef _WIN32
-  #include <malloc.h> // for alloca()
-#endif
-
 IMPLEMENT_STANDARD_RTTIEXT(OpenGl_ShaderProgram, OpenGl_NamedResource)
 
 OpenGl_VariableSetterSelector OpenGl_ShaderProgram::mySetterSelector = OpenGl_VariableSetterSelector();
@@ -749,6 +745,7 @@ Standard_Boolean OpenGl_ShaderProgram::Link (const Handle(OpenGl_Context)& theCt
 Standard_Boolean OpenGl_ShaderProgram::FetchInfoLog (const Handle(OpenGl_Context)& theCtx,
                                                      TCollection_AsciiString&      theOutput)
 {
+  theOutput.Clear();
   if (myProgramID == NO_PROGRAM)
   {
     return Standard_False;
@@ -756,13 +753,11 @@ Standard_Boolean OpenGl_ShaderProgram::FetchInfoLog (const Handle(OpenGl_Context
 
   GLint aLength = 0;
   theCtx->core20fwd->glGetProgramiv (myProgramID, GL_INFO_LOG_LENGTH, &aLength);
-  if (aLength > 0)
-  {
-    GLchar* aLog = (GLchar*) alloca (aLength);
-    memset (aLog, 0, aLength);
-    theCtx->core20fwd->glGetProgramInfoLog (myProgramID, aLength, NULL, aLog);
-    theOutput = aLog;
-  }
+  if (aLength <= 1)
+    return Standard_True;
+
+  theOutput = TCollection_AsciiString (aLength - 1, ' ');
+  theCtx->core20fwd->glGetProgramInfoLog (myProgramID, aLength, NULL, (GLchar*)theOutput.ToCString());
   return Standard_True;
 }
 
