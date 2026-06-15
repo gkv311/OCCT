@@ -1016,6 +1016,13 @@ Standard_Boolean BOPTools_AlgoTools::GetFaceOff
       else if (aF2.IsSame(theF1)) {
         aAngle=aTwoPI;
       }
+      else if (!bIsComputed) {
+        // Near-zero angle between different faces where the bi-normal direction could not be
+        // reliably computed (near-degenerate geometry, e.g. very thin face producing
+        // nearly-coincident intersection curves). Treat as maximum angle (2*PI) to prevent
+        // incorrect selection of this unreliable face over a proper closing face.
+        aAngle = aTwoPI;
+      }
     }
     //
     if (Abs(aAngle) < anAngleCriteria ||
