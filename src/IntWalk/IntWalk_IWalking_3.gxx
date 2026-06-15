@@ -15,6 +15,14 @@
 #include <NCollection_IncAllocator.hxx>
 #include <NCollection_LocalArray.hxx>
 
+namespace {
+// rule by tests in U4, corresponds to 11.478 degrees
+static constexpr Standard_Real CosRef3D = 0.98;
+// corresponds to 25 degrees because the angle is too great in 2d (U4)
+static constexpr Standard_Real CosRef2D = 0.88;
+// max number of step division to stop iteration (a protection from infinite loops)
+static constexpr Standard_Integer MaxNbBadRootIters = 60;
+}
 
 // modified by NIZHNY-MKK  Thu Nov  2 15:07:26 2000.BEGIN
 static Standard_Boolean TestPassedSolutionWithNegativeState(const IntWalk_VectorOfWalkingData& wd,
@@ -171,7 +179,8 @@ void IntWalk_IWalking::ComputeOpenLine(const TColStd_SequenceOfReal& Umult,
       // modified by NIZHNY-MKK  Fri Oct 27 12:39:37 2000
       Standard_Integer IndexOfPathPointDoNotCheck=0;
       Standard_Integer aNbIter = 10;
-      while (!Arrive) { //    as one of stop tests is not checked
+      Standard_Integer aNbBadRootIter = 0; // consecutive iterations where Root > Tolerance
+      while (!Arrive) {
         Cadre = Cadrage(BornInf,BornSup,UVap,PasC,StepSign);
         //  Border?
 
@@ -193,7 +202,10 @@ void IntWalk_IWalking::ComputeOpenLine(const TColStd_SequenceOfReal& Umult,
             PasC = PasC / 2.0;
             PasCu = Abs(PasC*previousd2d.X());
             PasCv = Abs(PasC*previousd2d.Y());
-            if (PasCu <= tolerance(1) && PasCv <= tolerance(2)) {
+            ++aNbBadRootIter;
+            if ((PasCu <= tolerance(1) && PasCv <= tolerance(2)) || aNbBadRootIter > MaxNbBadRootIters) {
+              // Step collapsed below tolerance, or Cadrage keeps resetting
+              // the step (preventing convergence) after too many attempts.
               if (CurrentLine->NbPoints() == 1) break;
               Arrive = Standard_True;
               CurrentLine->AddStatusLast(Standard_False);
@@ -204,6 +216,7 @@ void IntWalk_IWalking::ComputeOpenLine(const TColStd_SequenceOfReal& Umult,
             }  
           }
           else { // test stop
+            aNbBadRootIter = 0;
             Rsnld.Root(UVap);
             Arrive = TestArretPassage(Umult, Vmult, Func, UVap, N);
             if (Arrive) {
