@@ -86,21 +86,13 @@ class GeomLib_CheckCurveOnSurface_TargetFunc :
   Standard_Boolean Value( const  Standard_Real theX,
                           Standard_Real& theFVal) const
   {
-    try
-    {
-      OCC_CATCH_SIGNALS
-      if (!CheckParameter(theX))
-        return Standard_False;
-
-      const gp_Pnt  aP1(myCurve1.Value(theX)),
-                    aP2(myCurve2.Value(theX));
-      
-      theFVal = -1.0*aP1.SquareDistance(aP2);
-    }
-    catch(Standard_Failure const&) {
+    if (!CheckParameter(theX))
       return Standard_False;
-    }
-    //
+
+    const gp_Pnt  aP1(myCurve1.Value(theX)),
+                  aP2(myCurve2.Value(theX));
+
+    theFVal = -1.0*aP1.SquareDistance(aP2);
     return Standard_True;
   }
 
@@ -122,41 +114,34 @@ class GeomLib_CheckCurveOnSurface_TargetFunc :
   //parameter is equal to theX
   Standard_Boolean Derive(const Standard_Real theX, Standard_Real& theDeriv1, Standard_Real* const theDeriv2 = 0) const
   {
-    try
-    {
-      OCC_CATCH_SIGNALS
-      if (!CheckParameter(theX))
-      {
-        return Standard_False;
-      }
-      //
-      gp_Pnt aP1, aP2;
-      gp_Vec aDC1, aDC2, aDCC1, aDCC2;
-      //
-      if (!theDeriv2)
-      {
-        myCurve1.D1(theX, aP1, aDC1);
-        myCurve2.D1(theX, aP2, aDC2);
-      }
-      else
-      {
-        myCurve1.D2(theX, aP1, aDC1, aDCC1);
-        myCurve2.D2(theX, aP2, aDC2, aDCC2);
-      }
-
-      const gp_Vec aVec1(aP1, aP2), aVec2(aDC2-aDC1);
-      //
-      theDeriv1 = -2.0*aVec1.Dot(aVec2);
-
-      if (theDeriv2)
-      {
-        const gp_Vec aVec3(aDCC2 - aDCC1);
-        *theDeriv2 = -2.0*(aVec2.SquareMagnitude() + aVec1.Dot(aVec3));
-      }
-    }
-    catch(Standard_Failure const&)
+    OCC_CATCH_SIGNALS
+    if (!CheckParameter(theX))
     {
       return Standard_False;
+    }
+    //
+    gp_Pnt aP1, aP2;
+    gp_Vec aDC1, aDC2, aDCC1, aDCC2;
+    //
+    if (!theDeriv2)
+    {
+      myCurve1.D1(theX, aP1, aDC1);
+      myCurve2.D1(theX, aP2, aDC2);
+    }
+    else
+    {
+      myCurve1.D2(theX, aP1, aDC1, aDCC1);
+      myCurve2.D2(theX, aP2, aDC2, aDCC2);
+    }
+
+    const gp_Vec aVec1(aP1, aP2), aVec2(aDC2-aDC1);
+    //
+    theDeriv1 = -2.0*aVec1.Dot(aVec2);
+
+    if (theDeriv2)
+    {
+      const gp_Vec aVec3(aDCC2 - aDCC1);
+      *theDeriv2 = -2.0*(aVec2.SquareMagnitude() + aVec1.Dot(aVec3));
     }
 
     return Standard_True;
