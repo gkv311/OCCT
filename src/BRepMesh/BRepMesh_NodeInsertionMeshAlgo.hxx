@@ -24,7 +24,6 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <BRep_Tool.hxx>
-#include <Standard_ErrorHandler.hxx>
 #include <BRepMesh_Delaun.hxx>
 
 //! Extends base meshing algo in order to enable possibility 
@@ -218,9 +217,7 @@ private:
   {
     try
     {
-      OCC_CATCH_SIGNALS
-
-        gp_Pnt2d aPnt2d = BRep_Tool::Parameters(theVertex, this->getDFace()->GetFace());
+      gp_Pnt2d aPnt2d = BRep_Tool::Parameters(theVertex, this->getDFace()->GetFace());
       // check UV values for internal vertices
       if (myClassifier->Perform(aPnt2d) != TopAbs_IN)
         return;

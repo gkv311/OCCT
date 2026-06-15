@@ -600,7 +600,6 @@ Standard_Boolean GeomFill_Sweep::BuildKPart()
     Tf.SetVectorialPart(M);
     Tf.SetTranslationPart(V.XYZ());
     try { // Pas joli mais il n'y as pas d'autre moyens de tester SetValues
-      OCC_CATCH_SIGNALS
       Tf2.SetValues(Tf(1, 1), Tf(1, 2), Tf(1, 3), Tf(1, 4),
                     Tf(2, 1), Tf(2, 2), Tf(2, 3), Tf(2, 4),
                     Tf(3, 1), Tf(3, 2), Tf(3, 3), Tf(3, 4));
@@ -789,7 +788,6 @@ Standard_Boolean GeomFill_Sweep::BuildKPart()
       Tf.SetVectorialPart(M);
       Tf.SetTranslationPart(V.XYZ());
 //      try { // Pas joli mais il n'y as pas d'autre moyens de tester SetValues
-//        OCC_CATCH_SIGNALS
       Tf2.SetValues(Tf(1, 1), Tf(1, 2), Tf(1, 3), Tf(1, 4),
                     Tf(2, 1), Tf(2, 2), Tf(2, 3), Tf(2, 4),
                     Tf(3, 1), Tf(3, 2), Tf(3, 3), Tf(3, 4));
