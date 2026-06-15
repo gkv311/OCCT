@@ -22,10 +22,6 @@
 #include <Standard_Assert.hxx>
 #include <TCollection_AsciiString.hxx>
 
-#ifdef _WIN32
-  #include <malloc.h> // for alloca()
-#endif
-
 IMPLEMENT_STANDARD_RTTIEXT(OpenGl_ShaderObject,OpenGl_Resource)
 
 //! Puts line numbers to the output of GLSL program source code.
@@ -194,6 +190,7 @@ Standard_Boolean OpenGl_ShaderObject::Compile (const Handle(OpenGl_Context)& the
 Standard_Boolean OpenGl_ShaderObject::FetchInfoLog (const Handle(OpenGl_Context)& theCtx,
                                                     TCollection_AsciiString&      theLog)
 {
+  theLog.Clear();
   if (myShaderID == NO_SHADER)
   {
     return Standard_False;
@@ -202,14 +199,11 @@ Standard_Boolean OpenGl_ShaderObject::FetchInfoLog (const Handle(OpenGl_Context)
   // Load information log of the compiler
   GLint aLength = 0;
   theCtx->core20fwd->glGetShaderiv (myShaderID, GL_INFO_LOG_LENGTH, &aLength);
-  if (aLength > 0)
-  {
-    GLchar* aLog = (GLchar*) alloca (aLength);
-    memset (aLog, 0, aLength);
-    theCtx->core20fwd->glGetShaderInfoLog (myShaderID, aLength, NULL, aLog);
-    theLog = aLog;
-  }
+  if (aLength <= 1)
+    return Standard_True;
 
+  theLog = TCollection_AsciiString (aLength - 1, ' ');
+  theCtx->core20fwd->glGetShaderInfoLog (myShaderID, aLength, NULL, (GLchar*)theLog.ToCString());
   return Standard_True;
 }
 
