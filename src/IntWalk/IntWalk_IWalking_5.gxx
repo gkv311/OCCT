@@ -12,14 +12,6 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-namespace {
-  static const Standard_Real CosRef3D = 0.98;// rule by tests in U4 
-                                             // correspond to  11.478 d
-  static const Standard_Real CosRef2D = 0.88; // correspond to 25 d
-  static const Standard_Integer MaxDivision = 60;  // max number of step division 
-                                                   // because the angle is too great in 2d (U4)
-}
-
 IntWalk_StatusDeflection IntWalk_IWalking::TestDeflection
   (TheIWFunction& sp,
    const Standard_Boolean Finished,
@@ -136,10 +128,10 @@ IntWalk_StatusDeflection IntWalk_IWalking::TestDeflection
   if (sp.IsTangent()) 
     return IntWalk_ArretSurPoint;       
 
-//if during routing one has subdivided more than  MaxDivision for each
+//if during routing one has subdivided more than  MaxNbBadRootIters for each
 //previous step, bug on the square; do nothing (experience U4)
 
-  if ((NbDivision < MaxDivision) && (aStatus != IntWalk_PointConfondu) &&
+  if ((NbDivision < MaxNbBadRootIters) && (aStatus != IntWalk_PointConfondu) &&
     (StatusPrecedent!= IntWalk_PointConfondu))
   {
     Standard_Real Cosi2 = Cosi * Cosi / Duv;
