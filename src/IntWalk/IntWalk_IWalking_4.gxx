@@ -167,6 +167,7 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
       NbDivision = 0;
       StatusPrecedent = IntWalk_OK;
       Standard_Integer aNbIter = 10;
+      Standard_Integer aNbBadRootIter = 0; // consecutive iterations where Root > Tolerance
       while (!Arrive) {  // as no test of stop is passed
         Cadre=Cadrage(BornInf,BornSup,Uvap,PasC, StepSign);  // border?
 #ifdef CHRONO
@@ -188,8 +189,9 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
             PasC = PasC/2.;
             PasCu = Abs(PasC*previousd2d.X());
             PasCv = Abs(PasC*previousd2d.Y());
+            ++aNbBadRootIter;
 
-            if (PasCu <= tolerance(1) && PasCv <= tolerance(2)) {
+            if ((PasCu <= tolerance(1) && PasCv <= tolerance(2)) || aNbBadRootIter > MaxNbBadRootIters) {
               if (CurrentLine->NbPoints()==1)
               {
                 RemoveTwoEndPoints(I);
@@ -203,6 +205,7 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
                 StatusPrecedent = IntWalk_OK;
                 Arrive = Standard_False;
                 PasC = PasSav;
+                aNbBadRootIter = 0;
                 Rajout = Standard_True;
                 seqAlone.Append(-lines.Length()-1);
                 seqAjout.Append(-lines.Length()-1);
@@ -227,6 +230,7 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
             }
           }
           else { // there is a solution
+            aNbBadRootIter = 0;
             Rsnld.Root(Uvap);
 
             // Avoid uninitialized memory access.
@@ -441,6 +445,7 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
                 StatusPrecedent = IntWalk_OK;
                 Arrive = Standard_False;
                 PasC = PasSav;
+                aNbBadRootIter = 0;
                 Rajout = Standard_True;
                 seqAlone.Append(-lines.Length()-1);
                 seqAjout.Append(-lines.Length()-1);
@@ -481,7 +486,8 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
                 seqAjout.Append(N);
                 StatusPrecedent = IntWalk_OK;
                 Arrive = Standard_False;
-                PasC = PasSav;	
+                PasC = PasSav;
+                aNbBadRootIter = 0;
               }
               else { 
                 Arrive = Standard_True;                   
@@ -533,6 +539,7 @@ void IntWalk_IWalking::ComputeCloseLine(const TColStd_SequenceOfReal& Umult,
               StatusPrecedent = IntWalk_OK;
               Arrive = Standard_False;
               PasC = PasSav;
+              aNbBadRootIter = 0;
               Rajout = Standard_True;
               seqAlone.Append(-lines.Length()-1);
               seqAjout.Append(-lines.Length()-1);
