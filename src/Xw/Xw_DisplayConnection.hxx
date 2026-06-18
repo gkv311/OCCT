@@ -15,11 +15,12 @@
 #define Xw_DisplayConnection_HeaderFile
 
 #include <Aspect_DisplayConnection.hxx>
+#include <NCollection_Vec2.hxx>
 
 //! This class creates and provides connection with X server.
 //! Raises exception if can not connect to X server.
 //! On Windows and Mac OS X (in case when Cocoa used) platforms this class does nothing.
-//! WARRNING: Do not close display connection manually!
+//! WARNING: Do not close display connection manually!
 class Xw_DisplayConnection : public Aspect_DisplayConnection
 {
   DEFINE_STANDARD_RTTIEXT(Xw_DisplayConnection, Aspect_DisplayConnection)
@@ -81,6 +82,9 @@ public:
   //! Set default window visual; the visual will be deallocated using XFree().
   Standard_EXPORT virtual void SetDefaultVisualInfo (Aspect_XVisualInfo* theVisual,
                                                      Aspect_FBConfig theFBConfig) Standard_OVERRIDE;
+
+  //! Return (default) screen resolution.
+  Standard_EXPORT NCollection_Vec2<int> ScreenResolution() const;
 
 #ifdef X_PROTOCOL
   //! Constructor wrapping existing Display instance.

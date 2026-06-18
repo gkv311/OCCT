@@ -140,8 +140,6 @@ static LRESULT WINAPI AdvViewerWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, 
 static void VProcessEvents(ClientData,int);
 #elif defined(__APPLE__)
 typedef Cocoa_Window ViewerTest_Window;
-extern void ViewerTest_SetCocoaEventManagerView (const Handle(Cocoa_Window)& theWindow);
-extern void GetCocoaScreenResolution (Standard_Integer& theWidth, Standard_Integer& theHeight);
 #elif defined(__EMSCRIPTEN__)
 
 #if defined(_LP64)
@@ -615,19 +613,12 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
   // Get screen resolution
   Graphic3d_Vec2i aScreenSize;
 #if defined(_WIN32)
-  RECT aWindowSize;
-  GetClientRect(GetDesktopWindow(), &aWindowSize);
-  aScreenSize.SetValues (aWindowSize.right, aWindowSize.bottom);
+  aScreenSize = WNT_Window::ScreenResolution();
 #elif defined(HAVE_XLIB)
   if (Handle(Xw_DisplayConnection) anXDispCon = Handle(Xw_DisplayConnection)::DownCast(GetDisplayConnection()))
-  {
-    ::Display* aDispX = (::Display* )anXDispCon->GetDisplayAspect();
-    Screen* aScreen = DefaultScreenOfDisplay(aDispX);
-    aScreenSize.x() = WidthOfScreen(aScreen);
-    aScreenSize.y() = HeightOfScreen(aScreen);
-  }
+    aScreenSize = anXDispCon->ScreenResolution();
 #elif defined(__APPLE__)
-  GetCocoaScreenResolution (aScreenSize.x(), aScreenSize.y());
+  aScreenSize = Cocoa_Window::ScreenResolution();
 #else
   // not implemented
 #endif
@@ -809,11 +800,14 @@ TCollection_AsciiString ViewerTest::ViewerInit (const ViewerTest_VinitParams& th
     }
     #endif
   #elif defined(__APPLE__)
-    Handle(Cocoa_Window) aWin = new Cocoa_Window(aTitle.ToCString(),
-                                                 (int )aPxTopLeft.x(), (int )aPxTopLeft.y(),
-                                                 (int )aPxSize.x(), (int )aPxSize.y());
+    Handle(Cocoa_Window) aWin = new Cocoa_Window();
+    aWin->SetVirtual(isVirtual);
+    if (Draw_DpiAware == 0)
+      aWin->SetIgnoreDpi(true);
+
+    aWin->Create(aTitle.ToCString(), Graphic3d_Vec2i(aPxTopLeft), Graphic3d_Vec2i(aPxSize));
+    aWin->SetupWindowDelegate(nullptr); // input listener will be set later on
     VT_GetWindow() = aWin;
-    ViewerTest_SetCocoaEventManagerView(aWin);
   #elif defined(__EMSCRIPTEN__)
     // current EGL implementation in Emscripten supports only one global WebGL canvas returned by Module.canvas property;
     // the code should be revised for handling multiple canvas elements (which is technically also possible)
@@ -2604,7 +2598,7 @@ static void VProcessEvents (ClientData theDispX, int)
     SetDisplayConnection (anActiveCtx->CurrentViewer()->Driver()->GetDisplayConnection());
   }
 }
-#elif !defined(__APPLE__)
+#else
 // =======================================================================
 // function : ViewerMainLoop
 // purpose  :

@@ -68,6 +68,9 @@ public:
   //! Return scale factor.
   Standard_EXPORT static Standard_Real GetScreenDevicePixelRatio (const Graphic3d_Vec2i& thePnt = Graphic3d_Vec2i());
 
+  //! Return screen resolution.
+  Standard_EXPORT static NCollection_Vec2<int> ScreenResolution();
+
 public:
 
   //! Creates a Window defined by his position and size in pixels from the Parent Window.
