@@ -97,7 +97,6 @@ protected:
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
   UIView*                myUIView;
 #endif
-  Graphic3d_Vec2i        mySizePt;      //!< window width x height in logical units
 #endif
   Graphic3d_Vec2i        mySize;        //!< window width x height in pixels
 

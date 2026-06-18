@@ -578,6 +578,17 @@ void WNT_Window::SetPos (const Standard_Integer theX,  const Standard_Integer th
 }
 
 // =======================================================================
+// function : ScreenResolution
+// purpose  :
+// =======================================================================
+NCollection_Vec2<int> WNT_Window::ScreenResolution()
+{
+  RECT aWindowSize = {};
+  GetClientRect(GetDesktopWindow(), &aWindowSize);
+  return NCollection_Vec2<int>(aWindowSize.right, aWindowSize.bottom);
+}
+
+// =======================================================================
 // function : GetScreenDevicePixelRatio
 // purpose  :
 // =======================================================================

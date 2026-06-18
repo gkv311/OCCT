@@ -64,9 +64,16 @@ public:
   //! Convert Carbon virtual key into Aspect_VKey.
   Standard_EXPORT static Aspect_VKey VirtualKeyFromNative (Standard_Integer theKey);
 
+  //! Return screen resolution.
+  Standard_EXPORT static NCollection_Vec2<int> ScreenResolution();
+
 public:
 
-  //! Creates a NSWindow and NSView defined by his position and size in pixels
+  //! Empty constructor.
+  Standard_EXPORT Cocoa_Window ();
+
+  //! Creates a NSWindow and NSView defined by his position and size in pixels.
+  //! @sa SetupWindowDelegate() to setup event handler
   Standard_EXPORT Cocoa_Window (const Standard_CString theTitle,
                                 const Standard_Integer thePxLeft,
                                 const Standard_Integer thePxTop,
@@ -83,6 +90,15 @@ public:
 
   //! Destroys the Window and all resourses attached to it
   Standard_EXPORT ~Cocoa_Window();
+
+  //! Creates a window defined by size.
+  //! @sa SetupWindowDelegate() to setup event handler
+  Standard_EXPORT void Create(const Standard_CString theTitle,
+                              const Graphic3d_Vec2i& theTopLeft,
+                              const Graphic3d_Vec2i& theSize);
+
+  //! Destroys the window and all resources attached to it.
+  Standard_EXPORT void Close();
 
   //! Opens the window <me>
   Standard_EXPORT virtual void Map() const Standard_OVERRIDE;
@@ -111,6 +127,16 @@ public:
   //! Returns The Window SIZE in PIXEL
   Standard_EXPORT virtual void Size (Standard_Integer& theWidth,
                                      Standard_Integer& theHeight) const Standard_OVERRIDE;
+
+  //! Return device pixel ratio.
+  Standard_EXPORT virtual Standard_Real DevicePixelRatio() const Standard_OVERRIDE;
+
+  //! Return flag to ignore DPI within DevicePixelRatio(); FALSE by default.
+  //! This flag should be used only for testing purposes.
+  bool ToIgnoreDpi() const { return myIsDpiUnaware; }
+
+  //! Set flag to ignore DPI within DevicePixelRatio().
+  void SetIgnoreDpi(bool theToIgnore) { myIsDpiUnaware = theToIgnore; }
 
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
   //! @return associated UIView
@@ -148,18 +174,22 @@ public:
   //! Call will be implicitly redirected to the main thread when called from non-GUI thread.
   Standard_EXPORT virtual void InvalidateContent (const Handle(Aspect_DisplayConnection)& theDisp = NULL) Standard_OVERRIDE;
 
+  //! Setup default delegator redirecting Cocoa events to Aspect_WindowInputListener.
+  Standard_EXPORT void SetupWindowDelegate(Aspect_WindowInputListener* theListener);
+
 protected:
 
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
-  UIView*          myHView;
+  UIView*          myHView = nullptr;
 #else
-  NSWindow*        myHWindow;
-  NSView*          myHView;
+  NSWindow*        myHWindow = nullptr;
+  NSView*          myHView = nullptr;
 #endif
-  Standard_Integer myXLeft;
-  Standard_Integer myYTop;
-  Standard_Integer myXRight;
-  Standard_Integer myYBottom;
+  Standard_Integer myXLeft = 0;
+  Standard_Integer myYTop = 0;
+  Standard_Integer myXRight = 0;
+  Standard_Integer myYBottom = 0;
+  bool             myIsDpiUnaware = false;
 
 public:
 

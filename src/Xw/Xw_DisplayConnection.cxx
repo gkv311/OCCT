@@ -162,3 +162,19 @@ void Xw_DisplayConnection::Init (Aspect_XDisplay* theDisplay)
   myIsOwnDisplay = theDisplay == NULL;
 #endif
 }
+
+// =======================================================================
+// function : ScreenResolution
+// purpose  :
+// =======================================================================
+NCollection_Vec2<int> Xw_DisplayConnection::ScreenResolution() const
+{
+#if defined(HAVE_XLIB)
+  if (myDisplay != nullptr)
+  {
+    Screen* aScreen = DefaultScreenOfDisplay((Display* )myDisplay);
+    return NCollection_Vec2<int>(WidthOfScreen(aScreen), HeightOfScreen(aScreen));
+  }
+#endif
+  return NCollection_Vec2<int>();
+}

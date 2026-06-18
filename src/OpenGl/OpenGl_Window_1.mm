@@ -28,13 +28,6 @@
   #import <UIKit/UIKit.h>
 #else
   #import <Cocoa/Cocoa.h>
-
-#if !defined(MAC_OS_X_VERSION_10_7) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_7)
-@interface NSView (LionAPI)
-- (NSSize )convertSizeToBacking: (NSSize )theSize;
-@end
-#endif
-
 #endif
 
 #include <OpenGl_Window.hxx>
@@ -85,10 +78,6 @@ void OpenGl_Window::Init (const Handle(OpenGl_GraphicDriver)& theDriver,
 
   (void )theDriver;
   mySizeWindow->Size (mySize.x(), mySize.y());
-
-#if defined(__APPLE__)
-  mySizePt = mySize;
-#endif
 
 #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
   EAGLContext* aGLContext = theGContext;
@@ -285,32 +274,10 @@ void OpenGl_Window::Resize()
     }
     mySize = aWinSize;
   }
-  else if (mySizePt == aWinSize)
+  else if (mySize == aWinSize)
   {
-  #if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
     return;
-  #else
-    // check backing store change (moving to another screen)
-    NSOpenGLContext* aGLCtx = myGlContext->myGContext;
-  Standard_DISABLE_DEPRECATION_WARNINGS
-    NSView* aView = [aGLCtx view];
-  Standard_ENABLE_DEPRECATION_WARNINGS
-    if (![aView respondsToSelector: @selector(convertSizeToBacking:)])
-    {
-      return;
-    }
-
-    NSRect aBounds = [aView bounds];
-    NSSize aRes    = [aView convertSizeToBacking: aBounds.size];
-    if (mySize.x() == Standard_Integer(aRes.width)
-     && mySize.y() == Standard_Integer(aRes.height))
-    {
-      return;
-    }
-  #endif
   }
-
-  mySizePt = aWinSize;
 
   init();
 }
@@ -376,27 +343,11 @@ void OpenGl_Window::init()
     && mySizeWindow == myPlatformWindow)
   {
     NSOpenGLContext* aGLCtx  = myGlContext->myGContext;
-  Standard_DISABLE_DEPRECATION_WARNINGS
-    NSView*          aView   = [aGLCtx view];
-  Standard_ENABLE_DEPRECATION_WARNINGS
-    NSRect           aBounds = [aView bounds];
 
     // we should call this method each time when window is resized
     [aGLCtx update];
 
-    if ([aView respondsToSelector: @selector(convertSizeToBacking:)])
-    {
-      NSSize aRes = [aView convertSizeToBacking: aBounds.size];
-      mySize.x() = Standard_Integer(aRes.width);
-      mySize.y() = Standard_Integer(aRes.height);
-    }
-    else
-    {
-      mySize.x() = Standard_Integer(aBounds.size.width);
-      mySize.y() = Standard_Integer(aBounds.size.height);
-    }
-    mySizePt.x() = Standard_Integer(aBounds.size.width);
-    mySizePt.y() = Standard_Integer(aBounds.size.height);
+    mySizeWindow->Size(mySize.x(), mySize.y());
   }
 #endif
 
