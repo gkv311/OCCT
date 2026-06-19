@@ -1,0 +1,55 @@
+puts "============"
+puts "Substitute diameter symbol with similar Latin letter when not present in font"
+puts "============"
+puts ""
+
+pload MODELING VISUALIZATION
+dtracelevel trace
+vfont -verbose 1
+vfont -clear
+vfont add [locate_data_file DejaVuSans.ttf] SansFont
+vfont add [locate_data_file DejaVuSerif.ttf] SerifFont
+
+set text {
+U+00F8 ø -- Runic o
+U+00D8 Ø -- Runic O
+U+2300 ⌀ -- Diameter
+U+2205 ∅ -- Empty set
+}
+set size 24
+
+box b -preview 612 320 0
+top
+fit
+
+vinit View1
+vtop
+vdisplay b -dispMode 0 -noselection
+vfit
+
+# DejaVuSerif doesn't define diameter symbol, whileDejaVuSans does.
+# Notice, this might be changed in newer version of DejaVu fonts!
+vfont -similarGlyphFallback 0 -unicodeFallback 0
+set text1 "DejaVuSans no fallback:$text"
+set text2 "DejaVuSerif no fallback:$text"
+text2brep t1 "$text1" -pos 0   0 0 -font SansFont  -height $size
+text2brep t2 "$text2" -pos 0 150 0 -font SerifFont -height $size
+vdrawtext t1 "$text1" -pos 0   0 0 -font SansFont  -height $size -zoom 1
+vdrawtext t2 "$text2" -pos 0 150 0 -font SerifFont -height $size -zoom 1
+vaspects  t1 -color GREEN
+vaspects  t2 -color RED
+
+# Enable fallback, so that DejaVuSerif will use Runic O as replacement.
+# Use italic style as otherwise textured font cache will reuse previously used symbols.
+vfont -similarGlyphFallback 1 -unicodeFallback 0
+set text3 "DejaVuSans with fallback:$text"
+set text4 "DejaVuSerif with fallback:$text"
+text2brep t3 "$text3" -pos 300   0 0 -font SansFont  -height $size -aspect ITALIC
+text2brep t4 "$text4" -pos 300 150 0 -font SerifFont -height $size -aspect ITALIC
+vdrawtext t3 "$text3" -pos 300   0 0 -font SansFont  -height $size -aspect ITALIC -zoom 1
+vdrawtext t4 "$text4" -pos 300 150 0 -font SerifFont -height $size -aspect ITALIC -zoom 1
+vaspects  t3 -color PURPLE
+vaspects  t4 -color PURPLE
+
+vdump $imagedir/${casename}_gl.png
+xwd $imagedir/${casename}.png

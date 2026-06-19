@@ -57,6 +57,14 @@ public:
   //! Return flag to use fallback fonts in case if used font does not include symbols from specific Unicode subset; TRUE by default.
   Standard_EXPORT static Standard_Boolean& ToUseUnicodeSubsetFallback();
 
+  //! Return flag to use similar glyphs when main glyph is not present in the font; TRUE by default.
+  //! This will automatically substitute similar-looking symbols like diameter -> Runic O,
+  //! when used font doesn't define adeducated symbol for this.
+  Standard_EXPORT static Standard_Boolean& ToUseSimilarGlyphFallback();
+
+  //! Return the map of similar glyphs.
+  Standard_EXPORT static const NCollection_DataMap<Standard_Utf32Char, Standard_Utf32Char>& SimilarGlyphFallbackMap();
+
 public:
 
   //! Return the list of available fonts.

@@ -6267,13 +6267,12 @@ static int VFont (Draw_Interpretor& theDI,
           || anArgCase == "-fallback"
           || anArgCase == "-touseunicodesubsetfallback")
     {
-      bool toEnable = true;
-      if (anArgIter + 1 < theArgNb
-       && Draw::ParseOnOff (theArgVec[anArgIter + 1], toEnable))
-      {
-        ++anArgIter;
-      }
-      Font_FontMgr::ToUseUnicodeSubsetFallback() = toEnable;
+      Font_FontMgr::ToUseUnicodeSubsetFallback() = Draw::ParseOnOffIterator (theArgNb, theArgVec, anArgIter);
+    }
+    else if (anArgCase == "-similarglyphfallback"
+          || anArgCase == "-tousesimilarglyphfallback")
+    {
+      Font_FontMgr::ToUseSimilarGlyphFallback() = Draw::ParseOnOffIterator (theArgNb, theArgVec, anArgIter);
     }
     else
     {
@@ -7389,7 +7388,7 @@ vfont [-add pathToFont [fontName] [regular,bold,italic,boldItalic=undefined] [si
       [-strict {any|aliases|strict}] [-find fontName [regular,bold,italic,boldItalic=undefined]]
       [-verbose {on|off}]
       [-findAll fontNameMask] [-findInfo fontName]
-      [-unicodeFallback {on|off}]
+      [-unicodeFallback {on|off}] [-similarGlyphFallback {on|off}]
       [-clear] [-init] [-list] [-names {0|1}]=0 [-info {0|1}]=1
       [-aliases [aliasName]] [-addAlias Alias FontName] [-removeAlias Alias FontName]
       [-clearAlias Alias] [-clearAliases]

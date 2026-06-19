@@ -50,7 +50,8 @@ Font_FTFont::Font_FTFont (const Handle(Font_FTLibrary)& theFTLib)
   myLoadFlags   (0),
 #endif
   myUChar       (0U),
-  myToUseUnicodeSubsetFallback (Font_FontMgr::ToUseUnicodeSubsetFallback())
+  myToUseUnicodeSubsetFallback (Font_FontMgr::ToUseUnicodeSubsetFallback()),
+  myToUseSimilarGlyphFallback (Font_FontMgr::ToUseSimilarGlyphFallback())
 {
   if (myFTLib.IsNull())
   {
@@ -376,6 +377,7 @@ bool Font_FTFont::findAndInitFallback (Font_UnicodeSubset theSubset)
 #ifdef HAVE_FREETYPE
   myFallbackFaces[theSubset] = new Font_FTFont (myFTLib);
   myFallbackFaces[theSubset]->myToUseUnicodeSubsetFallback = false; // no recursion
+  myFallbackFaces[theSubset]->myToUseSimilarGlyphFallback = myToUseSimilarGlyphFallback;
   myFallbackFaces[theSubset]->SetShearAngle(myShearAngle);
   myFallbackFaces[theSubset]->SetWidthScaling(myWidthScaling);
 
@@ -433,15 +435,23 @@ bool Font_FTFont::loadGlyph (const Standard_Utf32Char theUChar)
     return false;
   }
 
+  Standard_Utf32Char aUChar = theUChar;
+  if (myToUseSimilarGlyphFallback && !HasSymbol(theUChar))
+  {
+    Standard_Utf32Char aUCharFall = 0;
+    if (Font_FontMgr::SimilarGlyphFallbackMap().Find(theUChar,aUCharFall) && HasSymbol(aUCharFall))
+      aUChar = aUCharFall;
+  }
+
   bool toEmbolden = myFontParams.ToSynthesizeBold && !myFontParams.IsSingleStrokeFont;
   if (myToUseUnicodeSubsetFallback
-  && !HasSymbol (theUChar))
+  && !HasSymbol (aUChar))
   {
     // try using fallback
-    const Font_UnicodeSubset aSubset = CharSubset (theUChar);
+    const Font_UnicodeSubset aSubset = CharSubset (aUChar);
     Handle(Font_FTFont)& aSubsetFont = myFallbackFaces[aSubset];
     if (findAndInitFallback (aSubset)
-     && aSubsetFont->HasSymbol (theUChar))
+     && aSubsetFont->HasSymbol (aUChar))
     {
       myActiveFTFace = aSubsetFont->myFTFace;
       toEmbolden = aSubsetFont->myFontParams.ToSynthesizeBold
@@ -449,7 +459,7 @@ bool Font_FTFont::loadGlyph (const Standard_Utf32Char theUChar)
     }
   }
 
-  if (FT_Load_Char (myActiveFTFace, theUChar, FT_Int32(myLoadFlags)) != 0
+  if (FT_Load_Char (myActiveFTFace, aUChar, FT_Int32(myLoadFlags)) != 0
    || myActiveFTFace->glyph == NULL)
   {
     return false;
@@ -460,7 +470,7 @@ bool Font_FTFont::loadGlyph (const Standard_Utf32Char theUChar)
   if (toEmbolden)
     FT_GlyphSlot_Embolden (myActiveFTFace->glyph);
 
-  myUChar = theUChar;
+  myUChar = aUChar;
   return true;
 #else
   return false;
@@ -478,16 +488,24 @@ bool Font_FTFont::RenderGlyph (const Standard_Utf32Char theUChar)
   myActiveFTFace = myFTFace;
 
 #ifdef HAVE_FREETYPE
+  Standard_Utf32Char aUChar = theUChar;
+  if (myToUseSimilarGlyphFallback && !HasSymbol(theUChar))
+  {
+    Standard_Utf32Char aUCharFall = 0;
+    if (Font_FontMgr::SimilarGlyphFallbackMap().Find(theUChar,aUCharFall) && HasSymbol(aUCharFall))
+      aUChar = aUCharFall;
+  }
+
   bool toEmbolden = myFontParams.ToSynthesizeBold && !myFontParams.IsSingleStrokeFont;
-  if (theUChar != 0
+  if (aUChar != 0
   &&  myToUseUnicodeSubsetFallback
-  && !HasSymbol (theUChar))
+  && !HasSymbol (aUChar))
   {
     // try using fallback
-    const Font_UnicodeSubset aSubset = CharSubset (theUChar);
+    const Font_UnicodeSubset aSubset = CharSubset (aUChar);
     Handle(Font_FTFont)& aSubsetFont = myFallbackFaces[aSubset];
     if (findAndInitFallback (aSubset)
-     && aSubsetFont->HasSymbol (theUChar))
+     && aSubsetFont->HasSymbol (aUChar))
     {
       myActiveFTFace = aSubsetFont->myFTFace;
       toEmbolden = aSubsetFont->myFontParams.ToSynthesizeBold
@@ -495,8 +513,8 @@ bool Font_FTFont::RenderGlyph (const Standard_Utf32Char theUChar)
     }
   }
 
-  if (theUChar == 0
-   || FT_Load_Char (myActiveFTFace, theUChar, FT_Int32(myLoadFlags | FT_LOAD_RENDER)) != 0
+  if (aUChar == 0
+   || FT_Load_Char (myActiveFTFace, aUChar, FT_Int32(myLoadFlags | FT_LOAD_RENDER)) != 0
    || myActiveFTFace->glyph == NULL
    || myActiveFTFace->glyph->format != FT_GLYPH_FORMAT_BITMAP)
   {
@@ -548,7 +566,7 @@ bool Font_FTFont::RenderGlyph (const Standard_Utf32Char theUChar)
     return false;
   }
 
-  myUChar = theUChar;
+  myUChar = aUChar;
   return true;
 #else
   (void )theUChar;

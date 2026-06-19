@@ -311,6 +311,32 @@ Standard_Boolean& Font_FontMgr::ToUseUnicodeSubsetFallback()
 }
 
 // =======================================================================
+// function : ToUseSimilarGlyphFallback
+// purpose  :
+// =======================================================================
+Standard_Boolean& Font_FontMgr::ToUseSimilarGlyphFallback()
+{
+  static Standard_Boolean TheToUseSimilarGlyphFallback = true;
+  return TheToUseSimilarGlyphFallback;
+}
+
+// =======================================================================
+// function : SimilarGlyphFallbackMap
+// purpose  :
+// =======================================================================
+const NCollection_DataMap<Standard_Utf32Char, Standard_Utf32Char>&Font_FontMgr::SimilarGlyphFallbackMap()
+{
+  static const NCollection_DataMap<Standard_Utf32Char, Standard_Utf32Char>&TheMap = []()
+  {
+    NCollection_DataMap<Standard_Utf32Char, Standard_Utf32Char>aMap;
+    aMap.Bind(0x2300, 0x00F8); // diameter symbol looks very alike to smaller Runic O letter
+    aMap.Bind(0x2205, 0x00D8); // empty set symbol looks very alike touppper  Runic O letter
+    return aMap;
+  }();
+  return TheMap;
+}
+
+// =======================================================================
 // function : AddFontAlias
 // purpose  :
 // =======================================================================
