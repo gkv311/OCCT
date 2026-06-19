@@ -494,7 +494,7 @@ protected:
   Image_PixMap               myGlyphImg;     //!< cached glyph plane
   Standard_Utf32Char         myUChar;        //!< currently loaded unicode character
   Standard_Boolean           myToUseUnicodeSubsetFallback; //!< use default fallback fonts for extended Unicode sub-sets (Korean, CJK, etc.)
-
+  Standard_Boolean           myToUseSimilarGlyphFallback;  //!< use default fallback glyphs within the same font for similar glyph
 };
 
 #endif // _Font_FTFont_H__
