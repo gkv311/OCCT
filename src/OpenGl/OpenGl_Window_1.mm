@@ -135,32 +135,29 @@ void OpenGl_Window::Init (const Handle(OpenGl_GraphicDriver)& theDriver,
     anAttribs[aLastAttrib++] = NSOpenGLPFADepthSize;    anAttribs[aLastAttrib++] = 24;
     anAttribs[aLastAttrib++] = NSOpenGLPFAStencilSize;  anAttribs[aLastAttrib++] = 8;
     anAttribs[aLastAttrib++] = NSOpenGLPFADoubleBuffer;
-    if (theCaps->contextNoAccel)
+    if (!theCaps->contextCompatible)
     {
-      anAttribs[aLastAttrib++] = NSOpenGLPFARendererID;
-      anAttribs[aLastAttrib++] = (NSOpenGLPixelFormatAttribute )kCGLRendererGenericFloatID;
+      // supported since OS X 10.7+
+      anAttribs[aLastAttrib++] = 99;     // NSOpenGLPFAOpenGLProfile
+      anAttribs[aLastAttrib++] = 0x3200; // NSOpenGLProfileVersion3_2Core
     }
-    else
-    {
-      anAttribs[aLastAttrib++] = NSOpenGLPFAAccelerated;
-    }
+
     anAttribs[aLastAttrib] = 0;
+
     const Standard_Integer aLastMainAttrib = aLastAttrib;
-    Standard_Integer aTryCore   = 0;
+    Standard_Integer aTryAccel  = 0;
     Standard_Integer aTryStereo = 0;
-    for (aTryCore = 1; aTryCore >= 0; --aTryCore)
+    for (aTryAccel = !theCaps->contextNoAccel ? 1 : 0; aTryAccel >= 0; --aTryAccel)
     {
       aLastAttrib = aLastMainAttrib;
-      if (aTryCore == 1)
+      if (aTryAccel == 1)
       {
-        if (theCaps->contextCompatible)
-        {
-          continue;
-        }
-
-        // supported since OS X 10.7+
-        anAttribs[aLastAttrib++] = 99;     // NSOpenGLPFAOpenGLProfile
-        anAttribs[aLastAttrib++] = 0x3200; // NSOpenGLProfileVersion3_2Core
+        anAttribs[aLastAttrib++] = NSOpenGLPFAAccelerated;
+      }
+      else
+      {
+        anAttribs[aLastAttrib++] = NSOpenGLPFARendererID;
+        anAttribs[aLastAttrib++] = (NSOpenGLPixelFormatAttribute )kCGLRendererGenericFloatID;
       }
 
       for (aTryStereo = 1; aTryStereo >= 0; --aTryStereo)
@@ -207,10 +204,10 @@ void OpenGl_Window::Init (const Handle(OpenGl_GraphicDriver)& theDriver,
       TCollection_ExtendedString aMsg("OpenGl_Window::CreateWindow: QuadBuffer is unavailable!");
       myGlContext->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 0, GL_DEBUG_SEVERITY_LOW, aMsg);
     }
-    if (aTryCore == 0
-    && !theCaps->contextCompatible)
+    if (aTryAccel == 0
+    && !theCaps->contextNoAccel)
     {
-      TCollection_ExtendedString aMsg("OpenGl_Window::CreateWindow: core profile creation failed.");
+      TCollection_ExtendedString aMsg("OpenGl_Window::CreateWindow: OpenGL context is NOT accelerated.");
       myGlContext->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PORTABILITY, 0, GL_DEBUG_SEVERITY_LOW, aMsg);
     }
 
@@ -218,7 +215,7 @@ void OpenGl_Window::Init (const Handle(OpenGl_GraphicDriver)& theDriver,
   Standard_DISABLE_DEPRECATION_WARNINGS
     [aGLContext setView: aView];
   Standard_ENABLE_DEPRECATION_WARNINGS
-    isCore = (aTryCore == 1);
+    isCore = !theCaps->contextCompatible;
   }
 
   myGlContext->Init (aGLContext, isCore);
