@@ -33,6 +33,7 @@
 #include <OpenGl_GlCore11.hxx>
 #include <OpenGl_Context.hxx>
 #include <OpenGl_FrameBuffer.hxx>
+#include <OpenGl_ShaderManager.hxx>
 
 #include <Standard_ProgramError.hxx>
 
@@ -67,6 +68,8 @@ Standard_Boolean OpenGl_Context::MakeCurrent()
   return [EAGLContext setCurrentContext: myGContext] == YES;
 #else
   [myGContext makeCurrentContext];
+
+  myShaderManager->SetContext (this);
   return Standard_True;
 #endif
 }

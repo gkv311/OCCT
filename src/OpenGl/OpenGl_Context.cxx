@@ -1065,6 +1065,9 @@ TCollection_AsciiString OpenGl_Context::FormatGlError (int theGlError)
 // =======================================================================
 bool OpenGl_Context::ResetErrors (const bool theToPrintErrors)
 {
+  if (core11fwd == nullptr)
+    return true;
+
   int aPrevErr = 0;
   int anErr    = core11fwd->glGetError();
   const bool hasError = anErr != GL_NO_ERROR;
