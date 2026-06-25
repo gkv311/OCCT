@@ -1,5 +1,8 @@
 Image_AlienPixMap.cxx
 Image_AlienPixMap.hxx
+Image_RWAppKit.cxx
+Image_RWAppKit.hxx
+Image_RWAppKit_1.mm
 Image_RWAVCodec.cxx
 Image_RWAVCodec.hxx
 Image_Color.hxx

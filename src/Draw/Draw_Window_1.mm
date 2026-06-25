@@ -17,6 +17,9 @@
 
 #include <Draw_Window.hxx>
 #include <Cocoa_LocalPool.hxx>
+#include <Image_AlienPixMap.hxx>
+#include <Image_RWAppKit.hxx>
+#include <Message.hxx>
 
 #if !defined(MAC_OS_X_VERSION_10_12) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
   // replacements for macOS versions before 10.12
@@ -35,12 +38,6 @@
   #define NSWindowStyleMaskTitled     NSTitledWindowMask
 
   #define NSCompositingOperationSourceOver NSCompositeSourceOver
-#endif
-#if !defined(MAC_OS_X_VERSION_10_14) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_14)
-  #define NSBitmapImageFileTypePNG  NSPNGFileType
-  #define NSBitmapImageFileTypeBMP  NSBMPFileType
-  #define NSBitmapImageFileTypeJPEG NSJPEGFileType
-  #define NSBitmapImageFileTypeGIF  NSGIFFileType
 #endif
 
 @interface Draw_CocoaView : NSView
@@ -187,6 +184,8 @@ void Draw_Window::init (const NCollection_Vec2<int>& theXY,
                                            styleMask: aWinStyle
                                              backing: NSBackingStoreBuffered
                                                defer: NO];
+    // for consistency with OpenGL viewer
+    [myWindow setColorSpace: [NSColorSpace sRGBColorSpace]];
   }
 
   if (myView == NULL)
@@ -523,33 +522,34 @@ Standard_Boolean Draw_Window::Save (Standard_CString theFileName) const
 {
   Cocoa_LocalPool aLocalPool;
 
-  NSString* aFileName = [[[NSString alloc] initWithUTF8String: theFileName] autorelease];
-  NSString* aFileExtension = [[aFileName pathExtension] lowercaseString];
-
-  NSDictionary* aFileTypeDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  [NSNumber numberWithInt: NSBitmapImageFileTypePNG],  @"png",
-                                  [NSNumber numberWithInt: NSBitmapImageFileTypeBMP],  @"bmp",
-                                  [NSNumber numberWithInt: NSBitmapImageFileTypeJPEG], @"jpg",
-                                  [NSNumber numberWithInt: NSBitmapImageFileTypeGIF],  @"gif",
-                                  nil];
-  if ([aFileTypeDict valueForKey: aFileExtension] == NULL)
-  {
-    return Standard_False; // unsupported image extension
-  }
-
-  NSBitmapImageFileType aFileType = (NSBitmapImageFileType )[[aFileTypeDict valueForKey: aFileExtension] intValue];
   NSBitmapImageRep* anImageRep = [NSBitmapImageRep imageRepWithData: [myImageBuffer TIFFRepresentation]];
 
-  NSDictionary* anImgProps = [NSDictionary dictionaryWithObject: [NSNumber numberWithFloat: 0.8]
-                                                         forKey: NSImageCompressionFactor];
+  Image_PixMap aPixmap;
+  if (!Image_RWAppKit::WrapNSBitmap(aPixmap, anImageRep, theFileName))
+    return false;
 
-  NSData* aData = [anImageRep representationUsingType: aFileType 
-                                           properties: anImgProps];
+  // returned buffer is usually defined in Image_Format_RGBAF_half format,
+  // which is not widely supported by other image libraries
+  if (aPixmap.Format() == Image_Format_RGBAF_half)
+  {
+    Image_AlienPixMap aCopy;
+    if (!aCopy.InitZero(Image_Format_RGB, aPixmap.SizeX(), aPixmap.SizeY()))
+    {
+      Message::SendFail() << "Error: unable to init image " << int(aCopy.SizeX()) << "x" << int(aCopy.SizeY());
+      return false;
+    }
 
-  Standard_Boolean isSuccess = [aData writeToFile: aFileName
-                                       atomically: NO];
+    aCopy.SetTopDown(aPixmap.IsTopDown());
+    for (Standard_Size aRow = 0; aRow < aPixmap.SizeY(); ++aRow)
+      aCopy.FillRowFrom(aRow, aPixmap, aRow);
 
-  return isSuccess;
+    return aCopy.Save(theFileName);
+  }
+
+  // this should always work, but NSImage will save PNG files with unusual rgba64be format
+  // out of Image_Format_RGBAF_half on input
+  Image_RWAppKit aRWImage;
+  return aRWImage.Write(aPixmap, theFileName, "");
 }
 
 Standard_Boolean Draw_Window::IsEqualWindows (const long theWindowNumber)
