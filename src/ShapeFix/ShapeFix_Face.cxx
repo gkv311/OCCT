@@ -354,6 +354,18 @@ Standard_Boolean ShapeFix_Face::Perform()
   Handle(ShapeFix_Wire) theAdvFixWire = myFixWire;
   if (theAdvFixWire.IsNull()) return Standard_False;
 
+  // Skip if an earlier fix already replaced this face with a non-face (e.g. a compound):
+  // the TopoDS::Face casts below would build an invalid handle over a non-face TShape.
+  if (!Context().IsNull())
+  {
+    const TopoDS_Shape anApplied = Context()->Apply(myFace);
+    if (anApplied.ShapeType() != TopAbs_FACE)
+    {
+      myResult = anApplied;
+      return false;
+    }
+  }
+
   BRep_Builder B;
   TopoDS_Shape aInitFace = myFace;
   // perform first part of fixes on wires
