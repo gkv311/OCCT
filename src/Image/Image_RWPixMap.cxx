@@ -13,6 +13,7 @@
 
 #include <Image_RWPixMap.hxx>
 
+#include <Image_RWAppKit.hxx>
 #include <Image_RWAVCodec.hxx>
 #include <Image_RWEmscripten.hxx>
 #include <Image_RWFreeImage.hxx>
@@ -72,6 +73,12 @@ static Handle(Image_RWPixMapSelector) createDefaultSelector()
   if (aWasmImg->IsAvailable())
   {
     aSystem->AddLibrary(aWasmImg, true);
+  }
+#elif defined(__APPLE__)
+  Handle(Image_RWAppKit) anAppKitImg = new Image_RWAppKit();
+  if (aSystem->Libraries().IsEmpty() && anAppKitImg->IsAvailable())
+  {
+    aSystem->AddLibrary(anAppKitImg, true);
   }
 #endif
   if (!aSystem->Libraries().IsEmpty())
