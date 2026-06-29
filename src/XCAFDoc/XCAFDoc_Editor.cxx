@@ -710,9 +710,9 @@ Standard_Boolean XCAFDoc_Editor::RescaleGeometry(const TDF_Label& theLabel,
       else if (aNodeType == XCAFDoc_AssemblyGraph::NodeType_Occurrence)
       {
         TopLoc_Location aLoc = aShapeTool->GetLocation(aLabel);
-        gp_Trsf aTrsf = aLoc.Transformation();
-        aTrsf.SetTranslationPart(aTrsf.TranslationPart() * theScaleFactor);
-        XCAFDoc_Location::Set(aLabel, aTrsf);
+        gp_Trsf aLocTrsf = aLoc.Transformation();
+        aLocTrsf.SetTranslationPart(aLocTrsf.TranslationPart() * theScaleFactor);
+        XCAFDoc_Location::Set(aLabel, aLocTrsf);
       }
 
       return Standard_True;

@@ -1760,14 +1760,7 @@ static Standard_Integer meshcolors( Draw_Interpretor& di,
               //get node coordinates to aCoord variable
               aDataSource->GetGeom(anIter.Key(), Standard_False, aCoords, aNbNodes, aType);
 
-              Standard_Real aScaleValue;
-              try {
-                OCC_CATCH_SIGNALS
-                aScaleValue = (aCoords.Value(1) - (Standard_Real) aMinX) / aDelta;
-              } catch(Standard_Failure const&) {
-                aScaleValue = 0;
-              }
-
+              Standard_Real aScaleValue = aDelta != 0.0 ? ((aCoords.Value(1) - Standard_Real(aMinX)) / aDelta) : 0.0;
               aScaleMap.Bind(anIter.Key(), aScaleValue);
             }
 
