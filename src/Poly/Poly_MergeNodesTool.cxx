@@ -373,7 +373,11 @@ void Poly_MergeNodesTool::PushLastElement (int theNbNodes)
   if (myToMergeElems)
   {
     NCollection_Vec4<int> aSorted = myNodeInds;
-    std::sort (aSorted.ChangeData(), aSorted.ChangeData() + theNbNodes);
+    if (theNbNodes == 3) // suppress false-positive -Warray-bounds warning from GCC 15.2.0
+      std::sort(aSorted.ChangeData(), aSorted.ChangeData() + 3);
+    else
+      std::sort(aSorted.ChangeData(), aSorted.ChangeData() + 4);
+
     if (!myElemMap.Add (aSorted))
     {
       ++myNbMergedElems;
