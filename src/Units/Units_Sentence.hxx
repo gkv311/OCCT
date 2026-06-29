@@ -55,7 +55,7 @@ public:
   
   //! Return True if number of created tokens > 0
   //! (i.e creation of sentence is successful)
-  Standard_Boolean IsDone() const { return thesequenceoftokens->Length() > 0; }
+  Standard_Boolean IsDone() const { return !thesequenceoftokens.IsNull() && !thesequenceoftokens->IsEmpty(); }
   
   //! Useful for debugging.
   Standard_EXPORT void Dump() const;

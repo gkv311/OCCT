@@ -1591,12 +1591,15 @@ static Standard_Integer XDumpAssemblyTree(Draw_Interpretor& di,
     if (aPrintNames)
     {
       Standard_Boolean aFirst = Standard_True;
-      for (TColStd_ListOfAsciiString::Iterator anIt(theItem.GetPath()); anIt.More(); 
-           anIt.Next(), aFirst = Standard_False)
+      for (const TCollection_AsciiString& aPathIt : theItem.GetPath())
       {
-        if (!aFirst) aSS << "/";
+        if (!aFirst)
+          aSS << "/";
+        else
+          aFirst = false;
+
         TDF_Label aL;
-        TDF_Tool::Label(aDoc->GetData(), anIt.Value(), aL, Standard_False);
+        TDF_Tool::Label(aDoc->GetData(), aPathIt, aL, Standard_False);
         if (!aL.IsNull())
         {
           TCollection_ExtendedString aName;
@@ -1608,7 +1611,7 @@ static Standard_Integer XDumpAssemblyTree(Draw_Interpretor& di,
             continue;
           }
         }
-        aSS << anIt.Value();
+        aSS << aPathIt;
       }
       aSS << std::endl;
     }
@@ -1671,13 +1674,13 @@ static Standard_Integer XDumpAssemblyGraph(Draw_Interpretor& di,
   }
 
   Standard_Boolean aPrintNames = Standard_False;
-  TDF_Label aLabel = XCAFDoc_DocumentTool::ShapesLabel(aDoc->Main());
+  TDF_Label aShapesLabel = XCAFDoc_DocumentTool::ShapesLabel(aDoc->Main());
   for (Standard_Integer iarg = 2; iarg < argc; ++iarg)
   {
     if (strcmp(argv[iarg], "-root") == 0)
     {
       Standard_ProgramError_Raise_if(iarg + 1 >= argc, "Root is expected!");
-      TDF_Tool::Label(aDoc->GetData(), argv[++iarg], aLabel, Standard_False);
+      TDF_Tool::Label(aDoc->GetData(), argv[++iarg], aShapesLabel, Standard_False);
     }
     else if (strcmp(argv[iarg], "-names") == 0)
     {
@@ -1685,7 +1688,7 @@ static Standard_Integer XDumpAssemblyGraph(Draw_Interpretor& di,
     }
   }
 
-  Handle(XCAFDoc_AssemblyGraph) aG = new XCAFDoc_AssemblyGraph(aLabel);
+  Handle(XCAFDoc_AssemblyGraph) aG = new XCAFDoc_AssemblyGraph(aShapesLabel);
 
   Standard_SStream aSS;
 

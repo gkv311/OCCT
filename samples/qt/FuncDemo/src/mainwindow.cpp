@@ -60,6 +60,7 @@
 #include <TFunction_Scope.hxx>
 
 #include <TColStd_MapIteratorOfMapOfInteger.hxx>
+#include <OSD.hxx>
 #include <OSD_Timer.hxx>
 
 #include <TDF_Tool.hxx>
@@ -206,11 +207,7 @@ void MainWindow::compute()
 
             // Process user-events.
             qApp->processEvents();
-            #ifdef __GNUC__
-               sleep(0.001);
-            #else
-               ::Sleep(100);
-            #endif
+            OSD::MilliSecSleep(100);
         }
     }
 

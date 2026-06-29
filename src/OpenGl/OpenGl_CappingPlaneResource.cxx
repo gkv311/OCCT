@@ -185,7 +185,7 @@ void OpenGl_CappingPlaneResource::updateTransform (const Handle(OpenGl_Context)&
   const Graphic3d_Vec3 T (anEq.xyz() * -anEqW);
 
   // project plane normal onto OX to find left vector
-  const Standard_ShortReal aProjLen = sqrt ((Standard_ShortReal)anEq.xz().SquareModulus());
+  const Standard_ShortReal aProjLen = std::sqrt ((Standard_ShortReal)anEq.xz().SquareModulus());
   Graphic3d_Vec3 aLeft;
   if (aProjLen < ShortRealSmall())
   {
