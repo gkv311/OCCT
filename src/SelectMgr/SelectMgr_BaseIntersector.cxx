@@ -17,6 +17,7 @@
 #include <gp_Ax3.hxx>
 
 #include <algorithm>
+#include <array>
 
 IMPLEMENT_STANDARD_RTTIEXT(SelectMgr_BaseIntersector, Standard_Transient)
 
@@ -181,7 +182,7 @@ Standard_Boolean SelectMgr_BaseIntersector::RayCylinderIntersection (const Stand
                                                                      Standard_Real& theTimeLeave) const
 {
   Standard_Integer aNbIntersections = 0;
-  Standard_Real anIntersections[4] = { RealLast(), RealLast(), RealLast(), RealLast() };
+  std::array<Standard_Real, 4> anIntersections = { RealLast(), RealLast(), RealLast(), RealLast() };
   // Check intersections with end faces
   // point of intersection theRayDir and z = 0
   if (!theIsHollow && theRayDir.Z() != 0)
@@ -283,13 +284,18 @@ Standard_Boolean SelectMgr_BaseIntersector::RayCylinderIntersection (const Stand
   {
     return false;
   }
-
-  std::sort (anIntersections, anIntersections + aNbIntersections);
-  theTimeEnter = anIntersections[0];
-  if (aNbIntersections > 1)
+  else if (aNbIntersections == 1)
   {
-    theTimeLeave = anIntersections[1];
+    theTimeEnter = anIntersections[0];
+    theTimeLeave = anIntersections[0];
+    return true;
   }
+
+  // sort the whole array instead of aNbIntersections elements (RealLast() will remain at end)
+  // to suppress false-positive -Warray-bounds warning from GCC 15.2.0
+  std::sort(anIntersections.begin(), anIntersections.end());
+  theTimeEnter = anIntersections[0];
+  theTimeLeave = anIntersections[1];
   return true;
 }
 
