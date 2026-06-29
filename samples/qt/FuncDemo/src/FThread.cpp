@@ -7,6 +7,7 @@
 #include <TFunction_Driver.hxx>
 #include <TFunction_GraphNode.hxx>
 
+#include <OSD.hxx>
 #include <TDataStd_Tick.hxx>
 #include <TDF_ListIteratorOfLabelList.hxx>
 
@@ -73,11 +74,7 @@ void FThread::run()
         {
             L = getFreeFunction();
             if (L.IsNull())
-            #ifdef __GNUC__
-               sleep(0.001);
-            #else
-               ::Sleep(100);
-            #endif
+                OSD::MilliSecSleep(100);
             else
                 break;
         }

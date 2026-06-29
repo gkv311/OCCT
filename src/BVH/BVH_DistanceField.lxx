@@ -411,7 +411,7 @@ void BVH_DistanceField<T, N>::BuildSlices (BVH_Geometry<T, N>& theGeometry,
 
         Standard_Boolean isOutside = Standard_True;
 
-        const T aDistance = sqrt (
+        const T aDistance = (T )std::sqrt (
           BVH::SquareDistanceToGeomerty<T, N> (theGeometry, aCenter, isOutside));
 
         Voxel (aX, aY, aZ) = (!myComputeSign || isOutside) ? aDistance : -aDistance;
