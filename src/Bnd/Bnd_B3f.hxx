@@ -19,6 +19,7 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
+#include <Standard_ShortReal.hxx>
 
 class gp_XYZ;
 class gp_Pnt;

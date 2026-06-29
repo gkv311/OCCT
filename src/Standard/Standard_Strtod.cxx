@@ -4248,7 +4248,7 @@ Strtod(const char *s00, char **se)
 				dval(&rv) = 2.*dval(&rv0);
 				dval(&rv) *= tinytens[j];
 #endif
-				if (!dval(&rv)) {
+				if (dval(&rv) == 0.0) {
  undfl:
 					dval(&rv) = 0.;
 #ifdef Honor_FLT_ROUNDS
@@ -4726,9 +4726,9 @@ Strtod(const char *s00, char **se)
 #ifdef Avoid_Underflow
 			if (bc.scale && y <= 2*P*Exp_msk1) {
 				if (aadj <= 0x7fffffff) {
-					if ((z = aadj) <= 0)
+					if ((z = ULong(aadj)) <= 0)
 						z = 1;
-					aadj = z;
+					aadj = double(z);
 					aadj1 = bc.dsign ? aadj : -aadj;
 					}
 				dval(&aadj2) = aadj1;
