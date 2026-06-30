@@ -455,6 +455,10 @@ void Graphic3d_ShaderManager::defaultOitGlslVersion (const Handle(Graphic3d_Shad
         {
           theProgram->SetHeader ("#version 130");
         }
+        else if (myGlslExtensions[Graphic3d_GlslExtension_GL_EXT_gpu_shader4])
+        {
+          theProgram->SetHeader ("#extension GL_EXT_gpu_shader4 : enable\n");
+        }
       }
       break;
     }
@@ -565,12 +569,12 @@ Handle(Graphic3d_ShaderProgram) Graphic3d_ShaderManager::getStdProgramFboBlit (S
       EOL"{"
       EOL"  ivec2 aSize  = textureSize (uColorSampler);"
       EOL"  ivec2 anUV   = ivec2 (vec2 (aSize) * TexCoord);"
-      EOL"  gl_FragDepth = texelFetch (uDepthSampler, anUV, THE_NUM_SAMPLES / 2 - 1).r;"
+      EOL"  gl_FragDepth = occTextureFetch2D (uDepthSampler, anUV, THE_NUM_SAMPLES / 2 - 1).r;"
       EOL
       EOL"  vec4 aColor = vec4 (0.0);"
       EOL"  for (int aSample = 0; aSample < THE_NUM_SAMPLES; ++aSample)"
       EOL"  {"
-      EOL"    vec4 aVal = texelFetch (uColorSampler, anUV, aSample);"
+      EOL"    vec4 aVal = occTextureFetch2D (uColorSampler, anUV, aSample);"
       EOL"    aColor += aVal;"
       EOL"  }"
       EOL"  aColor /= float(THE_NUM_SAMPLES);"
@@ -695,8 +699,8 @@ Handle(Graphic3d_ShaderProgram) Graphic3d_ShaderManager::getStdProgramOitComposi
       EOL"void main()"
       EOL"{"
       EOL"  ivec2 aTexel  = ivec2 (vec2 (textureSize (uAccumTexture)) * TexCoord);"
-      EOL"  vec4 aAccum   = texelFetch (uAccumTexture,  aTexel, gl_SampleID);"
-      EOL"  float aWeight = texelFetch (uWeightTexture, aTexel, gl_SampleID).r;"
+      EOL"  vec4 aAccum   = occTextureFetch2D (uAccumTexture,  aTexel, gl_SampleID);"
+      EOL"  float aWeight = occTextureFetch2D (uWeightTexture, aTexel, gl_SampleID).r;"
       EOL"  occSetFragColor (vec4 (aAccum.rgb / max (aWeight, 0.00001), aAccum.a));"
       EOL"}";
   }
@@ -734,7 +738,7 @@ Handle(Graphic3d_ShaderProgram) Graphic3d_ShaderManager::getStdProgramOitDepthPe
   + EOL"void main()"
     EOL"{"
     EOL"  #define THE_SAMPLE_ID " + (theMsaa ? "gl_SampleID" : "0")
-  + EOL"  occFragColor = texelFetch (uDepthPeelingBackColor, ivec2 (gl_FragCoord.xy), THE_SAMPLE_ID);"
+  + EOL"  occFragColor = occTextureFetch2D (uDepthPeelingBackColor, ivec2 (gl_FragCoord.xy), THE_SAMPLE_ID);"
     EOL"  if (occFragColor.a == 0.0) { discard; }"
     EOL"}";
 
@@ -774,8 +778,8 @@ Handle(Graphic3d_ShaderProgram) Graphic3d_ShaderManager::getStdProgramOitDepthPe
     EOL"{"
     EOL"  #define THE_SAMPLE_ID " + (theMsaa ? "gl_SampleID" : "0")
   + EOL"  ivec2 aFragCoord  = ivec2 (gl_FragCoord.xy);"
-    EOL"  vec4  aFrontColor = texelFetch (uDepthPeelingFrontColor, aFragCoord, THE_SAMPLE_ID);"
-    EOL"  vec4  aBackColor  = texelFetch (uDepthPeelingBackColor,  aFragCoord, THE_SAMPLE_ID);"
+    EOL"  vec4  aFrontColor = occTextureFetch2D (uDepthPeelingFrontColor, aFragCoord, THE_SAMPLE_ID);"
+    EOL"  vec4  aBackColor  = occTextureFetch2D (uDepthPeelingBackColor,  aFragCoord, THE_SAMPLE_ID);"
     EOL"  float anAlphaMult = 1.0 - aFrontColor.a;"
     EOL"  occFragColor = vec4 (aFrontColor.rgb + anAlphaMult * aBackColor.rgb, aFrontColor.a + aBackColor.a);"
     EOL"}";
