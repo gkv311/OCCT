@@ -1083,6 +1083,13 @@ static Standard_Integer QANColTestSequence(Draw_Interpretor& di, Standard_Intege
 // modern compilers use return value optimization in release mode
 // (object that is returned is constructed once at its target 
 // place and never copied).
+#if defined(__clang__)
+  #pragma clang optimize off
+#elif defined(__GNUC__) && (__GNUC__ >= 12)
+  // GCC12 is smart enough to detect the issue
+  #pragma GCC diagnostic push
+  #pragma GCC diagnostic ignored "-Wdangling-pointer="
+#endif
 static NCollection_Array1<double> GetArrayByValue()
 {
   const int aLen = 1024;
@@ -1092,6 +1099,11 @@ static NCollection_Array1<double> GetArrayByValue()
     anArray.SetValue(i, i + 113.);
   return anArray;
 }
+#if defined(__clang__)
+  #pragma clang optimize on
+#elif defined(__GNUC__) && (__GNUC__ >= 12)
+  #pragma GCC diagnostic pop // "-Wdangling-pointer="
+#endif
 
 // check array for possible corruption
 static bool CheckArrayByValue(NCollection_Array1<double> theArray)
