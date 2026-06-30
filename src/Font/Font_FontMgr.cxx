@@ -511,6 +511,7 @@ Font_FontMgr::Font_FontMgr()
   aKorean->Append (Font_FontAlias ("malgun gothic")); // introduced since Vista
   aKorean->Append (Font_FontAlias ("gulim"));         // used on older systems (Windows XP)
 #elif defined(__APPLE__)
+  aCJK   ->Append (Font_FontAlias ("songti sc light"));
   aKorean->Append (Font_FontAlias ("applegothic"));
   aKorean->Append (Font_FontAlias ("stfangsong"));
 #endif
