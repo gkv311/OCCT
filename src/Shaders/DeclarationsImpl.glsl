@@ -8,10 +8,10 @@ uniform sampler2D occDepthPeelingFrontColor;
 int IsFrontPeelLayer = -1;
 bool occFragEarlyReturn()
 {
-  #define THE_DEPTH_CLEAR_VALUE -1e15f
+  #define THE_DEPTH_CLEAR_VALUE -1e15
   ivec2  aFragCoord = ivec2 (gl_FragCoord.xy);
-  vec2   aLastDepth = texelFetch (occDepthPeelingDepth, aFragCoord, 0).rg;
-  occPeelFrontColor = texelFetch (occDepthPeelingFrontColor, aFragCoord, 0);
+  vec2   aLastDepth = occTextureFetch2D (occDepthPeelingDepth, aFragCoord, 0).rg;
+  occPeelFrontColor = occTextureFetch2D (occDepthPeelingFrontColor, aFragCoord, 0);
   occPeelDepth.rg   = vec2 (THE_DEPTH_CLEAR_VALUE); // depth value always increases, so that MAX blend equation can be used
   occPeelBackColor  = vec4 (0.0); // back color is blend after each peeling pass
 

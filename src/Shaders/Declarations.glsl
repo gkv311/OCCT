@@ -23,6 +23,7 @@
   #define occTexture3D   texture
   #define occTextureCube texture
   #define occTextureCubeLod textureLod
+  #define occTextureFetch2D texelFetch
 #else
   #define THE_ATTRIBUTE  attribute
   #define THE_SHADER_IN  varying
@@ -37,6 +38,7 @@
   #else // fallback
     #define occTextureCubeLod(theSampl,theCoord,theLod) textureCube(theSampl,theCoord)
   #endif
+  #define occTextureFetch2D texelFetch2D
 #endif
 
 #ifdef GL_ES
