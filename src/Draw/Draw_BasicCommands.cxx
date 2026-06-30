@@ -1043,8 +1043,19 @@ static int dmeminfo (Draw_Interpretor& theDI,
 
   for (int aCountersIt = 0; aCountersIt < int(OSD_MemInfo::MemCounter_NB); ++aCountersIt)
   {
-    if (aCounters[aCountersIt])
-      theDI << Standard_Real(aMemInfo.Value((OSD_MemInfo::Counter)aCountersIt)) << " ";
+    if (!aCounters[aCountersIt])
+      continue;
+
+    const Standard_Size aSize = aMemInfo.Value((OSD_MemInfo::Counter)aCountersIt);
+    // return '0' for unavailable counter to simplify things
+    // (so that it doesn't make any trouble for math logic in Tcl scripts using 'expr'),
+    // which might be mistreated as valid, but very unlikely
+    if (aSize == Standard_Size(-1))
+      theDI << "0";
+    else
+      theDI << Standard_Real(aSize);
+
+    theDI << " ";
   }
   theDI << "\n";
   return 0;
