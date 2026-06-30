@@ -294,24 +294,38 @@ void OSD_MemInfo::Update()
   }
   aFile.close();
 #elif (defined(__APPLE__))
-  if (IsActive (MemVirtual)
-   || IsActive (MemWorkingSet)
-   || IsActive (MemHeapUsage))
+  if (IsActive(MemVirtual)
+   || IsActive(MemWorkingSet))
   {
-    struct task_basic_info aTaskInfo;
-    mach_msg_type_number_t aTaskInfoCount = TASK_BASIC_INFO_COUNT;
-    if (task_info (mach_task_self(), TASK_BASIC_INFO,
-                   (task_info_t )&aTaskInfo, &aTaskInfoCount) == KERN_SUCCESS)
+    struct mach_task_basic_info aTaskInfo;
+    mach_msg_type_number_t aTaskInfoCount = MACH_TASK_BASIC_INFO_COUNT;
+    if (task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+                  (task_info_t )&aTaskInfo, &aTaskInfoCount) == KERN_SUCCESS)
     {
-      // On Mac OS X, these values in bytes, not pages!
-      myCounters[MemVirtual]    = aTaskInfo.virtual_size;
-      myCounters[MemWorkingSet] = aTaskInfo.resident_size;
+      // these values are in bytes on macOS, not pages!
+      myCounters[MemWorkingSet] = (size_t)aTaskInfo.resident_size;
+      // macOS returns extremely large values for virtual_size,
+      // which makes this counter impractical for any use compared to other platforms,
+      // but return it anyway (the same value is shown by Activity Monitor)
+      myCounters[MemVirtual] = (size_t)aTaskInfo.virtual_size;
+    }
+  }
+  if (IsActive(MemHeapUsage))
+  {
+    // getting malloc statistics
+    malloc_statistics_t aStats = {};
+    malloc_zone_statistics(nullptr, &aStats);
 
-      //Getting malloc statistics
-      malloc_statistics_t aStats;
-      malloc_zone_statistics (NULL, &aStats);
-
-      myCounters[MemHeapUsage] = aStats.size_in_use;
+    myCounters[MemHeapUsage] = aStats.size_in_use;
+  }
+  if (IsActive(MemWorkingSetPeak))
+  {
+    struct rusage aResUsage;
+    if (getrusage(RUSAGE_SELF, &aResUsage) == 0)
+    {
+      // ru_maxrss should be in KiB on other systems and old macOS (like 10.6),
+      // but on modern macOS (at least 10.11+) ru_maxrss is returned in bytes
+      myCounters[MemWorkingSetPeak] = aResUsage.ru_maxrss;
     }
   }
 #endif
