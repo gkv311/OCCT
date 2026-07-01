@@ -1,8 +1,22 @@
-puts "TODO OCC24156 MacOS: Faulty OCC6143"
-
 puts "================"
 puts "0001723, 0002707, 0006143, 0012131"
 puts "OSD::SetSignal : not all FLT e x c e p t i o n s are caught"
+
+# not trapped regardless of arch
+puts "TODO OCC24156 MacOS: Test Integer Divide By Zero: Error"
+
+if { [regexp {Architecture: ARM} [dversion]] == 1 } {
+  puts "known issues on ARM:"
+  # FPE traps are optional on ARM64 hardware, seems to be unavailable on Linux
+  puts "TODO OCC24156 Linux: Test Integer Divide By Zero: Error"
+  puts "TODO OCC24156 Linux: Test Real"
+  # only Integer Divide By Zero is caught on Windows on ARM64
+  puts "TODO OCC24156 Windows: Test Real"
+} else {
+  puts "known issues on x86:"
+  # FPE signal handling is not implemented for macOS on Intel
+  puts "TODO OCC24156 MacOS: Test Real"
+}
 puts "================"
 puts ""
 

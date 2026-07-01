@@ -733,9 +733,12 @@ LONG _osd_debug ( void ) {
 // POSIX threads
 #include <pthread.h>
 
-#ifdef __linux__
-#include  <cfenv>
-//#include  <fenv.h>
+#if defined(__linux__) || defined(__APPLE__)
+  #include <cfenv>
+#endif
+
+#if defined(__APPLE__)
+  #include <sys/ucontext.h>
 #endif
 
 // variable signalling that Control-C has been pressed (SIGINT signal)
@@ -762,7 +765,11 @@ typedef void (* SIG_PFV) (int);
   #include <sys/signal.h>
 #endif
 
-# define _OSD_FPX (FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW)
+// the bits FE_UNDERFLOW / __fpcr_trap_underflow also work (tested on Linux x86_64, macOS ARM64),
+// but we don't add them for more consistency within MSVC
+#define _OSD_FPX (FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW)
+// the same as _OSD_FPX, but shifted by 8 bits, e.g. (_OSD_FPX<<8)
+#define _OSD_FPRC_TRAP_BITS (__fpcr_trap_invalid | __fpcr_trap_divbyzero | __fpcr_trap_overflow)
 
 //============================================================================
 //==== Handler
@@ -784,11 +791,15 @@ typedef void (* SIG_PFV) (int);
 //==== SIGSEGV is handled by "SegvHandler()"
 //============================================================================
 #ifdef SA_SIGINFO
-static void Handler (const int theSignal, siginfo_t */*theSigInfo*/, const Standard_Address /*theContext*/)
+static void Handler (const int theSignal, siginfo_t* theSigInfo, const Standard_Address theContext)
 #else
 static void Handler (const int theSignal)
 #endif
 {
+#ifdef SA_SIGINFO
+  (void)theSigInfo, (void)theContext;
+#endif
+
   struct sigaction oldact, act;
   // re-install the signal
   if ( ! sigaction (theSignal, NULL, &oldact) ) {
@@ -822,9 +833,33 @@ static void Handler (const int theSignal)
     exit(SIGQUIT);
     break;
   case SIGILL:
+  {
+    // for some reason, macOS generates SIGILL instead of SIGFPE,
+    // and we have to parse low-level details to distinguish them
+  #if defined(__APPLE__) && defined(__arm64__)
+    int aSigCode = theSigInfo->si_code;
+    const ucontext_t* aUCtx = (const ucontext_t*)theContext;
+    if (aSigCode == ILL_ILLTRP)
+    {
+      // check topmost 6 bits - from AArch64 documentation
+      const auto anExcSyndrome = aUCtx->uc_mcontext->__es.__esr;
+      const auto anExcCause = anExcSyndrome >> (std::numeric_limits<decltype(anExcSyndrome)>::digits - 6);
+      if (anExcCause == 0b101100) // it is 0b101000 for AArch32
+      {
+        sigaddset(&set, SIGILL);
+        sigprocmask(SIG_UNBLOCK, &set, nullptr);
+
+        OSD::SetFloatingSignal(true);
+
+        Standard_Failure::Jump(Standard_NumericError::NewInstance("SIGILL Arithmetic exception detected"));
+        break;
+      }
+    }
+  #endif
     Standard_Failure::Jump(OSD_SIGILL::NewInstance("SIGILL 'illegal instruction' detected."));
     exit(SIGILL);
     break;
+  }
   case SIGKILL:
     Standard_Failure::Jump(OSD_SIGKILL::NewInstance("SIGKILL 'kill' detected."));
     exit(SIGKILL);
@@ -974,7 +1009,19 @@ static void SegvHandler(const int theSignal,
 //=======================================================================
 void OSD::SetFloatingSignal (Standard_Boolean theFloatingSignal)
 {
-#if defined (__linux__)
+#if defined(__APPLE__) && defined(__arm64__)
+  feclearexcept(FE_ALL_EXCEPT);
+
+  // warning! for some reason macOS raises SIGILL instead of SIGFPE
+  fenv_t anFEnv = {};
+  fegetenv(&anFEnv);
+  if (theFloatingSignal)
+    anFEnv.__fpcr |= _OSD_FPRC_TRAP_BITS;
+  else
+    anFEnv.__fpcr &= ~_OSD_FPRC_TRAP_BITS;
+
+  fesetenv(&anFEnv);
+#elif defined (__linux__)
   feclearexcept (FE_ALL_EXCEPT);
   if (theFloatingSignal)
   {
@@ -1007,7 +1054,11 @@ void OSD::SetFloatingSignal (Standard_Boolean theFloatingSignal)
 //=======================================================================
 Standard_Boolean OSD::ToCatchFloatingSignals()
 {
-#if defined (__linux__)
+#if defined(__APPLE__) && defined(__arm64__)
+  fenv_t anFEnv = {};
+  fegetenv(&anFEnv);
+  return (anFEnv.__fpcr & _OSD_FPRC_TRAP_BITS) != 0;
+#elif defined (__linux__)
   return (fegetexcept() & _OSD_FPX) != 0;
 #else
   return Standard_False;
