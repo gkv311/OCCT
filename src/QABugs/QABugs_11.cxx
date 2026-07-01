@@ -46,6 +46,7 @@
 #include <Standard_Overflow.hxx>
 #include <Standard_Underflow.hxx>
 #include <Standard_DivideByZero.hxx>
+#include <OSD.hxx>
 #include <OSD_SIGSEGV.hxx>
 #include <OSD_Exception_ACCESS_VIOLATION.hxx>
 #include <OSD_Exception_STACK_OVERFLOW.hxx>
@@ -2074,6 +2075,28 @@ static int StackOverflow (int i = -1)
   #pragma GCC push_options
   #pragma GCC optimize("O0")
 #endif
+
+namespace
+{
+//! This printer duplicates messages in Tcl and std::cout
+//! to have message in log even if process crashed
+class LocalPrinter
+{
+public:
+  LocalPrinter(Draw_Interpretor& theDi) : myDI(&theDi) {}
+
+  template<typename T> LocalPrinter& operator<<(const T& theArg)
+  {
+    std::cout << theArg << std::flush;
+    *myDI << theArg;
+    return *this;
+  }
+
+private:
+  Draw_Interpretor* myDI = nullptr;
+};
+}
+
 static Standard_Integer OCC6143 (Draw_Interpretor& di, Standard_Integer argc, const char ** argv)
 {
   if (argc != 1)
@@ -2081,245 +2104,203 @@ static Standard_Integer OCC6143 (Draw_Interpretor& di, Standard_Integer argc, co
     std::cout << "Usage : " << argv[0] << "\n";
     return 1;
   }
-  Standard_Boolean Succes;
   
-  Succes = Standard_True;
+  // signals are expected to be set by 'dsetsignal' command
   //OSD::SetSignal();
 
-  {//==== Test Divide ByZero (Integer) ========================================
-    try{
+  // this command duplicates messages in Tcl and std::cout
+  // to have message in log even if process crashed
+  LocalPrinter aPrinter(di);
+
+  {
+    aPrinter << "Test Integer Divide By Zero: ";
+    try
+    {
       OCC_CATCH_SIGNALS
-      std::cout << "(Integer) Divide By Zero..." << std::endl;
-      di << "(Integer) Divide By Zero...";
-      //std::cout.flush();
-      di << "\n";
-      Standard_Integer res, a =4, b = 0 ;
+      Standard_Integer res, a = 4, b = 0;
       res = a / b;
-      di << "Error: 4 / 0 = " << res << " - no exception is raised!\n";
-      Succes = Standard_False;
+      aPrinter << "Error, 4 / 0 = " << res << " - no exception is raised!\n";
     }
 #if defined(SOLARIS) || defined(_WIN32)
-    catch(Standard_DivideByZero const&)
+    catch (const Standard_DivideByZero&)
 #else
-    catch(Standard_NumericError const&)
+    catch (const Standard_NumericError&)
 #endif
     {
-      di << "Caught, OK\n";
+      aPrinter << "OK, caught\n";
     }
-    catch(Standard_Failure const& anException) {
-      di << " Caught (";
-      di << anException.GetMessageString();
-      di << ")... KO\n";
-      Succes = Standard_False;
+    catch (const Standard_Failure& anException)
+    {
+      aPrinter << "Error, caught (" << anException.GetMessageString() << ") instead of a typed one\n";
     }
-    // this case tests if (...) supersedes (Standard_*),
-    // the normal behaviour is not
-    catch(...) {
-      di<<" unknown exception... (But) Ok\n";
+    catch (...)
+    {
+      aPrinter << "Error, caught unknown exception instead of a typed one\n";
     }
   }
 
-  {//==== Test Divide ByZero (Real) ===========================================
-    try{
-      OCC_CATCH_SIGNALS
-      std::cout << "(Real) Divide By Zero..." << std::endl;
-      di << "(Real) Divide By Zero...";
-      //std::cout.flush();
-      di << "\n";
-      Standard_Real res, a= 4.0, b=0.0;
-      res = a / b;
-      di << "Error: 4.0 / 0.0 = " << res << " - no exception is raised!\n";
-      Succes = Standard_False;
-    }
-    catch(Standard_DivideByZero const&) // Solaris, Windows w/o SSE2
+  {
+    aPrinter << "Test Integer Overflow: ";
+    try
     {
-      di << "Caught, OK\n";
-    }
-    catch(Standard_NumericError const&) // Linux, Windows with SSE2
-    {
-      di << "Caught, OK\n";
-    }
-    catch(Standard_Failure const& anException) {
-      //std::cout << " Caught (" << Standard_Failure::Caught() << ")... KO" << std::endl;
-      di << " Caught (";
-      di << anException.GetMessageString();
-      di << ")... KO\n";
-      Succes = Standard_False;
-    }
-  }
-
-  {//==== Test Overflow (Integer) =============================================
-    try{
       OCC_CATCH_SIGNALS
-      std::cout << "(Integer) Overflow..." << std::endl;
-      di << "(Integer) Overflow...";
-      //std::cout.flush();
-      di << "\n";
-      Standard_Integer res, i=IntegerLast();
+      Standard_Integer res, i = IntegerLast();
       res = i + 1;
-      //++++ std::cout << " -- "<<res<<"="<<i<<"+1   Does not Caught... KO"<< std::endl;
-      //++++ Succes = Standard_False;
-      di << "Not caught: " << i << " + 1 = " << res << ", still OK\n";
+      aPrinter << "Not caught, " << i << " + 1 = " << res << ", still OK\n";
     }
-    catch(Standard_Overflow const&) {
-      di << "Caught, OK\n";
+    catch (const Standard_Overflow&)
+    {
+      aPrinter << "OK, caught\n";
     }
-    catch(Standard_Failure const& anException) {
-      //std::cout << " Caught (" << Standard_Failure::Caught() << ")... KO" << std::endl;
-      di << " Caught (";
-      di << anException.GetMessageString();
-      di << ")... KO\n";
-      Succes = Standard_False;
+    catch (const Standard_Failure& anException)
+    {
+      aPrinter << "Error: caught (" << anException.GetMessageString() << ") instead of a typed one\n";
     }
   }
 
-  {//==== Test Overflow (Real) ================================================ 
-    try{
+  {
+    aPrinter << "Test Real Divide By Zero: ";
+    try
+    {
       OCC_CATCH_SIGNALS
-      std::cout << "(Real) Overflow..." << std::endl;
-      di << "(Real) Overflow...";
-      //std::cout.flush();
-      di << "\n";
-      Standard_Real res, r=RealLast();
+      Standard_Real res, a = 4.0, b = 0.0;
+      res = a / b;
+      aPrinter << "Error, 4.0 / 0.0 = " << res << " - no exception is raised!\n";
+    }
+    catch (const Standard_DivideByZero&) // Solaris, Windows w/o SSE2
+    {
+      aPrinter << "OK, caught 1\n";
+    }
+    catch (const Standard_NumericError&) // Linux, Windows with SSE2
+    {
+      aPrinter << "OK, caught 2\n";
+    }
+    catch (const Standard_Failure& anException)
+    {
+      aPrinter << "Error, caught (" << anException.GetMessageString() << ") instead of a typed one\n";
+    }
+  }
+
+  {
+    aPrinter << "Test Real Overflow: ";
+    try
+    {
+      OCC_CATCH_SIGNALS
+      Standard_Real res, r = RealLast();
       res = r * r;
-      
-      (void)sin(1.); //this function tests FPU flags and raises signal (tested on LINUX).
 
-      di << "Error: " << r << "*" << r << " = " << res << " - no exception is raised!\n";
-      Succes = Standard_False;
+      (void)sin(1.); // this math function tests FPU flags and raises signal (on different tested platforms).
+
+      aPrinter << "Error, " << r << "*" << r << " = " << res << " - no exception is raised!\n";
     }
-    catch(Standard_Overflow const&) // Solaris, Windows w/o SSE2
+    catch (const Standard_Overflow&) // Solaris, Windows w/o SSE2
     {
-      di << "Caught, OK\n";
+      aPrinter << "OK, caught 1\n";
     }
-    catch(Standard_NumericError const&) // Linux, Windows with SSE2
+    catch (const Standard_NumericError&) // Linux, Windows with SSE2
     {
-      di << "Caught, OK\n";
+      aPrinter << "OK, caught 2\n";
     }
-    catch(Standard_Failure const& anException) {
-      //std::cout << " Caught (" << Standard_Failure::Caught() << ")... KO" << std::endl;
-      di << " Caught (";
-      di << anException.GetMessageString();
-      di << ")... KO\n";
-      Succes = Standard_False;
+    catch (const Standard_Failure& anException)
+    {
+      aPrinter << "Error, caught (" << anException.GetMessageString() << ") instead of a typed one\n";
     }
   }
 
-  {//==== Test Underflow (Real) ===============================================
-    try{
+  {
+    aPrinter << "Test Real Underflow: ";
+    try
+    {
       OCC_CATCH_SIGNALS
-      std::cout << "(Real) Underflow" << std::endl; // to have message in log even if process crashed
-      di << "(Real) Underflow";
-      //std::cout.flush();
-      di << "\n";
       Standard_Real res, r = RealSmall();
       res = r * r;
-      //res = res + 1.;
-      //++++ std::cout<<"-- "<<res<<"="<<r<<"*"<<r<<"   Does not Caught... KO"<<std::endl;
-      //++++ Succes = Standard_False;
-      di << "Not caught: " << r << "*" << r << " = " << res << ", still OK\n";
+      aPrinter << "Not caught, " << r << "*" << r << " = " << res << ", still OK\n";
     }
-    catch(Standard_Underflow const&) // could be on Solaris, Windows w/o SSE2
+    catch (const Standard_Underflow&) // could be on Solaris, Windows w/o SSE2
     {
-      di << "Exception caught, KO\n";
-      Succes = Standard_False;
+      aPrinter << "OK, caught 1\n";
     }
-    catch(Standard_NumericError const&) // could be on Linux, Windows with SSE2
+    catch (const Standard_NumericError&) // could be on Linux, Windows with SSE2
     {
-      di << "Exception caught, KO\n";
-      Succes = Standard_False;
+      aPrinter << "OK, caught 2\n";
     }
-    catch(Standard_Failure const& anException) {
-      //std::cout << " Caught (" << Standard_Failure::Caught() << ")... KO" << std::endl;
-      di << " Caught (";
-      di << anException.GetMessageString();
-      di << ")... KO\n";
-      Succes = Standard_False;
+    catch (const Standard_Failure& anException)
+    {
+      aPrinter << "Error, caught (" << anException.GetMessageString() << ") instead of a typed one\n";
     }
   }
 
-  {//==== Test Invalid Operation (Real) ===============================================
-    try{
+  {
+    aPrinter << "Test Real Invalid Operation: ";
+    try
+    {
       OCC_CATCH_SIGNALS
-      std::cout << "(Real) Invalid Operation..." << std::endl;
-      di << "(Real) Invalid Operation...";
-      //std::cout.flush();
-      di << "\n";
-      Standard_Real res, r=-1;
+      Standard_Real res, r = -1;
       res = sqrt(r);
-      di << "Error: swrt(-1) = " << res << " - no exception is raised!\n";
-      Succes = Standard_False;
+      aPrinter << "Error, sqrt(-1) = " << res << " - no exception is raised!\n";
     }
-    catch(Standard_NumericError const&) {
-      di << "Caught, OK\n";
+    catch (const Standard_NumericError&)
+    {
+      aPrinter << "OK, caught\n";
     }
-    catch(Standard_Failure const& anException) {
-      //std::cout << " Caught (" << Standard_Failure::Caught() << ")... KO" << std::endl;
-      di << " Caught (";
-      di << anException.GetMessageString();
-      di << ")... KO\n";
-      Succes = Standard_False;
+    catch (const Standard_Failure& anException)
+    {
+      aPrinter << "Error, caught (" << anException.GetMessageString() << ") instead of a typed one\n";
     }
   }
 
-  {//==== Test Access Violation ===============================================
-    try {
+  {
+    aPrinter << "Test Segmentation Fault: ";
+    try
+    {
       OCC_CATCH_SIGNALS
-      std::cout << "Segmentation Fault..." << std::endl;
-      di << "Segmentation Fault...";
-      //std::cout.flush();
-      di << "\n";
-      int* pint=NULL;
+      int* pint = nullptr;
       *pint = 4;
-      di << "Error: writing by NULL address - no exception is raised!\n";
-      Succes = Standard_False;
+      aPrinter << "Error, writing by NULL address - no exception is raised!\n";
     }
 #ifdef _WIN32
-    catch(OSD_Exception_ACCESS_VIOLATION const&)
+    catch (const OSD_Exception_ACCESS_VIOLATION&)
 #else
-    catch(OSD_SIGSEGV const&)
+    catch (const OSD_SIGSEGV&)
 #endif
     {
-      di << "Caught, OK\n";
-    } catch(Standard_Failure const& anException) {
-      //std::cout << " Caught (" << Standard_Failure::Caught() << ")... KO" << std::endl;
-      di << " Caught (";
-      di << anException.GetMessageString();
-      di << ")... KO\n";
-      Succes = Standard_False;
+      aPrinter << "OK, caught\n";
+    }
+    catch (const Standard_Failure& anException)
+    {
+      aPrinter << "Error, caught (" << anException.GetMessageString() << ") instead of a typed one\n";
     }
   }
 
 #if defined(_WIN32) && !defined(_WIN64)
-  {//==== Test Stack Overflow ===============================================
-    try {
+  {
+    aPrinter << "Test Stack Overflow: ";
+    try
+    {
       OCC_CATCH_SIGNALS
-      std::cout << "Stack Overflow..." << std::endl;
-      di << "Stack Overflow...";
-      //std::cout.flush();
-      di << "\n";
       StackOverflow();
-      di << "Error - no exception is raised!\n";
-      Succes = Standard_False;
+      aPrinter << "Error, no exception is raised!\n";
     }
-    catch(OSD_Exception_STACK_OVERFLOW const&) {
-      di << "Caught, OK\n";
+    catch (const OSD_Exception_STACK_OVERFLOW&)
+    {
+      aPrinter << "OK, caught\n";
     }
-    catch(Standard_Failure const& anException) {
-      //std::cout << " Caught (" << Standard_Failure::Caught() << ")... KO" << std::endl;
-      di << " Caught (";
-      di << anException.GetMessageString();
-      di << ")... KO\n";
-      Succes = Standard_False;
+    catch (const Standard_Failure& anException)
+    {
+      aPrinter << "Error, caught (" << anException.GetMessageString() << ") instead of a typed one\n";
     }
   }
 #endif
 
- if(Succes) {
-   di << "TestExcept: Successful completion\n";
- } else {
-   di << "TestExcept: failure\n";
- }
+  aPrinter << "TestExcept: Successful completion\n\n";
+
+  // Tk_MainLoop() generates FPE signals on macOS;
+  // disable them at the end of test to prevent crash
+  // when running test interactively and not in batch mode.
+#if defined(__APPLE__) && defined(HAVE_TK)
+  di << "Warning: FPE is implicitly disabled at the end of the test to prevent crash from Tk_MainLoop on macOS\n";
+  OSD::SetSignal(false);
+#endif
 
   return 0;
 }
