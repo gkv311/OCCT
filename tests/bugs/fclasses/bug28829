@@ -1,5 +1,18 @@
 # check that FPE signals can be both disabled and enabled
 
+set hasBrokenFPE 0
+if { [regexp {Architecture: ARM} [dversion]] == 1 } {
+  # FPE traps are optional on ARM64 hardware, seems to be unavailable on Linux
+  puts "TODO OCC24156 Linux: Error: FPE wasn't caught"
+  # only Integer Divide By Zero is caught on Windows on ARM64
+  puts "TODO OCC24156 Windows: Error: FPE wasn't caught"
+  set hasBrokenFPE [expr {$tcl_platform(os)!="Darwin" ? 1 : 0}]
+} else {
+  # FPE signal handling is not implemented for macOS on Intel
+  puts "TODO OCC24156 MacOS: Error: FPE wasn't caught"
+  set hasBrokenFPE [expr {$tcl_platform(os)=="Darwin" ? 1 : 0}]
+}
+
 pload QAcommands
 
 # start with enabled signals
@@ -7,9 +20,15 @@ dsetsignal 1
 
 # first, disable
 dsetsignal 0
-OCC28829
+dset b 123.0/0.0
 
 # then, enable
-puts "REQUIRED OCC28829 All: Standard_NumericError"
 dsetsignal 1
-catch {OCC28829}
+if { !$hasBrokenFPE } { puts "REQUIRED OCC28829 All: Standard_NumericError" }
+catch {dset b 123.0/0.0} result
+
+if { [regexp {An exception was caught} $result] == 1 } {
+  puts "OK: FPE was caught"
+} else {
+  puts "Error: FPE wasn't caught"
+}
