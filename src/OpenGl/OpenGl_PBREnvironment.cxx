@@ -619,7 +619,7 @@ void OpenGl_PBREnvironment::bake (const Handle(OpenGl_Context)& theCtx,
     clear (theCtx, Graphic3d_Vec3(1.0f));
   }
 
-  theEnvMap->Unbind (theCtx, theCtx->PBREnvLUTTexUnit());
+  theEnvMap->Unbind (theCtx, theCtx->PBRSpecIBLMapTexUnit());
 }
 
 // =======================================================================
