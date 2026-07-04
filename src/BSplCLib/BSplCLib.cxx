@@ -3161,7 +3161,6 @@ void  BSplCLib::Eval
   *PolesArray,
   *WeightsArray,
   LocalParameter,
-  Period,
   Inverse,
   Delta ;
   PolesArray = &Poles     ;
@@ -3177,15 +3176,10 @@ void  BSplCLib::Eval
   // the degree of the Bspline
   //
   if (PeriodicFlag) {
-    Period = FlatKnots(FlatKnots.Upper() - 1) - FlatKnots(2) ;
-
-    while (LocalParameter > FlatKnots(FlatKnots.Upper() - 1)) {
-      LocalParameter -= Period ;
-    }
-    
-    while (LocalParameter < FlatKnots(2)) {
-      LocalParameter +=  Period ;
-    }
+    const Standard_Real aLowerBound = FlatKnots(2);
+    const Standard_Real aUpperBound = FlatKnots(FlatKnots.Upper() - 1);
+    if (LocalParameter < aLowerBound || LocalParameter > aUpperBound)
+      LocalParameter = ElCLib::InPeriod(LocalParameter, aLowerBound, aUpperBound);
   }
   if (Parameter < FlatKnots(2) && 
       LocalRequest < ExtrapModeArray[0] &&
@@ -3358,7 +3352,6 @@ void  BSplCLib::Eval
   Standard_Real  *ResultArray,
   *PolesArray,
   LocalParameter,
-  Period,
   Inverse,
   Delta ;
          
@@ -3373,15 +3366,11 @@ void  BSplCLib::Eval
   // the degree of the Bspline
   //
   if (PeriodicFlag) {
-    Period = FlatKnots(FlatKnots.Upper() - 1) - FlatKnots(2) ;
 
-    while (LocalParameter > FlatKnots(FlatKnots.Upper() - 1)) {
-      LocalParameter -= Period ;
-    }
-
-    while (LocalParameter < FlatKnots(2)) {
-      LocalParameter +=  Period ;
-    }
+    const Standard_Real aLowerBound = FlatKnots(2);
+    const Standard_Real aUpperBound = FlatKnots(FlatKnots.Upper() - 1);
+    if (LocalParameter < aLowerBound || LocalParameter > aUpperBound)
+      LocalParameter = ElCLib::InPeriod(LocalParameter, aLowerBound, aUpperBound);
   }
   if (Parameter < FlatKnots(2) && 
       LocalRequest < ExtrapModeArray[0] &&

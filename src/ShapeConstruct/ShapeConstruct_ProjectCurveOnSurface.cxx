@@ -274,6 +274,7 @@ Standard_Boolean ShapeConstruct_ProjectCurveOnSurface::Perform (Handle(Geom_Curv
   // knot interval inside [aFirstParam, aLastParam].
   // If quotient = (MaxSpeed / MinSpeed) >= aMaxQuotientCoeff then
   // use PerformByProjLib algorithm.
+  Handle(Geom2d_Curve) aProjLibPCurveResult;
   if(!bspl.IsNull())
   {
     Standard_Real aFirstParam = First; // First parameter of current interval.
@@ -345,11 +346,17 @@ Standard_Boolean ShapeConstruct_ProjectCurveOnSurface::Perform (Handle(Geom_Curv
     if (anEvenlyCoeff > aMaxQuotientCoeff &&
         aMinParSpeed > Precision::Confusion() )
     {
-      PerformByProjLib(c3d, First, Last, c2d);
-      // PerformByProjLib fail detection:
+      PerformByProjLib(c3d, First, Last, aProjLibPCurveResult);
+      c2d = aProjLibPCurveResult;
+      // Validate the range of produced pcurve (similar to BRepCheck_Edge/BRepCheck_InvalidRange);
+      // inconsistent range may cause following update of Edge with BSpline pcurve with knot range
+      // lesser than parameter range, that may cause garbage point values when evaluating latter by parameter
       if (!c2d.IsNull())
       {
-        return Status (ShapeExtend_DONE);
+        const Standard_Real aRange2d = Abs(c2d->LastParameter() - c2d->FirstParameter());
+        const Standard_Real aRange3d = Abs(c3d->LastParameter() - c3d->FirstParameter());
+        if (Abs(aRange2d - aRange3d) <= Precision::PConfusion())
+          return Status (ShapeExtend_DONE);
       }
     }
   }
@@ -403,6 +410,10 @@ Standard_Boolean ShapeConstruct_ProjectCurveOnSurface::Perform (Handle(Geom_Curv
     thePnts2d->SetValue(iPnt, pnt2d(iPnt));
   }
   c2d = InterpolatePCurve (nbPini, thePnts2d, theParams2d, c3d);
+
+  // Take at least the result of the ProjLib
+  if (c2d.IsNull())
+    c2d = aProjLibPCurveResult;
 
   // Faut-il aussi reprendre la C3D ?
   myStatus |= ShapeExtend::EncodeStatus (c2d.IsNull() ? ShapeExtend_FAIL1 : ShapeExtend_DONE2);
