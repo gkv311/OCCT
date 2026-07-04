@@ -20,11 +20,13 @@
 //            bon appel a LocateParameter (PRO6973) et mise en conformite avec
 //            le cdl de LocateU, lorsque U est un noeud (PRO6988)
 
+#include <Law_BSpline.hxx>
+
 #include <BSplCLib.hxx>
 #include <BSplCLib_KnotDistribution.hxx>
 #include <BSplCLib_MultDistribution.hxx>
 #include <gp.hxx>
-#include <Law_BSpline.hxx>
+#include <ElCLib.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_DimensionError.hxx>
 #include <Standard_DomainError.hxx>
@@ -1302,20 +1304,17 @@ void Law_BSpline::UpdateKnots()
 //purpose  : that is compute the cache so that it is valid
 //=======================================================================
 
-void Law_BSpline::PeriodicNormalization(Standard_Real&  Parameter) const 
+void Law_BSpline::PeriodicNormalization(Standard_Real& theParameter) const
 {
-  Standard_Real Period ;
-  
-  if (periodic){
-    Period = flatknots->Value(flatknots->Upper() - deg) - 
-      flatknots->Value (deg + 1) ;
-    while (Parameter > flatknots->Value(flatknots->Upper()-deg)){
-      Parameter -= Period ;
-    }
-    while (Parameter < flatknots->Value((deg + 1))){
-      Parameter +=  Period ;
-    }
-  }
+  if (!periodic)
+    return;
+
+  const Standard_Real aLowerBound = flatknots->Value((deg + 1));
+  const Standard_Real aUpperBound = flatknots->Value(flatknots->Upper() - deg);
+  if (theParameter >= aLowerBound && theParameter <= aUpperBound)
+    return;
+
+  theParameter = ElCLib::InPeriod(theParameter,aLowerBound, aUpperBound);
 }
 
 
