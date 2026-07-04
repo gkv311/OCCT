@@ -65,7 +65,11 @@ public:
   void SetCoord (const Standard_Integer theIndex, const Standard_Real theXi)
   {
     Standard_OutOfRange_Raise_if (theIndex < 1 || theIndex > 3, NULL);
-    (&x)[theIndex - 1] = theXi;
+    const Standard_Integer anIndex = theIndex - 1;
+    // nit: this code might cause problems with aggressive compiler optimizations;
+    // the previous code has been tuned to workaround issues with clang-18
+    Standard_Real* aData = &x;
+    aData[anIndex] = theXi;
   }
 
   //! Assigns the given value to the X coordinate
@@ -86,13 +90,19 @@ public:
   Standard_Real Coord (const Standard_Integer theIndex) const
   {
     Standard_OutOfRange_Raise_if (theIndex < 1 || theIndex > 3, NULL);
-    return (&x)[theIndex - 1];
+    const Standard_Integer anIndex = theIndex - 1;
+
+    const Standard_Real* aData = &x;
+    return aData[anIndex];
   }
 
   Standard_Real& ChangeCoord (const Standard_Integer theIndex)
   {
     Standard_OutOfRange_Raise_if (theIndex < 1 || theIndex > 3, NULL);
-    return (&x)[theIndex - 1];
+    const Standard_Integer anIndex = theIndex - 1;
+
+    Standard_Real* aData = &x;
+    return aData[anIndex];
   }
 
   void Coord (Standard_Real& theX, Standard_Real& theY, Standard_Real& theZ) const
