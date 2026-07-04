@@ -24,7 +24,13 @@ dset b 123.0/0.0
 
 # then, enable
 dsetsignal 1
-if { !$hasBrokenFPE } { puts "REQUIRED OCC28829 All: Standard_NumericError" }
+if { !$hasBrokenFPE } {
+  if { $tcl_platform(platform) == "windows" } {
+    puts "REQUIRED OCC28829 Windows: Standard_DivideByZero"
+  } else {
+    puts "REQUIRED OCC28829 All: Standard_NumericError"
+  }
+}
 catch {dset b 123.0/0.0} result
 
 if { [regexp {An exception was caught} $result] == 1 } {
