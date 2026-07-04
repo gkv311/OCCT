@@ -1,6 +1,3 @@
-puts "TODO OCC24156 MacOS: An exception was caught"
-puts "TODO OCC24156 MacOS: OCC8842: Faulty"
-
 puts "============"
 puts "00008842: E r r o r s in Offset Shape algorithm working with bspline and surface of revolution"
 puts "============"
