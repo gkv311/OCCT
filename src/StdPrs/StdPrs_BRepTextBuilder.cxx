@@ -80,6 +80,8 @@ TopoDS_Shape StdPrs_BRepTextBuilder::Perform (StdPrs_BRepFont&                  
   aFormatter->Reset();
   aFormatter->SetupAlignment (theHAlign, theVAlign);
 
+  Standard_Mutex::Sentry aSentry (theFont.Mutex());
+
   Font_TextFormatter::FontScaling aScaling;
   aScaling.SizeScaling = (float)theFont.Scale();
   aFormatter->Append (theString, *theFont.FTFont(), theHAlign, aScaling);

@@ -134,7 +134,7 @@ void Font_TextFormatter::Append(const NCollection_String& theString,
     bool  toWrapWord = false;
     float anAdvanceX = 0.0f;
 
-    const float aGlyphWidth = !isNewline ? theFont.AdvanceX(aCharThis, '\n') * aSpaceScaling : 0.0f;
+    const float aGlyphWidth = !isNewline ? theFont.AdvanceX(aCharThis, '\n') * theFontScale.SizeScaling : 0.0f;
     if (aCharThis == ' ')
     {
       aLine->LastWordStart = myGlyphs.Upper() + 2;
@@ -154,15 +154,17 @@ void Font_TextFormatter::Append(const NCollection_String& theString,
 
       if (HasWrapping() && aLine->NbGraphSymbols > 0)
       {
-        if (!myIsWordWrapping || aLine->LastWordStart == aLine->GlyphLower)
+        Standard_Real aMinGlyphSpace = aGlyphWidth - theFont.GlyphRightSideBearing(aCharThis) * theFontScale.SizeScaling;
+        if (aLine->Pen.x() + aMinGlyphSpace > myWrappingWidth)
         {
-          if ((aLine->Pen.x() + aGlyphWidth) >= myWrappingWidth)
-            isNewline = true; // symbol wrapping
-        }
-        else if (myIsWordWrapping && aLine->LastWordStart > aLine->GlyphLower)
-        {
-          if ((aLine->Pen.x() + aGlyphWidth) >= myWrappingWidth)
+          if (myIsWordWrapping && aLine->LastWordStart > aLine->GlyphLower)
+          {
             toWrapWord = aLine->LastWordStart <= myGlyphs.Upper(); // word wrapping
+          }
+          else
+          {
+            isNewline = true; // symbol wrapping
+          }
         }
       }
     }

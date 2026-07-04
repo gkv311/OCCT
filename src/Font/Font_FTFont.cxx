@@ -926,6 +926,38 @@ float Font_FTFont::GlyphHeight (Standard_Utf32Char theUChar)
 }
 
 // =======================================================================
+// function : GlyphLeftSideBearing
+// purpose  :
+// =======================================================================
+float Font_FTFont::GlyphLeftSideBearing (Standard_Utf32Char theUChar)
+{
+  if (loadGlyph (theUChar))
+  {
+#ifdef HAVE_FREETYPE
+    return fromFTPoints<float> (myActiveFTFace->glyph->metrics.horiBearingX);
+#endif
+  }
+  return 0.0f;
+}
+
+// =======================================================================
+// function : GlyphRightSideBearing
+// purpose  :
+// =======================================================================
+float Font_FTFont::GlyphRightSideBearing (Standard_Utf32Char theUChar)
+{
+  if (loadGlyph (theUChar))
+  {
+#ifdef HAVE_FREETYPE
+    return fromFTPoints<float> (myActiveFTFace->glyph->advance.x
+                              - myActiveFTFace->glyph->metrics.horiBearingX
+                              - myActiveFTFace->glyph->metrics.width);
+#endif
+  }
+  return 0.0f;
+}
+
+// =======================================================================
 // function : getKerning
 // purpose  :
 // =======================================================================

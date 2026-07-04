@@ -361,6 +361,14 @@ public:
   //! @param theUChar the character to be loaded as current one
   Standard_EXPORT float GlyphHeight (Standard_Utf32Char theUChar);
 
+  //! The horizontal empty space between a glyph's origin and the leftmost edge of glyph's bounding box.
+  //! @param theUChar the character to be loaded as current one
+  Standard_EXPORT float GlyphLeftSideBearing (Standard_Utf32Char theUChar);
+
+  //! Return horizontal empty space between the right edge of a glyph's bounding box and its total advance width.
+  //! @param theUChar the character to be loaded as current one
+  Standard_EXPORT float GlyphRightSideBearing (Standard_Utf32Char theUChar);
+
   //! Return glyphs number in this font.
   //! @param theToIncludeFallback if TRUE then the number will include fallback list
   Standard_EXPORT Standard_Integer GlyphsNumber (bool theToIncludeFallback = false) const;
