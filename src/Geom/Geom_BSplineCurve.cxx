@@ -1101,19 +1101,17 @@ void Geom_BSplineCurve::UpdateKnots()
 //purpose  : that is compute the cache so that it is valid
 //=======================================================================
 
-void Geom_BSplineCurve::PeriodicNormalization(Standard_Real&  Parameter) const 
+void Geom_BSplineCurve::PeriodicNormalization(Standard_Real& theParameter) const
 {
-  Standard_Real Period ;
+  if (!periodic)
+    return;
 
-  if (periodic) {
-    Period = flatknots->Value(flatknots->Upper() - deg) - flatknots->Value (deg + 1) ;
-    while (Parameter > flatknots->Value(flatknots->Upper()-deg)) {
-      Parameter -= Period ;
-    }
-    while (Parameter < flatknots->Value((deg + 1))) {
-      Parameter +=  Period ;
-    }
-  }
+  const Standard_Real aLowerBound = flatknots->Value((deg + 1));
+  const Standard_Real aUpperBound = flatknots->Value(flatknots->Upper() - deg);
+  if (theParameter >= aLowerBound && theParameter <= aUpperBound)
+    return;
+
+  theParameter = ElCLib::InPeriod(theParameter, aLowerBound, aUpperBound);
 }
 
 //=======================================================================
