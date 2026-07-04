@@ -346,6 +346,13 @@ Handle_TCollection_HAsciiString {
 
 In Visual Studio 2012 and later, visualizers can be put in a separate file in subdirectory *Visualizers*. See file *occt.natvis* for example.
 
+@subsection occt_debug_qtcreator Qt Creator debugging helpers
+
+Qt Creator provides a way to customize display of variables of different types in debugger windows (Watch, Autos, Locals, etc.).
+
+See file *occt_qtcreator.py* as an example for custom helper,
+which could be loaded by Qt Creator by putting a path in settings: Debugger, Locals & Expressions, Extra Debugging Helpers.
+
 @section occt_debug_perf Performance measurement tools
 
 It is recommended to use specialized performance analysis tools to profile OCCT and application code.
