@@ -8,7 +8,7 @@
 
 pload MODELING VISUALIZATION
 # Ray-Tracing doesn't work with Compatible Profile on macOS
-if { $::tcl_platform(os) == "Darwin" } { vcaps -core }
+if { $::tcl_platform(os) == "Darwin" } { vdriver -load GL; vcaps -core }
 
 # procedure to define box dimensions
 set scale 1.
