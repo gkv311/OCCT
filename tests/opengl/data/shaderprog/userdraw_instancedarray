@@ -5,6 +5,8 @@ puts ""
 
 pload VISUALIZATION
 
+if { $::tcl_platform(os) == "Darwin" } { vcaps -core }
+
 vinit View1
 vuserdraw a -instanced
 vfit
