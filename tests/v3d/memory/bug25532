@@ -4,16 +4,19 @@ puts "============"
 puts ""
 
 pload MODELING VISUALIZATION
-pload OPENGL
+
 psphere s 0.5
 tclean  s
 incmesh s 0.001
 trinfo  s
 
+pload OPENGL
+vgldebug -sync 1
+vcaps -vbo 0
 vclear
 vinit View1
 vaxo
-vcaps -vbo 0
+
 vsetdispmode 1
 vdefaults -absDefl 1.0
 vselprops -autoactivate 0
