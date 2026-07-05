@@ -2147,7 +2147,7 @@ Handle(Graphic3d_ShaderProgram) Graphic3d_ShaderManager::getBgSkydomeProgram() c
 
   if (myGapi == Aspect_GraphicsLibrary_OpenGL)
   {
-    aProgSrc->SetHeader ("#version 130");
+    aProgSrc->SetHeader (IsGapiGreaterEqual (3, 2) ? "#version 150" : "#version 130");
   }
   else if (myGapi == Aspect_GraphicsLibrary_OpenGLES)
   {
