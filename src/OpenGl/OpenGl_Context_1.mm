@@ -125,4 +125,31 @@ Standard_Boolean OpenGl_Context::Init (const Standard_Boolean theIsCoreProfile)
   return Standard_True;
 }
 
+// =======================================================================
+// function : windowBufferBits
+// purpose  :
+// =======================================================================
+void OpenGl_Context::windowBufferBits (Graphic3d_Vec4i& theColorBits,
+                                       Graphic3d_Vec2i& theDepthStencilBits) const
+{
+#if defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE
+  (void)theColorBits, (void)theDepthStencilBits;
+  return;
+#else
+  if (myGContext == nullptr)
+    return;
+
+  NSOpenGLPixelFormat* aFormat = [myGContext pixelFormat];
+  if (aFormat == nullptr)
+    return;
+
+  GLint aColorSize = 0;
+  [aFormat getValues: &aColorSize             forAttribute: NSOpenGLPFAColorSize   forVirtualScreen: 0];
+  [aFormat getValues: &theColorBits.a()       forAttribute: NSOpenGLPFAAlphaSize   forVirtualScreen: 0];
+  [aFormat getValues: &theDepthStencilBits[0] forAttribute: NSOpenGLPFADepthSize   forVirtualScreen: 0];
+  [aFormat getValues: &theDepthStencilBits[1] forAttribute: NSOpenGLPFAStencilSize forVirtualScreen: 0];
+  theColorBits.r() = theColorBits.g() = theColorBits.b() = (aColorSize - theColorBits.a()) / 3;
+#endif
+}
+
 #endif // __APPLE__

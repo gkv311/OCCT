@@ -1558,6 +1558,10 @@ void OpenGl_Context::init (const Standard_Boolean theIsCoreProfile)
   Graphic3d_Vec2i aWinBitsDepthStencil;
   WindowBufferBits (aWinBitsRGBA, aWinBitsDepthStencil);
   myIsWindowDeepColor = aWinBitsRGBA.r() >= 10;
+#ifdef __APPLE__
+  if (myIsWindowDeepColor)
+    myIsSRgbWindow = false;
+#endif
 
   // standard formats
   mySupportedFormats->Add (Image_Format_Gray);
@@ -1912,6 +1916,8 @@ void OpenGl_Context::WindowBufferBits (Graphic3d_Vec4i& theColorBits,
       glXGetConfig (aDisplay, aVis.get(), GLX_DEPTH_SIZE,   &theDepthStencilBits[0]);
       glXGetConfig (aDisplay, aVis.get(), GLX_STENCIL_SIZE, &theDepthStencilBits[1]);
     }
+  #elif defined(__APPLE__)
+    windowBufferBits(theColorBits, theDepthStencilBits);
   #endif
   }
 
