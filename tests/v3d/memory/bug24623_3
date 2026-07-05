@@ -11,6 +11,11 @@ tclean  s
 incmesh s 0.001
 trinfo  s
 
+pload OPENGL
+vgldebug -sync 1
+vclear
+vinit View1
+
 set aMemInit [meminfo h]
 set aNb 1000
 
