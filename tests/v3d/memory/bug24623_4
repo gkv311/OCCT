@@ -10,8 +10,11 @@ psphere s 0.5
 tclean  s
 incmesh s 0.001
 trinfo  s
-vinit
+
+pload OPENGL
+vgldebug -sync 1
 vclear
+vinit View1
 
 set aMemInit [meminfo h]
 set anIterNb 100

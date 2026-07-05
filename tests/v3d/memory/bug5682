@@ -10,8 +10,11 @@ set aBoxes {}
 for {set i 1} {$i <= $aNbBoxes} {incr i} { box b$i $i 0 0 1 2 3; lappend aBoxes b$i }
 box b 1 1 1
 
+pload OPENGL
+vgldebug -sync 1
 vclear
 vinit View1
+
 catch {vselmode 4 1}
 vdisplay b
 vfit
