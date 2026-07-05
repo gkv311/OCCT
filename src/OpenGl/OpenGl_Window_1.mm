@@ -131,7 +131,16 @@ void OpenGl_Window::Init (const Handle(OpenGl_GraphicDriver)& theDriver,
   {
     NSOpenGLPixelFormatAttribute anAttribs[32] = {};
     Standard_Integer aLastAttrib = 0;
-    //anAttribs[aLastAttrib++] = NSOpenGLPFAColorSize;    anAttribs[aLastAttrib++] = 32,
+    //anAttribs[aLastAttrib++] = NSOpenGLPFAColorSize;
+    //anAttribs[aLastAttrib++] = 32,
+    if (theCaps->buffersDeepColor)
+    {
+      anAttribs[aLastAttrib++] = NSOpenGLPFAColorSize;
+      anAttribs[aLastAttrib++] = 30;
+      anAttribs[aLastAttrib++] = NSOpenGLPFAAlphaSize;
+      anAttribs[aLastAttrib++] = 2;
+    }
+
     anAttribs[aLastAttrib++] = NSOpenGLPFADepthSize;    anAttribs[aLastAttrib++] = 24;
     anAttribs[aLastAttrib++] = NSOpenGLPFAStencilSize;  anAttribs[aLastAttrib++] = 8;
     anAttribs[aLastAttrib++] = NSOpenGLPFADoubleBuffer;

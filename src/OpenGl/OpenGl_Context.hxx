@@ -1012,6 +1012,11 @@ private:
   //! Private initialization function that should be called only once.
   Standard_EXPORT void init (const Standard_Boolean theIsCoreProfile);
 
+#ifdef __APPLE__
+  //! Get pixel format info.
+  void windowBufferBits (Graphic3d_Vec4i& theColorBits,
+                         Graphic3d_Vec2i& theDepthStencilBits) const;
+#endif
 public: //! @name core profiles
 
   OpenGl_GlCore11*     core11ffp;  //!< OpenGL 1.1 core functionality
