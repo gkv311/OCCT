@@ -4,9 +4,12 @@ puts "# ==================================================================="
 puts ""
 
 pload VISUALIZATION QAcommands
+
 pload OPENGL
+vgldebug -sync 1
 vcaps -vsync 0
 vinit View1
+
 vglinfo
 
 OCC29412 100 ;# just to initialize

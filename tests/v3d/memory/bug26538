@@ -4,11 +4,15 @@ puts "============"
 puts ""
 
 pload MODELING VISUALIZATION
+
 box b1 1 1 1
 box b2 1 1 1
 
+pload OPENGL
+vgldebug -sync 1
 vclear
 vinit View1
+
 vdisplay b1 b2
 vsetlocation b2 10 10 10
 vfit
