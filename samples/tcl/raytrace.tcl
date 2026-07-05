@@ -5,7 +5,7 @@
 
 # Ray-Tracing doesn't work with Compatible Profile on macOS
 pload VISUALIZATION
-if { $::tcl_platform(os) == "Darwin" } { vcaps -core }
+if { $::tcl_platform(os) == "Darwin" } { vdriver -load GL; vcaps -core }
 
 # make bottle by calling another script
 source [file join [file dirname [info script]] bottle.tcl]

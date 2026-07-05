@@ -4,6 +4,9 @@ puts "============"
 puts ""
 
 pload MODELING VISUALIZATION
+
+if { $::tcl_platform(os) == "Darwin" } { vdriver -load GL; vcaps -core }
+
 vclear
 vclose ALL
 box b1_1 0 0 0 1 2 3

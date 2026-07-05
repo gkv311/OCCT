@@ -8,6 +8,8 @@ set THE_DIM 256
 pload MODELING VISUALIZATION
 psphere s 1
 
+if { $::tcl_platform(os) == "Darwin" } { vcaps -core }
+
 vinit View1 -width 768 -height 512
 vcamera -persp -fovy 120
 
