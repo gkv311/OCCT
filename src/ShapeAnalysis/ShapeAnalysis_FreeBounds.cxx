@@ -368,12 +368,14 @@ ShapeAnalysis_FreeBounds::ShapeAnalysis_FreeBounds(const TopoDS_Shape& shape,
       {
         if (!aSel.ContWire(i))
         {
-          lwire = i; //szv#4:S4163:12Mar99 optimized
-          sewd->Add (TopoDS::Wire (arrwires->Value (lwire)));
-          aSel.LoadList(lwire);
+          sewd->Add (TopoDS::Wire (arrwires->Value (i)));
+          aSel.LoadList(i);
 
           if (sewd->NbEdges() > 0)
+          {
+            lwire = i;
             break;
+          }
           sewd->Clear();
         }
       }
