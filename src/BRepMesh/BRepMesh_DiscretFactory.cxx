@@ -23,7 +23,7 @@
 namespace
 {
   //! Embedded triangulation tool(s)
-  static TCollection_AsciiString THE_FAST_DISCRET_MESH ("FastDiscret");
+  static const char THE_FAST_DISCRET_MESH[] = "FastDiscret";
 
   //! Generate system-dependent name for dynamic library
   //! (add standard prefixes and postfixes)
