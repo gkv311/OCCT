@@ -40,24 +40,17 @@ namespace
 // =======================================================================
 TCollection_AsciiString Graphic3d_TextureRoot::TexturesFolder()
 {
-  static Standard_Boolean IsDefined = Standard_False;
-  static TCollection_AsciiString VarName;
-  if (!IsDefined)
+  static const TCollection_AsciiString theTextureFolder = []() -> TCollection_AsciiString
   {
-    IsDefined = Standard_True;
-    OSD_Environment aTexDirEnv ("CSF_MDTVTexturesDirectory");
-    VarName = aTexDirEnv.Value();
-    if (VarName.IsEmpty())
+    TCollection_AsciiString aFolder = OSD_Environment("CSF_MDTVTexturesDirectory").Value();
+    if (aFolder.IsEmpty())
     {
-      OSD_Environment aCasRootEnv ("CASROOT");
-      VarName = aCasRootEnv.Value();
-      if (!VarName.IsEmpty())
-      {
-        VarName += "/src/Textures";
-      }
+      aFolder = OSD_Environment("CASROOT").Value();
+      if (!aFolder.IsEmpty())
+        aFolder += "/src/Textures";
     }
 
-    if (VarName.IsEmpty())
+    if (aFolder.IsEmpty())
     {
 #ifdef OCCT_DEBUG
       std::cerr << "Both environment variables CSF_MDTVTexturesDirectory and CASROOT are undefined!\n"
@@ -66,20 +59,21 @@ TCollection_AsciiString Graphic3d_TextureRoot::TexturesFolder()
       throw Standard_Failure("CSF_MDTVTexturesDirectory and CASROOT are undefined");
     }
 
-    const OSD_Path aDirPath (VarName);
+    const OSD_Path aDirPath (aFolder);
     OSD_Directory aDir (aDirPath);
-    const TCollection_AsciiString aTexture = VarName + "/2d_MatraDatavision.rgb";
+    const TCollection_AsciiString aTexture = aFolder + "/2d_MatraDatavision.rgb";
     OSD_File aTextureFile (aTexture);
     if (!aDir.Exists() || !aTextureFile.Exists())
     {
 #ifdef OCCT_DEBUG
       std::cerr << " CSF_MDTVTexturesDirectory or CASROOT not correctly set\n";
-      std::cerr << " not all files are found in : "<< VarName.ToCString() << std::endl;
+      std::cerr << " not all files are found in : "<< aFolder.ToCString() << std::endl;
 #endif
       throw Standard_Failure("CSF_MDTVTexturesDirectory or CASROOT not correctly set");
     }
-  }
-  return VarName;
+    return aFolder;
+  }();
+  return theTextureFolder;
 }
 
 // =======================================================================
