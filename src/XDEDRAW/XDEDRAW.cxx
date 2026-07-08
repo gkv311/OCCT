@@ -597,6 +597,15 @@ static Standard_Integer show (Draw_Interpretor& di, Standard_Integer argc, const
     return 1;
   }
 
+  // Register driver in global table for displaying XDE documents
+  // in 3d viewer using OCAF mechanics
+  static const Handle(XCAFPrs_Driver) aTPrsStdDriver = []()
+  {
+    Handle(XCAFPrs_Driver) aDriver = new XCAFPrs_Driver();
+    TPrsStd_DriverTable::Get()->AddDriver (XCAFPrs_Driver::GetID(), aDriver);
+    return aDriver;
+  }();
+
   // init viewer
   TDF_Label aRoot = aDoc->GetData()->Root();
   Handle(TPrsStd_AISViewer) aDocViewer;
@@ -1949,10 +1958,6 @@ void XDEDRAW::Init(Draw_Interpretor& di)
   Handle(TDocStd_Application) anApp = DDocStd::GetApplication();
   BinXCAFDrivers::DefineFormat(anApp);
   XmlXCAFDrivers::DefineFormat(anApp);
-
-  // Register driver in global table for displaying XDE documents 
-  // in 3d viewer using OCAF mechanics
-  TPrsStd_DriverTable::Get()->AddDriver (XCAFPrs_Driver::GetID(), new XCAFPrs_Driver);
 
   //=====================================
   // General commands
