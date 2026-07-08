@@ -18,6 +18,7 @@
 #include <Graphic3d_GraphicDriver.hxx>
 #include <Graphic3d_ShaderObject.hxx>
 #include <Graphic3d_TextureSetBits.hxx>
+#include <Message.hxx>
 #include <OSD_Directory.hxx>
 #include <OSD_Environment.hxx>
 #include <OSD_File.hxx>
@@ -37,40 +38,31 @@ namespace
 // =======================================================================
 const TCollection_AsciiString& Graphic3d_ShaderProgram::ShadersFolder()
 {
-  static Standard_Boolean        THE_IS_DEFINED = Standard_False;
-  static TCollection_AsciiString THE_SHADERS_FOLDER;
-  if (!THE_IS_DEFINED)
+  static const TCollection_AsciiString theShadersFolder = []() -> TCollection_AsciiString
   {
-    THE_IS_DEFINED = Standard_True;
-    OSD_Environment aDirEnv ("CSF_ShadersDirectory");
-    THE_SHADERS_FOLDER = aDirEnv.Value();
-    if (THE_SHADERS_FOLDER.IsEmpty())
+    TCollection_AsciiString aFolder = OSD_Environment("CSF_ShadersDirectory").Value();
+    if (aFolder.IsEmpty())
     {
-      OSD_Environment aCasRootEnv ("CASROOT");
-      THE_SHADERS_FOLDER = aCasRootEnv.Value();
-      if (!THE_SHADERS_FOLDER.IsEmpty())
-      {
-        THE_SHADERS_FOLDER += "/src/Shaders";
-      }
+      aFolder = OSD_Environment("CASROOT").Value();
+      if (!aFolder.IsEmpty())
+        aFolder += "/src/Shaders";
     }
+    if (aFolder.IsEmpty())
+      return aFolder;
 
-    if (THE_SHADERS_FOLDER.IsEmpty())
-    {
-      return THE_SHADERS_FOLDER;
-    }
-
-    const OSD_Path aDirPath (THE_SHADERS_FOLDER);
+    const OSD_Path aDirPath (aFolder);
     OSD_Directory aDir (aDirPath);
-    const TCollection_AsciiString aProgram = THE_SHADERS_FOLDER + "/Declarations.glsl";
+    const TCollection_AsciiString aProgram = aFolder + "/Declarations.glsl";
     OSD_File aProgramFile (aProgram);
     if (!aDir.Exists()
      || !aProgramFile.Exists())
     {
-      std::cerr << "Standard GLSL programs are not found in: " << THE_SHADERS_FOLDER.ToCString() << std::endl;
+      Message::SendFail() << "Standard GLSL programs are not found in: " << aFolder;
       throw Standard_Failure("CSF_ShadersDirectory or CASROOT is set incorrectly");
     }
-  }
-  return THE_SHADERS_FOLDER;
+    return aFolder;
+  }();
+  return theShadersFolder;
 }
 
 // =======================================================================
