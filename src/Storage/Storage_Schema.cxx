@@ -663,12 +663,10 @@ Standard_Boolean Storage_Schema::AddPersistent
     Handle(Storage_InternalData)     iData = Storage_Schema::ICurrentData()->InternalData();
 
     if (sp->_typenum == 0) {
-      Standard_Integer         aTypenum;
-      static TCollection_AsciiString  aTypeName;
-      aTypeName = tName;
       Handle(Storage_TypeData) tData = Storage_Schema::ICurrentData()->TypeData();
 
-      aTypenum = iData->myTypeBinding.Find(aTypeName)->Index();
+      const TCollection_AsciiString aTypeName(tName);
+      const Standard_Integer aTypenum = iData->myTypeBinding.Find(aTypeName)->Index();
 
       sp->_typenum = aTypenum;
       sp->_refnum = iData->myObjId++;
