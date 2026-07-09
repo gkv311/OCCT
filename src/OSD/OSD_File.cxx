@@ -1628,6 +1628,29 @@ void OSD_File::Rewind()
 }
 
 // =======================================================================
+// function : IsReadOnly
+// purpose  :
+// =======================================================================
+bool OSD_File::IsReadOnly(const TCollection_AsciiString& thePath)
+{
+  const OSD_Path aPath = OSD_Path(thePath);
+  OSD_File aFile(aPath);
+  switch (aFile.Protection().User())
+  {
+    case OSD_W:
+    case OSD_RW:
+    case OSD_WX:
+    case OSD_RWX:
+    case OSD_RWD:
+    case OSD_WXD:
+    case OSD_RWXD:
+      return false;
+    default:
+      return true;
+  }
+}
+
+// =======================================================================
 // function : ReadLastLine
 // purpose  :
 // =======================================================================

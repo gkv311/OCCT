@@ -32,6 +32,10 @@ class OSD_Protection;
 class OSD_File  : public OSD_FileNode
 {
 public:
+  //! Return TRUE if the file exists and if permissions allow only reading it.
+  Standard_EXPORT static bool IsReadOnly(const TCollection_AsciiString& thePath);
+
+public:
 
   //! Creates File object.
   Standard_EXPORT OSD_File();

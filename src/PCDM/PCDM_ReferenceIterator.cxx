@@ -17,11 +17,11 @@
 
 #include <Message_Messenger.hxx>
 #include <CDM_MetaData.hxx>
+#include <OSD_File.hxx>
 #include <OSD_Path.hxx>
 #include <PCDM_ReferenceIterator.hxx>
 #include <PCDM_RetrievalDriver.hxx>
 #include <Standard_Type.hxx>
-#include <UTL.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(PCDM_ReferenceIterator,Standard_Transient)
 
@@ -96,50 +96,38 @@ void PCDM_ReferenceIterator::Next() {
 Handle(CDM_MetaData) PCDM_ReferenceIterator::MetaData(CDM_MetaDataLookUpTable& theLookUpTable,
                                                       const Standard_Boolean ) const
 {
-  
-  TCollection_ExtendedString theFolder,theName;
-  TCollection_ExtendedString theFile=myReferences(myIterator).FileName();
-  TCollection_ExtendedString f(theFile);
+  TCollection_ExtendedString aFile = myReferences(myIterator).FileName();
 #ifndef _WIN32
-  
-  Standard_Integer i= f.SearchFromEnd("/");
+  TCollection_ExtendedString f(aFile);
+  Standard_Integer           i = f.SearchFromEnd("/");
   TCollection_ExtendedString n = f.Split(i); 
-  f.Trunc(f.Length()-1);
-  theFolder = f;
-  theName = n;
+  f.Trunc(f.Length() - 1);
+  TCollection_ExtendedString aFolder = f;
+  TCollection_ExtendedString aName = n;
 #else
-  OSD_Path p = UTL::Path(f);
-  Standard_ExtCharacter      chr;
-  TCollection_ExtendedString dir, dirRet, name;
-  
-  dir = UTL::Disk(p);
-  dir += UTL::Trek(p);
-  
-  for ( int i = 1; i <= dir.Length (); ++i ) {
-    
-    chr = dir.Value ( i );
-    
-    switch ( chr ) {
-
-    case '|':
-      dirRet += "/";
-      break;
-
-    case '^':
-
-      dirRet += "..";
-      break;
-      
-    default:
-      dirRet += chr;
-      
-    }  
+  const OSD_Path p = OSD_Path(TCollection_AsciiString(aFile));
+  const TCollection_ExtendedString dir(p.Disk() + p.Trek());
+  TCollection_ExtendedString aFolder;
+  for (int i = 1; i <= dir.Length(); ++i)
+  {
+    const Standard_ExtCharacter chr = dir.Value(i);
+    switch (chr)
+    {
+      case '|':
+        aFolder += "/";
+        break;
+      case '^':
+        aFolder += "..";
+        break;
+      default:
+        aFolder += chr;
+        break;
+    }
   }
-  theFolder = dirRet;
-  theName   = UTL::Name(p); theName+= UTL::Extension(p);
+  const TCollection_ExtendedString aName(p.Name() + p.Extension());
 #endif  // _WIN32
-  
-  return CDM_MetaData::LookUp(theLookUpTable, theFolder, theName, theFile, theFile, UTL::IsReadOnly(theFile));
+
+  return CDM_MetaData::LookUp(theLookUpTable, aFolder, aName, aFile, aFile, OSD_File::IsReadOnly(aFile));
 }
 
 //=======================================================================
