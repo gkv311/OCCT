@@ -33,7 +33,6 @@
 #include <TCollection_ExtendedString.hxx>
 #include <TColStd_SequenceOfAsciiString.hxx>
 #include <TColStd_SequenceOfExtendedString.hxx>
-#include <UTL.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(PCDM_ReadWriter_1,PCDM_ReadWriter)
 
@@ -166,14 +165,14 @@ void PCDM_ReadWriter_1::WriteReferences(const Handle(Storage_Data)& aData, const
 
     CDM_ReferenceIterator it(aDocument);
 
-    TCollection_ExtendedString ligne;
+    TCollection_AsciiString ligne;
 
     TCollection_AsciiString theAbsoluteDirectory=GetDirFromFile(theReferencerFileName);
 
     for (;it.More();it.Next()) {
-      ligne = TCollection_ExtendedString(it.ReferenceIdentifier());
+      ligne = TCollection_AsciiString(it.ReferenceIdentifier());
       ligne += " ";
-      ligne += TCollection_ExtendedString(it.Document()->Modifications());
+      ligne += TCollection_AsciiString(it.Document()->Modifications());
       ligne += " ";
 
       TCollection_AsciiString thePath(it.Document()->MetaData()->FileName());
@@ -182,8 +181,8 @@ void PCDM_ReadWriter_1::WriteReferences(const Handle(Storage_Data)& aData, const
 	theRelativePath=OSD_Path::RelativePath(theAbsoluteDirectory,thePath);
 	if(!theRelativePath.IsEmpty()) thePath=theRelativePath;
       }
-      ligne +=  TCollection_ExtendedString(thePath);
-      UTL::AddToUserInfo(aData,ligne);
+      ligne += thePath;
+      aData->AddToUserInfo(ligne);
     }
     aData->AddToUserInfo(END_REF);
   }
@@ -195,18 +194,16 @@ void PCDM_ReadWriter_1::WriteReferences(const Handle(Storage_Data)& aData, const
 //=======================================================================
 
 void PCDM_ReadWriter_1::WriteExtensions(const Handle(Storage_Data)& aData, const Handle(CDM_Document)& aDocument) const {  
-
   TColStd_SequenceOfExtendedString theExtensions;
   aDocument->Extensions(theExtensions);
-  Standard_Integer theNumber = theExtensions.Length();
-  if(theNumber > 0) {
+  if (theExtensions.IsEmpty())
+    return;
 
-    aData->AddToUserInfo(START_EXT);
-    for (Standard_Integer i=1; i<=theNumber; i++) {
-      UTL::AddToUserInfo(aData,theExtensions(i));
-    }
-    aData->AddToUserInfo(END_EXT);
-  }
+  aData->AddToUserInfo(START_EXT);
+  for (const TCollection_ExtendedString& anExtIter : theExtensions)
+    aData->AddToUserInfo (TCollection_AsciiString(anExtIter));
+
+  aData->AddToUserInfo(END_EXT);
 }
 //=======================================================================
 //function : WriteVersion
@@ -272,47 +269,41 @@ Standard_Integer PCDM_ReadWriter_1::ReadReferenceCounter(const TCollection_Exten
 //purpose  : 
 //=======================================================================
 
-void PCDM_ReadWriter_1::ReadReferences(const TCollection_ExtendedString& aFileName, PCDM_SequenceOfReference& theReferences, const Handle(Message_Messenger)& theMsgDriver) const  {
+void PCDM_ReadWriter_1::ReadReferences(const TCollection_ExtendedString& theFileName,
+                                       PCDM_SequenceOfReference& theReferences,
+                                       const Handle(Message_Messenger)& theMsgDriver) const
+{
+  const TCollection_AsciiString anAbsDirectory = GetDirFromFile(theFileName);
 
-  TColStd_SequenceOfExtendedString ReadReferences;
-  
-  ReadUserInfo(aFileName,START_REF,END_REF,ReadReferences, theMsgDriver);
+  TColStd_SequenceOfExtendedString aReadReferences;
+  ReadUserInfo(theFileName, START_REF, END_REF, aReadReferences, theMsgDriver);
+  for (TCollection_ExtendedString& aRefIter : aReadReferences) // we modify strings in a temporary list
+  {
+    const Standard_Integer pos = aRefIter.Search(" ");
+    if (pos == -1)
+      continue;
 
-  Standard_Integer theReferenceIdentifier;
-  TCollection_ExtendedString theFileName;
-  Standard_Integer theDocumentVersion;
-
-  TCollection_AsciiString theAbsoluteDirectory=GetDirFromFile(aFileName);
-
-  for (Standard_Integer i=1; i<=ReadReferences.Length(); i++) {
-    Standard_Integer pos=ReadReferences(i).Search(" ");
-    if(pos != -1) {
-      TCollection_ExtendedString theRest=ReadReferences(i).Split(pos);
-      theReferenceIdentifier=UTL::IntegerValue(ReadReferences(i));
+    TCollection_ExtendedString aRest = aRefIter.Split(pos);
+    const Standard_Integer aRefIdentifier = TCollection_AsciiString(aRefIter).IntegerValue();
     
-      Standard_Integer pos2=theRest.Search(" ");
+    const Standard_Integer pos2 = aRest.Search(" ");
+
+    const TCollection_ExtendedString aFileName = aRest.Split(pos2);
+    const Standard_Integer aDocVer = TCollection_AsciiString(aRest).IntegerValue();
       
-      theFileName=theRest.Split(pos2);
-      theDocumentVersion=UTL::IntegerValue(theRest);
-      
-      TCollection_AsciiString thePath(theFileName);
-      TCollection_AsciiString theAbsolutePath;
-      if(!theAbsoluteDirectory.IsEmpty()) {
-	theAbsolutePath=AbsolutePath(theAbsoluteDirectory,thePath);
-	if(!theAbsolutePath.IsEmpty()) thePath=theAbsolutePath;
-      }
-      if(!theMsgDriver.IsNull()) {
-//      std::cout << "reference found; ReferenceIdentifier: " << theReferenceIdentifier << "; File:" << thePath << ", version:" << theDocumentVersion;
-	TCollection_ExtendedString aMsg("Warning: ");
-	aMsg = aMsg.Cat("reference found; ReferenceIdentifier:  ").Cat(theReferenceIdentifier).Cat("; File:").Cat(thePath).Cat(", version:").Cat(theDocumentVersion).Cat("\0");
-	theMsgDriver->Send(aMsg.ToExtString());
-      }
-      TCollection_ExtendedString aPathW(thePath);
-      theReferences.Append(PCDM_Reference (theReferenceIdentifier,aPathW,theDocumentVersion));
-    
+    TCollection_AsciiString aPath(aFileName);
+    if (!anAbsDirectory.IsEmpty())
+    {
+      const TCollection_AsciiString anAbsPath = AbsolutePath(anAbsDirectory, aPath);
+      if (!anAbsPath.IsEmpty())
+        aPath = anAbsPath;
     }
-  }
+    if (!theMsgDriver.IsNull())
+      theMsgDriver->Send(TCollection_AsciiString("Warning: reference found; ReferenceIdentifier:  ")
+                       + aRefIdentifier + "; File:" + aPath + ", version:" + aDocVer);
 
+    theReferences.Append(PCDM_Reference(aRefIdentifier, TCollection_ExtendedString(aPath), aDocVer));
+  }
 }
 
 //=======================================================================
