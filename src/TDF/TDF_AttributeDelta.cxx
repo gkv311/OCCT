@@ -75,7 +75,7 @@ Standard_GUID TDF_AttributeDelta::ID() const
 
 Standard_OStream& TDF_AttributeDelta::Dump(Standard_OStream& OS) const
 {
-  static TCollection_AsciiString entry;
+  TCollection_AsciiString entry;
   TDF_Tool::Entry(Label(),entry);
   OS<<this->DynamicType()->Name()<<" at "<<entry;
   OS<<" on "<<Attribute()->DynamicType()->Name();
