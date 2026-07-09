@@ -29,7 +29,6 @@
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <TColStd_HSequenceOfAsciiString.hxx>
-#include <UTL.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(PCDM_ReadWriter,Standard_Transient)
 
@@ -49,7 +48,7 @@ void PCDM_ReadWriter::Open (const Handle(Storage_BaseDriver)&   aDriver,
                             const TCollection_ExtendedString&   aFileName,
                             const Storage_OpenMode              aMode)
 {
-  Storage_Error error = UTL::OpenFile(aDriver,aFileName,aMode);
+  Storage_Error error = aDriver->Open(TCollection_AsciiString(aFileName), aMode);
   if(error != Storage_VSOk) {
     Standard_SStream aMsg; aMsg << "could not open the file: ";
     aMsg << aFileName;
