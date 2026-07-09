@@ -32,7 +32,6 @@
 #include <Standard_NullObject.hxx>
 #include <Standard_Type.hxx>
 #include <TCollection_ExtendedString.hxx>
-#include <UTL.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(CDM_Document,Standard_Transient)
 
@@ -971,31 +970,6 @@ void CDM_Document::RemoveFromReference(const Standard_Integer aReferenceIdentifi
 }
 
 //=======================================================================
-//function : GetResource
-//purpose  : 
-//=======================================================================
-
-TCollection_ExtendedString GetResource (const TCollection_ExtendedString& aFormat,
-                                        const TCollection_ExtendedString& anItem)
-{
-  TCollection_ExtendedString theResource;
-  theResource+= aFormat;
-  theResource+= ".";
-  theResource+= anItem;
-  return theResource;
-}
-
-static void FIND (const Handle(Resource_Manager)& theDocumentResource,
-                  const TCollection_ExtendedString& theResourceName,
-                  Standard_Boolean& IsDef,
-                  TCollection_ExtendedString& theValue)
-{
-  IsDef=UTL::Find(theDocumentResource,theResourceName);
-  if(IsDef) theValue=UTL::Value(theDocumentResource,theResourceName);
-  
-}
-
-//=======================================================================
 //function : StorageResource
 //purpose  : 
 //=======================================================================
@@ -1018,26 +992,24 @@ Handle(Resource_Manager) CDM_Document::StorageResource()
 
 void CDM_Document::LoadResources()
 {
-  if(!myResourcesAreLoaded) {
-    Handle(Resource_Manager) theDocumentResource = StorageResource();
- 
-    TCollection_ExtendedString theFormat=StorageFormat(); theFormat+=".";
-    TCollection_ExtendedString theResourceName;
-    
-    theResourceName=theFormat;
-    theResourceName+="FileExtension";
-    FIND(theDocumentResource,
-         theResourceName,myFileExtensionWasFound,myFileExtension);
-    
-    theResourceName=theFormat;
-    theResourceName+="Description";
-    FIND(theDocumentResource,theResourceName,myDescriptionWasFound,myDescription);
-    
-    myResourcesAreLoaded=Standard_True;
-    
+  if (myResourcesAreLoaded)
+    return;
+
+  const TCollection_AsciiString aFormat(StorageFormat());
+
+  Handle(Resource_Manager) aResMgr = StorageResource();
+
+  TCollection_AsciiString aVal;
+  myFileExtensionWasFound = aResMgr->Find(aFormat + ".FileExtension", aVal);
+  if (myFileExtensionWasFound)
+    myFileExtension = aVal;
+
+  myDescriptionWasFound = aResMgr->Find(aFormat + ".Description", aVal);
+  if (myDescriptionWasFound)
+    myDescription = aVal;
+
+  myResourcesAreLoaded = true;
 //    std::cout << "resource Loaded: Format: " << theFormat << ", FileExtension:" << myFileExtension << ", Description:" << myDescription << std::endl;
-  }
-  return;
 }
 
 //=======================================================================

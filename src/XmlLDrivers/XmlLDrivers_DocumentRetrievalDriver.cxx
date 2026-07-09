@@ -18,6 +18,7 @@
 #include <Message_Messenger.hxx>
 #include <Message_ProgressScope.hxx>
 #include <CDM_MetaData.hxx>
+#include <OSD_File.hxx>
 #include <OSD_FileSystem.hxx>
 #include <OSD_Path.hxx>
 #include <PCDM_DOMHeaderParser.hxx>
@@ -27,7 +28,6 @@
 #include <TDF_Data.hxx>
 #include <TDocStd_Document.hxx>
 #include <TDocStd_Owner.hxx>
-#include <UTL.hxx>
 #include <XmlLDrivers.hxx>
 #include <XmlLDrivers_DocumentRetrievalDriver.hxx>
 #include <XmlMDF.hxx>
@@ -82,7 +82,7 @@ static Standard_Integer RemoveExtraSeparator(TCollection_AsciiString& aString) {
   return len ;
 }
 static TCollection_AsciiString GetDirFromFile(const TCollection_ExtendedString& aFileName) {
-  TCollection_AsciiString theCFile=UTL::CString(aFileName);
+  TCollection_AsciiString theCFile(aFileName);
   TCollection_AsciiString theDirectory;
   Standard_Integer i=theCFile.SearchFromEnd("/");
 #ifdef _WIN32    
@@ -342,14 +342,14 @@ void XmlLDrivers_DocumentRetrievalDriver::ReadFromDomDocument
 
 
         TCollection_ExtendedString aRest=anInfo.Split(pos);
-        aRefId = UTL::IntegerValue(anInfo);
+        aRefId = TCollection_AsciiString(anInfo).IntegerValue();
         
         Standard_Integer pos2 = aRest.Search(" ");
         
         aFileName = aRest.Split(pos2);
-        aDocumentVersion = UTL::IntegerValue(aRest);
+        aDocumentVersion = TCollection_AsciiString(aRest).IntegerValue();
         
-        TCollection_AsciiString aPath = UTL::CString(aFileName);
+        TCollection_AsciiString aPath(aFileName);
         TCollection_AsciiString anAbsolutePath;
         if(!anAbsoluteDirectory.IsEmpty()) {
     anAbsolutePath = AbsolutePath(anAbsoluteDirectory,aPath);
@@ -374,39 +374,31 @@ void XmlLDrivers_DocumentRetrievalDriver::ReadFromDomDocument
         theFolder = f;
         theName = n;
 #else
-        OSD_Path p = UTL::Path(f);
-        Standard_ExtCharacter      chr;
-        TCollection_ExtendedString dir, dirRet, name;
-        
-        dir = UTL::Disk(p);
-        dir += UTL::Trek(p);
-        
+        const OSD_Path p = OSD_Path(TCollection_AsciiString(f));
+        const TCollection_ExtendedString dir(p.Disk() + p.Trek());
+        TCollection_ExtendedString dirRet, name;
         for ( int i = 1; i <= dir.Length (); ++i ) {
     
-    chr = dir.Value ( i );
+    const Standard_ExtCharacter chr = dir.Value ( i );
     
     switch ( chr ) {
-
     case '|':
       dirRet += "/";
       break;
-
     case '^':
-
       dirRet += "..";
       break;
-      
     default:
       dirRet += chr;
-      
-    }  
+      break;
+    }
         }
         theFolder = dirRet;
-        theName   = UTL::Name(p); theName+= UTL::Extension(p);
+        theName   = TCollection_ExtendedString(p.Name() + p.Extension());
 #endif  // _WIN32
         
         Handle(CDM_MetaData) aMetaData =
-          CDM_MetaData::LookUp(theApplication->MetaDataLookUpTable(), theFolder, theName, aPath, aPath, UTL::IsReadOnly(aFileName));
+          CDM_MetaData::LookUp(theApplication->MetaDataLookUpTable(), theFolder, theName, aPath, aPath, OSD_File::IsReadOnly(aFileName));
 ////////////
         theNewDocument->CreateReference(aMetaData,aRefId,
              theApplication,aDocumentVersion,Standard_False);
