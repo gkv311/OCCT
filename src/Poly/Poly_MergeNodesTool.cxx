@@ -70,6 +70,15 @@ Poly_MergeNodesTool::MergedNodesMap::MergedNodesMap (const int theNbBuckets)
 }
 
 // =======================================================================
+// function : MergedNodesMap::Clear
+// purpose  :
+// =======================================================================
+void Poly_MergeNodesTool::MergedNodesMap::Clear(bool theDoReleaseMemory)
+{
+  Destroy (DataMapNode::delNode, theDoReleaseMemory);
+}
+
+// =======================================================================
 // function : MergedNodesMap::SetMergeTolerance
 // purpose  :
 // =======================================================================

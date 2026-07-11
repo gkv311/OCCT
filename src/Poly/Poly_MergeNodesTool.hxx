@@ -225,6 +225,12 @@ private:
     //! Main constructor.
     Standard_EXPORT MergedNodesMap (const int theNbBuckets);
 
+    //! Destructor.
+    virtual ~MergedNodesMap() { Clear(); }
+
+    //! Clear data.
+    Standard_EXPORT void Clear(bool theDoReleaseMemory = true);
+
     //! Return merge angle in radians;
     double MergeAngle() const { return myAngle; }
 
