@@ -72,7 +72,7 @@ static clock_t CPU_CURRENT; // cpu time already used at last
 
 extern Standard_Boolean Draw_Batch;
 
-static clock_t CPU_LIMIT;   // Cpu_limit in Sec.
+static clock_t CPU_LIMIT = 0;
 static OSD_Timer aTimer;
 
 //=======================================================================
@@ -629,6 +629,7 @@ static unsigned int __stdcall CpuFunc (void * /*param*/)
   clock_t anElapCurrent;
   clock_t aCurrent;
 
+  OSD_Thread::SetCurrentName("occt:draw:cpulimit");
   for(;;)
   {
     Sleep (5);
@@ -668,19 +669,15 @@ static unsigned int __stdcall CpuFunc (void * /*param*/)
   }
 }
 #else
-static void cpulimitSignalHandler (int)
-{
-  std::cout << "Process killed by CPU limit  (" << CPU_LIMIT << " sec)" << std::endl;
-  std::abort();
-}
 static void *CpuFunc(void* /*threadarg*/)
 {
-  clock_t anElapCurrent;
+  OSD_Thread::SetCurrentName("occt:draw:cpulimit");
   for(;;)
   {
     sleep (5);
-    anElapCurrent = clock_t(aTimer.ElapsedTime());
-    if (CPU_LIMIT >0 && (anElapCurrent) >= CPU_LIMIT) {
+    const clock_t anElapCurrent = clock_t(aTimer.ElapsedTime());
+    if (CPU_LIMIT > 0 && anElapCurrent >= CPU_LIMIT)
+    {
       std::cout << "Process killed by elapsed limit  (" << CPU_LIMIT << " sec)" << std::endl;
       std::abort();
     }
@@ -741,7 +738,7 @@ static Standard_Integer cpulimit(Draw_Interpretor& di, Standard_Integer n, const
   // Unix & Linux
   rusage aUsage = {};
   getrusage(RUSAGE_SELF, &aUsage);
-  rlimit rlp;
+  rlimit rlp = {};
   rlp.rlim_max = RLIM_INFINITY;
   if (n <= 1)
   {
@@ -750,14 +747,15 @@ static Standard_Integer cpulimit(Draw_Interpretor& di, Standard_Integer n, const
   }
   else
   {
-    CPU_LIMIT = (clock_t)GetCpuLimit (a[1]);
-    if (CPU_LIMIT <= 0) // protect from invalid usage
+    const clock_t aNewLimit = (clock_t)GetCpuLimit (a[1]);
+    if (aNewLimit <= 0) // protect from invalid usage
     {
       CPU_LIMIT = (clock_t)RLIM_INFINITY;
       rlp.rlim_cur = RLIM_INFINITY;
     }
     else
     {
+      CPU_LIMIT = aNewLimit;
       rlp.rlim_cur = aUsage.ru_utime.tv_sec + (rlim_t)CPU_LIMIT;
     }
   }
@@ -765,23 +763,43 @@ static Standard_Integer cpulimit(Draw_Interpretor& di, Standard_Integer n, const
   int aStatus = setrlimit (RLIMIT_CPU, &rlp);
   if (aStatus != 0)
   {
-    di << "status cpulimit setrlimit : " << aStatus << "\n";
+    di << "status cpulimit setrlimit : " << aStatus << "; errno: " << errno << "\n";
   }
 
   // set signal handler to print a message before death
-  struct sigaction act, oact;
-  memset (&act, 0, sizeof(act));
-  act.sa_handler = cpulimitSignalHandler;
+  struct sigaction act = {}, oact = {};
+  if (CPU_LIMIT != (clock_t)RLIM_INFINITY)
+  {
+    act.sa_handler = [](int) -> void
+    {
+      if (CPU_LIMIT != (clock_t)RLIM_INFINITY)
+      {
+        std::cout << "Process killed by CPU limit  (" << CPU_LIMIT << " sec)" << std::endl;
+        std::abort();
+      }
+      else
+      {
+        std::cout << "Warning: ignore SIGXCPU for CPU limit (" << CPU_LIMIT << " sec)" << std::endl;
+      }
+    };
+  }
+  else
+  {
+    act.sa_handler = [](int) -> void
+    {
+      std::cout << "Warning: ignore SIGXCPU for CPU limit (" << CPU_LIMIT << " sec)" << std::endl;
+    };
+  }
   sigaction (SIGXCPU, &act, &oact);
 
   // cpulimit for elapsed time
-  aTimer.Reset();
-  aTimer.Start();
-  pthread_t cpulimitThread;
+  aTimer.Restart();
   if (aFirst) // Launch the thread only at the 1st call.
   {
     aFirst = 0;
-    pthread_create(&cpulimitThread, NULL, CpuFunc, NULL);
+    OSD_Thread aThread(CpuFunc);
+    aThread.Run();
+    aThread.Detach();
   }
 #endif
   di << "CPU and elapsed time limit set to " << (double)CPU_LIMIT << " seconds";
