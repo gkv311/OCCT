@@ -235,21 +235,23 @@ void Cocoa_Window::Close()
   Cocoa_LocalPool aLocalPool;
 #endif
 #if !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE)
-  if (myHWindow != NULL)
+  if (myHWindow != nullptr)
   {
+    [myHWindow setContentView: nullptr];
+    [myHWindow setDelegate: nullptr];
   #if !defined(HAVE_OBJC_ARC)
     //[myHWindow close];
     [myHWindow release];
   #endif
-    myHWindow = NULL;
+    myHWindow = nullptr;
   }
 #endif
-  if (myHView != NULL)
+  if (myHView != nullptr)
   {
   #if !defined(HAVE_OBJC_ARC)
     [myHView release];
   #endif
-    myHView = NULL;
+    myHView = nullptr;
   }
 }
 
