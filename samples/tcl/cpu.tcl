@@ -73,15 +73,26 @@ renamevar case_1 case
 # note that font is chosen by availability of Unicode symbols,
 # it is different from actual font found on processor
 set font "Arial Unicode MS"
-#set text "i\u24c2\u00a911\nINTEL\u00ae CORE\u2122 i7-4790\nSR1QF 3.60GHZ\nMALAY\nL411B540 \u24d4"
-#text2brep title $text "Arial Unicode MS" 1.7 x=10 y=24 z=4.51
-# alternative variant to work-around issue #25852
-set text "i\u20dd\u20dd11\nINTEL\u20dd CORE\u2122 i7-4790\nSR1QF 3.60GHZ\nMALAY\nL411B540 \u20dd"
-text2brep title0 $text -font $font -height 1.7 -pos 10 24 4.51 -valign topfirstline
-text2brep title1 "    M    C" -font $font -height 0.77 -pos 10 24.2 4.51
-text2brep title2 "R" -font $font -height 0.77 -pos 15.3 21.9 4.51
-text2brep title3 "e4" -font $font -height 0.7 -pos 18.6 15.1 4.51
-compound title0 title1 title2 title3 title
+set aFontList [vfont]
+vfont -verbose 1
+dtracelevel trace
+if {[string first "Arial Unicode MS" $aFontList] != -1} {
+  set font "Arial Unicode MS"
+} elseif {[string first "SimSun" $aFontList] != -1} {
+  # Windows
+  set font "SimSun"
+} elseif {[string first "FreeSans" $aFontList] != -1} {
+  # Linux
+  set font "FreeSans"
+}
+
+set text {iⓂⒸ11
+INTELⓇ CORE™ i7-4790
+SR1QF 3.60GHZ
+MALAY
+L411B540 ⓔ}
+
+text2brep title $text -font "$font" -height 1.7 -pos 10 24 4.51 -valign topfirstline
 
 puts "Adding contact pads..."
 
