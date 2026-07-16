@@ -39,6 +39,7 @@ Standard_Boolean MinComputing(
                 GeomLib_CheckCurveOnSurface_TargetFunc& theFunction,
                 const Standard_Real theEpsilon, //1.0e-3
                 const Standard_Integer theNbParticles,
+                const Standard_Boolean theIsAnalytic,
                 Standard_Real& theBestValue,
                 Standard_Real& theBestParameter);
 
@@ -222,12 +223,14 @@ public:
     const Array1OfHCurve& theCurveOnSurfaceArray,
     const TColStd_Array1OfReal& theIntervalsArr,
     const Standard_Real theEpsilonRange,
-    const Standard_Integer theNbParticles):
+    const Standard_Integer theNbParticles,
+    const Standard_Boolean theIsAnalytic):
     myCurveArray(theCurveArray),
     myCurveOnSurfaceArray(theCurveOnSurfaceArray),
     mySubIntervals(theIntervalsArr),
     myEpsilonRange(theEpsilonRange),
     myNbParticles(theNbParticles),
+    myIsAnalytic(theIsAnalytic),
     myArrOfDist(theIntervalsArr.Lower(), theIntervalsArr.Upper() - 1),
     myArrOfParam(theIntervalsArr.Lower(), theIntervalsArr.Upper() - 1)
   {
@@ -246,7 +249,7 @@ public:
                                                  mySubIntervals.Value(theElemIndex + 1));
 
     Standard_Real aMinDist = RealLast(), aPar = 0.0;
-    if (!MinComputing(aFunc, myEpsilonRange, myNbParticles, aMinDist, aPar))
+    if (!MinComputing(aFunc, myEpsilonRange, myNbParticles, myIsAnalytic, aMinDist, aPar))
     {
       myArrOfDist(theElemIndex) = RealLast();
       myArrOfParam(theElemIndex) = aFunc.FirstParameter();
@@ -285,6 +288,7 @@ private:
   const TColStd_Array1OfReal& mySubIntervals;
   const Standard_Real myEpsilonRange;
   const Standard_Integer myNbParticles;
+  const Standard_Boolean myIsAnalytic;
   mutable NCollection_Array1<Standard_Real> myArrOfDist;
   mutable NCollection_Array1<Standard_Real> myArrOfParam;
 };
@@ -346,6 +350,35 @@ void GeomLib_CheckCurveOnSurface::Init( const Handle(Adaptor3d_Curve)& theCurve,
   myTolRange = theTolRange;
 }
 
+//! Returns true when the whole composition is made of analytic geometry:
+//! the deviation function is then a low-degree smooth function whose behavior
+//! is fully resolved by the control-point sampling performed before the swarm optimization,
+//! so a flat sampled deviation can be trusted without running it.
+static bool IsAnalyticComposition(const Adaptor3d_Curve&          theCurve,
+                                  const Adaptor3d_CurveOnSurface& theCurveOnSurface)
+{
+  const auto isAnalyticCurveType = [](const GeomAbs_CurveType theType)
+  {
+    return theType == GeomAbs_Line || theType == GeomAbs_Circle || theType == GeomAbs_Ellipse
+        || theType == GeomAbs_Hyperbola || theType == GeomAbs_Parabola;
+  };
+
+  if (!isAnalyticCurveType(theCurve.GetType()))
+    return false;
+
+  const Handle(Adaptor2d_Curve2d)& aCurve2d = theCurveOnSurface.GetCurve();
+  if (aCurve2d.IsNull() || !isAnalyticCurveType(aCurve2d->GetType()))
+    return false;
+
+  const Handle(Adaptor3d_Surface)& aSurface = theCurveOnSurface.GetSurface();
+  if (aSurface.IsNull())
+    return false;
+
+  const GeomAbs_SurfaceType aSurfType = aSurface->GetType();
+  return aSurfType == GeomAbs_Plane || aSurfType == GeomAbs_Cylinder || aSurfType == GeomAbs_Cone
+      || aSurfType == GeomAbs_Sphere || aSurfType == GeomAbs_Torus;
+}
+
 //=======================================================================
 //function : Perform
 //purpose  : 
@@ -405,8 +438,10 @@ void GeomLib_CheckCurveOnSurface::Perform(const Handle(Adaptor3d_CurveOnSurface)
                                     ? theCurveOnSurface->ShallowCopy()
                                     : static_cast<const Handle(Adaptor3d_Curve)&> (theCurveOnSurface));
     }
+
+    const bool isAnalytic = IsAnalyticComposition(*myCurve, *theCurveOnSurface);
     GeomLib_CheckCurveOnSurface_Local aComp(aCurveArray, aCurveOnSurfaceArray, anIntervals,
-                                            anEpsilonRange, aNbParticles);
+                                            anEpsilonRange, aNbParticles, isAnalytic);
     if (aNbThreads > 1)
     {
       const Handle(OSD_ThreadPool)& aThreadPool = OSD_ThreadPool::DefaultPool();
@@ -652,13 +687,21 @@ Standard_Boolean PSO_Perform(GeomLib_CheckCurveOnSurface_TargetFunc& theFunction
                              const math_Vector &theParInf,
                              const math_Vector &theParSup,
                              const Standard_Real theEpsilon,
-                             const Standard_Integer theNbParticles, 
+                             const Standard_Integer theNbParticles,
+                             const Standard_Boolean theIsAnalytic,
                              Standard_Real& theBestValue,
-                             math_Vector &theOutputParam)
+                             math_Vector &theOutputParam,
+                             bool& theIsFlat)
 {
+  theIsFlat = false;
+
   const Standard_Real aDeltaParam = theParSup(1) - theParInf(1);
   if(aDeltaParam < Precision::PConfusion())
     return Standard_False;
+
+  Standard_Integer aNbComputed  = 0;
+  Standard_Real    aBestSeedVal = RealLast();
+  Standard_Real    aBestSeedPrm = theParInf(1);
 
   math_Vector aStepPar(1, 1);
   aStepPar(1) = theEpsilon*aDeltaParam;
@@ -677,6 +720,13 @@ Standard_Boolean PSO_Perform(GeomLib_CheckCurveOnSurface_TargetFunc& theFunction
     if(!theFunction.Value(aPrm, aVal))
       continue;
 
+    ++aNbComputed;
+    if (aVal < aBestSeedVal)
+    {
+      aBestSeedVal = aVal;
+      aBestSeedPrm = aPrm;
+    }
+
     PSO_Particle* aParticle = aParticles.GetWorstParticle();
 
     if(aVal > aParticle->BestDistance)
@@ -686,6 +736,45 @@ Standard_Boolean PSO_Perform(GeomLib_CheckCurveOnSurface_TargetFunc& theFunction
     aParticle->BestPosition[0] = aPrm;
     aParticle->Distance     = aVal;
     aParticle->BestDistance = aVal;
+  }
+
+  // When every control point lies below the geometric noise floor
+  // (squared distances under Precision::SquareConfusion()),
+  // the curves are coincident within Precision::Confusion() and the swarm optimization,
+  // the Newton refinement (whose Hessian is singular on such a flat function)
+  // and the fallback swarm would only rediscover this value.
+  // For a fully analytic composition the control-point sampling already resolves
+  // the low-degree deviation function; otherwise flatness is confirmed by resampling
+  // at half-step offsets before the optimization is skipped.
+  if (aNbComputed == aNbControlPoints && aBestSeedVal >= -Precision::SquareConfusion())
+  {
+    bool isConfirmedFlat = theIsAnalytic;
+    if (!isConfirmedFlat)
+    {
+      isConfirmedFlat = true;
+      for (double aPrm = theParInf(1) + 0.5 * aStep; aPrm < theParSup(1); aPrm += aStep)
+      {
+        double aVal = RealLast();
+        if (!theFunction.Value(aPrm, aVal) || aVal < -Precision::SquareConfusion())
+        {
+          isConfirmedFlat = false;
+          break;
+        }
+        if (aVal < aBestSeedVal)
+        {
+          aBestSeedVal = aVal;
+          aBestSeedPrm = aPrm;
+        }
+      }
+    }
+
+    if (isConfirmedFlat)
+    {
+      theBestValue      = aBestSeedVal;
+      theOutputParam(1) = aBestSeedPrm;
+      theIsFlat         = true;
+      return true;
+    }
   }
 
   math_PSO aPSO(&theFunction, theParInf, theParSup, aStepPar);
@@ -702,6 +791,7 @@ Standard_Boolean MinComputing (
                 GeomLib_CheckCurveOnSurface_TargetFunc& theFunction,
                 const Standard_Real theEpsilon, //1.0e-3
                 const Standard_Integer theNbParticles,
+                const Standard_Boolean theIsAnalytic,
                 Standard_Real& theBestValue,
                 Standard_Real& theBestParameter)
 {
@@ -716,8 +806,9 @@ Standard_Boolean MinComputing (
     theBestParameter = aParInf(1);
     theBestValue = RealLast();
 
-    if(!PSO_Perform(theFunction, aParInf, aParSup, theEpsilon, theNbParticles,
-                    theBestValue, anOutputParam))
+    bool isFlat = false;
+    if(!PSO_Perform(theFunction, aParInf, aParSup, theEpsilon, theNbParticles, theIsAnalytic,
+                    theBestValue, anOutputParam, isFlat))
     {
 #ifdef OCCT_DEBUG
       std::cout << "BRepLib_CheckCurveOnSurface::Compute(): math_PSO is failed!" << std::endl;
@@ -726,6 +817,8 @@ Standard_Boolean MinComputing (
     }
 
     theBestParameter = anOutputParam(1);
+    if (isFlat)
+      return Standard_True;
 
     //Here, anOutputParam contains parameter, which is near to optimal.
     //It needs to be more precise. Precision is made by math_NewtonMinimum.
@@ -745,8 +838,8 @@ Standard_Boolean MinComputing (
       aParSup(1) = theBestParameter + 0.5*aStep;
 
       Standard_Real aValue = RealLast();
-      if(PSO_Perform(theFunction, aParInf, aParSup, theEpsilon, theNbParticles,
-                     aValue, anOutputParam))
+      if(PSO_Perform(theFunction, aParInf, aParSup, theEpsilon, theNbParticles, theIsAnalytic,
+                     aValue, anOutputParam, isFlat))
       {
         if(aValue < theBestValue)
         {
