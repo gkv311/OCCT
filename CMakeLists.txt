@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.5...4.1 FATAL_ERROR)
 
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/adm/cmake")
 
-set (CMAKE_SUPPRESS_REGENERATION TRUE)
+set (CMAKE_SUPPRESS_REGENERATION TRUE CACHE BOOL "Suppress implicit project regeneration by CMake")
 
 set (CMAKE_CONFIGURATION_TYPES Release Debug RelWithDebInfo CACHE INTERNAL "" FORCE)
 
