@@ -76,6 +76,21 @@ namespace {
     theBox.Add( thePnt2 );
     theBox.Enlarge(Precision);
   }
+
+  //! Returns a snapshot of the neighbor link ids of the given node.
+  static std::vector<Standard_Integer, NCollection_StdAllocator<Standard_Integer>>
+    getSnapshotsOfNeighborLinkIds(const IMeshData::ListOfInteger& theNeighborLinkIds)
+  {
+    std::vector<Standard_Integer, NCollection_StdAllocator<Standard_Integer>> aResult(theNeighborLinkIds.Size());
+    if (theNeighborLinkIds.IsEmpty())
+        return aResult;
+
+    Standard_Integer anIndex = 0;
+    for (const Standard_Integer aLinkId : theNeighborLinkIds)
+      aResult[anIndex++] = aLinkId;
+
+    return aResult;
+  }
 } // anonymous namespace
 
 //=======================================================================
@@ -1396,18 +1411,19 @@ void BRepMesh_Delaun::killTrianglesAroundVertex(
   IMeshData::MapOfInteger&            theSurvivedLinks,
   IMeshData::MapOfIntegerInteger&     theLoopEdges )
 {
-  IMeshData::ListOfInteger::Iterator aNeighborsIt = 
-    myMeshData->LinksConnectedTo( theZombieNodeId );
-
   // Try to infect neighbor nodes
   IMeshData::VectorOfInteger aVictimNodes;
-  for ( ; aNeighborsIt.More(); aNeighborsIt.Next() )
+
+  // Iterate over snapshot of links to avoid invalidation
+  for (const Standard_Integer aNeighborLinkId : getSnapshotsOfNeighborLinkIds(myMeshData->LinksConnectedTo(theZombieNodeId)))
   {
-    const Standard_Integer& aNeighborLinkId = aNeighborsIt.Value();
     if ( theSurvivedLinks.Contains( aNeighborLinkId ) )
       continue;
 
     const BRepMesh_Edge& aNeighborLink = GetEdge( aNeighborLinkId );
+    if (aNeighborLink.Movability() == BRepMesh_Deleted)
+      continue;
+
     if ( aNeighborLink.Movability() == BRepMesh_Frontier )
     {
       // Though, if it lies onto the polygon boundary -
@@ -1537,13 +1553,13 @@ void BRepMesh_Delaun::killTrianglesOnIntersectingLinks(
 
   killLinkTriangles( theLinkToCheckId, theLoopEdges );
 
-  IMeshData::ListOfInteger::Iterator aNeighborsIt(
-    myMeshData->LinksConnectedTo(theEndPoint));
-
-  for ( ; aNeighborsIt.More(); aNeighborsIt.Next() )
+  // Iterate over snapshot of links to avoid invalidation
+  for (const Standard_Integer aNeighborLinkId : getSnapshotsOfNeighborLinkIds(myMeshData->LinksConnectedTo(theEndPoint)))
   {
-    const Standard_Integer& aNeighborLinkId = aNeighborsIt.Value();
-    const BRepMesh_Edge&    aNeighborLink   = GetEdge( aNeighborLinkId );
+    const BRepMesh_Edge& aNeighborLink = GetEdge(aNeighborLinkId);
+    if (aNeighborLink.Movability() == BRepMesh_Deleted)
+      continue;
+
     Standard_Integer anOtherNode = aNeighborLink.FirstNode();
     if ( anOtherNode == theEndPoint )
       anOtherNode = aNeighborLink.LastNode();
