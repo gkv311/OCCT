@@ -1,0 +1,10 @@
+puts "============"
+puts "BRepGProps raises  e x c e p t i o n  on a degenerated edge"
+puts "============"
+
+pload MODELING
+2dbsplinecurve c 3 2  0.0 4 1.0 4  0.0 0.0 1.0  0.1 0.05 1.0  0.2 -0.05 1.0  0.3 0.0 1.0
+mkedge e c
+
+puts "Check that lprops does not crash on a degenerated edge"
+lprops e
