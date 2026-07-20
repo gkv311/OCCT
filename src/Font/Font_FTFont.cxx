@@ -95,7 +95,8 @@ void Font_FTFont::Release()
 bool Font_FTFont::Init (const Handle(NCollection_Buffer)& theData,
                         const TCollection_AsciiString& theFileName,
                         const Font_FTFontParams& theParams,
-                        const Standard_Integer theFaceId)
+                        const Standard_Integer theFaceId,
+                        Font_FTFont* theMainFont)
 {
   Release();
   myBuffer = theData;
@@ -165,11 +166,26 @@ bool Font_FTFont::Init (const Handle(NCollection_Buffer)& theData,
     Release();
     return false;
   }
-
   initTransformation();
+
+  if (theParams.IsCapHeightFallback && theMainFont != nullptr)
+  {
+    const double aCapMain = theMainFont->CapHeight();
+    const double aCapThis = CapHeight();
+    const double aScale   = aCapMain / aCapThis;
+    const int32_t aPointSize = int32_t(Round(theParams.PointSize * aScale * 64.0));
+    if (FT_Set_Char_Size (myFTFace, 0L, aPointSize, theParams.Resolution, theParams.Resolution) != 0)
+    {
+      Message::SendTrace (TCollection_AsciiString("Font '") + myFontPath + "' doesn't contains requested size");
+      Release();
+      return false;
+    }
+  }
+
   myActiveFTFace = myFTFace;
   return true;
 #else
+  (void )theMainFont;
   return false;
 #endif
 }
@@ -369,17 +385,16 @@ bool Font_FTFont::FindAndInit (const TCollection_AsciiString& theFontName,
 // =======================================================================
 bool Font_FTFont::findAndInitFallback (Font_UnicodeSubset theSubset)
 {
-  if (!myFallbackFaces[theSubset].IsNull())
-  {
-    return myFallbackFaces[theSubset]->IsValid();
-  }
+  Handle(Font_FTFont)& aFallback = myFallbackFaces[theSubset];
+  if (!aFallback.IsNull())
+    return aFallback->IsValid();
 
 #ifdef HAVE_FREETYPE
-  myFallbackFaces[theSubset] = new Font_FTFont (myFTLib);
-  myFallbackFaces[theSubset]->myToUseUnicodeSubsetFallback = false; // no recursion
-  myFallbackFaces[theSubset]->myToUseSimilarGlyphFallback = myToUseSimilarGlyphFallback;
-  myFallbackFaces[theSubset]->SetShearAngle(myShearAngle);
-  myFallbackFaces[theSubset]->SetWidthScaling(myWidthScaling);
+  aFallback = new Font_FTFont (myFTLib);
+  aFallback->myToUseUnicodeSubsetFallback = false; // no recursion
+  aFallback->myToUseSimilarGlyphFallback = myToUseSimilarGlyphFallback;
+  aFallback->SetShearAngle(myShearAngle);
+  aFallback->SetWidthScaling(myWidthScaling);
 
   Handle(Font_FontMgr) aFontMgr = Font_FontMgr::GetInstance();
   if (Handle(Font_SystemFont) aRequestedFont = aFontMgr->FindFallbackFont (theSubset, myFontAspect))
@@ -391,14 +406,44 @@ bool Font_FTFont::findAndInitFallback (Font_UnicodeSubset theSubset)
 
     Standard_Integer aFaceId = 0;
     const TCollection_AsciiString& aPath = aRequestedFont->FontPathAny (myFontAspect, aParams, aFaceId);
-    if (myFallbackFaces[theSubset]->Init (aPath, aParams, aFaceId))
+    if (aFallback->Init (Handle(NCollection_Buffer)(), aPath, aParams, aFaceId, this))
     {
       Message::SendTrace (TCollection_AsciiString ("Font_FTFont, using fallback font '") + aRequestedFont->FontName() + "'"
                         + " for symbols unsupported by '" + myFTFace->family_name + "'");
     }
   }
 #endif
-  return myFallbackFaces[theSubset]->IsValid();
+  return aFallback->IsValid();
+}
+
+// =======================================================================
+// function : FamilyName
+// purpose  :
+// =======================================================================
+TCollection_AsciiString Font_FTFont::FamilyName() const
+{
+  if (IsValid())
+  {
+#ifdef HAVE_FREETYPE
+    return TCollection_AsciiString (myFTFace->family_name != nullptr ? myFTFace->family_name : "");
+#endif
+  }
+  return TCollection_AsciiString();
+}
+
+// =======================================================================
+// function : StyleName
+// purpose  :
+// =======================================================================
+TCollection_AsciiString Font_FTFont::StyleName() const
+{
+  if (IsValid())
+  {
+#ifdef HAVE_FREETYPE
+    return TCollection_AsciiString (myFTFace->style_name != nullptr ? myFTFace->style_name : "");
+#endif
+  }
+  return TCollection_AsciiString();
 }
 
 // =======================================================================
