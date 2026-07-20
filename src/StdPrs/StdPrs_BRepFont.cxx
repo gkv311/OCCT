@@ -193,6 +193,7 @@ void StdPrs_BRepFont::SetFontSize (Standard_Real theSize)
   myCache.Clear();
   myFontSize = theSize;
   myScaleUnits = aScale;
+  myFTFont->SetCapHeightFallback (false);
 }
 
 // =======================================================================
@@ -219,6 +220,7 @@ void StdPrs_BRepFont::SetCapHeight (Standard_Real theSize)
   myCache.Clear();
   myFontSize = aScale * Standard_Real(THE_RESOLUTION_DPI);
   myScaleUnits = aScale;
+  myFTFont->SetCapHeightFallback (true);
 }
 
 // =======================================================================

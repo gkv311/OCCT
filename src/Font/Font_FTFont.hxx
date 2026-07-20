@@ -54,6 +54,8 @@ struct Font_FTFontParams
   //! Single-stroke (one-line) font, FALSE by default.
   //! Such fonts can be used only for generating wireframe shapes (e.g. they have no outlines).
   bool IsSingleStrokeFont = false;
+  //! Align the size of fallback fonts with the main font via CapHeight metrics; FALSE by default.
+  bool IsCapHeightFallback = false;
 
   //! Empty constructor.
   Font_FTFontParams() {}
@@ -190,11 +192,13 @@ public:
   //! @param theFileName optional path to the font
   //! @param theParams   initialization parameters
   //! @param theFaceId   face id within the file (0 by default)
+  //! @param theMainFont main font (when initializing a fallback font)
   //! @return true on success
   Standard_EXPORT bool Init (const Handle(NCollection_Buffer)& theData,
                              const TCollection_AsciiString& theFileName,
                              const Font_FTFontParams& theParams,
-                             const Standard_Integer theFaceId = 0);
+                             const Standard_Integer theFaceId = 0,
+                             Font_FTFont* theMainFont = nullptr);
 
   //! Find (using Font_FontMgr) and initialize the font from the given name.
   //! @param theFontName    the font name
@@ -232,6 +236,12 @@ public:
 
   //! Render specified glyph into internal buffer (bitmap).
   Standard_EXPORT bool RenderGlyph (const Standard_Utf32Char theChar);
+
+  //! Return family name as stored inside the font.
+  Standard_EXPORT TCollection_AsciiString FamilyName() const;
+
+  //! Return style name as stored inside the font.
+  Standard_EXPORT TCollection_AsciiString StyleName() const;
 
 public:
 
@@ -305,11 +315,21 @@ public:
 
 public:
 
+  //! Font initialization parameters.
+  const Font_FTFontParams& FontParams() const { return myFontParams; }
+
   //! Configured point size
   unsigned int PointSize() const
   {
     return myFontParams.PointSize;
   }
+
+  //! Align the size of fallback fonts with the main font via CapHeight metrics; FALSE by default.
+  bool IsCapHeightFallback() const { return myFontParams.IsCapHeightFallback; }
+
+  //! Set to align the size of fallback fonts with the main font via CapHeight metrics.
+  //! Should be set before using the font.
+  void SetCapHeightFallback(bool theToAlign) { myFontParams.IsCapHeightFallback = theToAlign; }
 
   //! Return shear transformation angle, in radians; 0.0 by default.
   //! Notice that this angle is applied in addition to italic aspect.
