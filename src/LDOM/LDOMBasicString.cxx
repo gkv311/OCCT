@@ -257,13 +257,13 @@ LDOMBasicString::operator TCollection_ExtendedString () const
     errno = 0;
     // Check if ptr is ascii string
     if (ptr[0] != '#' || ptr[1] != '#')
-      return TCollection_ExtendedString (ptr);
+      return TCollection_ExtendedString (ptr, false);
     buf[0] = ptr[2];
     buf[1] = ptr[3];
     buf[2] = ptr[4];
     buf[3] = ptr[5];
     if (strtol (&buf[0], NULL, 16) != aUnicodeHeader)
-      return TCollection_ExtendedString (ptr);
+      return TCollection_ExtendedString (ptr, false);
 
     // convert Unicode to Extended String
     ptr += 2;
