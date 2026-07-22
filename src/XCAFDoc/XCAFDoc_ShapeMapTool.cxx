@@ -23,8 +23,6 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(XCAFDoc_ShapeMapTool,TDF_Attribute)
 
-#define AUTONAMING // automatically set names for labels
-
 // attribute methods //////////////////////////////////////////////////
 
 //=======================================================================

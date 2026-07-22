@@ -248,7 +248,46 @@ public:
   //! Returns current auto-naming mode. See SetAutoNaming() for
   //! description.
   Standard_EXPORT static Standard_Boolean AutoNaming();
-  
+
+  //! A sentry object to temporarily change automaming flag for shape tool instance.
+  class AutonamingSentry
+  {
+  public:
+    AutonamingSentry(const Handle(XCAFDoc_ShapeTool)& theTool,
+                     const bool theIsAutonaming)
+    : myTool (theTool.get()), myPrevState (theTool->myOwnAutonaming)
+    {
+      theTool->myOwnAutonaming = theIsAutonaming ? 1 : 0;
+    }
+
+    ~AutonamingSentry()
+    {
+      myTool->myOwnAutonaming = myPrevState;
+    }
+
+  private:
+    XCAFDoc_ShapeTool* myTool = nullptr;
+    Standard_Integer   myPrevState = 0;
+  };
+
+  //! Return autonaming flag for this tool instance.
+  Standard_Boolean OwnAutoNaming() const
+  {
+    return myOwnAutonaming == -1 ? XCAFDoc_ShapeTool::AutoNaming() : myOwnAutonaming == 1;
+  }
+
+  //! Set autonaming flag for this tool instance.
+  void SetOwnAutoNaming (Standard_Boolean theOwnFlag)
+  {
+    myOwnAutonaming = theOwnFlag ? 1 : 0;
+  }
+
+  //! Reset autonaming flag for this tool instance to global state.
+  void UnsetOwnAutoNaming()
+  {
+    myOwnAutonaming = -1;
+  }
+
   //! recursive
   Standard_EXPORT void ComputeShapes (const TDF_Label& L);
   
@@ -472,7 +511,7 @@ private:
   
   //! Makes a shape on label L to be a reference to shape refL
   //! with location loc
-  Standard_EXPORT static void MakeReference (const TDF_Label& L, const TDF_Label& refL, const TopLoc_Location& loc);
+  Standard_EXPORT void MakeReference (const TDF_Label& L, const TDF_Label& refL, const TopLoc_Location& loc);
 
   //! Auxiliary method for Expand
   //! Add declared under expanded theMainShapeL subshapes to new part label thePart
@@ -482,8 +521,9 @@ private:
   XCAFDoc_DataMapOfShapeLabel myShapeLabels;
   XCAFDoc_DataMapOfShapeLabel mySubShapes;
   XCAFDoc_DataMapOfShapeLabel mySimpleShapes;
-  Standard_Boolean hasSimpleShapes;
-
+  Standard_Boolean hasSimpleShapes = false;
+  //! Define own autonaming property; -1 by default which means to use global flag
+  Standard_Integer myOwnAutonaming = -1;
 
 };
 

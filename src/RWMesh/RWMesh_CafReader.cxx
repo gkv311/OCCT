@@ -178,11 +178,10 @@ void RWMesh_CafReader::fillDocument()
     Message::SendWarning("Warning: Length unit of document not equal to the system length unit");
   }
 
-  const Standard_Boolean wasAutoNaming = XCAFDoc_ShapeTool::AutoNaming();
-  XCAFDoc_ShapeTool::SetAutoNaming (Standard_False);
   const TCollection_AsciiString aRootName; // = generateRootName (theFile);
   CafDocumentTools aTools;
   aTools.ShapeTool = XCAFDoc_DocumentTool::ShapeTool (myXdeDoc->Main());
+  XCAFDoc_ShapeTool::AutonamingSentry anAutonamingSentry(aTools.ShapeTool, false);
   aTools.ColorTool = XCAFDoc_DocumentTool::ColorTool (myXdeDoc->Main());
   aTools.VisMaterialTool = XCAFDoc_DocumentTool::VisMaterialTool (myXdeDoc->Main());
   for (TopTools_SequenceOfShape::Iterator aRootIter (myRootShapes); aRootIter.More(); aRootIter.Next())
@@ -190,7 +189,6 @@ void RWMesh_CafReader::fillDocument()
     addShapeIntoDoc (aTools, aRootIter.Value(), TDF_Label(), aRootName);
   }
   XCAFDoc_DocumentTool::ShapeTool (myXdeDoc->Main())->UpdateAssemblies();
-  XCAFDoc_ShapeTool::SetAutoNaming (wasAutoNaming);
 }
 
 // =======================================================================

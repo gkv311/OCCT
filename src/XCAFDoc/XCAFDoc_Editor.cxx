@@ -68,8 +68,7 @@ Standard_Boolean XCAFDoc_Editor::Expand (const TDF_Label& theDoc,
     return Standard_False;
   }
   Handle(XCAFDoc_ShapeTool) aShapeTool = XCAFDoc_DocumentTool::ShapeTool(theDoc);
-  Standard_Boolean isAutoNaming = aShapeTool->AutoNaming();
-  aShapeTool->SetAutoNaming(Standard_False);
+  XCAFDoc_ShapeTool::AutonamingSentry anAutonamingSentry(aShapeTool, false);
 
   TDF_Label aCompoundPartL = theShape;
   if (aShapeTool->IsReference(theShape))
@@ -137,10 +136,8 @@ Standard_Boolean XCAFDoc_Editor::Expand (const TDF_Label& theDoc,
         }
       }
     }
-    aShapeTool->SetAutoNaming(isAutoNaming);
     return Standard_True;
   }
-  aShapeTool->SetAutoNaming(isAutoNaming);
   return Standard_False;
 }
 
