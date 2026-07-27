@@ -17,13 +17,15 @@
 #ifndef _GCPnts_TangentialDeflection_HeaderFile
 #define _GCPnts_TangentialDeflection_HeaderFile
 
-#include <TColgp_SequenceOfPnt.hxx>
-#include <TColStd_SequenceOfReal.hxx>
+#include <Adaptor3d_Curve.hxx>
+#include <Adaptor2d_Curve2d.hxx>
 #include <gp_Pnt.hxx>
 #include <math_Function.hxx>
 #include <math_MultipleVarFunction.hxx>
-#include <Adaptor3d_Curve.hxx>
-#include <Adaptor2d_Curve2d.hxx>
+#include <NCollection_StdAllocator.hxx>
+
+#include <memory>
+#include <vector>
 
 //! Computes a set of  points on a curve from package
 //! Adaptor3d  such  as between  two successive   points
@@ -192,20 +194,14 @@ public:
                                              const Standard_Real theParam,
                                              const Standard_Boolean theIsReplace = Standard_True);
 
-  Standard_Integer NbPoints () const
-  {
-    return myParameters.Length ();
-  }
+  //! Return number of points.
+  Standard_EXPORT Standard_Integer NbPoints () const;
 
-  Standard_Real Parameter (const Standard_Integer I) const
-  {
-    return myParameters.Value (I);
-  }
+  //! Return parameter at specified index @p I within @code [1, NbPoints()] @endcode range.
+  Standard_EXPORT Standard_Real Parameter (const Standard_Integer I) const;
 
-  gp_Pnt Value (const Standard_Integer I) const
-  {
-    return myPoints.Value (I);
-  }
+  //! Return point at specified index @p I within @code [1, NbPoints()] @endcode range.
+  Standard_EXPORT gp_Pnt Value (const Standard_Integer I) const;
 
   //! Computes angular step for the arc using the given parameters.
   Standard_EXPORT static Standard_Real ArcAngularStep (const Standard_Real theRadius,
@@ -248,15 +244,21 @@ private:
                   Standard_Real& theMaxDefl, Standard_Real& theUMax);
 
 private:
-  Standard_Real myAngularDeflection;
-  Standard_Real myCurvatureDeflection;
-  Standard_Real myUTol;
-  Standard_Integer myMinNbPnts;
-  Standard_Real myMinLen;
-  Standard_Real myLastU;
-  Standard_Real myFirstu;
-  TColgp_SequenceOfPnt   myPoints;
-  TColStd_SequenceOfReal myParameters;
+
+  typedef std::vector<gp_Pnt, NCollection_StdAllocator<gp_Pnt>> VectorOfPoints;
+  typedef std::vector<double, NCollection_StdAllocator<double>> VectorOfParameters;
+
+
+private:
+  Standard_Real myAngularDeflection = 0.0;
+  Standard_Real myCurvatureDeflection = 0.0;
+  Standard_Real myUTol = 0.0;
+  Standard_Integer myMinNbPnts = 0;
+  Standard_Real myMinLen = 0.0;
+  Standard_Real myLastU = 0.0;
+  Standard_Real myFirstu = 0.0;
+  std::unique_ptr<VectorOfPoints> myPoints;
+  std::unique_ptr<VectorOfParameters> myParameters;
 };
 
 #endif // _GCPnts_TangentialDeflection_HeaderFile
