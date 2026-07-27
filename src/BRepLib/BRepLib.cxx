@@ -2237,7 +2237,7 @@ static void EncodeRegularity(const TopoDS_Shape&        theShape,
     TopoDS_Face F1,F2;
     Standard_Boolean found;
     for (Standard_Integer i = 1; i <= M.Extent(); i++){
-      TopoDS_Edge E = TopoDS::Edge(M.FindKey(i));
+      const TopoDS_Edge& E = TopoDS::Edge(M.FindKey(i));
       if (!theEdgesToEncode.IsEmpty())
       {
         // process only the edges from the list to update their regularity
@@ -2261,9 +2261,8 @@ static void EncodeRegularity(const TopoDS_Shape&        theShape,
       }
       if (!found && !F1.IsNull()){//is it a sewing edge?
         TopAbs_Orientation orE = E.Orientation();
-        TopoDS_Edge curE;
         for (Ex.Init(F1, TopAbs_EDGE); Ex.More() && !found; Ex.Next()){
-          curE = TopoDS::Edge(Ex.Current());
+          const TopoDS_Edge& curE = TopoDS::Edge(Ex.Current());
           if (E.IsSame(curE) && orE != curE.Orientation()) {
             found = Standard_True;
             F2 = F1;
@@ -2271,7 +2270,7 @@ static void EncodeRegularity(const TopoDS_Shape&        theShape,
         }
       }
       if (found)
-        BRepLib::EncodeRegularity(E, F1, F2, theTolAng);
+        BRepLib::EncodeRegularity(const_cast<TopoDS_Edge&>(E), F1, F2, theTolAng);
     }
   }
   catch (Standard_Failure const& anException) {
