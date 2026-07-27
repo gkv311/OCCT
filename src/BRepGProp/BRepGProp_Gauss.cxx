@@ -760,6 +760,7 @@ Standard_Real BRepGProp_Gauss::Compute(
                 const Standard_Integer ind2 = anInertiaU->Length();
                 BRepGProp_Gauss::InitMass(0.0, 1, ind2, anInertiaU);
                 BRepGProp_Gauss::Init(ErrU, 0.0, 1, ind2);
+                Standard_Integer IndErrU = 1;
                 if (UMaxSubs > SM)
                   UMaxSubs = SM;
 
@@ -769,7 +770,7 @@ Standard_Real BRepGProp_Gauss::Compute(
                 {//while: U
                   if (++JU > iUSubEnd)
                   {
-                    URange[0] = IU = ErrU->Max();
+                    URange[0] = IU = IndErrU;
                     URange[1] = JU;
 
                     U1->Value(JU) = (U1->Value(IU) + U2->Value(IU)) * 0.5;
@@ -871,6 +872,8 @@ Standard_Real BRepGProp_Gauss::Compute(
                         #endif
 
                         ErrU->Value(iUS) = mult(aDMass, ur);
+                        if (ErrorU < ErrU->Value(iUS))
+                          IndErrU = iUS;
                       }
                       else
                       {
@@ -885,6 +888,8 @@ Standard_Real BRepGProp_Gauss::Compute(
                         anUI.Iyz = mult(aLocal[0].Iyz, ur);
 
                         ErrU->Value(iUS) = mult(aDMass, ur);
+                        if (ErrorU < ErrU->Value(iUS))
+                          IndErrU = iUS;
                       }
                     }
                   }
@@ -892,7 +897,7 @@ Standard_Real BRepGProp_Gauss::Compute(
                   if (JU == iUSubEnd)
                   {
                     kUEnd = 2;
-                    ErrorU = ErrU->Value(ErrU->Max());
+                    ErrorU = ErrU->Value(IndErrU);
                   }
                 } while (((ErrorU - EpsU > 0.0 && EpsU != 0.0) || kUEnd == 1) && JU < ind2);
 
