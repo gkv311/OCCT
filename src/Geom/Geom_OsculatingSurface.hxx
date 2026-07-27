@@ -17,17 +17,14 @@
 #ifndef _Geom_OsculatingSurface_HeaderFile
 #define _Geom_OsculatingSurface_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Real.hxx>
-#include <Geom_HSequenceOfBSplineSurface.hxx>
-#include <TColStd_HSequenceOfInteger.hxx>
-#include <TColStd_Array1OfBoolean.hxx>
-#include <Standard_Integer.hxx>
+#include <Geom_BSplineSurface.hxx>
 #include <GeomAbs_IsoType.hxx>
-#include <Geom_SequenceOfBSplineSurface.hxx>
+#include <NCollection_StdAllocator.hxx>
+#include <TColStd_Array1OfBoolean.hxx>
+
+#include <memory>
+#include <vector>
+
 class Geom_Surface;
 class Geom_BSplineSurface;
 
@@ -93,17 +90,19 @@ private:
   Standard_EXPORT Standard_Boolean IsAlongV() const;
   
   Standard_EXPORT void ClearOsculFlags();
-  
-  Standard_EXPORT const Geom_SequenceOfBSplineSurface& GetSeqOfL1() const;
-  
-  Standard_EXPORT const Geom_SequenceOfBSplineSurface& GetSeqOfL2() const;
 
+private:
+
+  typedef std::vector<Handle(Geom_BSplineSurface), NCollection_StdAllocator<Handle(Geom_BSplineSurface)>> VectorOfBSplineSurface;
+  typedef std::vector<Standard_Integer, NCollection_StdAllocator<Standard_Integer>> VectorOfInteger;
+
+private:
 
   Handle(Geom_Surface) myBasisSurf;
-  Standard_Real myTol;
-  Handle(Geom_HSequenceOfBSplineSurface) myOsculSurf1;
-  Handle(Geom_HSequenceOfBSplineSurface) myOsculSurf2;
-  Handle(TColStd_HSequenceOfInteger) myKdeg;
+  Standard_Real myTol = 0.0;
+  std::unique_ptr<VectorOfBSplineSurface> myOsculSurf1;
+  std::unique_ptr<VectorOfBSplineSurface> myOsculSurf2;
+  std::unique_ptr<VectorOfInteger> myKdeg;
   TColStd_Array1OfBoolean myAlong;
 
 
