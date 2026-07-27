@@ -66,10 +66,15 @@ public:
 
   //! Shallow copy of adaptor
   Standard_EXPORT virtual Handle(Adaptor3d_Surface) ShallowCopy() const Standard_OVERRIDE;
-  
-  //! Sets the surface to the geometry of <F>.
-  Standard_EXPORT void Initialize (const TopoDS_Face& F, const Standard_Boolean Restriction = Standard_True);
-  
+
+  //! Sets the surface to the geometry of face.
+  //! @param[in] theFace input face
+  //! @param[in] theRestriction flag to reduce parametric domain of adapter to UVBounds() of face
+  //! @param[in] theToEmbedTrsf flag to make a surface copy with pre-applied transformation
+  Standard_EXPORT void Initialize (const TopoDS_Face& theFace,
+                                   const Standard_Boolean theRestriction = Standard_True,
+                                   const Standard_Boolean theToEmbedTrsf = Standard_False);
+
   //! Returns the surface.
   Standard_EXPORT const GeomAdaptor_Surface& Surface() const;
   

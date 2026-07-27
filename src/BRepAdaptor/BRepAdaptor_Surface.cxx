@@ -84,13 +84,22 @@ Handle(Adaptor3d_Surface) BRepAdaptor_Surface::ShallowCopy() const
 //=======================================================================
 
 void BRepAdaptor_Surface::Initialize(const TopoDS_Face& F,
-				     const Standard_Boolean Restriction) 
+                                     const Standard_Boolean Restriction,
+                                     const Standard_Boolean theToEmbedTrsf)
 {
   myFace = F;
   TopLoc_Location L;
-  const Handle(Geom_Surface)& aSurface = BRep_Tool::Surface(F, L);
+  Handle(Geom_Surface) aSurface = BRep_Tool::Surface(F, L);
   if (aSurface.IsNull())
     return;
+
+  myTrsf = L.Transformation();
+  if (theToEmbedTrsf && Abs(myTrsf.ScaleFactor() - 1.0) <= gp::Resolution())
+  {
+    // pre-apply transformation
+    aSurface = BRep_Tool::Surface(F);
+    myTrsf = gp_Trsf();
+  }
 
   if (Restriction) {
     Standard_Real umin,umax,vmin,vmax;
@@ -99,7 +108,6 @@ void BRepAdaptor_Surface::Initialize(const TopoDS_Face& F,
   }
   else 
     mySurf.Load(aSurface);
-  myTrsf = L.Transformation();
 }
 
 
@@ -221,7 +229,11 @@ Handle(Adaptor3d_Surface) BRepAdaptor_Surface::VTrim
 gp_Pnt BRepAdaptor_Surface::Value(const Standard_Real U,
 				  const Standard_Real V) const
 {
-  return mySurf.Value(U,V).Transformed(myTrsf);
+  gp_Pnt aPnt = mySurf.Value(U, V);
+  if (myTrsf.Form() != gp_Identity)
+    aPnt.Transform(myTrsf);
+
+  return aPnt;
 }
 
 //=======================================================================
@@ -234,7 +246,8 @@ void  BRepAdaptor_Surface::D0(const Standard_Real U,
 			      gp_Pnt& P) const
 {
   mySurf.D0(U,V,P);
-  P.Transform(myTrsf);
+  if (myTrsf.Form() != gp_Identity)
+    P.Transform(myTrsf);
 }
 
 //=======================================================================
@@ -249,9 +262,12 @@ void  BRepAdaptor_Surface::D1(const Standard_Real U,
 			      gp_Vec& D1V)const 
 {
   mySurf.D1(U,V,P,D1U,D1V);
-  P.Transform(myTrsf);
-  D1U.Transform(myTrsf);
-  D1V.Transform(myTrsf);
+  if (myTrsf.Form() != gp_Identity)
+  {
+    P.Transform(myTrsf);
+    D1U.Transform(myTrsf);
+    D1V.Transform(myTrsf);
+  }
 }
 
 
@@ -269,12 +285,15 @@ void  BRepAdaptor_Surface::D2(const Standard_Real U,
 			      gp_Vec& D2UV)const 
 {
   mySurf.D2(U,V,P,D1U,D1V,D2U,D2V,D2UV);
-  P.Transform(myTrsf);
-  D1U.Transform(myTrsf);
-  D1V.Transform(myTrsf);
-  D2U.Transform(myTrsf);
-  D2V.Transform(myTrsf);
-  D2UV.Transform(myTrsf);
+  if (myTrsf.Form() != gp_Identity)
+  {
+    P.Transform(myTrsf);
+    D1U.Transform(myTrsf);
+    D1V.Transform(myTrsf);
+    D2U.Transform(myTrsf);
+    D2V.Transform(myTrsf);
+    D2UV.Transform(myTrsf);
+  }
 }
 
 //=======================================================================
@@ -292,16 +311,19 @@ void  BRepAdaptor_Surface::D3(const Standard_Real U,
 			      gp_Vec& D3UUV, gp_Vec& D3UVV)const 
 {
   mySurf.D3(U,V,P,D1U,D1V,D2U,D2V,D2UV,D3U,D3V,D3UUV,D3UVV);
-  P.Transform(myTrsf);
-  D1U.Transform(myTrsf);
-  D1V.Transform(myTrsf);
-  D2U.Transform(myTrsf);
-  D2V.Transform(myTrsf);
-  D2UV.Transform(myTrsf);
-  D3U.Transform(myTrsf);
-  D3V.Transform(myTrsf);
-  D3UUV.Transform(myTrsf);
-  D3UVV.Transform(myTrsf);
+  if (myTrsf.Form() != gp_Identity)
+  {
+    P.Transform(myTrsf);
+    D1U.Transform(myTrsf);
+    D1V.Transform(myTrsf);
+    D2U.Transform(myTrsf);
+    D2V.Transform(myTrsf);
+    D2UV.Transform(myTrsf);
+    D3U.Transform(myTrsf);
+    D3V.Transform(myTrsf);
+    D3UUV.Transform(myTrsf);
+    D3UVV.Transform(myTrsf);
+  }
 }
 
 
@@ -315,7 +337,11 @@ gp_Vec BRepAdaptor_Surface::DN(const Standard_Real U,
 			       const Standard_Integer Nu,
 			       const Standard_Integer Nv) const
 {
-  return mySurf.DN(U,V,Nu,Nv).Transformed(myTrsf);
+  gp_Vec aDer = mySurf.DN(U, V, Nu, Nv);
+  if (myTrsf.Form() != gp_Identity)
+    aDer.Transform(myTrsf);
+
+  return aDer;
 }
 
 //=======================================================================
