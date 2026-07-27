@@ -38,7 +38,6 @@ Geom_Ellipse.cxx
 Geom_Ellipse.hxx
 Geom_Geometry.cxx
 Geom_Geometry.hxx
-Geom_HSequenceOfBSplineSurface.hxx
 Geom_Hyperbola.cxx
 Geom_Hyperbola.hxx
 Geom_Line.cxx
@@ -57,7 +56,6 @@ Geom_Point.cxx
 Geom_Point.hxx
 Geom_RectangularTrimmedSurface.cxx
 Geom_RectangularTrimmedSurface.hxx
-Geom_SequenceOfBSplineSurface.hxx
 Geom_SphericalSurface.cxx
 Geom_SphericalSurface.hxx
 Geom_Surface.cxx

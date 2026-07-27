@@ -11,11 +11,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <Geom_OsculatingSurface.hxx>
 
 #include <BSplSLib.hxx>
 #include <Convert_GridPolynomialToPoles.hxx>
 #include <Geom_BezierSurface.hxx>
-#include <Geom_OsculatingSurface.hxx>
 #include <Geom_Surface.hxx>
 #include <PLib.hxx>
 #include <TColgp_Array2OfPnt.hxx>
@@ -64,12 +64,12 @@ void Geom_OsculatingSurface::Init(const Handle(Geom_Surface)& BS,
   Standard_Real TolMin=0.;//consider all singularities below Tol, not just above 1.e-12 (id23943)
   Standard_Boolean OsculSurf = Standard_True;
   myBasisSurf = Handle(Geom_Surface)::DownCast(BS->Copy());
-  myOsculSurf1 = new Geom_HSequenceOfBSplineSurface();
-  myOsculSurf2 = new Geom_HSequenceOfBSplineSurface();
-  if ((BS->IsKind(STANDARD_TYPE(Geom_BSplineSurface))) || 
+  if ((BS->IsKind(STANDARD_TYPE(Geom_BSplineSurface))) ||
     (BS->IsKind(STANDARD_TYPE(Geom_BezierSurface)))) 
   {
     Standard_Real U1=0,U2=0,V1=0,V2=0;
+    myOsculSurf1.reset(new VectorOfBSplineSurface());
+    myOsculSurf2.reset(new VectorOfBSplineSurface());
 
     Standard_Integer i = 1;
     BS->Bounds(U1,U2,V1,V2);
@@ -120,7 +120,7 @@ void Geom_OsculatingSurface::Init(const Handle(Geom_Surface)& BS,
       if ((IsAlongU() && InitSurf->VDegree()>1) ||
         (IsAlongV() && InitSurf->UDegree()>1)) 
       {
-        myKdeg = new TColStd_HSequenceOfInteger();
+        myKdeg.reset(new VectorOfInteger());
         Standard_Integer k=0;
         Standard_Boolean IsQPunc;
         Standard_Integer UKnot,VKnot;
@@ -148,7 +148,7 @@ void Geom_OsculatingSurface::Init(const Handle(Geom_Surface)& BS,
 
               }
               if (OsculSurf)
-                myOsculSurf1->Append(L);
+                myOsculSurf1->push_back(L);
               else
                 ClearOsculFlags(); //myAlong.SetValue(1,Standard_False);
               if (myAlong(2) && OsculSurf) 
@@ -172,8 +172,8 @@ void Geom_OsculatingSurface::Init(const Handle(Geom_Surface)& BS,
                 }
                 if(OsculSurf)
                 {
-                  myOsculSurf2->Append(L);
-                  myKdeg->Append(k);
+                  myOsculSurf2->push_back(L);
+                  myKdeg->push_back(k);
                 }
               } 
             }
@@ -199,8 +199,8 @@ void Geom_OsculatingSurface::Init(const Handle(Geom_Surface)& BS,
               }
               if(OsculSurf)
               {
-                myOsculSurf2->Append(L);
-                myKdeg->Append(k);
+                myOsculSurf2->push_back(L);
+                myKdeg->push_back(k);
               }
               else
                 ClearOsculFlags(); //myAlong.SetValue(2,Standard_False);
@@ -230,7 +230,7 @@ void Geom_OsculatingSurface::Init(const Handle(Geom_Surface)& BS,
                 S=L;
               }
               if(OsculSurf)
-                myOsculSurf1->Append(L);
+                myOsculSurf1->push_back(L);
               else
                 ClearOsculFlags(); //myAlong.SetValue(3,Standard_False);
               if (myAlong(4) && OsculSurf )
@@ -253,8 +253,8 @@ void Geom_OsculatingSurface::Init(const Handle(Geom_Surface)& BS,
                 }
                 if(OsculSurf)
                 {
-                  myOsculSurf2->Append(L);
-                  myKdeg->Append(k);
+                  myOsculSurf2->push_back(L);
+                  myKdeg->push_back(k);
                 }
               }
             }
@@ -278,8 +278,8 @@ void Geom_OsculatingSurface::Init(const Handle(Geom_Surface)& BS,
               }
               if(OsculSurf)
               {
-                myOsculSurf2->Append(L);
-                myKdeg->Append(k);
+                myOsculSurf2->push_back(L);
+                myKdeg->push_back(k);
               }
               else
                 ClearOsculFlags(); //myAlong.SetValue(4,Standard_False);
@@ -360,7 +360,7 @@ Standard_Boolean Geom_OsculatingSurface::UOscSurf
 
     if (myAlong(1) && NV == 1) 
     {
-      L = *((Handle(Geom_BSplineSurface)*)& myOsculSurf1->Value(NU));
+      L = myOsculSurf1->at(NU - 1);
       along = Standard_True;
     }
     if (myAlong(2) && (NV == NbVK-1) && !isToSkipSecond)
@@ -368,8 +368,11 @@ Standard_Boolean Geom_OsculatingSurface::UOscSurf
       // t means that derivative vector of osculating surface is opposite
       // to the original. This happens when (v-t)^k is negative, i.e.
       // difference between degrees (k) is odd and t is the last parameter
-      if (myKdeg->Value(NU)%2) t = Standard_True;
-      L = *((Handle(Geom_BSplineSurface)*)& myOsculSurf2->Value(NU));
+      if (myKdeg->at(NU - 1) % 2)
+      {
+        t = Standard_True;
+      }
+      L = myOsculSurf2->at(NU - 1);
       along = Standard_True;
     }
   }
@@ -419,13 +422,16 @@ Standard_Boolean Geom_OsculatingSurface::VOscSurf
 
     if (myAlong(3) && NU == 1)  
     {
-      L = *((Handle(Geom_BSplineSurface)*)& myOsculSurf1->Value(NV));
+      L = myOsculSurf1->at(NV - 1);
       along = Standard_True;
     }
     if (myAlong(4) && (NU == NbUK-1) && !isToSkipSecond)
     {
-      if (myKdeg->Value(NV)%2) t = Standard_True;
-      L = *((Handle(Geom_BSplineSurface)*)& myOsculSurf2->Value(NV));
+      if (myKdeg->at(NV - 1) % 2)
+      {
+        t = Standard_True;
+      }
+      L = myOsculSurf2->at(NV - 1);
       along = Standard_True;
     }
   }
@@ -761,25 +767,6 @@ Standard_Boolean Geom_OsculatingSurface::IsAlongV() const
   return (myAlong(3) || myAlong(4));
 }
 
-
-//=======================================================================
-//function : IsGetSeqOfL1
-//purpose  : 
-//=======================================================================
-
-const Geom_SequenceOfBSplineSurface& Geom_OsculatingSurface::GetSeqOfL1() const
-{
-  return myOsculSurf1->Sequence();
-}
-//=======================================================================
-//function : IsGetSeqOfL2
-//purpose  : 
-//=======================================================================
-
-const Geom_SequenceOfBSplineSurface& Geom_OsculatingSurface::GetSeqOfL2() const
-{
-  return myOsculSurf2->Sequence();
-}
 //=======================================================================
 //function : ClearOsculFlags
 //purpose  : 
@@ -805,12 +792,12 @@ void Geom_OsculatingSurface::DumpJson (Standard_OStream& theOStream, Standard_In
   OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, myBasisSurf.get())
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myTol)
 
-  if (!myOsculSurf1.IsNull())
-    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myOsculSurf1->Size())
-  if (!myOsculSurf2.IsNull())
-    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myOsculSurf2->Size())
-  if (!myKdeg.IsNull())
-    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myKdeg->Size())
+  if (myOsculSurf1)
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myOsculSurf1->size())
+  if (myOsculSurf2)
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myOsculSurf2->size())
+  if (myKdeg)
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myKdeg->size())
 
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myAlong.Size())
 }
