@@ -200,7 +200,8 @@ bool BRepGProp_Face::Load(const TopoDS_Edge& E)
 void BRepGProp_Face::Load(const TopoDS_Face& F) 
 { 
   TopoDS_Shape aLocalShape = F.Oriented(TopAbs_FORWARD);
-  mySurface.Initialize(TopoDS::Face(aLocalShape));
+  const bool toEmbedTrsf = true; // pre-apply transformation to speed-up calculations
+  mySurface.Initialize(TopoDS::Face(aLocalShape), true, toEmbedTrsf);
 //  mySurface.Initialize(TopoDS::Face(F.Oriented(TopAbs_FORWARD)));
   mySReverse = (F.Orientation() == TopAbs_REVERSED);
 }
