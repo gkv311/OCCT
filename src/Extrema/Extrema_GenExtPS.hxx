@@ -18,6 +18,7 @@
 #define _Extrema_GenExtPS_HeaderFile
 
 #include <Bnd_HArray1OfSphere.hxx>
+#include <NCollection_StdAllocator.hxx>
 #include <Extrema_Array2OfPOnSurfParams.hxx>
 #include <Extrema_POnSurfParams.hxx>
 #include <Extrema_HUBTreeOfSphere.hxx>
@@ -25,6 +26,9 @@
 #include <Extrema_ExtFlag.hxx>
 #include <Extrema_ExtAlgo.hxx>
 #include <TColStd_HArray1OfReal.hxx>
+
+#include <memory>
+#include <vector>
 
 class Adaptor3d_Surface;
 
@@ -109,7 +113,12 @@ private:
   Standard_EXPORT void BuildGrid (const gp_Pnt& thePoint);
   
   //! Compute new edge parameters.
-  Standard_EXPORT const Extrema_POnSurfParams& ComputeEdgeParameters (const Standard_Boolean IsUEdge, const Extrema_POnSurfParams& theParam0, const Extrema_POnSurfParams& theParam1, const gp_Pnt& thePoints, const Standard_Real theDiffTol);
+  Standard_EXPORT void ComputeEdgeParameters (Extrema_POnSurfParams& theOutParam,
+                                              const Standard_Boolean IsUEdge,
+                                              const Extrema_POnSurfParams& theParam0,
+                                              const Extrema_POnSurfParams& theParam1,
+                                              const gp_Pnt& thePoints,
+                                              const Standard_Real theDiffTol);
 
 private:
 
@@ -119,31 +128,68 @@ private:
 
 private:
 
-  Standard_Boolean myDone;
-  Standard_Boolean myInit;
-  Standard_Real myumin;
-  Standard_Real myusup;
-  Standard_Real myvmin;
-  Standard_Real myvsup;
-  Standard_Integer myusample;
-  Standard_Integer myvsample;
-  Standard_Real mytolu;
-  Standard_Real mytolv;
+  typedef std::vector<Standard_Real, NCollection_StdAllocator<Standard_Real>> VectorOfParams;
+  typedef std::vector<Extrema_POnSurfParams, NCollection_StdAllocator<Extrema_POnSurfParams>> VectorOfSurfParams;
+  typedef std::vector<VectorOfSurfParams, NCollection_StdAllocator<VectorOfSurfParams>> VectorOfVectorOfSurfParams;
 
-  Extrema_Array2OfPOnSurfParams myPoints;
+  struct PointGrid
+  {
+    VectorOfParams UParams;
+    VectorOfParams VParams;
+
+    // avoid using NCollection_Array2 to avoid memory allocation issues on Windows
+    VectorOfVectorOfSurfParams Points;
+    VectorOfVectorOfSurfParams FacePntParams;
+    VectorOfVectorOfSurfParams UEdgePntParams;
+    VectorOfVectorOfSurfParams VEdgePntParams;
+
+    //! Resize vector of vectors.
+    static void Resize (VectorOfVectorOfSurfParams& theVec,
+                        Standard_Integer theNbRows, Standard_Integer theNbCols)
+    {
+      theVec.resize(theNbRows);
+      for (VectorOfSurfParams& aRow : theVec)
+        aRow.resize(theNbCols);
+    }
+
+    //! Build grid of parametric points.
+    static void BuildParamGrid (VectorOfParams& theParams,
+                                Standard_Real theMin,
+                                Standard_Real theSup,
+                                Standard_Integer theNbSamples)
+    {
+      Standard_Real PasU = theSup - theMin;
+      Standard_Real U0   = PasU / theNbSamples / 100.;
+      PasU = (PasU - U0) / (theNbSamples - 1);
+      U0 = U0/2. + theMin;
+      theParams.resize(theNbSamples);
+      Standard_Real U = U0;
+      for (Standard_Integer aSampleIter = 0; aSampleIter < theNbSamples; ++aSampleIter, U += PasU)
+        theParams[aSampleIter] = U;
+    }
+  };
+
+private:
+
+  Standard_Boolean myDone = Standard_False;
+  Standard_Boolean myInit = Standard_False;
+  Standard_Real myumin = 0.0;
+  Standard_Real myusup = 0.0;
+  Standard_Real myvmin = 0.0;
+  Standard_Real myvsup = 0.0;
+  Standard_Integer myusample = 0;
+  Standard_Integer myvsample = 0;
+  Standard_Real mytolu = 0.0;
+  Standard_Real mytolv = 0.0;
+
   Extrema_HUBTreeOfSphere mySphereUBTree;
   Handle(Bnd_HArray1OfSphere) mySphereArray;
   Extrema_FuncPSNorm myF;
-  const Adaptor3d_Surface* myS;
-  Extrema_ExtFlag myFlag;
-  Extrema_ExtAlgo myAlgo;
-  Handle(TColStd_HArray1OfReal) myUParams;
-  Handle(TColStd_HArray1OfReal) myVParams;
-  Extrema_Array2OfPOnSurfParams myFacePntParams;
-  Extrema_Array2OfPOnSurfParams myUEdgePntParams;
-  Extrema_Array2OfPOnSurfParams myVEdgePntParams;
-  Extrema_POnSurfParams myGridParam;
+  const Adaptor3d_Surface* myS = nullptr;
+  Extrema_ExtFlag myFlag = Extrema_ExtFlag_MINMAX;
+  Extrema_ExtAlgo myAlgo = Extrema_ExtAlgo_Grad;
 
+  std::unique_ptr<PointGrid> myGrid;
 };
 
 #endif // _Extrema_GenExtPS_HeaderFile
