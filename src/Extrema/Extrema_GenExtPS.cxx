@@ -349,6 +349,23 @@ static void fillParams (const TColStd_Array1OfReal& theKnots,
     theParams.clear();
 }
 
+//! Build equi-distant distribution of points along the curve with the help of GCPnts_QuasiUniformAbscissa.
+static void buildEquiDistantGrid(const Handle(Adaptor3d_Curve)& theCurve,
+                                 const Standard_Real theParMin,
+                                 const Standard_Real theParMax,
+                                 const Standard_Integer theSample,
+                                 std::vector<Standard_Real, NCollection_StdAllocator<Standard_Real>>& theParams)
+{
+  GCPnts_QuasiUniformAbscissa anAbscissa(*theCurve, theSample, theParMin, theParMax);
+  if (!anAbscissa.IsDone() ||anAbscissa.NbPoints() < theSample)
+    return;
+
+  const Standard_Integer nbPoints = anAbscissa.NbPoints();
+  theParams.resize(nbPoints);
+  for (Standard_Integer i = 1; i <= nbPoints; ++i)
+    theParams[i - 1] = anAbscissa.Parameter(i);
+}
+
 void Extrema_GenExtPS::GetGridPoints( const Adaptor3d_Surface& theSurf)
 {
   //creation parametric points for BSpline and Bezier surfaces
@@ -408,6 +425,11 @@ void Extrema_GenExtPS::GetGridPoints( const Adaptor3d_Surface& theSurf)
           fillParams(aKnots, aBez->Degree(), myumin, myusup, myGrid->UParams, myusample);
       }
     }
+
+    if (theSurf.GetType() == GeomAbs_SurfaceOfExtrusion && myGrid->UParams.empty())
+      buildEquiDistantGrid (theSurf.BasisCurve(), myumin, myusup, myusample, myGrid->UParams);
+    else if (theSurf.GetType() == GeomAbs_SurfaceOfRevolution && myGrid->VParams.empty())
+      buildEquiDistantGrid (theSurf.BasisCurve(), myvmin, myvsup, myvsample, myGrid->VParams);
   }
 
   if (!myGrid->UParams.empty())
