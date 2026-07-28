@@ -485,6 +485,9 @@ void Extrema_GenExtPS::ComputeEdgeParameters (Extrema_POnSurfParams&       theOu
       gp_XYZ aPoP(thePoint.XYZ().Subtracted(theParam0.Value().XYZ()));
       gp_XYZ aPoP1(theParam1.Value().XYZ().Subtracted(theParam0.Value().XYZ()));
       Standard_Real aRatio = aPoP.Dot(aPoP1)/aSqrDist01;
+      // clamp the region explicitly to protect from FPE in case of floating point inaccuracy
+      aRatio = Max(0.0, Min(1.0, aRatio));
+
       Standard_Real aU[2];
       Standard_Real aV[2];
 
