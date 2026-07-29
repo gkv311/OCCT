@@ -49,7 +49,6 @@
 #include <StepBasic_SiUnitAndLengthUnit.hxx>
 #include <StepBasic_SiUnitAndMassUnit.hxx>
 #include <StepBasic_SiUnitAndPlaneAngleUnit.hxx>
-#include <STEPCAFControl_ActorWrite.hxx>
 #include <STEPCAFControl_Controller.hxx>
 #include <STEPCAFControl_ExternFile.hxx>
 #include <STEPConstruct.hxx>
@@ -57,6 +56,7 @@
 #include <STEPCAFControl_GDTProperty.hxx>
 #include <STEPConstruct_Styles.hxx>
 #include <STEPConstruct_ValidationProps.hxx>
+#include <STEPControl_ActorWrite.hxx>
 #include <STEPControl_StepModelType.hxx>
 #include <StepData_Factors.hxx>
 #include <StepData_Logical.hxx>
@@ -217,6 +217,7 @@
 #include <XCAFPrs_Style.hxx>
 #include <XSAlgo.hxx>
 #include <XSAlgo_AlgoContainer.hxx>
+#include <XSControl_Controller.hxx>
 #include <XSControl_TransferWriter.hxx>
 #include <XSControl_WorkSession.hxx>
 #include <UnitsMethods.hxx>
@@ -518,8 +519,7 @@ Standard_Boolean STEPCAFControl_Writer::transfer(STEPControl_Writer& theWriter,
   if (theLabels.IsEmpty())
     return Standard_False;
 
-  Handle(STEPCAFControl_ActorWrite) anActor =
-    Handle(STEPCAFControl_ActorWrite)::DownCast(theWriter.WS()->NormAdaptor()->ActorWrite());
+  Handle(STEPControl_ActorWrite) anActor = Handle(STEPControl_ActorWrite)::DownCast(theWriter.WS()->NormAdaptor()->ActorWrite());
 
   StepData_Factors aLocalFactors;
   const Handle(StepData_StepModel) aModel = Handle(StepData_StepModel)::DownCast(theWriter.WS()->Model());
@@ -544,7 +544,7 @@ Standard_Boolean STEPCAFControl_Writer::transfer(STEPControl_Writer& theWriter,
     // write shape either as a whole, or as multifile (with extern refs)
     if (!theIsMulti)
     {
-      anActor->SetStdMode(Standard_False);
+      anActor->SetAutoAssemblyMode(Standard_False);
 
       TDF_LabelSequence aCompLabels;
 
@@ -619,7 +619,7 @@ Standard_Boolean STEPCAFControl_Writer::transfer(STEPControl_Writer& theWriter,
         anActor->RegisterAssembly(aCurShape);
 
       theWriter.Transfer(aCurShape, theMode, Standard_False, aRange);
-      anActor->SetStdMode(Standard_True); // restore default behaviour
+      anActor->SetAutoAssemblyMode(Standard_True); // restore default behaviour
     }
     else
     {
