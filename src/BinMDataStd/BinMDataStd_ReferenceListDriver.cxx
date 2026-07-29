@@ -98,6 +98,7 @@ void BinMDataStd_ReferenceListDriver::Paste(const Handle(TDF_Attribute)& theSour
   TDF_ListIteratorOfLabelList itr(anAtt->List());
   for (Standard_Integer i = aFirstInd; itr.More(); itr.Next(), i++)
   {
+    (void)i; // debug counter
     TDF_Label L = itr.Value();
     if (!L.IsNull())
     {

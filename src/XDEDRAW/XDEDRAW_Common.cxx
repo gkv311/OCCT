@@ -205,6 +205,7 @@ static Standard_Integer FromShape(Draw_Interpretor& di, Standard_Integer argc, c
   Standard_Integer num = 0;
   for (; DicIt.More(); DicIt.Next(), num++)
   {
+    (void)num;
     Handle(XSControl_WorkSession) CurrentWS =
       Handle(XSControl_WorkSession)::DownCast(DicIt.Value());
     XSDRAW::Pilot()->SetSession(CurrentWS);
