@@ -17,7 +17,6 @@
 #include <Interface_Check.hxx>
 #include <Interface_HArray1OfHAsciiString.hxx>
 #include <Interface_Macros.hxx>
-#include <Interface_Static.hxx>
 #include <Interface_ParamList.hxx>
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
@@ -56,13 +55,6 @@ IMPLEMENT_STANDARD_RTTIEXT(StepData_StepReaderData, Interface_FileReaderData)
 // Ainsi, dans StepReaderData, le Header est constitue des "thenbhead" 1res Entites
 //  #########################################################################
 //  ....   Creation et Acces de base aux donnees atomiques du fichier    ....
-typedef TCollection_HAsciiString String;
-static char txtmes[200];  // plus commode que redeclarer partout
-
-
-static Standard_Boolean initstr = Standard_False;
-#define Maxlst 64
-//static TCollection_AsciiString subl[Maxlst];          // Maxlst : minimum 10
 
 static Standard_Integer acceptvoid = 0;
 
@@ -330,12 +322,6 @@ StepData_StepReaderData::StepData_StepReaderData
   thenbscop = 0;  thenbents = 0;  thelastn = 0;  thenbhead = nbheader;
   //themults.Init(0);
   thecheck = new Interface_Check;
-  if (initstr) return;
-  //for (Standard_Integer i = 0; i < Maxlst; i ++) {
-  //  Snprintf(textnum,"$%d",i+1);
-  //  subl[i].AssignCat(textnum);
-  //}
-  initstr = Standard_True;
 }
 
 
@@ -437,13 +423,10 @@ void StepData_StepReaderData::AddStepParam(const Standard_Integer num,
     Standard_Integer numid = 0;
     if (aval[2] != '\0') {
       numid = atoi(&aval[1]);
-      //      if (numid <= Maxlst) Interface_FileReaderData::AddParam
-      //	(num,subl[numid-1].ToCString(),atype,numid);
       Interface_FileReaderData::AddParam(num, aval, atype, numid);
     } else {
       char *numlstchar = (char *)(aval + 1);
       numid = (*numlstchar) - 48;  // -48 ('0') -1 (adresse [] depuis 0)
-//      Interface_FileReaderData::AddParam (num,subl[numid].ToCString(),atype,numid);
       Interface_FileReaderData::AddParam(num, aval, atype, numid);
     }
   } else if (atype == Interface_ParamIdent) {
@@ -452,8 +435,6 @@ void StepData_StepReaderData::AddStepParam(const Standard_Integer num,
   } else {
     Interface_FileReaderData::AddParam(num, aval, atype, nument);
   }
-
-  //  Interface_FileReaderData::AddParam (num,parval,atype,numid);
 }
 
 
@@ -570,21 +551,23 @@ Standard_Boolean  StepData_StepReaderData::NamedForComplex
 
   if (n == 0) /*stat =*/ NamedForComplex(name, num0, n, ach);  // on a rembobine
 //  Pas dans l ordre alphabetique : boucler
-  Handle(String) errmess = new String("Parameter n0.%d (%s) not a LIST");
-  Snprintf(txtmes, errmess->ToCString(), num0, name);
+  const char* errmess = "Parameter n0.%d (%s) not a LIST";
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, num0, name);
+
   for (n = num0; n > 0; n = NextForComplex(n)) {
     if (!strcmp(RecordType(n).ToCString(), name)) {
       num = n;
-      errmess = new String("Complex Record n0.%d, member type %s not in alphabetic order");
-      Snprintf(txtmes, errmess->ToCString(), num0, name);
-      ach->AddWarning(txtmes, errmess->ToCString());
+      errmess = "Complex Record n0.%d, member type %s not in alphabetic order";
+      Snprintf(txtmes, errmess, num0, name);
+      ach->AddWarning(txtmes, errmess);
       return Standard_False;
     }
   }
   num = 0;
-  errmess = new String("Complex Record n0.%d, member type %s not found");
-  Snprintf(txtmes, errmess->ToCString(), num0, name);
-  ach->AddFail(txtmes, errmess->ToCString());
+  errmess = "Complex Record n0.%d, member type %s not found";
+  Snprintf(txtmes, errmess, num0, name);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -608,24 +591,25 @@ Standard_Boolean  StepData_StepReaderData::NamedForComplex
   }
 
   //entities are not in alphabetical order
-  Handle(String) errmess = new String("Parameter n0.%d (%s) not a LIST");
-  Snprintf(txtmes, errmess->ToCString(), num0, theName);
+  const char* errmess = "Parameter n0.%d (%s) not a LIST";
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, num0, theName);
   for (n = num0; n > 0; n = NextForComplex(n))
   {
     if (!strcmp(RecordType(n).ToCString(), theName) ||
       !strcmp(RecordType(n).ToCString(), theShortName))
     {
       num = n;
-      errmess = new String("Complex Record n0.%d, member type %s not in alphabetic order");
-      Snprintf(txtmes, errmess->ToCString(), num0, theName);
-      ach->AddWarning(txtmes, errmess->ToCString());
+      errmess = "Complex Record n0.%d, member type %s not in alphabetic order";
+      Snprintf(txtmes, errmess, num0, theName);
+      ach->AddWarning(txtmes, errmess);
       return Standard_False;
     }
   }
   num = 0;
-  errmess = new String("Complex Record n0.%d, member type %s not found");
-  Snprintf(txtmes, errmess->ToCString(), num0, theName);
-  ach->AddFail(txtmes, errmess->ToCString());
+  errmess = "Complex Record n0.%d, member type %s not found";
+  Snprintf(txtmes, errmess, num0, theName);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -643,11 +627,12 @@ Standard_Boolean StepData_StepReaderData::CheckNbParams(const Standard_Integer n
   const Standard_CString mess) const
 {
   if (NbParams(num) == nbreq) return Standard_True;
-  Handle(String) errmess;
-  if (mess[0] == '\0') errmess = new String("Count of Parameters is not %d");
-  else errmess = new String("Count of Parameters is not %d for %s");
-  Snprintf(txtmes, errmess->ToCString(), nbreq, mess);
-  ach->AddFail(txtmes, errmess->ToCString());
+  const char* errmess = mess[0] == '\0'
+                      ? "Count of Parameters is not %d"
+                      : "Count of Parameters is not %d for %s";
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nbreq, mess);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -676,10 +661,11 @@ Standard_Boolean StepData_StepReaderData::ReadSubList(const Standard_Integer num
   Standard_Boolean isvoid = (Param(num, nump).ParamType() == Interface_ParamVoid);
   if (isvoid && optional) return Standard_False;
 
-  Handle(String) errmess = new String("Parameter n0.%d (%s) not a LIST");
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  if (acceptvoid && isvoid)  ach->AddWarning(txtmes, errmess->ToCString());
-  else { ach->AddFail(txtmes, errmess->ToCString()); return Standard_False; }
+  const char* errmess = "Parameter n0.%d (%s) not a LIST";
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  if (acceptvoid && isvoid) ach->AddWarning(txtmes, errmess);
+  else { ach->AddFail(txtmes, errmess); return Standard_False; }
   return Standard_True;
 }
 
@@ -891,10 +877,10 @@ Standard_Boolean StepData_StepReaderData::ReadMember(const Standard_Integer num,
   Standard_Boolean res = ReadAny(num, nump, mess, ach, nuldescr, v);
   if (v == val) return res;
   //   changement -> refus
-  Handle(String) errmess =
-    new String("Parameter n0.%d (%s) : does not match SELECT clause");
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  ach->AddFail(txtmes, errmess->ToCString());
+  const char* errmess = "Parameter n0.%d (%s) : does not match SELECT clause";
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1133,28 +1119,30 @@ Standard_Boolean StepData_StepReaderData::ReadXY(const Standard_Integer num,
   Handle(Interface_Check)& ach,
   Standard_Real& X, Standard_Real& Y) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   Standard_Integer numsub = SubListNumber(num, nump, Standard_False);
   if (numsub != 0) {
     if (NbParams(numsub) == 2) {
       const Interface_FileParameter& FPX = Param(numsub, 1);
       if (FPX.ParamType() == Interface_ParamReal)  X =
         Interface_FileReaderData::Fastof(FPX.CValue());
-      else errmess = new String("Parameter n0.%d (%s) : (X,Y) X not a Real");
+      else errmess = "Parameter n0.%d (%s) : (X,Y) X not a Real";
 
       const Interface_FileParameter& FPY = Param(numsub, 2);
       if (FPY.ParamType() == Interface_ParamReal)  Y =
         Interface_FileReaderData::Fastof(FPY.CValue());
-      else errmess = new String("Parameter n0.%d (%s) : (X,Y) Y not a Real");
+      else errmess = "Parameter n0.%d (%s) : (X,Y) Y not a Real";
 
     }
-    else errmess = new String("Parameter n0.%d (%s) : (X,Y) has not 2 params");
+    else errmess = "Parameter n0.%d (%s) : (X,Y) has not 2 params";
   }
-  else errmess = new String("Parameter n0.%d (%s) : (X,Y) not a SubList");
+  else errmess = "Parameter n0.%d (%s) : (X,Y) not a SubList";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1171,33 +1159,35 @@ Standard_Boolean StepData_StepReaderData::ReadXYZ(const Standard_Integer num,
   Standard_Real& X, Standard_Real& Y,
   Standard_Real& Z) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   Standard_Integer numsub = SubListNumber(num, nump, Standard_False);
   if (numsub != 0) {
     if (NbParams(numsub) == 3) {
       const Interface_FileParameter& FPX = Param(numsub, 1);
       if (FPX.ParamType() == Interface_ParamReal)  X =
         Interface_FileReaderData::Fastof(FPX.CValue());
-      else errmess = new String("Parameter n0.%d (%s) : (X,Y,Z) X not a Real");
+      else errmess = "Parameter n0.%d (%s) : (X,Y,Z) X not a Real";
 
       const Interface_FileParameter& FPY = Param(numsub, 2);
       if (FPY.ParamType() == Interface_ParamReal)  Y =
         Interface_FileReaderData::Fastof(FPY.CValue());
-      else errmess = new String("Parameter n0.%d (%s) : (X,Y,Z) Y not a Real");
+      else errmess = "Parameter n0.%d (%s) : (X,Y,Z) Y not a Real";
 
       const Interface_FileParameter& FPZ = Param(numsub, 3);
       if (FPZ.ParamType() == Interface_ParamReal)  Z =
         Interface_FileReaderData::Fastof(FPZ.CValue());
-      else errmess = new String("Parameter n0.%d (%s) : (X,Y,Z) Z not a Real");
+      else errmess = "Parameter n0.%d (%s) : (X,Y,Z) Z not a Real";
 
     }
-    else errmess = new String("Parameter n0.%d (%s) : (X,Y,Z) has not 3 params");
+    else errmess = "Parameter n0.%d (%s) : (X,Y,Z) has not 3 params";
   }
-  else errmess = new String("Parameter n0.%d (%s) : (X,Y,Z) not a SubList");
+  else errmess = "Parameter n0.%d (%s) : (X,Y,Z) not a SubList";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1213,18 +1203,20 @@ Standard_Boolean StepData_StepReaderData::ReadReal(const Standard_Integer num,
   Handle(Interface_Check)& ach,
   Standard_Real& val) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
     if (FP.ParamType() == Interface_ParamReal || FP.ParamType() == Interface_ParamInteger) 
       val = Interface_FileReaderData::Fastof(FP.CValue());
-    else errmess = new String("Parameter n0.%d (%s) not a Real");
+    else errmess = "Parameter n0.%d (%s) not a Real";
   }
-  else errmess = new String("Parameter n0.%d (%s) absent");
+  else errmess = "Parameter n0.%d (%s) absent";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1244,7 +1236,7 @@ Standard_Boolean StepData_StepReaderData::ReadEntity(const Standard_Integer num,
   const Handle(Standard_Type)& atype,
   Handle(Standard_Transient)& ent) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   Standard_Boolean warn = Standard_False;
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
@@ -1255,28 +1247,30 @@ Standard_Boolean StepData_StepReaderData::ReadEntity(const Standard_Integer num,
 	Handle(Standard_Transient) entent = BoundEntity(nent);
         if (entent.IsNull() || !entent->IsKind(atype))
         {
-          errmess = new String("Parameter n0.%d (%s) : Entity has illegal type");
+          errmess = "Parameter n0.%d (%s) : Entity has illegal type";
           if (!entent.IsNull() && entent->IsKind(STANDARD_TYPE(StepData_UndefinedEntity)))
             ent = entent;
         }
 	else ent = entent;
       }
-      else errmess = new String("Parameter n0.%d (%s) : Unresolved reference");
+      else errmess = "Parameter n0.%d (%s) : Unresolved reference";
     }
     else {
       if (acceptvoid && FP.ParamType() == Interface_ParamVoid) warn = Standard_True;
-      errmess = new String("Parameter n0.%d (%s) not an Entity");
+      errmess = "Parameter n0.%d (%s) not an Entity";
     }
   }
   else {
     warn = (acceptvoid > 0);
-    errmess = new String("Parameter n0.%d (%s) absent");
+    errmess = "Parameter n0.%d (%s) absent";
   }
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  if (warn) ach->AddWarning(txtmes, errmess->ToCString());
-  else ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  if (warn) ach->AddWarning(txtmes, errmess);
+  else ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1292,7 +1286,7 @@ Standard_Boolean StepData_StepReaderData::ReadEntity(const Standard_Integer num,
   Handle(Interface_Check)& ach,
   StepData_SelectType& sel) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   Standard_Boolean warn = Standard_False;
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
@@ -1303,7 +1297,7 @@ Standard_Boolean StepData_StepReaderData::ReadEntity(const Standard_Integer num,
 	Handle(Standard_Transient) entent = BoundEntity(nent);
         if (!sel.Matches(entent))
         {
-          errmess = new String("Parameter n0.%d (%s) : Entity has illegal type");
+          errmess = "Parameter n0.%d (%s) : Entity has illegal type";
           //fot not supported STEP entity
           if (!entent.IsNull() && entent->IsKind(STANDARD_TYPE(StepData_UndefinedEntity)))
             sel.SetValue(entent);
@@ -1312,33 +1306,35 @@ Standard_Boolean StepData_StepReaderData::ReadEntity(const Standard_Integer num,
           sel.SetValue(entent);
       }
       else
-        errmess = new String("Parameter n0.%d (%s) : Unresolved reference");
+        errmess = "Parameter n0.%d (%s) : Unresolved reference";
     }
     else if (FP.ParamType() == Interface_ParamVoid) {
       if (acceptvoid) warn = Standard_True;
-      errmess = new String("Parameter n0.%d (%s) not an Entity");
+      errmess = "Parameter n0.%d (%s) not an Entity";
     }
     else {
       // Cas restant : on s interesse en fait au SelectMember ...
       Handle(Standard_Transient) sm = sel.NewMember();
       // SelectMember qui assure ce role. Peut etre specialise
       if (!ReadAny(num, nump, mess, ach, sel.Description(), sm))
-        errmess = new String("Parameter n0.%d (%s) : could not be read");
+        errmess = "Parameter n0.%d (%s) : could not be read";
       if (!sel.Matches(sm))
-        errmess = new String("Parameter n0.%d (%s) : illegal parameter type");
+        errmess = "Parameter n0.%d (%s) : illegal parameter type";
       else
         sel.SetValue(sm);
     }
   }
   else {
     warn = (acceptvoid > 0);
-    errmess = new String("Parameter n0.%d (%s) absent");
+    errmess = "Parameter n0.%d (%s) absent";
   }
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  if (warn) ach->AddWarning(txtmes, errmess->ToCString());
-  else ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  if (warn) ach->AddWarning(txtmes, errmess);
+  else ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1357,7 +1353,7 @@ Standard_Boolean StepData_StepReaderData::ReadInteger(const Standard_Integer num
   Handle(Interface_Check)& ach,
   Standard_Integer& val) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   Standard_Boolean warn = Standard_False;
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
@@ -1371,22 +1367,23 @@ Standard_Boolean StepData_StepReaderData::ReadInteger(const Standard_Integer num
       val = static_cast<Standard_Integer>(Round(aValF));
       //if (aValF != double(val) {}
       if (acceptvoid) warn = Standard_True;
-      errmess = new String("Parameter n0.%d (%s) was rounded");
+      errmess = "Parameter n0.%d (%s) was rounded";
     }
 
     if (FP.ParamType() != Interface_ParamInteger &&
         FP.ParamType() != Interface_ParamReal)
     {
-      errmess = new String("Parameter n0.%d (%s) not an Integer");
+      errmess = "Parameter n0.%d (%s) not an Integer";
     }
   }
-  else errmess = new String("Parameter n0.%d (%s) absent");
+  else errmess = "Parameter n0.%d (%s) absent";
 
-  if (errmess.IsNull()) return Standard_True;
+  if (errmess == nullptr) return Standard_True;
 
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  if (warn) ach->AddWarning(txtmes, errmess->ToCString());
-  else ach->AddFail(txtmes, errmess->ToCString());
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  if (warn) ach->AddWarning(txtmes, errmess);
+  else ach->AddFail(txtmes, errmess);
 
   return Standard_False;
 }
@@ -1404,22 +1401,24 @@ Standard_Boolean StepData_StepReaderData::ReadBoolean(const Standard_Integer num
   Standard_Boolean& flag) const
 {
   flag = Standard_True;
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
     if (FP.ParamType() == Interface_ParamEnum) {
       Standard_CString txt = FP.CValue();
       if (!strcmp(txt, ".T.")) flag = Standard_True;
       else if (!strcmp(txt, ".F.")) flag = Standard_False;
-      else errmess = new String("Parameter n0.%d (%s) : Incorrect Boolean Value. It was set to true");
+      else errmess = "Parameter n0.%d (%s) : Incorrect Boolean Value. It was set to true";
     }
-    else errmess = new String("Parameter n0.%d (%s) not a Boolean. It was set to true");
+    else errmess = "Parameter n0.%d (%s) not a Boolean. It was set to true";
   }
-  else errmess = new String("Parameter n0.%d (%s) absent.It was set to true");
+  else errmess = "Parameter n0.%d (%s) absent.It was set to true";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1435,7 +1434,7 @@ Standard_Boolean StepData_StepReaderData::ReadLogical(const Standard_Integer num
   Handle(Interface_Check)& ach,
   StepData_Logical& flag) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
     if (FP.ParamType() == Interface_ParamEnum) {
@@ -1443,15 +1442,17 @@ Standard_Boolean StepData_StepReaderData::ReadLogical(const Standard_Integer num
       if (!strcmp(txt, ".T.")) flag = StepData_LTrue;
       else if (!strcmp(txt, ".F.")) flag = StepData_LFalse;
       else if (!strcmp(txt, ".U.")) flag = StepData_LUnknown;
-      else errmess = new String("Parameter n0.%d (%s) : Incorrect Logical Value");
+      else errmess = "Parameter n0.%d (%s) : Incorrect Logical Value";
     }
-    else errmess = new String("Parameter n0.%d (%s) not a Logical");
+    else errmess = "Parameter n0.%d (%s) not a Logical";
   }
-  else errmess = new String("Parameter n0.%d (%s) absent");
+  else errmess = "Parameter n0.%d (%s) absent";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1467,7 +1468,7 @@ Standard_Boolean StepData_StepReaderData::ReadString(const Standard_Integer num,
   Handle(Interface_Check)& ach,
   Handle(TCollection_HAsciiString)& val) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   Standard_Boolean warn = Standard_False;
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
@@ -1483,15 +1484,17 @@ Standard_Boolean StepData_StepReaderData::ReadString(const Standard_Integer num,
       cleanText(val);
     } else {
       if (acceptvoid && FP.ParamType() == Interface_ParamVoid) warn = Standard_True;
-      errmess = new String("Parameter n0.%d (%s) not a quoted String");
+      errmess = "Parameter n0.%d (%s) not a quoted String";
     }
   }
-  else errmess = new String("Parameter n0.%d (%s) absent");
+  else errmess = "Parameter n0.%d (%s) absent";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  if (warn) ach->AddWarning(txtmes, errmess->ToCString());
-  else ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  if (warn) ach->AddWarning(txtmes, errmess);
+  else ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1507,7 +1510,7 @@ Standard_Boolean StepData_StepReaderData::ReadEnumParam(const Standard_Integer n
   Handle(Interface_Check)& ach,
   Standard_CString& text) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   Standard_Boolean warn = Standard_False;
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
@@ -1515,18 +1518,19 @@ Standard_Boolean StepData_StepReaderData::ReadEnumParam(const Standard_Integer n
       text = FP.CValue();
       warn = (acceptvoid > 0);
     } else if (FP.ParamType() == Interface_ParamVoid) {
-      errmess =
-        new String("Parameter n0.%d (%s) : Undefined Enumeration not allowed");
+      errmess = "Parameter n0.%d (%s) : Undefined Enumeration not allowed";
       warn = (acceptvoid > 0);
     }
-    else errmess = new String("Parameter n0.%d (%s) not an Enumeration");
+    else errmess = "Parameter n0.%d (%s) not an Enumeration";
   }
-  else errmess = new String("Parameter n0.%d (%s) absent");
+  else errmess = "Parameter n0.%d (%s) absent";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  if (warn) ach->AddWarning(txtmes, errmess->ToCString());
-  else ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  if (warn) ach->AddWarning(txtmes, errmess);
+  else ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1541,10 +1545,10 @@ void  StepData_StepReaderData::FailEnumValue(const Standard_Integer /* num */,
   const Standard_CString mess,
   Handle(Interface_Check)& ach) const
 {
-  Handle(String) errmess =
-    new String("Parameter n0.%d (%s) : Incorrect Enumeration Value");
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  ach->AddFail(txtmes, errmess->ToCString());
+  const char* errmess = "Parameter n0.%d (%s) : Incorrect Enumeration Value";
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  ach->AddFail(txtmes, errmess);
 }
 
 
@@ -1561,32 +1565,33 @@ Standard_Boolean StepData_StepReaderData::ReadEnum(const Standard_Integer num,
   Standard_Integer& val) const
 {
   //  reprendre avec ReadEnumParam ?
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   Standard_Boolean warn = Standard_False;
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
     if (FP.ParamType() == Interface_ParamEnum) {
       val = enumtool.Value(FP.CValue());
       if (val >= 0) return Standard_True;
-      else errmess = new String("Parameter n0.%d (%s) : Incorrect Enumeration Value");
+      else errmess = "Parameter n0.%d (%s) : Incorrect Enumeration Value";
       warn = (acceptvoid > 0);
     }
     else if (FP.ParamType() == Interface_ParamVoid) {
       val = enumtool.NullValue();
-      if (val < 0) errmess =
-        new String("Parameter n0.%d (%s) : Undefined Enumeration not allowed");
+      if (val < 0) errmess = "Parameter n0.%d (%s) : Undefined Enumeration not allowed";
       warn = (acceptvoid > 0);
     }
-    else errmess = new String("Parameter n0.%d (%s) not an Enumeration");
+    else errmess = "Parameter n0.%d (%s) not an Enumeration";
   }
-  else errmess = new String("Parameter n0.%d (%s) absent");
+  else errmess = "Parameter n0.%d (%s) absent";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
   if (warn)
-    ach->AddWarning(txtmes, errmess->ToCString());
+    ach->AddWarning(txtmes, errmess);
   else
-    ach->AddFail(txtmes, errmess->ToCString());
+    ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1605,30 +1610,32 @@ Standard_Boolean StepData_StepReaderData::ReadTypedParam(const Standard_Integer 
   Standard_Integer& numrp,
   TCollection_AsciiString& typ) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   if (nump > 0 && nump <= NbParams(num)) {
     const Interface_FileParameter& FP = Param(num, nump);
     if (FP.ParamType() != Interface_ParamSub) {
       //    Pas une sous-liste : OK si admis
       numr = num;  numrp = nump;  typ.Clear();
       if (mustbetyped) {
-        errmess = new String("Parameter n0.%d (%s) : single, not typed");
-        Snprintf(txtmes, errmess->ToCString(), nump, mess);
-        ach->AddFail(txtmes, errmess->ToCString());
+        errmess = "Parameter n0.%d (%s) : single, not typed";
+        char txtmes[200] = {};
+        Snprintf(txtmes, errmess, nump, mess);
+        ach->AddFail(txtmes, errmess);
         return Standard_False;
       }
       return Standard_True;
     }
     numr = FP.EntityNumber();  numrp = 1;
-    if (NbParams(numr) != 1) errmess =
-      new String("Parameter n0.%d (%s) : SubList, not typed");
+    if (NbParams(numr) != 1) errmess = "Parameter n0.%d (%s) : SubList, not typed";
     typ = RecordType(numr);
   }
-  else errmess = new String("Parameter n0.%d (%s) absent");
+  else errmess = "Parameter n0.%d (%s) absent";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
@@ -1644,19 +1651,21 @@ Standard_Boolean StepData_StepReaderData::CheckDerived(const Standard_Integer nu
   Handle(Interface_Check)& ach,
   const Standard_Boolean errstat) const
 {
-  Handle(String) errmess;  // Null si pas d erreur
+  const char* errmess = nullptr;  // Null si pas d erreur
   Standard_Boolean warn = !errstat;
   if (nump > 0 && nump <= NbParams(num)) {
     if (!strcmp(Param(num, nump).CValue(), "*")) return Standard_True;
-    else errmess = new String("Parameter n0.%d (%s) not Derived");
+    else errmess = "Parameter n0.%d (%s) not Derived";
     if (acceptvoid) warn = Standard_True;
   }
-  else errmess = new String("Parameter n0.%d (%s) absent");
+  else errmess = "Parameter n0.%d (%s) absent";
 
-  if (errmess.IsNull()) return Standard_True;
-  Snprintf(txtmes, errmess->ToCString(), nump, mess);
-  if (warn) ach->AddWarning(txtmes, errmess->ToCString());
-  else      ach->AddFail(txtmes, errmess->ToCString());
+  if (errmess == nullptr) return Standard_True;
+
+  char txtmes[200] = {};
+  Snprintf(txtmes, errmess, nump, mess);
+  if (warn) ach->AddWarning(txtmes, errmess);
+  else      ach->AddFail(txtmes, errmess);
   return Standard_False;
 }
 
