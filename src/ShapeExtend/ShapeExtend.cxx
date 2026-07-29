@@ -22,17 +22,8 @@
 
 #include "../SHMessage/SHMessage_SHAPE_us.pxx"
 
-//=======================================================================
-//function : Init
-//purpose  : 
-//=======================================================================
-void ShapeExtend::Init()
+static bool initOnce()
 {
-  static Standard_Boolean init = Standard_False;
-  if (init) return;
-
-  init = Standard_True;
-  
   // load Message File for Shape Healing
   if (!Message_MsgFile::HasMsg ("ShapeFix.FixSmallSolid.MSG0"))
   {
@@ -45,6 +36,17 @@ void ShapeExtend::Init()
       throw Standard_ProgramError("Critical Error - message resources for ShapeExtend are invalid or undefined!");
     }
   }
+  return true;
+}
+
+//=======================================================================
+//function : Init
+//purpose  :
+//=======================================================================
+void ShapeExtend::Init()
+{
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
 }
 
 //=======================================================================

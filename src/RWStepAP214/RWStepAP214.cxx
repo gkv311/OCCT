@@ -18,22 +18,25 @@
 #include <RWHeaderSection.hxx>
 #include <RWStepAP214_GeneralModule.hxx>
 #include <RWStepAP214_ReadWriteModule.hxx>
-#include <StepAP214.hxx>
 #include <StepAP214_Protocol.hxx>
 #include <StepData_WriterLib.hxx>
 
-static int THE_RWStepAP214_init = 0;
+static bool initOnce()
+{
+  static Handle(StepAP214_Protocol) aProtocol = new StepAP214_Protocol();
+  static Handle(RWStepAP214_ReadWriteModule) aRWM = new RWStepAP214_ReadWriteModule();
+  static Handle(RWStepAP214_GeneralModule) aGM = new RWStepAP214_GeneralModule();
+  (void)aRWM,(void)aGM;
+
+  RWHeaderSection::Init();
+  Interface_GeneralLib::SetGlobal(new RWStepAP214_GeneralModule, aProtocol);
+  Interface_ReaderLib::SetGlobal(new RWStepAP214_ReadWriteModule, aProtocol);
+  StepData_WriterLib::SetGlobal(new RWStepAP214_ReadWriteModule, aProtocol);
+  return true;
+}
 
 void RWStepAP214::Init()
 {
-  if (THE_RWStepAP214_init)
-  {
-    return;
-  }
-  THE_RWStepAP214_init = 1;
-  RWHeaderSection::Init();
-  Handle(StepAP214_Protocol) proto = StepAP214::Protocol();
-  Interface_GeneralLib::SetGlobal (new RWStepAP214_GeneralModule,proto);
-  Interface_ReaderLib::SetGlobal  (new RWStepAP214_ReadWriteModule,proto);
-  StepData_WriterLib::SetGlobal   (new RWStepAP214_ReadWriteModule,proto);
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
 }

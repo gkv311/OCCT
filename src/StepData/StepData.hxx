@@ -42,11 +42,7 @@ public:
   
   //! Adds a new Header Protocol to the Header Definition
   Standard_EXPORT static void AddHeaderProtocol (const Handle(StepData_Protocol)& headerproto);
-  
-  //! Prepares General Data required to work with this package,
-  //! which are the Protocol and Modules to be loaded into Libraries
-  Standard_EXPORT static void Init();
-  
+
   //! Returns a Protocol from StepData (avoids to create it)
   Standard_EXPORT static Handle(StepData_Protocol) Protocol();
 

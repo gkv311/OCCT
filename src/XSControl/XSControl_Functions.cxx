@@ -453,23 +453,8 @@ static IFSelect_ReturnStatus XSControl_settransfert(const Handle(IFSelect_Sessio
   return pilot->RecordItem(new XSControl_SelectForTransfer(XSControl::Session(pilot)->TransferReader()));
 }
 
-
-
-static int THE_XSControl_Functions_initactor = 0;
-
-//=======================================================================
-//function : Init
-//purpose  :
-//=======================================================================
-
-void XSControl_Functions::Init ()
+static bool initOnce()
 {
-  if (THE_XSControl_Functions_initactor)
-  {
-    return;
-  }
-
-  THE_XSControl_Functions_initactor = 1;
   IFSelect_Act::SetGroup("DE: General");
 
   IFSelect_Act::AddFunc ("xinit","[norm:string to change norme] reinitialises according to the norm",XSControl_xinit);
@@ -501,4 +486,15 @@ void XSControl_Functions::Init ()
   IFSelect_Act::AddFunc ("twstat","Statistics on TransferProcess (WRITE)",XSControl_twstat);
 
   IFSelect_Act::AddFSet ("selecttransfer","selection (recognize from transfer actor)",XSControl_settransfert);
+  return true;
+}
+
+//=======================================================================
+//function : Init
+//purpose  :
+//=======================================================================
+void XSControl_Functions::Init ()
+{
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
 }

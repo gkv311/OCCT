@@ -45,27 +45,12 @@ public:
   //! Sends a short help message for IGESSelect commands
   Standard_EXPORT Standard_CString Help (const Standard_Integer number) const Standard_OVERRIDE;
 
-
-
-
   DEFINE_STANDARD_RTTIEXT(IGESSelect_Activator,IFSelect_Activator)
-
-protected:
-
-
-
 
 private:
 
-
-
+  bool registerFirstInstance();
 
 };
-
-
-
-
-
-
 
 #endif // _IGESSelect_Activator_HeaderFile

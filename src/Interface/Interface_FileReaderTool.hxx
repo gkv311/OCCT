@@ -132,10 +132,7 @@ public:
   //! (to keep at least its literal description)
   //! Uses Protocol to do it
   Standard_EXPORT Handle(Standard_Transient) UnknownEntity() const;
-  
-  //! Creates an empty Model of the norm. Uses Protocol to do it
-  Standard_EXPORT Handle(Interface_InterfaceModel) NewModel() const;
-  
+
   //! Reads and fills Entities from the FileReaderData set by
   //! SetData to an InterfaceModel.
   //! It enchains required operations, the specific ones correspond

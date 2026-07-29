@@ -41,18 +41,8 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(IGESGeom_Protocol,IGESData_Protocol)
 
-static int THE_IGESGeom_Protocol_deja = 0;
-static Handle(Standard_Type) atype01,atype02,atype03,atype04,atype05,atype06,
-  atype07,atype08,atype09,atype10,atype11,atype12,atype13,atype14,atype15,
-  atype16,atype17,atype18,atype19,atype20,atype21,atype22,atype23;
-
 IGESGeom_Protocol::IGESGeom_Protocol()
 {
-  if (THE_IGESGeom_Protocol_deja)
-  {
-    return;
-  }
-  THE_IGESGeom_Protocol_deja = 1;
   atype01 = STANDARD_TYPE(IGESGeom_BSplineCurve);
   atype02 = STANDARD_TYPE(IGESGeom_BSplineSurface);
   atype03 = STANDARD_TYPE(IGESGeom_Boundary);
