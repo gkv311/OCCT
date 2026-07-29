@@ -270,7 +270,6 @@ static Standard_Boolean IsManifoldShape(const TopoDS_Shape& theShape) {
 //=======================================================================
 
 STEPControl_ActorWrite::STEPControl_ActorWrite ()
-: mygroup (0) , mytoler (-1.)
 {  
   SetMode(STEPControl_ShellBasedSurfaceModel);
 }
@@ -599,6 +598,17 @@ static Standard_Real UsedTolerance (const Standard_Real mytoler,
 }
 
 //=======================================================================
+//function : SetAutoAssemblyMode
+//purpose  :
+//=======================================================================
+void STEPControl_ActorWrite::SetAutoAssemblyMode (const Standard_Boolean aMode)
+{
+  myAutoAssemblyMode = aMode;
+  if (aMode)
+    ClearAssemblyMap();
+}
+
+//=======================================================================
 //function : IsAssembly
 //purpose  : 
 //=======================================================================
@@ -607,6 +617,9 @@ static Standard_Real UsedTolerance (const Standard_Real mytoler,
 
 Standard_Boolean STEPControl_ActorWrite::IsAssembly (TopoDS_Shape &S) const
 {
+  if (!myAutoAssemblyMode)
+    return myAssemblyMap.Contains(S);
+
   if ( ! GroupMode() || S.ShapeType() != TopAbs_COMPOUND ) return Standard_False;
   // PTV 16.09.2002  OCC725 for storing compound of vertices
   if (Interface_Static::IVal("write.step.vertex.mode") == 0) {//bug 23950
@@ -631,6 +644,25 @@ Standard_Boolean STEPControl_ActorWrite::IsAssembly (TopoDS_Shape &S) const
   if ( it.More() ) return Standard_True;
   S = shape;
   return IsAssembly ( S );
+}
+
+//=======================================================================
+//function : RegisterAssembly
+//purpose  :
+//=======================================================================
+void STEPControl_ActorWrite::RegisterAssembly (const TopoDS_Shape& S)
+{
+  if (!myAutoAssemblyMode && S.ShapeType() == TopAbs_COMPOUND)
+    myAssemblyMap.Add(S);
+}
+
+//=======================================================================
+//function : ClearAssemblyMap
+//purpose  :
+//=======================================================================
+void STEPControl_ActorWrite::ClearAssemblyMap()
+{
+  myAssemblyMap.Clear();
 }
 
 //=======================================================================

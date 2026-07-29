@@ -13,45 +13,17 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <STEPCAFControl_Controller.hxx>
 
 #include <Interface_Static.hxx>
-#include <Standard_Type.hxx>
-#include <STEPCAFControl_ActorWrite.hxx>
-#include <STEPCAFControl_Controller.hxx>
+#include <Standard_Mutex.hxx>
 #include <XSAlgo.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(STEPCAFControl_Controller,STEPControl_Controller)
-
-//=======================================================================
-//function : STEPCAFControl_Controller
-//purpose  : 
-//=======================================================================
-STEPCAFControl_Controller::STEPCAFControl_Controller ()
+//! Initializer.
+static Standard_Boolean initOnce()
 {
-  Handle(STEPCAFControl_ActorWrite) ActWrite = new STEPCAFControl_ActorWrite;
-  myAdaptorWrite = ActWrite;
-}
-
-//=======================================================================
-//function : Init
-//purpose  : 
-//=======================================================================
-
-Standard_Boolean STEPCAFControl_Controller::Init ()
-{
-  static Standard_Mutex theMutex;
-  {
-    Standard_Mutex::Sentry aSentry(theMutex);
-    static Standard_Boolean inic = Standard_False;
-    if (inic) return Standard_True;
-    inic = Standard_True;
-  }
-  // self-registering
-  Handle(STEPCAFControl_Controller) STEPCTL = new STEPCAFControl_Controller;
-  // do XSAlgo::Init, cause it does not called before.
+  // call XSAlgo::Init, as it might be not called before
   XSAlgo::Init();
-  // do something to avoid warnings...
-  STEPCTL->AutoRecord();
 
   //-----------------------------------------------------------
   // Few variables for advanced control of translation process
@@ -74,4 +46,15 @@ Standard_Boolean STEPCAFControl_Controller::Init ()
   Interface_Static::SetIVal("read.stepcaf.subshapes.name", 0); // Disabled by default
 
   return Standard_True;
+}
+
+//=======================================================================
+//function : Init
+//purpose  :
+//=======================================================================
+Standard_Boolean STEPCAFControl_Controller::Init()
+{
+  // rely on safe statics
+  static Standard_Boolean wasInitialized = initOnce();
+  return wasInitialized;
 }
