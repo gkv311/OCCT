@@ -22,18 +22,11 @@
 
 static Handle(XSAlgo_AlgoContainer) theContainer;
 
-//=======================================================================
-//function : Init
-//purpose  : 
-//=======================================================================
-
- void XSAlgo::Init() 
+static bool initOnce()
 {
-  static Standard_Boolean init = Standard_False;
-  if (init) return;
-  init = Standard_True;
-  ShapeAlgo::Init();
   theContainer = new XSAlgo_AlgoContainer;
+
+  ShapeAlgo::Init();
 
   // init parameters
   Interface_Static::Standards();
@@ -63,6 +56,17 @@ static Handle(XSAlgo_AlgoContainer) theContainer;
   
   // init Standard Shape Processing operators
   ShapeProcess_OperLibrary::Init();
+  return true;
+}
+
+//=======================================================================
+//function : Init
+//purpose  :
+//=======================================================================
+void XSAlgo::Init()
+{
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
 }
 
 //=======================================================================

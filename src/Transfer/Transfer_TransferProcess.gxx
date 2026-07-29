@@ -147,11 +147,7 @@ void Transfer_TransferProcess::Resize (const Standard_Integer nb)
 
 void  Transfer_TransferProcess::SetActor(const Handle(Transfer_Actor)& actor)
 {
-  if (theactor == actor)         return;
-  if (theactor.IsNull())         theactor = actor;
-  else if (actor.IsNull())       theactor = actor;  // declenche RAZ
-  else if (theactor->IsLast()) { actor->SetNext(theactor);  theactor = actor; }
-  else                           theactor->SetNext(actor);
+  theactor = actor;
 }
 
 
@@ -978,13 +974,7 @@ void Transfer_TransferProcess::ResetNestingLevel ()
 
 Standard_Boolean  Transfer_TransferProcess::Recognize(const TheStart& start) const
 {
-  Handle(Transfer_Actor) actor = theactor;
-  //   On balaie les Next jusqu a avoir un Resultat
-  while (!actor.IsNull()) {
-    if (actor->Recognize (start)) return Standard_True;
-    actor = actor->Next();
-  }
-  return Standard_False;
+  return theactor && theactor->Recognize (start);
 }
 
 
@@ -1159,19 +1149,11 @@ Handle(Transfer_Binder) Transfer_TransferProcess::Transferring(const TheStart& s
 {
   thelevel ++;             // si decremente et == 0, transfert racine
   Handle(Transfer_Binder) binder;
-  Handle(Transfer_Actor) actor = theactor;
-
-//   On balaie les Next jusqu a avoir un Resultat
-  Message_ProgressScope aScope (theProgress, NULL, 1, true);
-  while (!actor.IsNull()) {
-    if (actor->Recognize (start)) binder = actor->Transferring(start,this, aScope.Next());
-    else binder.Nullify();
-    if (!binder.IsNull()) break;
-    actor = actor->Next();
+  if (theactor && theactor->Recognize (start))
+  {
+    binder = theactor->Transferring(start, this, theProgress);
   }
-  if (aScope.UserBreak())
-    return Handle(Transfer_Binder)();
-  
+
   if (binder.IsNull()) {
 //    if (thetrace) {
 //      aSender << "Transfer has produced no Result" <<endl;

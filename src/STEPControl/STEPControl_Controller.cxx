@@ -27,6 +27,8 @@
 #include <RWStepAP214.hxx>
 #include <Standard_Type.hxx>
 #include <Standard_Version.hxx>
+#include <StepAP214.hxx>
+#include <StepAP214_Protocol.hxx>
 #include <STEPControl_ActorRead.hxx>
 #include <STEPControl_ActorWrite.hxx>
 #include <STEPControl_Controller.hxx>
@@ -49,14 +51,9 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(STEPControl_Controller,XSControl_Controller)
 
-//  Pour NewModel et Write : definition de produit (temporaire ...)
-STEPControl_Controller::STEPControl_Controller ()
-: XSControl_Controller ("STEP", "step")
+static bool initOnce()
 {
-  static Standard_Boolean init = Standard_False;
-  static Standard_Mutex aMutex;
-  aMutex.Lock();
-  if (!init) {
+  {
     RWHeaderSection::Init();  RWStepAP214::Init();
 
     Interface_Static::Init ("step","write.step.product.name",'t',"Open CASCADE STEP translator " OCC_VERSION_STRING);
@@ -317,11 +314,18 @@ STEPControl_Controller::STEPControl_Controller ()
     Interface_Static::SetCVal("write.step.tessellated", "OnNoBRep");
 
     Standard_STATIC_ASSERT((int)Resource_FormatType_CP850 - (int)Resource_FormatType_CP1250 == 18); // "Error: Invalid Codepage Enumeration"
-
-    init = Standard_True;
   }
-  aMutex.Unlock();
 
+  XSAlgo::Init();
+
+  Handle(STEPControl_Controller) STEPCTL = new STEPControl_Controller();
+  STEPCTL->AutoRecord();  // avec les noms donnes a la construction
+  return true;
+}
+
+STEPControl_Controller::STEPControl_Controller()
+: XSControl_Controller ("STEP", "step")
+{
   Handle(STEPControl_ActorWrite) ActWrite = new STEPControl_ActorWrite;
   ActWrite->SetGroupMode (Interface_Static::IVal("write.step.assembly"));
   myAdaptorWrite = ActWrite;
@@ -329,7 +333,7 @@ STEPControl_Controller::STEPControl_Controller ()
   Handle(StepSelect_WorkLibrary) swl = new StepSelect_WorkLibrary;
   swl->SetDumpLabel(1);
   myAdaptorLibrary  = swl;
-  myAdaptorProtocol = STEPEdit::Protocol();
+  myAdaptorProtocol = StepAP214::Protocol();
   myAdaptorRead     = new STEPControl_ActorRead;  // par ex pour Recognize
 
   SetModeWrite (0,4);
@@ -344,7 +348,7 @@ STEPControl_Controller::STEPControl_Controller ()
 
   DeclareAndCast(IFSelect_Selection,xmr,SessionItem("xst-model-roots"));
   if (!xmr.IsNull()) {
-    Handle(IFSelect_Signature) sty = STEPEdit::SignType();
+    Handle(IFSelect_Signature) sty = STEPEdit::NewSignType();
     AddSessionItem (sty,"step-type");
     Handle(IFSelect_SignCounter) tys = new IFSelect_SignCounter(sty,Standard_False,Standard_True);
     AddSessionItem (tys,"step-types");
@@ -355,7 +359,7 @@ STEPControl_Controller::STEPControl_Controller ()
     AddSessionItem (new IFSelect_SignAncestor(),"xst-derived");
 
     Handle(STEPSelections_SelectDerived) stdvar = new STEPSelections_SelectDerived();
-    stdvar->SetProtocol(STEPEdit::Protocol());
+    stdvar->SetProtocol(myAdaptorProtocol);
     AddSessionItem (stdvar,"step-derived");
     
     Handle(IFSelect_SelectSignature) selsdr = STEPEdit::NewSelectSDR();
@@ -402,7 +406,8 @@ STEPControl_Controller::STEPControl_Controller ()
 
 Handle(Interface_InterfaceModel)  STEPControl_Controller::NewModel () const
 {
-  return STEPEdit::NewModel();
+  APIHeaderSection_MakeHeader head;
+  return head.NewModel(StepAP214::Protocol());
 }
 
 //  ####    PROVISOIRE ???   ####
@@ -426,14 +431,8 @@ IFSelect_ReturnStatus  STEPControl_Controller::TransferWriteShape
 
 Standard_Boolean STEPControl_Controller::Init ()
 {
-  static Standard_Boolean inic = Standard_False;
-  if (!inic) {
-    Handle(STEPControl_Controller) STEPCTL = new STEPControl_Controller;
-    STEPCTL->AutoRecord();  // avec les noms donnes a la construction
-    XSAlgo::Init();                                                                                                        
-    inic = Standard_True;
-  }
-  return Standard_True;
+  static const bool wasInitialized = initOnce();
+  return wasInitialized;
 }
 //=======================================================================
 //function : Customise
@@ -458,7 +457,7 @@ void STEPControl_Controller::Customise(Handle(XSControl_WorkSession)& WS)
   WS->AddNamedItem ("xst-transferrable-roots",st1);
 
   if (!slr.IsNull()) {
-    Handle(IFSelect_Signature) sty = STEPEdit::SignType();
+    Handle(IFSelect_Signature) sty = STEPEdit::NewSignType();
     WS->AddNamedItem ("step-type",sty);
     
     Handle(IFSelect_SignCounter) tys = new IFSelect_SignCounter(sty,Standard_False,Standard_True);
@@ -470,7 +469,7 @@ void STEPControl_Controller::Customise(Handle(XSControl_WorkSession)& WS)
     //pdn S4133 18.02.99
     WS->AddNamedItem ("xst-derived",new IFSelect_SignAncestor());
     Handle(STEPSelections_SelectDerived) stdvar = new STEPSelections_SelectDerived();
-    stdvar->SetProtocol(STEPEdit::Protocol());
+    stdvar->SetProtocol(myAdaptorProtocol);
     WS->AddNamedItem ("step-derived",stdvar);
     
     Handle(IFSelect_SelectSignature) selsdr = STEPEdit::NewSelectSDR();

@@ -15,22 +15,28 @@
 
 #include <HeaderSection.hxx>
 #include <HeaderSection_Protocol.hxx>
+#include <Interface_GeneralLib.hxx>
+#include <Interface_ReaderLib.hxx>
 #include <RWHeaderSection_GeneralModule.hxx>
 #include <RWHeaderSection_ReadWriteModule.hxx>
 #include <StepData.hxx>
+#include <StepData_WriterLib.hxx>
 
-/// #include <EuclidStandard.hxx>
-static Handle(RWHeaderSection_ReadWriteModule) rwm;
-static Handle(RWHeaderSection_GeneralModule) rwg;
+static bool initOnce()
+{
+  static Handle(RWHeaderSection_ReadWriteModule) aRWM = new RWHeaderSection_ReadWriteModule();
+  static Handle(RWHeaderSection_GeneralModule) aGM = new RWHeaderSection_GeneralModule();
 
+  Handle(HeaderSection_Protocol) aProtocol = HeaderSection::Protocol();
+  StepData::AddHeaderProtocol(aProtocol);
+  StepData_WriterLib::SetGlobal(aRWM, aProtocol);
+  Interface_ReaderLib::SetGlobal(aRWM, aProtocol);
+  Interface_GeneralLib::SetGlobal(aGM, aProtocol);
+  return true;
+}
 
 void RWHeaderSection::Init()
 {
-///   EuclidStandard::Init();
-  Handle(HeaderSection_Protocol) proto = HeaderSection::Protocol();
-  StepData::AddHeaderProtocol(proto);
-  if (rwm.IsNull()) rwm = new RWHeaderSection_ReadWriteModule;
-  if (rwg.IsNull()) rwg = new RWHeaderSection_GeneralModule;
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
 }
-
-

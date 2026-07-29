@@ -2365,17 +2365,8 @@ static TCollection_AsciiString Reco_GeneralPropertyRelationship("GENERAL_PROPERT
 static TCollection_AsciiString Reco_BooleanRepresentationItem("BOOLEAN_REPRESENTATION_ITEM");
 static TCollection_AsciiString Reco_RealRepresentationItem("REAL_REPRESENTATION_ITEM");
 
-// -- Definition of the libraries --
-
-static NCollection_DataMap<TCollection_AsciiString, Standard_Integer> typenums;
-static NCollection_DataMap<TCollection_AsciiString, Standard_Integer> typeshor;
-
 RWStepAP214_ReadWriteModule::RWStepAP214_ReadWriteModule ()
 {
-//  Handle(StepAP214_Protocol) protocol = new StepAP214_Protocol;
-//  StepData_WriterLib::SetGlobal(Handle(RWStepAP214_ReadWriteModule)::DownCast(This()),protocol);
-//  Interface_ReaderLib::SetGlobal(Handle(RWStepAP214_ReadWriteModule)::DownCast(This()),protocol);
-  if (!typenums.IsEmpty()) return;
   typenums.Bind (Reco_CartesianPoint, 59);
   typenums.Bind (Reco_VertexPoint, 316);
   typenums.Bind (Reco_OrientedEdge, 181);

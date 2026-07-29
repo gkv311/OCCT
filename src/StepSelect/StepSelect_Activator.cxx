@@ -25,16 +25,15 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(StepSelect_Activator,IFSelect_Activator)
 
-static int THE_StepSelect_Activator_initActivator = 0;
-
 StepSelect_Activator::StepSelect_Activator ()
 {
-  if (THE_StepSelect_Activator_initActivator)
-  {
-    return;
-  }
+  // register only one instance of StepSelect_Activator in global list
+  static const bool wasInitialized = this->registerFirstInstance();
+  (void)wasInitialized;
+}
 
-  THE_StepSelect_Activator_initActivator = 1;
+bool StepSelect_Activator::registerFirstInstance()
+{
 //  Add ( 0,"load");
 //  Add ( 0,"loadstep");    // homonyme
 //  Add ( 1,"entity");
@@ -44,6 +43,7 @@ StepSelect_Activator::StepSelect_Activator ()
 
   Add    ( 1,"stepschema");
   AddSet (40,"floatformat");
+  return true;
 }
 
 

@@ -51,27 +51,13 @@ public:
   //! consider the same Type as the Protocol defines)
   Standard_EXPORT virtual Standard_Integer TypeNumber (const Handle(Standard_Type)& atype) const Standard_OVERRIDE;
 
-
-
-
   DEFINE_STANDARD_RTTIEXT(IGESGraph_Protocol,IGESData_Protocol)
-
-protected:
-
-
-
 
 private:
 
-
-
+  Handle(Standard_Type) atype01,atype02,atype03,atype04,atype05,atype06,
+    atype07,atype08,atype09,atype10,atype11,atype12,atype13,atype14;
 
 };
-
-
-
-
-
-
 
 #endif // _IGESGraph_Protocol_HeaderFile
