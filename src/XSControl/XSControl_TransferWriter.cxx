@@ -65,68 +65,6 @@ void XSControl_TransferWriter::PrintStats (const Standard_Integer , const Standa
 //  ##########    LES ACTIONS    ##########
 
 //=======================================================================
-//function : RecognizeTransient
-//purpose  : 
-//=======================================================================
-
-Standard_Boolean XSControl_TransferWriter::RecognizeTransient (const Handle(Standard_Transient)& obj)
-{
-  if (myController.IsNull()) return Standard_False;
-  XSControl_Utils xu;
-  TopoDS_Shape sh = xu.BinderShape (obj);
-  if (!sh.IsNull()) return RecognizeShape (sh);
-  return myController->RecognizeWriteTransient (obj,myTransferMode);
-}
-
-//=======================================================================
-//function : TransferWriteTransient
-//purpose  : 
-//=======================================================================
-
-IFSelect_ReturnStatus XSControl_TransferWriter::TransferWriteTransient
-  (const Handle(Interface_InterfaceModel)& model,
-   const Handle(Standard_Transient)& obj,
-   const Message_ProgressRange& theProgress)
-{
-  IFSelect_ReturnStatus status = IFSelect_RetVoid;
-  if (myController.IsNull()) return IFSelect_RetError;
-  if (model.IsNull()) return IFSelect_RetVoid;
-
-  if (myTransferWriter.IsNull()) myTransferWriter = new Transfer_FinderProcess;
-  Handle(Transfer_ActorOfFinderProcess) nulact;
-  myTransferWriter->SetActor (nulact);
-  Handle(Standard_Transient) resultat;
-  Message_Messenger::StreamBuffer sout = myTransferWriter->Messenger()->SendInfo();
-  try {
-    OCC_CATCH_SIGNALS
-    PrintStats(myTransferMode);
-    sout << "******        Transferring Transient, CDL Type = ";
-    sout<<obj->DynamicType()->Name()<<"   ******"<<std::endl;
-    status = myController->TransferWriteTransient
-      (obj,myTransferWriter,model, myTransferMode, theProgress);
-  }
-  catch(Standard_Failure const& anException) {
-    sout<<"****  ****  TransferWriteShape, EXCEPTION : ";
-    sout<<anException.GetMessageString(); 
-    sout<<std::endl;
-    status = IFSelect_RetFail;
-  }
-  return status;
-}
-
-//=======================================================================
-//function : RecognizeShape
-//purpose  : 
-//=======================================================================
-
-Standard_Boolean XSControl_TransferWriter::RecognizeShape (const TopoDS_Shape& shape)
-{
-  if (myController.IsNull()) return Standard_False;
-  if (shape.IsNull()) return Standard_False;
-  return myController->RecognizeWriteShape (shape,myTransferMode);
-}
-
-//=======================================================================
 //function : TransferWriteShape
 //purpose  : 
 //=======================================================================

@@ -17,17 +17,8 @@
 
 #include "../XSMessage/XSMessage_XSTEP_us.pxx"
 
-static int THE_Interface_Static_deja = 0;
-
-void  Interface_Static::Standards ()
+static bool initOnce()
 {
-  if (THE_Interface_Static_deja)
-  {
-    return;
-  }
-
-  THE_Interface_Static_deja = 1;
-
 //   read precision
   //#74 rln 10.03.99 S4135: new values and default value
   Interface_Static::Init ("XSTEP","read.precision.mode",'e',"");
@@ -100,4 +91,11 @@ void  Interface_Static::Standards ()
       throw Standard_ProgramError("Critical Error - message resources for Interface_Static are invalid or undefined!");
     }
   }
+  return true;
+}
+
+void Interface_Static::Standards()
+{
+  static const bool wasInitalized = initOnce();
+  (void)wasInitalized;
 }

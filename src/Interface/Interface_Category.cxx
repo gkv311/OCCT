@@ -21,11 +21,7 @@
 #include <TCollection_AsciiString.hxx>
 #include <NCollection_Vector.hxx>
 
-static int THE_Interface_Category_init = 0;
 static Standard_CString unspec = "unspecified";
-
-static Standard_Mutex gMapTypesMutex;
-static volatile Standard_Boolean gMapTypesInit = Standard_False;
 
 static NCollection_Vector<TCollection_AsciiString>& theCats()
 {
@@ -101,32 +97,22 @@ Standard_Integer Interface_Category::Number (const Standard_CString theName)
   return 0;
 }
 
+static bool initOnce()
+{
+  Interface_Category::AddCategory ("Shape");
+  Interface_Category::AddCategory ("Drawing");
+  Interface_Category::AddCategory ("Structure");
+  Interface_Category::AddCategory ("Description");
+  Interface_Category::AddCategory ("Auxiliary");
+  Interface_Category::AddCategory ("Professional");
+  Interface_Category::AddCategory ("FEA");
+  Interface_Category::AddCategory ("Kinematics");
+  Interface_Category::AddCategory ("Piping");
+  return true;
+}
+
 void Interface_Category::Init ()
 {
-  // On first call, initialize static map
-  if ( !gMapTypesInit )
-  {
-    gMapTypesMutex.Lock();
-    if ( !gMapTypesInit )
-    {
-      if (THE_Interface_Category_init)
-      {
-        return;
-      }
-
-      THE_Interface_Category_init = 1;
-      Interface_Category::AddCategory ("Shape");
-      Interface_Category::AddCategory ("Drawing");
-      Interface_Category::AddCategory ("Structure");
-      Interface_Category::AddCategory ("Description");
-      Interface_Category::AddCategory ("Auxiliary");
-      Interface_Category::AddCategory ("Professional");
-      Interface_Category::AddCategory ("FEA");
-      Interface_Category::AddCategory ("Kinematics");
-      Interface_Category::AddCategory ("Piping");
-
-      gMapTypesInit = Standard_True;
-    }
-    gMapTypesMutex.Unlock();
-  }
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
 }

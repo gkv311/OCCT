@@ -50,6 +50,7 @@
 #include <XSControl_SelectForTransfer.hxx>
 #include <XSControl_SignTransferStatus.hxx>
 #include <XSControl_WorkSession.hxx>
+#include <Standard_Mutex.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(XSControl_Controller,Standard_Transient)
 
@@ -57,6 +58,7 @@ IMPLEMENT_STANDARD_RTTIEXT(XSControl_Controller,Standard_Transient)
 //  Transferts
 
 static NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)> listad;
+static Standard_Mutex theMutex;
 
 //=======================================================================
 //function : XSControl_Controller
@@ -109,6 +111,7 @@ void XSControl_Controller::SetNames (const Standard_CString theLongName, const S
 
 void XSControl_Controller::Record (const Standard_CString theName) const
 {
+  Standard_Mutex::Sentry aLock(theMutex);
   if (listad.IsBound(theName)) {
     Handle(Standard_Transient) thisadapt(this);
     Handle(Standard_Transient) newadapt = listad.ChangeFind(theName);
@@ -127,6 +130,7 @@ void XSControl_Controller::Record (const Standard_CString theName) const
 
 Handle(XSControl_Controller) XSControl_Controller::Recorded(const Standard_CString theName)
 {
+  Standard_Mutex::Sentry aLock(theMutex);
   Handle(Standard_Transient) recorded;
   return (listad.Find(theName, recorded)?
     Handle(XSControl_Controller)::DownCast(recorded) :
@@ -236,20 +240,6 @@ Standard_CString  XSControl_Controller::ModeWriteHelp
 //    peut etre redefini ...
 
 //=======================================================================
-//function : RecognizeWriteTransient
-//purpose  : 
-//=======================================================================
-
-Standard_Boolean  XSControl_Controller::RecognizeWriteTransient
-  (const Handle(Standard_Transient)& obj,
-   const Standard_Integer modetrans) const
-{
-  if (myAdaptorWrite.IsNull()) return Standard_False;
-  myAdaptorWrite->ModeTrans() = modetrans;
-  return myAdaptorWrite->Recognize (new Transfer_TransientMapper(obj));
-}
-
-//=======================================================================
 //function : TransferFinder
 //purpose  : internal function
 //=======================================================================
@@ -284,37 +274,6 @@ static IFSelect_ReturnStatus TransferFinder
     binder = binder->NextResult();
   }
   return stat;
-}
-
-//=======================================================================
-//function : TransferWriteTransient
-//purpose  : 
-//=======================================================================
-
-IFSelect_ReturnStatus XSControl_Controller::TransferWriteTransient
-  (const Handle(Standard_Transient)& theObj,
-   const Handle(Transfer_FinderProcess)& theFP,
-   const Handle(Interface_InterfaceModel)& theModel,
-   const Standard_Integer theModeTrans,
-   const Message_ProgressRange& theProgress) const
-{
-  if (theObj.IsNull()) return IFSelect_RetVoid;
-  return TransferFinder
-    (myAdaptorWrite,new Transfer_TransientMapper(theObj),theFP,theModel,theModeTrans, theProgress);
-}
-
-//=======================================================================
-//function : RecognizeWriteShape
-//purpose  : 
-//=======================================================================
-
-Standard_Boolean XSControl_Controller::RecognizeWriteShape
-  (const TopoDS_Shape& shape,
-   const Standard_Integer modetrans) const
-{
-  if (myAdaptorWrite.IsNull()) return Standard_False;
-  myAdaptorWrite->ModeTrans() = modetrans;
-  return myAdaptorWrite->Recognize (new TransferBRep_ShapeMapper(shape));
 }
 
 //=======================================================================

@@ -688,22 +688,8 @@ static IFSelect_ReturnStatus XSControl_twrite
 //  ####                                                              ####
 //  ######################################################################
 
-static int THE_XSControl_FuncShape_initactor = 0;
-
-//=======================================================================
-//function : Init
-//purpose  :
-//=======================================================================
-
-void  XSControl_FuncShape::Init ()
+static bool initOnce()
 {
-  if (THE_XSControl_FuncShape_initactor)
-  {
-    return;
-  }
-
-  THE_XSControl_FuncShape_initactor = 1;
-
   IFSelect_Act::SetGroup("DE: General");
 
   IFSelect_Act::AddFunc ("tpdraw","[mode:item or root]  num|*  [nomvar] Passes an ITEM to Shape Draw (Start or Result)",XSControl_tpdraw);
@@ -725,6 +711,17 @@ void  XSControl_FuncShape::Init ()
 
   //skl IFSelect_Act::AddFunc ("checkbrep","shapename or * [+ rootname for expurged and faulties [+ mode f-s]]",XSHAPE_checkbrep);
   //skl IFSelect_Act::AddFunc ("dblist","option : clear  nb  index  set n1  data n1 n2",XSHAPE_dblist);
+  return true;
+}
+
+//=======================================================================
+//function : Init
+//purpose  :
+//=======================================================================
+void XSControl_FuncShape::Init()
+{
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
 }
 
 //  ######################################################################

@@ -205,6 +205,10 @@ public:
 
 private:
 
+  bool registerFirstInstance();
+
+private:
+
   Handle(IFSelect_WorkSession) thesession;
   TCollection_AsciiString theprompt;
   TCollection_AsciiString thecommand;

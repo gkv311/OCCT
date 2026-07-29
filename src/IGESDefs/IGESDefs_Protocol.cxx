@@ -27,18 +27,8 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(IGESDefs_Protocol,IGESData_Protocol)
 
-static int THE_IGESDefs_Protocol_deja = 0;
-
-static Handle(Standard_Type) atype1,atype2,atype3,atype4,atype5,atype6,atype7;
-
 IGESDefs_Protocol::IGESDefs_Protocol()
 {
-  if (THE_IGESDefs_Protocol_deja)
-  {
-    return;
-  }
-
-  THE_IGESDefs_Protocol_deja = 1;
   atype1 = STANDARD_TYPE(IGESDefs_AssociativityDef);
   atype2 = STANDARD_TYPE(IGESDefs_AttributeDef);
   atype3 = STANDARD_TYPE(IGESDefs_AttributeTable);

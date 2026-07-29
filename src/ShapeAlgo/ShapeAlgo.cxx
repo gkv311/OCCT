@@ -20,20 +20,22 @@
 
 static Handle(ShapeAlgo_AlgoContainer) theContainer;
 
-//=======================================================================
-//function : Init
-//purpose  : 
-//=======================================================================
-
- void ShapeAlgo::Init() 
+static bool initOnce()
 {
-  static Standard_Boolean init = Standard_False;
-  if (init) return;
-  init = Standard_True;
-  theContainer = new ShapeAlgo_AlgoContainer;
-
+  theContainer = new ShapeAlgo_AlgoContainer();
   // initialization of Standard Shape Healing
   ShapeExtend::Init();
+  return true;
+}
+
+//=======================================================================
+//function : Init
+//purpose  :
+//=======================================================================
+void ShapeAlgo::Init()
+{
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
 }
 
 //=======================================================================

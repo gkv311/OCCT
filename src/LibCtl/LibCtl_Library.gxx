@@ -12,19 +12,13 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-//#include <LibCtl_Library.ixx>
 #include <Standard_NoSuchObject.hxx>
+#include <Standard_Mutex.hxx>
 
-
-//  Liste Globale des Modules, dans laquelle on va se servir
-
+//  Global list of modules
 static Handle(LibCtl_GlobalNode) theglobal;
 
-//  Donnees pour optimisation (dernier Protocole demande)
-
-static Handle(TheProtocol) theprotocol;
-static Handle(LibCtl_Node) thelast;
-
+static Standard_Mutex theMutex;
 
 //  Alimentation de la liste globale
 //  ATTENTION : SetGlobal fait de la substitution, c-a-d que c est le dernier
@@ -32,6 +26,7 @@ static Handle(LibCtl_Node) thelast;
     void LibCtl_Library::SetGlobal
   (const Handle(TheModule)& amodule, const Handle(TheProtocol)& aprotocol)
 {
+  Standard_Mutex::Sentry aSentry(theMutex);
   if (theglobal.IsNull()) theglobal = new LibCtl_GlobalNode;
   theglobal->Add(amodule,aprotocol);
 }
@@ -39,71 +34,64 @@ static Handle(LibCtl_Node) thelast;
 // Constructeur d apres Protocole
     LibCtl_Library::LibCtl_Library (const Handle(TheProtocol)& aprotocol)
 {
-  Standard_Boolean last = Standard_False;
-  if (aprotocol.IsNull()) return;    // PAS de protocole = Lib VIDE
-  if (!theprotocol.IsNull()) last =
-    (theprotocol == aprotocol);
-
-  if (last) thelist = thelast;
-//  Si Pas d optimisation disponible : construire la liste
-  else {
+  if (!aprotocol.IsNull())
     AddProtocol(aprotocol);
-//  Ceci definit l optimisation (pour la fois suivante)
-    thelast     = thelist;
-    theprotocol = aprotocol;
-  }
 }
 
 //  Constructeur vide
     LibCtl_Library::LibCtl_Library ()    {  }
 
 
-//  Ajout d un Protocol : attention, desoptimise (sinon risque de confusion !)
+//  Add protocol
     void LibCtl_Library::AddProtocol
   (const Handle(Standard_Transient)& aprotocol)
 {
-//  DownCast car Protocol->Resources, meme redefini et utilise dans d autres
-//  librairies, doit toujours renvoyer le type le plus haut
+  // Check that type of the protocol instance matches type of the protocols
+  // handled by this library
   Handle(TheProtocol) aproto = Handle(TheProtocol)::DownCast(aprotocol);
-  if (aproto.IsNull()) return;
+  if (aproto.IsNull())
+    return;
 
-//  D abord, ajouter celui-ci a la liste : chercher le Node
+  Standard_Mutex::Sentry aSentry(theMutex);
+  // First, add this one to the list: search for the Node
   Handle(LibCtl_GlobalNode) curr;
-  for (curr = theglobal; !curr.IsNull(); ) {        // curr->Next : plus loin
+  for (curr = theglobal; !curr.IsNull(); curr = curr->Next())
+  {
     const Handle(TheProtocol)& protocol = curr->Protocol();
     if (!protocol.IsNull()) {
-//  Match Protocol ?
+      //  Match Protocol ?
       if (protocol->DynamicType() == aprotocol->DynamicType()) {
-	if (thelist.IsNull()) thelist = new LibCtl_Node;
-	thelist->AddNode(curr);
-	break;  // UN SEUL MODULE PAR PROTOCOLE
+        if (thelist.IsNull())
+          thelist = new LibCtl_Node();
+
+        thelist->AddNode(curr);
+        break; // UN SEUL MODULE PAR PROTOCOLE
       }
     }
-    curr = curr->Next();  // cette formule est refusee dans "for"
   }
 //  Ensuite, Traiter les ressources
   Standard_Integer nb = aproto->NbResources();
   for (Standard_Integer i = 1; i <= nb; i ++) {
     AddProtocol (aproto->Resource(i));
   }
-//  Ne pas oublier de desoptimiser
-  theprotocol.Nullify();
-  thelast.Nullify();
 }
 
-    void LibCtl_Library::Clear ()
-      {  thelist = new LibCtl_Node;  }
+void LibCtl_Library::Clear()
+{
+  thelist = new LibCtl_Node();
+  thecurr.Nullify();
+}
 
     void LibCtl_Library::SetComplete ()
 {
+  Standard_Mutex::Sentry aSentry(theMutex);
   thelist = new LibCtl_Node;
-//    On prend chacun des Protocoles de la Liste Globale et on l ajoute
+  // Take each of the Protocols from the Global List and add it
   Handle(LibCtl_GlobalNode) curr;
-  for (curr = theglobal; !curr.IsNull(); ) {        // curr->Next : plus loin
+  for (curr = theglobal; !curr.IsNull(); curr = curr->Next()) {
     const Handle(TheProtocol)& protocol = curr->Protocol();
-//    Comme on prend tout tout tout, on ne se preoccupe pas des Ressources !
+    // As we take everything, we don't worry about Resources
     if (!protocol.IsNull()) thelist->AddNode(curr);
-    curr = curr->Next();  // cette formule est refusee dans "for"
   }
 }
 

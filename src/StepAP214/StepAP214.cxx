@@ -13,14 +13,10 @@
 
 #include <StepAP214.hxx>
 
-#include <Interface_Statics.hxx>
 #include <StepAP214_Protocol.hxx>
 
-StaticHandle(StepAP214_Protocol, proto);
-
 Handle(StepAP214_Protocol) StepAP214::Protocol()
-
-	{
-		InitHandleVoid(StepAP214_Protocol, proto);
-		return proto;
-	}
+{
+  static Handle(StepAP214_Protocol) aProtocol = new StepAP214_Protocol();
+  return aProtocol;
+}

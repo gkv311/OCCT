@@ -17,12 +17,10 @@
 #ifndef _RWStepAP214_ReadWriteModule_HeaderFile
 #define _RWStepAP214_ReadWriteModule_HeaderFile
 
-#include <Standard.hxx>
-
+#include <NCollection_DataMap.hxx>
 #include <StepData_ReadWriteModule.hxx>
-#include <Standard_Integer.hxx>
 #include <TColStd_SequenceOfAsciiString.hxx>
-class TCollection_AsciiString;
+
 class StepData_StepReaderData;
 class Interface_Check;
 class Standard_Transient;
@@ -62,27 +60,13 @@ public:
   
   Standard_EXPORT void WriteStep (const Standard_Integer CN, StepData_StepWriter& SW, const Handle(Standard_Transient)& ent) const Standard_OVERRIDE;
 
-
-
-
   DEFINE_STANDARD_RTTIEXT(RWStepAP214_ReadWriteModule,StepData_ReadWriteModule)
-
-protected:
-
-
-
 
 private:
 
-
-
+  NCollection_DataMap<TCollection_AsciiString, Standard_Integer> typenums;
+  NCollection_DataMap<TCollection_AsciiString, Standard_Integer> typeshor;
 
 };
-
-
-
-
-
-
 
 #endif // _RWStepAP214_ReadWriteModule_HeaderFile

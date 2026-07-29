@@ -50,27 +50,12 @@ public:
   //! Returns a Resource, given its rank (between 1 and NbResources)
   Standard_EXPORT virtual Handle(Interface_Protocol) Resource (const Standard_Integer num) const Standard_OVERRIDE;
 
-
-
-
   DEFINE_STANDARD_RTTIEXT(StepAP214_Protocol,StepData_Protocol)
-
-protected:
-
-
-
 
 private:
 
-
-
+  Interface_DataMapOfTransientInteger types;
 
 };
-
-
-
-
-
-
 
 #endif // _StepAP214_Protocol_HeaderFile

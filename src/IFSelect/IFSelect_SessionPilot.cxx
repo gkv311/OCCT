@@ -32,9 +32,6 @@ IMPLEMENT_STANDARD_RTTIEXT(IFSelect_SessionPilot,IFSelect_Activator)
 #define MAXWORDS 200
 #define MAXCARS 1000
 
-static int THE_IFSelect_SessionPilot_initactor = 0;
-static TCollection_AsciiString nulword;
-
 //#define DEBUG_TRACE
 
 // Nb Maxi de words : cf thewords et method SetCommandLine
@@ -50,12 +47,14 @@ IFSelect_SessionPilot::IFSelect_SessionPilot (const Standard_CString prompt)
   }
   therecord = Standard_False;
   thenbwords = 0;
-  if (THE_IFSelect_SessionPilot_initactor)
-  {
-    return;
-  }
 
-  THE_IFSelect_SessionPilot_initactor = 1;
+  // register only one instance of IFSelect_SessionPilot in global list
+  static const bool wasInitialized = this->registerFirstInstance();
+  (void)wasInitialized;
+}
+
+bool IFSelect_SessionPilot::registerFirstInstance()
+{
   Add (1,"x");
   Add (1,"exit");
   Add (2,"?");
@@ -64,6 +63,7 @@ IFSelect_SessionPilot::IFSelect_SessionPilot (const Standard_CString prompt)
   Add (4,"xsource");
   Add (5,"xstep");
   Add (6,"xnew");
+  return true;
 }
 
 
@@ -185,9 +185,14 @@ IFSelect_SessionPilot::IFSelect_SessionPilot (const Standard_CString prompt)
     Standard_Integer  IFSelect_SessionPilot::NbWords () const 
       {  return thenbwords;  }
 
-    const TCollection_AsciiString&  IFSelect_SessionPilot::Word
-  (const Standard_Integer num) const 
-      {  if (num < thenbwords) return thewords(num);  return nulword;  }
+const TCollection_AsciiString& IFSelect_SessionPilot::Word (const Standard_Integer num) const
+{
+  if (num < thenbwords)
+    return thewords(num);
+
+  static const TCollection_AsciiString nulword;
+  return nulword;
+}
 
     Standard_CString  IFSelect_SessionPilot::Arg
   (const Standard_Integer num) const 

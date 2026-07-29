@@ -60,22 +60,25 @@
 #include <TopoDS_Shape.hxx>
 #include <XSAlgo.hxx>
 
-static Handle(IGESToBRep_AlgoContainer) theContainer; 
- 
-//=======================================================================                                                
-//function : Init                                                                                                        
-//purpose  :                                                                                                             
-//=======================================================================                                                
-                                                                                                                         
- void IGESToBRep::Init()                                                                                                   
-{                                                                                                                        
-  static Standard_Boolean init = Standard_False;                                                                         
-  if (init) return;                                                                                                      
-  init = Standard_True;                                                                                                  
-  XSAlgo::Init();                                                                                                        
-  theContainer = new IGESToBRep_AlgoContainer;                                                                             
-}     
-   
+static Handle(IGESToBRep_AlgoContainer) theContainer;
+
+static bool initOnce()
+{
+  XSAlgo::Init();
+  theContainer = new IGESToBRep_AlgoContainer();
+  return true;
+}
+
+//=======================================================================
+//function : Init
+//purpose  :
+//=======================================================================
+void IGESToBRep::Init()
+{
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
+}
+
 //=======================================================================                                                
 //function : SetAlgoContainer                                                                                            
 //purpose  :                                                                                                             

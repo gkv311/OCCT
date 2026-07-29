@@ -11,23 +11,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <RWHeaderSection_ReadWriteModule.hxx>
 
 #include <HeaderSection_FileDescription.hxx>
 #include <HeaderSection_FileName.hxx>
 #include <HeaderSection_FileSchema.hxx>
-#include <HeaderSection_Protocol.hxx>
 #include <Interface_Macros.hxx>
-#include <Interface_ReaderLib.hxx>
-#include <RWHeaderSection_ReadWriteModule.hxx>
 #include <RWHeaderSection_RWFileDescription.hxx>
 #include <RWHeaderSection_RWFileName.hxx>
 #include <RWHeaderSection_RWFileSchema.hxx>
-#include <Standard_Transient.hxx>
-#include <Standard_Type.hxx>
 #include <StepData_StepReaderData.hxx>
 #include <StepData_StepWriter.hxx>
 #include <StepData_UndefinedEntity.hxx>
-#include <StepData_WriterLib.hxx>
 #include <TCollection_AsciiString.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(RWHeaderSection_ReadWriteModule,StepData_ReadWriteModule)
@@ -42,9 +37,7 @@ static TCollection_AsciiString Reco_FileSchema ("FILE_SCHEMA");
 
 RWHeaderSection_ReadWriteModule::RWHeaderSection_ReadWriteModule ()
 {
-	Handle(HeaderSection_Protocol) protocol = new HeaderSection_Protocol;
-	StepData_WriterLib::SetGlobal(this,protocol);
-	Interface_ReaderLib::SetGlobal(this,protocol);
+  //
 }
 
 	// --- Case Recognition ---

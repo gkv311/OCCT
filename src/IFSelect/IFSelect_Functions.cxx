@@ -2413,16 +2413,8 @@ Handle(IFSelect_Dispatch)  IFSelect_Functions::GiveDispatch
 //  ####    INITIALISATIONS              ####
 //  #########################################
 
-static int THE_IFSelect_Functions_initactor = 0;
-
-void IFSelect_Functions::Init()
+static bool initOnce()
 {
-  if (THE_IFSelect_Functions_initactor)
-  {
-    return;
-  }
-
-  THE_IFSelect_Functions_initactor = 1;
   IFSelect_Act::SetGroup("DE: General");
   IFSelect_Act::AddFunc("xstatus","Lists XSTEP Status : Version, System Name ...",funstatus);
   IFSelect_Act::AddFunc("handler","Toggle status catch Handler Error of the session",fun1);
@@ -2547,4 +2539,12 @@ void IFSelect_Functions::Init()
   IFSelect_Act::AddFunc("editclear","editform [paramname] : clears edition on all or one param",fun_editclear);
   IFSelect_Act::AddFunc("editload","editform [entity-id] : loads from model or an entity",fun_editload);
   IFSelect_Act::AddFunc("editapply","editform [keep] : applies on loaded data",fun_editapply);
+
+  return true;
+}
+
+void IFSelect_Functions::Init()
+{
+  static const bool wasInitailized = initOnce();
+  (void)wasInitailized;
 }
