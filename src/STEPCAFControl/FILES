@@ -1,5 +1,3 @@
-STEPCAFControl_ActorWrite.cxx
-STEPCAFControl_ActorWrite.hxx
 STEPCAFControl_ConfigurationNode.cxx
 STEPCAFControl_ConfigurationNode.hxx
 STEPCAFControl_Controller.cxx

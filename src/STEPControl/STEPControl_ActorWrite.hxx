@@ -23,6 +23,7 @@
 #include <Standard_Integer.hxx>
 #include <STEPConstruct_ContextTool.hxx>
 #include <Transfer_ActorOfFinderProcess.hxx>
+#include <TopTools_MapOfShape.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 #include <STEPControl_StepModelType.hxx>
 class Transfer_Finder;
@@ -90,23 +91,27 @@ public:
   Standard_EXPORT Standard_Integer GroupMode() const;
   
   Standard_EXPORT void SetTolerance (const Standard_Real Tol);
-  
-  //! Customizable method to check whether shape S should
-  //! be written as assembly or not
-  //! Default implementation uses flag GroupMode and analyses
-  //! the shape itself
-  //! NOTE: this method can modify shape
-  Standard_EXPORT virtual Standard_Boolean IsAssembly (TopoDS_Shape& S) const;
 
+  //! Specifies a method to be used to decide whether compounds
+  //! should be written as assembly (as opposed to list of shapes):
+  //! if set to true, this is decided basing on content of the compound;
+  //! if set to false, only compounds registered bySetAssembly()
+  //! method are written as assemblies.
+  //! Setting this option to false also clears all registered assemblies.
+  Standard_EXPORT void SetAutoAssemblyMode (const Standard_Boolean aMode);
 
+  //! Returns true if shape S should be written as assembly
+  //! (see SetAutoAssemblyMode() method).
+  Standard_EXPORT Standard_Boolean IsAssembly (TopoDS_Shape& S) const;
 
+  //! Registers shape to be written as assembly.
+  //! The shape should be TopoDS_Compound (else does nothing)
+  Standard_EXPORT void RegisterAssembly (const TopoDS_Shape& S);
+
+  //! Clears map of shapes registered as assemblies
+  Standard_EXPORT void ClearAssemblyMap();
 
   DEFINE_STANDARD_RTTIEXT(STEPControl_ActorWrite,Transfer_ActorOfFinderProcess)
-
-protected:
-
-
-
 
 private:
 
@@ -129,11 +134,14 @@ private:
                                              TopTools_SequenceOfShape& theVertices);
 
 
+private:
 
-  Standard_Integer mygroup;
-  Standard_Real mytoler;
+  Standard_Integer mygroup = 0;
+  Standard_Real mytoler = -1.0;
   STEPConstruct_ContextTool myContext;
 
+  Standard_Boolean myAutoAssemblyMode = true;
+  TopTools_MapOfShape myAssemblyMap;
 
 };
 
