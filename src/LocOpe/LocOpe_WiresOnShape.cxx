@@ -1493,6 +1493,7 @@ Standard_Boolean LocOpe_WiresOnShape::Add(const TopTools_SequenceOfShape& theEdg
   TColStd_PackedMapOfInteger anUsedEdges;
   for (; anExpFaces.More(); anExpFaces.Next(), numF++)
   {
+    (void)numF; // debug counter
     const TopoDS_Face& aCurF = TopoDS::Face(anExpFaces.Current());
     Bnd_Box aBoxF;
     BRepBndLib::Add(aCurF, aBoxF);

@@ -7135,8 +7135,7 @@ static Standard_Integer VSelectByAxis (Draw_Interpretor& theDI,
     aContext->SetAutoActivateSelection (wasAuto);
   }
 
-  Standard_Integer anIndex = 0;
-  for (NCollection_Sequence<gp_Pnt>::Iterator anIter(aPoints); anIter.More(); anIter.Next(), anIndex++)
+  for (NCollection_Sequence<gp_Pnt>::Iterator anIter(aPoints); anIter.More(); anIter.Next())
   {
     const gp_Pnt& aPnt = anIter.Value();
     theDI << aPnt.X() << " " << aPnt.Y() << " " << aPnt.Z() << "\n";

@@ -113,7 +113,7 @@ void  BRepGProp::LinearProperties(const TopoDS_Shape& S, GProp_GProps& SProps, c
 static Standard_Real surfaceProperties(const TopoDS_Shape& S, GProp_GProps& Props, const Standard_Real Eps, const Standard_Boolean SkipShared,
                                        const Standard_Boolean UseTriangulation)
 {
-  Standard_Integer i;
+  Standard_Integer i = 0;
 #ifdef OCCT_DEBUG
   Standard_Integer iErrorMax = 0;
 #endif
@@ -130,6 +130,7 @@ static Standard_Real surfaceProperties(const TopoDS_Shape& S, GProp_GProps& Prop
   TopLoc_Location aLocDummy;
 
   for (ex.Init(S, TopAbs_FACE), i = 1; ex.More(); ex.Next(), i++) {
+    (void)i; // debug counter
     const TopoDS_Face& F = TopoDS::Face(ex.Current());
     if (SkipShared && !aFMap.Add(F))
     {
@@ -216,7 +217,7 @@ Standard_Real BRepGProp::SurfaceProperties(const TopoDS_Shape& S, GProp_GProps& 
 static Standard_Real volumeProperties(const TopoDS_Shape& S, GProp_GProps& Props, const Standard_Real Eps, const Standard_Boolean SkipShared,
                                       const Standard_Boolean UseTriangulation)
 {
-  Standard_Integer i;
+  Standard_Integer i = 0;
 #ifdef OCCT_DEBUG
   Standard_Integer iErrorMax = 0;
 #endif
@@ -234,6 +235,7 @@ static Standard_Real volumeProperties(const TopoDS_Shape& S, GProp_GProps& Props
   TopLoc_Location aLocDummy;
 
   for (ex.Init(S,TopAbs_FACE), i = 1; ex.More(); ex.Next(), i++) {
+    (void)i; // debug counter
     const TopoDS_Face& F = TopoDS::Face(ex.Current());
     TopAbs_Orientation anOri = F.Orientation();
     Standard_Boolean isFwd = anOri == TopAbs_FORWARD;
@@ -337,7 +339,7 @@ Standard_Real BRepGProp::VolumeProperties(const TopoDS_Shape& S, GProp_GProps& P
   // find the origin
   gp_Pnt P(0,0,0);  P.Transform(S.Location());
   Props = GProp_GProps(P);
-  Standard_Integer i;
+  Standard_Integer i = 0;
 #ifdef OCCT_DEBUG
   Standard_Integer iErrorMax = 0;
 #endif
@@ -346,6 +348,7 @@ Standard_Real BRepGProp::VolumeProperties(const TopoDS_Shape& S, GProp_GProps& P
     TopTools_MapOfShape aShMap;
     TopExp_Explorer ex(S,TopAbs_SHELL);
     for (i = 1; ex.More(); ex.Next(), i++) {
+      (void)i; // debug counter
       const TopoDS_Shape& Sh = ex.Current();
       if(SkipShared && !aShMap.Add(Sh))
       {

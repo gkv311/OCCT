@@ -118,6 +118,7 @@ protected:
     IMeshData::ListOfPnt2d::Iterator aNodesIt(*theNodes);
     for (Standard_Integer aNodeIt = 1; aNodesIt.More(); aNodesIt.Next(), ++aNodeIt)
     {
+      (void)aNodeIt; // debug counter
       const gp_Pnt2d& aPnt2d = aNodesIt.Value();
       if (this->getClassifier()->Perform(aPnt2d) == TopAbs_IN)
       {
@@ -149,6 +150,7 @@ private:
     IMeshData::ListOfPnt2d::Iterator aNodesIt(*theNodes);
     for (Standard_Integer aNodeIt = 1; aNodesIt.More(); aNodesIt.Next(), ++aNodeIt)
     {
+      (void)aNodeIt; // debug counter
       const gp_Pnt2d& aPnt2d = aNodesIt.Value();
       if (this->getClassifier()->Perform(aPnt2d) == TopAbs_IN)
       {

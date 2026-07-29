@@ -334,6 +334,7 @@ b- Calcul des minima:
       P1 = mypoints1->Value(NoU1, NoV1);
       for ( NoU2 = 1, U2 = U20; NoU2 <= myusample; NoU2++, U2 += PasU2) {
 	for ( NoV2 = 1, V2 = V20; NoV2 <= myvsample; NoV2++, V2 += PasV2) {
+	  (void)U2, (void)V2;
 	  P2 = mypoints2->Value(NoU2, NoV2);
 	  TheDist = P1.SquareDistance(P2);
 	  if (TheDist < distmin) {

@@ -1014,6 +1014,7 @@ static Standard_Integer VListColors (Draw_Interpretor& theDI,
   Standard_Integer aColIndex = 0;
   for (NCollection_Sequence<Quantity_NameOfColor>::Iterator aColIter (aColList); aColIter.More(); aColIter.Next(), ++aColIndex)
   {
+    (void)aColIndex; // debug counter
     Quantity_Color aCol (aColIter.Value());
     const TCollection_AsciiString aColName  = Quantity_Color::StringName (aColIter.Value());
     const TCollection_AsciiString anSRgbHex = Quantity_Color::ColorToHex (aCol);
