@@ -305,6 +305,7 @@ static Standard_Integer expshape(Draw_Interpretor& di, Standard_Integer argc, co
   
   Standard_Integer nbF =1;
   for (Ex.Init(Shape,TopAbs_FACE); Ex.More(); Ex.Next(),nbF++) {
+    (void)nbF;
     TopoDS_Face F = TopoDS::Face(Ex.Current());
     TopLoc_Location L;
     Handle(Geom_Surface) aSurface = BRep_Tool::Surface(F,L);
@@ -313,6 +314,7 @@ static Standard_Integer expshape(Draw_Interpretor& di, Standard_Integer argc, co
 
     Standard_Integer nbE = 1;
     for(exp.Init(F,TopAbs_EDGE); exp.More(); exp.Next(),nbE++) {
+      (void)nbE;
       TopoDS_Edge E = TopoDS::Edge(exp.Current());
       if(BRep_Tool::IsClosed(E,F))
         nbSeam++;

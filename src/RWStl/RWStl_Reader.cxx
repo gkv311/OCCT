@@ -442,7 +442,6 @@ Standard_Boolean RWStl_Reader::ReadBinary (Standard_IStream& theStream,
   // don't trust the number of triangles which is coded in the file
   // sometimes it is wrong, and with this technique we don't need to swap endians for integer
   Message_ProgressScope  aPS (theProgress, "Reading binary STL file", aNbFacets);
-  Standard_Integer        aNbRead = 0;
 
   // allocate buffer for 80 triangles
   const int THE_CHUNK_NBFACETS = 80;
@@ -454,7 +453,7 @@ Standard_Boolean RWStl_Reader::ReadBinary (Standard_IStream& theStream,
   const char*  aBufferPtr   = aBuffer;
   Standard_Integer aNbFacesInBuffer = 0;
   for (Standard_Integer aNbFacetRead = 0; aNbFacetRead < aNbFacets && aPS.More();
-       ++aNbFacetRead, ++aNbRead, --aNbFacesInBuffer, aBufferPtr += aFaceDataLen, aPS.Next())
+       ++aNbFacetRead, --aNbFacesInBuffer, aBufferPtr += aFaceDataLen, aPS.Next())
   {
     // read more data
     if (aNbFacesInBuffer <= 0)

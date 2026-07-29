@@ -2975,6 +2975,7 @@ static Standard_Integer DDataStd_GetIntPackedMap (Draw_Interpretor& di,
     const TColStd_PackedMapOfInteger& aMap = anAtt->GetMap();
     TColStd_MapIteratorOfPackedMapOfInteger itr(aMap);
     for (Standard_Integer j = 1; itr.More(); itr.Next(),j++){
+      (void)j; // debug counter
       Standard_Integer aKey(itr.Key());
       di << aKey << " ";
       }
