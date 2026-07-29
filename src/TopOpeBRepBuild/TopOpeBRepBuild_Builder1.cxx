@@ -1342,6 +1342,7 @@ Standard_Integer TopOpeBRepBuild_Builder1::PerformPieceOn2D (const TopoDS_Shape&
   // Loop on faces same domain to aFaceObj
   TopTools_ListIteratorOfListOfShape anIt(myDataStructure->SameDomain(aFaceObj));
   for (i=1; anIt.More(); anIt.Next(), i++) {
+    (void)i; // debug counter
     const TopoDS_Shape& aFaceTool=anIt.Value();
     
     TopTools_IndexedMapOfShape anEdgesToolMap;
@@ -1350,6 +1351,7 @@ Standard_Integer TopOpeBRepBuild_Builder1::PerformPieceOn2D (const TopoDS_Shape&
     if(myDataStructure -> HasSameDomain(anEdgeObj)) {
       TopTools_ListIteratorOfListOfShape anItE=myDataStructure->SameDomain(anEdgeObj);
       for (j=1; anItE.More(); anItE.Next(), j++) {
+        (void)j; // debug counter
         TopoDS_Shape anEdgeTool=anItE.Value();
 
 	if (anEdgesToolMap.Contains (anEdgeTool)) {
@@ -1369,6 +1371,7 @@ Standard_Integer TopOpeBRepBuild_Builder1::PerformPieceOn2D (const TopoDS_Shape&
 	    // we are looking for the same piece as aPieceObj among aPartOnTool
 	    TopTools_ListIteratorOfListOfShape anItTool(aPartOnTool);
 	    for (k=1; anItTool.More(); anItTool.Next(), k++) {
+	      (void)k; // debug counter
 	      TopoDS_Shape& aPieceTool=anItTool.Value();
 	      aPieceTool.Orientation(anEdgeTool.Orientation());
 

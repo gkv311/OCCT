@@ -642,6 +642,7 @@ void XmlMDataStd_NamedDataDriver::Paste(const Handle(TDF_Attribute)& theSource,
 
     TColStd_DataMapIteratorOfDataMapOfStringInteger itr(S->GetIntegersContainer());
     for (i=1; itr.More(); itr.Next(),i++) {
+      (void)i; // debug counter
       const TCollection_ExtendedString aValueStr = 
         itr.Key() + ' ' + TCollection_ExtendedString(itr.Value());// key - value;
       XmlObjMgt_Element aCurTarget = aDoc.createElement( ::ExtString() );

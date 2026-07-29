@@ -170,6 +170,7 @@ void BOPAlgo_BOP::CheckData()
     const TopTools_ListOfShape& aLS=(!i)? myArguments : myTools;
     aItLS.Initialize(aLS);
     for (j=0; aItLS.More(); aItLS.Next(), ++j) {
+      (void)j; // debug counter
       const TopoDS_Shape& aS=aItLS.Value();
       Standard_Boolean bIsEmpty = BOPTools_AlgoTools3D::IsEmptyShape(aS);
       if (bIsEmpty)

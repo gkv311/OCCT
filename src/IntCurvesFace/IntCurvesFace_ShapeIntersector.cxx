@@ -36,8 +36,7 @@ void IntCurvesFace_ShapeIntersector::Load(const TopoDS_Shape& theShape,
                                           const Standard_Real theTol) 
 { 
   TopExp_Explorer Ex;
-  Standard_Integer i;
-  for(myNbFaces = 0, i = 0, Ex.Init(theShape, TopAbs_FACE); Ex.More(); ++i, Ex.Next()) 
+  for(myNbFaces = 0, Ex.Init(theShape, TopAbs_FACE); Ex.More(); Ex.Next())
   {
     ++myNbFaces;
     TopoDS_Face aCurrentFace = TopoDS::Face(Ex.Current());
