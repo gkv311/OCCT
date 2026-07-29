@@ -166,7 +166,7 @@ protected:
   
   Standard_Boolean HasTypeBinding(const TCollection_AsciiString& aTypeName) const
   {
-    return Storage_Schema::ICurrentData()->InternalData()->myTypeBinding.IsBound(aTypeName);
+    return myCurrentData->InternalData()->myTypeBinding.IsBound(aTypeName);
   }
   
   Standard_EXPORT void BindType (const TCollection_AsciiString& aTypeName, const Handle(Storage_CallBack)& aCallBack) const;
@@ -179,12 +179,11 @@ private:
 
   Standard_EXPORT void Clear() const;
   
-  Standard_EXPORT static void ISetCurrentData (const Handle(Storage_Data)& dData);
-  
-  Standard_EXPORT static Handle(Storage_Data)& ICurrentData();
+private:
 
   Storage_MapOfCallBack myCallBack;
   Standard_Boolean myCallBackState;
+  mutable Handle(Storage_Data) myCurrentData;
   Handle(Storage_CallBack) myDefaultCallBack;
   TCollection_AsciiString myName;
   TCollection_AsciiString myVersion;
