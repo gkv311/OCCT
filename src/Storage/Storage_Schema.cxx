@@ -12,6 +12,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <Storage_Schema.hxx>
 
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Type.hxx>
@@ -23,7 +24,6 @@
 #include <Storage_HeaderData.hxx>
 #include <Storage_HSeqOfRoot.hxx>
 #include <Storage_Root.hxx>
-#include <Storage_Schema.hxx>
 #include <Storage_StreamWriteError.hxx>
 #include <Storage_TypeData.hxx>
 #include <Storage_TypedCallBack.hxx>
@@ -337,7 +337,7 @@ void Storage_Schema::Write (const Handle(Storage_BaseDriver)& theDriver,
   Handle(Standard_Persistent)      p;
   Handle(Storage_HSeqOfRoot)       plist;
   TCollection_AsciiString          errorContext("AddPersistent");
-  Storage_Schema::ISetCurrentData(aData);
+  myCurrentData = aData;
 
   Handle(Storage_InternalData) iData = aData->InternalData();
 
@@ -619,8 +619,8 @@ void Storage_Schema::BindType
                           const Handle(Storage_CallBack)& aCallBack) const
 {
   if (!HasTypeBinding(aTypeName)) {
-      Handle(Storage_InternalData) iData = Storage_Schema::ICurrentData()->InternalData();
-      Handle(Storage_TypeData) tData = Storage_Schema::ICurrentData()->TypeData();
+      Handle(Storage_InternalData) iData = myCurrentData->InternalData();
+      Handle(Storage_TypeData) tData = myCurrentData->TypeData();
       Handle(Storage_TypedCallBack) c = new Storage_TypedCallBack(aTypeName,aCallBack);
 
       tData->AddType(aTypeName,iData->myTypeId);
@@ -640,7 +640,7 @@ Handle(Storage_CallBack) Storage_Schema::TypeBinding
   Handle(Storage_CallBack) result;
 
   if (HasTypeBinding(aTypeName)) {
-    Handle(Storage_InternalData) iData = Storage_Schema::ICurrentData()->InternalData();
+    Handle(Storage_InternalData) iData = myCurrentData->InternalData();
 
     result =  iData->myTypeBinding.Find(aTypeName)->CallBack();
   }
@@ -660,10 +660,10 @@ Standard_Boolean Storage_Schema::AddPersistent
   Standard_Boolean result = Standard_False;
 
   if (!sp.IsNull()) {
-    Handle(Storage_InternalData)     iData = Storage_Schema::ICurrentData()->InternalData();
+    Handle(Storage_InternalData)     iData = myCurrentData->InternalData();
 
     if (sp->_typenum == 0) {
-      Handle(Storage_TypeData) tData = Storage_Schema::ICurrentData()->TypeData();
+      Handle(Storage_TypeData) tData = myCurrentData->TypeData();
 
       const TCollection_AsciiString aTypeName(tName);
       const Standard_Integer aTypenum = iData->myTypeBinding.Find(aTypeName)->Index();
@@ -689,7 +689,7 @@ Standard_Boolean Storage_Schema::PersistentToAdd
  Standard_Boolean result = Standard_False;
 
   if (!sp.IsNull()) {
-    Handle(Storage_InternalData) di = Storage_Schema::ICurrentData()->InternalData();
+    Handle(Storage_InternalData) di = myCurrentData->InternalData();
 
     if (sp->_typenum == 0 && sp->_refnum != -1) {
       result = Standard_True;
@@ -708,7 +708,7 @@ Standard_Boolean Storage_Schema::PersistentToAdd
 
 void Storage_Schema::Clear() const
 {
-  Storage_Schema::ICurrentData().Nullify();
+  myCurrentData.Nullify();
 }
 
 #ifdef DATATYPE_MIGRATION
@@ -816,27 +816,6 @@ Standard_Boolean Storage_Schema::CheckTypeMigration(const TCollection_AsciiStrin
   return false;
 }
 #endif
-
-//=======================================================================
-//function : ISetCurrentData
-//purpose  : 
-//=======================================================================
-
-void Storage_Schema::ISetCurrentData(const Handle(Storage_Data)& dData)
-{
-  Storage_Schema::ICurrentData() = dData;
-}
-
-//=======================================================================
-//function : ICurrentData
-//purpose  : 
-//=======================================================================
-
-Handle(Storage_Data)& Storage_Schema::ICurrentData()
-{
-  static Handle(Storage_Data) _Storage_CData;
-  return _Storage_CData;
-}
 
 #define SLENGTH 80
 
