@@ -75,12 +75,6 @@ IGESControl_Controller::IGESControl_Controller (const Standard_Boolean mod)
 : XSControl_Controller ((Standard_CString ) (mod ? "FNES" : "IGES") , (Standard_CString ) (mod ? "fnes" : "iges") ),
   themode (mod)
 {
-  static Standard_Boolean init = Standard_False;
-  if (!init) {
-    IGESSolid::Init();
-    IGESAppli::Init();
-    init = Standard_True;
-  }
   AddSessionItem (new IGESSelect_RemoveCurves(Standard_True) ,"iges-remove-pcurves");
   AddSessionItem (new IGESSelect_RemoveCurves(Standard_False),"iges-remove-curves-3d");
   AddSessionItem (new IGESSelect_SetLabel (0,Standard_True) ,"iges-clear-label");
@@ -353,16 +347,21 @@ IFSelect_ReturnStatus IGESControl_Controller::TransferWriteShape (const TopoDS_S
 //purpose  : 
 //=======================================================================
 
+static bool initOnce()
+{
+  XSAlgo::Init();
+  IGESSolid::Init();
+  IGESAppli::Init();
+  IGESToBRep::Init();
+  IGESToBRep::SetAlgoContainer (new IGESControl_AlgoContainer());
+
+  Handle(IGESControl_Controller) ADIGES = new IGESControl_Controller(false);
+  ADIGES->AutoRecord();
+  return true;
+}
+
 Standard_Boolean IGESControl_Controller::Init ()
 {
-  static Standard_Boolean inic = Standard_False;
-  if (!inic) {
-    Handle(IGESControl_Controller) ADIGES = new IGESControl_Controller(Standard_False);
-    ADIGES->AutoRecord();
-    XSAlgo::Init();
-    IGESToBRep::Init();
-    IGESToBRep::SetAlgoContainer (new IGESControl_AlgoContainer());
-    inic = Standard_True;
-  }
-  return Standard_True;
+  static const bool wasInitialized = initOnce();
+  return wasInitialized;
 }

@@ -87,27 +87,7 @@ class XSControl_TransferWriter : public Standard_Transient
   //! Prints statistics on current Trace File, according what,mode
   //! See PrintStatsProcess for details
   Standard_EXPORT void PrintStats (const Standard_Integer theWhat, const Standard_Integer theMode = 0) const;
-  
-  //! Tells if a transient object (from an application) is a valid
-  //! candidate for a transfer to a model
-  //! Asks the Controller (RecognizeWriteTransient)
-  //! If <obj> is a HShape, calls RecognizeShape
-  Standard_EXPORT Standard_Boolean RecognizeTransient (const Handle(Standard_Transient)& theObj);
-  
-  //! Transfers a Transient object (from an application) to a model
-  //! of current norm, according to the last call to SetTransferMode
-  //! Works by calling the Controller
-  //! Returns status : =0 if OK, >0 if error during transfer, <0 if
-  //! transfer badly initialised
-  Standard_EXPORT IFSelect_ReturnStatus TransferWriteTransient
-                   (const Handle(Interface_InterfaceModel)& theModel,
-                    const Handle(Standard_Transient)& theObj,
-                    const Message_ProgressRange& theProgress = Message_ProgressRange());
-  
-  //! Tells if a Shape is valid for a transfer to a model
-  //! Asks the Controller (RecognizeWriteShape)
-  Standard_EXPORT Standard_Boolean RecognizeShape (const TopoDS_Shape& theShape);
-  
+
   //! Transfers a Shape from CasCade to a model of current norm,
   //! according to the last call to SetTransferMode
   //! Works by calling the Controller

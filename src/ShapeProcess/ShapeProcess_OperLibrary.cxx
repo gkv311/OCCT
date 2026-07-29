@@ -883,13 +883,8 @@ static Standard_Boolean splitcommonvertex (const Handle(ShapeProcess_Context)& c
 //function : Init
 //purpose  : Register standard operators
 //=======================================================================
-
-void ShapeProcess_OperLibrary::Init ()
+static bool initOnce()
 {
-  static Standard_Boolean done = Standard_False;
-  if ( done ) return;
-  done = Standard_True;
-
   ShapeExtend::Init();
 
   ShapeProcess::RegisterOperator ( "DirectFaces",           new ShapeProcess_UOperator ( directfaces ) );
@@ -910,4 +905,11 @@ void ShapeProcess_OperLibrary::Init ()
   ShapeProcess::RegisterOperator ( "FixShape",              new ShapeProcess_UOperator ( fixshape ) );
   ShapeProcess::RegisterOperator ( "SplitClosedEdges",      new ShapeProcess_UOperator ( spltclosededges ) );
   ShapeProcess::RegisterOperator ( "SplitCommonVertex",     new ShapeProcess_UOperator ( splitcommonvertex ) );
+  return true;
+}
+
+void ShapeProcess_OperLibrary::Init ()
+{
+  static const bool wasInitialized = initOnce();
+  (void)wasInitialized;
 }

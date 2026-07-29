@@ -274,18 +274,6 @@ Handle(Standard_Transient) Interface_FileReaderTool::UnknownEntity() const
   return theproto->UnknownEntity();
 }
 
-
-//=======================================================================
-//function : NewModel
-//purpose  : 
-//=======================================================================
-
-Handle(Interface_InterfaceModel) Interface_FileReaderTool::NewModel() const
-{
-  return theproto->NewModel();
-}
-
-
 //=======================================================================
 //function : EndRead
 //purpose  : 

@@ -30,7 +30,6 @@ Transfer_ActorDispatch::Transfer_ActorDispatch
    const Interface_GeneralLib& lib)
     :  thetool (amodel,lib)
 {
-  SetLast(Standard_True);  // actor par defaut
   thetool.TransientProcess()->SetActor(this);
 }
 
@@ -39,7 +38,6 @@ Transfer_ActorDispatch::Transfer_ActorDispatch
    const Handle(Interface_Protocol)& protocol)
     :  thetool (amodel,protocol)
 {
-  SetLast(Standard_True);  // actor par defaut
   thetool.TransientProcess()->SetActor(this);
 }
 
@@ -47,7 +45,6 @@ Transfer_ActorDispatch::Transfer_ActorDispatch
   (const Handle(Interface_InterfaceModel)& amodel)
     :  thetool (amodel)
 {
-  SetLast(Standard_True);  // actor par defaut
   thetool.TransientProcess()->SetActor(this);
 }
 

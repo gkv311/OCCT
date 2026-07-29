@@ -35,17 +35,9 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
-  
-  //! Returns a Protocol fit for STEP (creates the first time)
-  Standard_EXPORT static Handle(Interface_Protocol) Protocol();
-  
-  //! Returns a new empty StepModel fit for STEP
-  //! i.e. with its header determined from Protocol
-  Standard_EXPORT static Handle(StepData_StepModel) NewModel();
-  
-  //! Returns a SignType fit for STEP (creates the first time)
-  Standard_EXPORT static Handle(IFSelect_Signature) SignType();
-  
+  //! Creates a SignType fit for STEP
+  Standard_EXPORT static Handle(IFSelect_Signature) NewSignType();
+
   //! Creates a Selection for ShapeDefinitionRepresentation
   //! By default searches among root entities
   Standard_EXPORT static Handle(IFSelect_SelectSignature) NewSelectSDR();

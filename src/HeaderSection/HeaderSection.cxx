@@ -11,17 +11,12 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
 #include <HeaderSection.hxx>
-#include <HeaderSection_Protocol.hxx>
-#include <Interface_Statics.hxx>
 
-StaticHandle(HeaderSection_Protocol, proto);
+#include <HeaderSection_Protocol.hxx>
 
 Handle(HeaderSection_Protocol) HeaderSection::Protocol()
-
-	{
-		InitHandleVoid(HeaderSection_Protocol, proto);
-		return proto;
-	}
-
+{
+  static Handle(HeaderSection_Protocol) aProto = new HeaderSection_Protocol();
+  return aProto;
+}

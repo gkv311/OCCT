@@ -11,30 +11,25 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <RWHeaderSection_GeneralModule.hxx>
 
-#include <HeaderSection.hxx>
 #include <HeaderSection_FileDescription.hxx>
 #include <HeaderSection_FileName.hxx>
 #include <HeaderSection_FileSchema.hxx>
-#include <HeaderSection_Protocol.hxx>
 #include <Interface_Check.hxx>
 #include <Interface_CopyTool.hxx>
 #include <Interface_EntityIterator.hxx>
-#include <Interface_GeneralLib.hxx>
 #include <Interface_HArray1OfHAsciiString.hxx>
 #include <Interface_Macros.hxx>
 #include <Interface_ShareTool.hxx>
-#include <RWHeaderSection_GeneralModule.hxx>
-#include <Standard_Transient.hxx>
-#include <Standard_Type.hxx>
 #include <StepData_UndefinedEntity.hxx>
 #include <TCollection_HAsciiString.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(RWHeaderSection_GeneralModule,StepData_GeneralModule)
 
 RWHeaderSection_GeneralModule::RWHeaderSection_GeneralModule ()
-{ 
-  Interface_GeneralLib::SetGlobal(this, HeaderSection::Protocol());
+{
+  //
 }
 
 void RWHeaderSection_GeneralModule::FillSharedCase(const Standard_Integer CN, const Handle(Standard_Transient)& ent, Interface_EntityIterator& iter) const

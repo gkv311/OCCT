@@ -42,10 +42,6 @@
 
 #include <iostream>
 #include <string>
-//#include <XSDRAW_Shape.hxx>
-static int deja = 0, dejald = 0;
-//unused variable 
-//static int okxset = 0;
 
 static NCollection_DataMap<TCollection_AsciiString, Standard_Integer> theolds;
 static Handle(TColStd_HSequenceOfAsciiString) thenews;
@@ -92,31 +88,24 @@ static Standard_Integer XSTEPDRAWRUN (Draw_Interpretor& di, Standard_Integer arg
   ChangeCommand (oldname,"");
 }
 
-    Standard_Boolean  XSDRAW::LoadSession ()
+static bool loadSessionOnce()
 {
-  if (deja) return Standard_False;
-  deja = 1;
-  thepilot   = new IFSelect_SessionPilot("XSTEP-DRAW>");
-  Handle(XSControl_WorkSession) WS = new XSControl_WorkSession;
+  thepilot = new IFSelect_SessionPilot("XSTEP-DRAW>");
+
+  Handle(XSControl_WorkSession) WS = new XSControl_WorkSession();
   WS->SetVars (new XSDRAW_Vars);
   thepilot->SetSession (WS);
 
   IFSelect_Functions::Init();
   XSControl_Functions::Init();
   XSControl_FuncShape::Init();
-//  XSDRAW_Shape::Init();   passe a present par theCommands
-  return Standard_True;
+  return true;
 }
 
-void XSDRAW::LoadDraw (Draw_Interpretor& theCommands)
+static bool loadDrawOnce (Draw_Interpretor& theCommands)
 {
-  if (dejald)
-  {
-    return;
-  }
-  dejald = 1;
 //  Pour tout faire d un coup : BRepTest & cie:
-  LoadSession();
+  XSDRAW::LoadSession();
 
   //skl: we make remove commands "x" and "exit" in order to this commands are
   //     performed not in IFSelect_SessionPilot but in standard Tcl interpretor
@@ -153,6 +142,19 @@ void XSDRAW::LoadDraw (Draw_Interpretor& theCommands)
     const TCollection_AsciiString& aCmdName = num < 0 ? aCmd : thenews->Value (num);
     theCommands.Add (aCmdName.ToCString(), aHelp.ToCString(), "", XSTEPDRAWRUN, anAct->Group());
   }
+  return true;
+}
+
+Standard_Boolean XSDRAW::LoadSession()
+{
+  static const bool wasInitialized = loadSessionOnce();
+  return wasInitialized;
+}
+
+void XSDRAW::LoadDraw (Draw_Interpretor& theCommands)
+{
+  static const bool wasInitialized = loadDrawOnce(theCommands);
+  (void)wasInitialized;
 }
 
     Standard_Integer  XSDRAW::Execute

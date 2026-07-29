@@ -14,52 +14,26 @@
 #include <StepData.hxx>
 
 #include <Interface_Macros.hxx>
-#include <Interface_Static.hxx>
-#include <Interface_Statics.hxx>
-#include <StepData_DefaultGeneral.hxx>
-#include <StepData_FileProtocol.hxx>
+#include <Standard_Mutex.hxx>
 #include <StepData_Protocol.hxx>
 
-StaticHandle(StepData_Protocol,proto);
-//svv #2: StaticHandle(StepData_DefaultGeneral,stmod);
+static Handle(StepData_Protocol) theHeader;
+static Standard_Mutex theMutex;
 
-StaticHandleA(StepData_Protocol,theheader);
-
-
-    void StepData::Init ()
+Handle(StepData_Protocol) StepData::Protocol()
 {
-//  InitHandleVoid(StepData_Protocol,proto);
-//  InitHandleVoid(StepData_DefaultGeneral,stmod);
-//:S4136  Interface_Static::Init("step","step.readaccept.void",'i',"1");
-//  if (proto.IsNull()) proto = new StepData_Protocol;
-//  if (stmod.IsNull()) stmod = new StepData_DefaultGeneral;
+  static Handle(StepData_Protocol) aProto = new StepData_Protocol();
+  return aProto;
 }
 
-    Handle(StepData_Protocol) StepData::Protocol ()
+void StepData::AddHeaderProtocol (const Handle(StepData_Protocol)& header)
 {
-  InitHandleVoid(StepData_Protocol,proto);// svv #2
-//  UseHandle(StepData_Protocol,proto);
-  return proto;
+  Standard_Mutex::Sentry aSentry(theMutex);
+  theHeader = header;
 }
 
-
-    void  StepData::AddHeaderProtocol (const Handle(StepData_Protocol)& header)
+Handle(StepData_Protocol) StepData::HeaderProtocol()
 {
-  InitHandle(StepData_Protocol,theheader);
-  if (theheader.IsNull()) theheader = header;
-  else {
-    DeclareAndCast(StepData_FileProtocol,headmult,theheader);
-    if (headmult.IsNull()) {
-      headmult = new StepData_FileProtocol;
-      headmult->Add(theheader);
-    }
-    headmult->Add(header);
-    theheader = headmult;
-  }
-}
-
-    Handle(StepData_Protocol) StepData::HeaderProtocol ()
-{
-  UseHandle(StepData_Protocol,theheader);
-  return theheader;
+  Standard_Mutex::Sentry aSentry(theMutex);
+  return theHeader;
 }

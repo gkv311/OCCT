@@ -45,27 +45,12 @@ public:
   //! Sends a short help message for StepSelect commands
   Standard_EXPORT Standard_CString Help (const Standard_Integer number) const Standard_OVERRIDE;
 
-
-
-
   DEFINE_STANDARD_RTTIEXT(StepSelect_Activator,IFSelect_Activator)
-
-protected:
-
-
-
 
 private:
 
-
-
+  bool registerFirstInstance();
 
 };
-
-
-
-
-
-
 
 #endif // _StepSelect_Activator_HeaderFile

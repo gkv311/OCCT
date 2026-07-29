@@ -44,7 +44,6 @@
 IMPLEMENT_STANDARD_RTTIEXT(IGESSelect_WorkLibrary,IFSelect_WorkLibrary)
 
 static int deja = 0;
-static  Handle(IGESData_FileProtocol) IGESProto;
 
 
      IGESSelect_WorkLibrary::IGESSelect_WorkLibrary
@@ -138,15 +137,20 @@ static  Handle(IGESData_FileProtocol) IGESProto;
   return status;
 }
 
-    Handle(IGESData_Protocol)  IGESSelect_WorkLibrary::DefineProtocol ()
+static Handle(IGESData_FileProtocol) initOnce()
 {
-  if (!IGESProto.IsNull()) return IGESProto;
-  Handle(IGESData_Protocol)     IGESProto1 = IGESSolid::Protocol();
-  Handle(IGESData_Protocol)     IGESProto2 = IGESAppli::Protocol();
-//  Handle(IGESData_FileProtocol) IGESProto  = new IGESData_FileProtocol;
-  IGESProto  = new IGESData_FileProtocol;
+  Handle(IGESData_Protocol) IGESProto1 = IGESSolid::Protocol();
+  Handle(IGESData_Protocol) IGESProto2 = IGESAppli::Protocol();
+
+  Handle(IGESData_FileProtocol) IGESProto  = new IGESData_FileProtocol();
   IGESProto->Add(IGESProto1);
   IGESProto->Add(IGESProto2);
+  return IGESProto;
+}
+
+Handle(IGESData_Protocol) IGESSelect_WorkLibrary::DefineProtocol()
+{
+  static Handle(IGESData_FileProtocol) IGESProto = initOnce();
   return IGESProto;
 }
 

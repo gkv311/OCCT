@@ -54,15 +54,15 @@
 #include <stdio.h>
 IMPLEMENT_STANDARD_RTTIEXT(IGESSelect_Activator,IFSelect_Activator)
 
-static int THE_IGESSelect_Activator_initActivator = 0;
-
 IGESSelect_Activator::IGESSelect_Activator()
 {
-  if (THE_IGESSelect_Activator_initActivator)
-  {
-    return;
-  }
-  THE_IGESSelect_Activator_initActivator = 1;
+  // register only one instance of IGESSelect_Activator in global list
+  static const bool wasInitialized = this->registerFirstInstance();
+  (void)wasInitialized;
+}
+
+bool IGESSelect_Activator::registerFirstInstance()
+{
 //  Add ( 0,"load");
 //  Add ( 0,"loadiges");    // homonyme
   SetForGroup ("XSTEP-IGES");
@@ -101,6 +101,7 @@ IGESSelect_Activator::IGESSelect_Activator()
   AddSet (60,"splinetobspline");
 
   Add    (70,"setuseflag");
+  return true;
 }
 
 
