@@ -23,6 +23,7 @@
 #include <gp_Trsf.hxx>
 #include <Message.hxx>
 #include <NCollection_DataMap.hxx>
+#include <NCollection_StdAllocator.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TDF_ChildIterator.hxx>
 #include <TDF_Tool.hxx>
@@ -38,7 +39,9 @@
 #include <XSAlgo_AlgoContainer.hxx>
 #include <UnitsMethods.hxx>
 
-#include <stdio.h>
+#include <algorithm>
+#include <vector>
+
 //=======================================================================
 // Section: Work with shapes
 //=======================================================================
@@ -1005,37 +1008,51 @@ static Standard_Integer XGetProperties(Draw_Interpretor& theDI,
     }
     const Handle(TDataStd_NamedData)& aNamedData = aNamedDataIter.Value();
     aNamedData->LoadDeferredData();
+
+    struct KeyValue
+    {
+      TCollection_AsciiString Key;
+      TCollection_AsciiString Value;
+
+      bool operator<(const KeyValue& theOther) const { return Key.IsLess(theOther.Key); }
+      bool operator==(const KeyValue& theOther) const { return Key.IsEqual(theOther.Key); }
+    };
+    std::vector<KeyValue, NCollection_StdAllocator<KeyValue>> aMetadata;
+
+    const auto formatReal = [](double theVal) -> TCollection_AsciiString
+    {
+      // note that Draw_Interpretor uses "%.17g" format, but TCollection_AsciiString uses "%g"
+      return TCollection_AsciiString(theVal);
+    };
+
+    const auto formatByte = [](Standard_Byte theVal) -> TCollection_AsciiString
+    {
+      return TCollection_AsciiString((int)theVal);
+    };
+
     if (aNamedData->HasIntegers())
     {
       const TColStd_DataMapOfStringInteger& anIntProperties = aNamedData->GetIntegersContainer();
-      for (TColStd_DataMapIteratorOfDataMapOfStringInteger anIter(anIntProperties); anIter.More(); anIter.Next())
-      {
-        theDI << anIter.Key() << " : " << anIter.Value() << "\n";
-      }
+      for (TColStd_DataMapOfStringInteger::Iterator anIter(anIntProperties); anIter.More(); anIter.Next())
+        aMetadata.push_back(KeyValue{anIter.Key(), anIter.Value()});
     }
     if (aNamedData->HasReals())
     {
       const TDataStd_DataMapOfStringReal& aRealProperties = aNamedData->GetRealsContainer();
-      for (TDataStd_DataMapIteratorOfDataMapOfStringReal anIter(aRealProperties); anIter.More(); anIter.Next())
-      {
-        theDI << anIter.Key() << " : " << anIter.Value() << "\n";
-      }
+      for (TDataStd_DataMapOfStringReal::Iterator anIter(aRealProperties); anIter.More(); anIter.Next())
+        aMetadata.push_back(KeyValue{anIter.Key(), formatReal(anIter.Value())});
     }
     if (aNamedData->HasStrings())
     {
       const TDataStd_DataMapOfStringString& aStringProperties = aNamedData->GetStringsContainer();
-      for (TDataStd_DataMapIteratorOfDataMapOfStringString anIter(aStringProperties); anIter.More(); anIter.Next())
-      {
-        theDI << anIter.Key() << " : " << anIter.Value() << "\n";
-      }
+      for (TDataStd_DataMapOfStringString::Iterator anIter(aStringProperties); anIter.More(); anIter.Next())
+        aMetadata.push_back(KeyValue{anIter.Key(), anIter.Value()});
     }
     if (aNamedData->HasBytes())
     {
       const TDataStd_DataMapOfStringByte& aByteProperties = aNamedData->GetBytesContainer();
       for (TDataStd_DataMapOfStringByte::Iterator anIter(aByteProperties); anIter.More(); anIter.Next())
-      {
-        theDI << anIter.Key() << " : " << anIter.Value() << "\n";
-      }
+        aMetadata.push_back(KeyValue{anIter.Key(), formatByte(anIter.Value())});
     }
     if (aNamedData->HasArraysOfIntegers())
     {
@@ -1044,14 +1061,15 @@ static Standard_Integer XGetProperties(Draw_Interpretor& theDI,
       for (TDataStd_DataMapOfStringHArray1OfInteger::Iterator anIter(anArrayIntegerProperties);
            anIter.More(); anIter.Next())
       {
-        TCollection_AsciiString aMessage(anIter.Key() + " : ");
-        for (TColStd_HArray1OfInteger::Iterator anSubIter(anIter.Value()->Array1());
-             anSubIter.More(); anSubIter.Next())
+        TCollection_AsciiString aMessage;
+        for (const Standard_Integer anSubIter : anIter.Value()->Array1())
         {
-          aMessage += " ";
-          aMessage += anSubIter.Value();
+          if (!aMessage.IsEmpty())
+            aMessage += " ";
+
+          aMessage += anSubIter;
         }
-        theDI << aMessage << "\n";
+        aMetadata.push_back(KeyValue{anIter.Key(), aMessage});
       }
     }
     if (aNamedData->HasArraysOfReals())
@@ -1061,15 +1079,22 @@ static Standard_Integer XGetProperties(Draw_Interpretor& theDI,
       for (TDataStd_DataMapOfStringHArray1OfReal::Iterator anIter(anArrayRealsProperties);
            anIter.More(); anIter.Next())
       {
-        TCollection_AsciiString aMessage(anIter.Key() + " : ");
-        for (TColStd_HArray1OfReal::Iterator anSubIter(anIter.Value()->Array1());
-             anSubIter.More(); anSubIter.Next())
+        TCollection_AsciiString aMessage;
+        for (const Standard_Real anSubIter : anIter.Value()->Array1())
         {
-          aMessage += " ";
-          aMessage += anSubIter.Value();
+          if (!aMessage.IsEmpty())
+            aMessage += " ";
+
+          aMessage += formatReal(anSubIter);
         }
-        theDI << aMessage << "\n";
+        aMetadata.push_back(KeyValue{anIter.Key(), aMessage});
       }
+    }
+
+    std::sort(aMetadata.begin(), aMetadata.end());
+    for (const KeyValue& aKeyValue : aMetadata)
+    {
+      theDI << aKeyValue.Key << " : " << aKeyValue.Value << "\n";
     }
   }
 
