@@ -5,8 +5,6 @@ TransferBRep_BinderOfShape.hxx
 TransferBRep_HSequenceOfTransferResultInfo.hxx
 TransferBRep_OrientedShapeMapper.hxx
 TransferBRep_OrientedShapeMapper_0.cxx
-TransferBRep_Reader.cxx
-TransferBRep_Reader.hxx
 TransferBRep_SequenceOfTransferResultInfo.hxx
 TransferBRep_ShapeBinder.cxx
 TransferBRep_ShapeBinder.hxx

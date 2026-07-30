@@ -1,8 +1,6 @@
 StepData.cxx
 StepData.hxx
 StepData_Array1OfField.hxx
-StepData_DefaultGeneral.cxx
-StepData_DefaultGeneral.hxx
 StepData_Described.cxx
 StepData_Described.hxx
 StepData_ECDescr.cxx
@@ -25,8 +23,6 @@ StepData_FieldListD.cxx
 StepData_FieldListD.hxx
 StepData_FieldListN.cxx
 StepData_FieldListN.hxx
-StepData_FileProtocol.cxx
-StepData_FileProtocol.hxx
 StepData_FileRecognizer.hxx
 StepData_FileRecognizer_0.cxx
 StepData_FreeFormEntity.cxx

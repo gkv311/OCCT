@@ -11,8 +11,6 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-// dce 21.01.99 : move of general message to IGESToBRep_Reader
-
 #include <stdio.h>
 // declarations des programmes C de base :
 #include <IGESData_IGESReaderData.hxx>

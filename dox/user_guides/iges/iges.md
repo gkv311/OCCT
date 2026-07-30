@@ -538,7 +538,7 @@ During the transfer of IGES to Open CASCADE Technology  several parameters are u
  
 @subsubsection occt_iges_2_6_2 Initial setting of tolerances in translating  objects
 
-Transfer starts from one entity treated as a root (either  the actual root in the IGES file or an entity selected by the user). The  function which performs the transfer (that is *IGESToBRep_Actor::Transfer* or *IGESToBRep_Reader::Transfer*) creates an object of the type  *IGESToBRep_CurveAndSurface*, which is intended for translating geometry. 
+Transfer starts from one entity treated as a root (either  the actual root in the IGES file or an entity selected by the user). The  function which performs the transfer (that is *IGESToBRep_Actor::Transfer*) creates an object of the type  *IGESToBRep_CurveAndSurface*, which is intended for translating geometry. 
 
 This object contains three tolerances: *Epsilon, EpsGeom* and  *EpsCoeff*. 
 

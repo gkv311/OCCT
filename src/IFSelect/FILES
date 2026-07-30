@@ -1,5 +1,3 @@
-IFSelect.cxx
-IFSelect.hxx
 IFSelect_Act.cxx
 IFSelect_Act.hxx
 IFSelect_ActFunc.hxx
@@ -7,8 +5,6 @@ IFSelect_Activator.cxx
 IFSelect_Activator.hxx
 IFSelect_AppliedModifiers.cxx
 IFSelect_AppliedModifiers.hxx
-IFSelect_BasicDumper.cxx
-IFSelect_BasicDumper.hxx
 IFSelect_CheckCounter.cxx
 IFSelect_CheckCounter.hxx
 IFSelect_ContextModif.cxx
@@ -130,10 +126,6 @@ IFSelect_SelectUnknownEntities.hxx
 IFSelect_SequenceOfAppliedModifiers.hxx
 IFSelect_SequenceOfGeneralModifier.hxx
 IFSelect_SequenceOfInterfaceModel.hxx
-IFSelect_SessionDumper.cxx
-IFSelect_SessionDumper.hxx
-IFSelect_SessionFile.cxx
-IFSelect_SessionFile.hxx
 IFSelect_SessionPilot.cxx
 IFSelect_SessionPilot.hxx
 IFSelect_ShareOut.cxx

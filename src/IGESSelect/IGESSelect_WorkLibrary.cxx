@@ -22,7 +22,6 @@
 #include <IGESData_Protocol.hxx>
 #include <IGESDefs.hxx>
 #include <IGESFile_Read.hxx>
-#include <IGESSelect_Dumper.hxx>
 #include <IGESSelect_FileModifier.hxx>
 #include <IGESSelect_WorkLibrary.hxx>
 #include <IGESSolid.hxx>
@@ -43,8 +42,6 @@
 #include <errno.h>
 IMPLEMENT_STANDARD_RTTIEXT(IGESSelect_WorkLibrary,IFSelect_WorkLibrary)
 
-static int deja = 0;
-
 
      IGESSelect_WorkLibrary::IGESSelect_WorkLibrary
   (const Standard_Boolean modefnes)
@@ -54,10 +51,6 @@ static int deja = 0;
   IGESAppli::Init();
   IGESDefs::Init();
 
-  if (!deja) {
-    Handle(IGESSelect_Dumper) sesdump = new IGESSelect_Dumper;  // ainsi,cestfait
-    deja = 1;
-  }
   SetDumpLevels (4,6);
   SetDumpHelp (0,"Only DNum");
   SetDumpHelp (1,"DNum, IGES Type & Form");

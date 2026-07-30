@@ -140,7 +140,6 @@
 #include <IGESControl_Writer.hxx>
 
 #include <IGESToBRep_Actor.hxx>
-#include <IGESToBRep_Reader.hxx>
 #include <XSControl_WorkSession.hxx>
 
 #include <STEPControl_StepModelType.hxx>
