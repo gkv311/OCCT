@@ -18,6 +18,7 @@
 #define _RWStepAP214_ReadWriteModule_HeaderFile
 
 #include <NCollection_DataMap.hxx>
+#include <NCollection_DoubleMap.hxx>
 #include <StepData_ReadWriteModule.hxx>
 #include <TColStd_SequenceOfAsciiString.hxx>
 
@@ -64,7 +65,7 @@ public:
 
 private:
 
-  NCollection_DataMap<TCollection_AsciiString, Standard_Integer> typenums;
+  NCollection_DoubleMap<TCollection_AsciiString, Standard_Integer> typenums;
   NCollection_DataMap<TCollection_AsciiString, Standard_Integer> typeshor;
 
 };
