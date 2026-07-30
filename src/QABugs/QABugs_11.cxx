@@ -37,7 +37,6 @@
 #include <BRepPrimAPI_MakeSphere.hxx>
 #include <BRepPrimAPI_MakeCone.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
-#include <IGESToBRep_Reader.hxx>
 #include <TopoDS.hxx>
 #include <GCPnts_UniformDeflection.hxx>
 #include <BRepAdaptor_CompCurve.hxx>

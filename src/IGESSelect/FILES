@@ -20,8 +20,6 @@ IGESSelect_DispPerDrawing.cxx
 IGESSelect_DispPerDrawing.hxx
 IGESSelect_DispPerSingleView.cxx
 IGESSelect_DispPerSingleView.hxx
-IGESSelect_Dumper.cxx
-IGESSelect_Dumper.hxx
 IGESSelect_EditDirPart.cxx
 IGESSelect_EditDirPart.hxx
 IGESSelect_EditHeader.cxx

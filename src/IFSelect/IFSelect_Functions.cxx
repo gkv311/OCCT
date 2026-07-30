@@ -44,7 +44,6 @@
 #include <IFSelect_SelectSuite.hxx>
 #include <IFSelect_SelectUnion.hxx>
 #include <IFSelect_SelectUnknownEntities.hxx>
-#include <IFSelect_SessionFile.hxx>
 #include <IFSelect_SessionPilot.hxx>
 #include <IFSelect_ShareOut.hxx>
 #include <IFSelect_SignatureList.hxx>
@@ -800,37 +799,6 @@ static IFSelect_ReturnStatus fun24
     sout<<" -- giving " << nbitems << " found" << std::endl;
   }
   return IFSelect_RetVoid;
-}
-
-static IFSelect_ReturnStatus fun25
-  (const Handle(IFSelect_SessionPilot)& pilot)
-{
-  Handle(IFSelect_WorkSession) WS = pilot->Session();
-  Standard_Integer argc = pilot->NbWords();
-  const Standard_CString arg1 = pilot->Arg(1);
-//        ****    Save (Dump)       ****
-  Message_Messenger::StreamBuffer sout = Message::SendInfo();
-  if (argc < 2) { sout<<"Donner nom du Fichier"<<std::endl; return IFSelect_RetError; }
-  IFSelect_SessionFile dumper(WS,arg1);
-  if (!dumper.IsDone()) return IFSelect_RetFail;
-  return IFSelect_RetDone;
-}
-
-static IFSelect_ReturnStatus fun26
-  (const Handle(IFSelect_SessionPilot)& pilot)
-{
-  Handle(IFSelect_WorkSession) WS = pilot->Session();
-  Standard_Integer argc = pilot->NbWords();
-  const Standard_CString arg1 = pilot->Arg(1);
-//        ****    Restore (Dump)    ****
-  Message_Messenger::StreamBuffer sout = Message::SendInfo();
-  if (argc < 2) { sout<<"Donner nom du Fichier"<<std::endl; return IFSelect_RetError; }
-  IFSelect_SessionFile dumper(WS);
-  Standard_Integer readstat = dumper.Read(arg1);
-  if      (readstat == 0) return IFSelect_RetDone;
-  else if (readstat >  0) sout << "-- Erreur Lecture Fichier "<<arg1<<std::endl;
-  else                    sout << "-- Pas pu ouvrir Fichier "<<arg1<<std::endl;
-  return IFSelect_RetDone;
 }
 
 static IFSelect_ReturnStatus fun27
@@ -2458,8 +2426,6 @@ static bool initOnce()
   IFSelect_Act::AddFunc("cleardata","mode:a-g-c-p  : Clears all or some data (model, check...)",fun22);
 
   IFSelect_Act::AddFunc("itemlabel","xxx xxx : liste items having this label",fun24);
-  IFSelect_Act::AddFunc("xsave","filename:string  : sauve items-session",fun25);
-  IFSelect_Act::AddFunc("xrestore","filename:string  : restaure items-session",fun26);
   IFSelect_Act::AddFunc("param","[-p Pattern] - displays all parameters or filtered by pattern;\n"
                                 "par_name - displays parameter;\n"
                                 "par_name par_value - changes parameter's value", fun27);

@@ -1823,7 +1823,7 @@ if (aMsgMap.IsBound (theShape1))
 Classes *MoniTool_Timer* and *MoniTool_TimerSentry* are used for measuring the performance of a current operation or any part of code, and provide the necessary API.
 Timers are used for debugging and performance optimizing purposes.
 
-Let us try to use timers in *XSDRAWIGES.cxx* and *IGESBRep_Reader.cxx* to analyze the performance of command *igesbrep*:
+Let us try to use timers in *XSDRAWIGES.cxx* and *IGESControl_Reader.cxx* to analyze the performance of command *igesbrep*:
 
 ~~~~{.cpp}
 XSDRAWIGES.cxx
@@ -1840,7 +1840,7 @@ XSDRAWIGES.cxx
   MoniTool_Timer::DumpTimers (std::cout);
   return;
 
-IGESBRep_Reader.cxx
+IGESControl_Reader.cxx
   ...
   #include <MoniTool_TimerSentry.hxx>
   ...
@@ -1848,7 +1848,7 @@ IGESBRep_Reader.cxx
   ...
   for (Standard_Integer i = 1; i<= aNbEntries; ++i)
   {
-    MoniTool_TimerSentry aTimeSentry ("IGESToBRep_Transfer");
+    MoniTool_TimerSentry aTimeSentry ("IGES_Transfer");
     ...
     try
     {
@@ -1864,7 +1864,7 @@ The result of *DumpTimer()* after file translation is as follows:
 | TIMER | Elapsed | CPU User | CPU Sys | Hits |
 | :--- | :---- | :----- | :---- | :---- |
 | *IGES_LoadFile* | 1.0 sec |  0.9 sec | 0.0 sec | 1 |
-| *IGESToBRep_Transfer* | 14.5 sec | 4.4 sec | 0.1 sec | 1311 |
+| *IGES_Transfer* | 14.5 sec | 4.4 sec | 0.1 sec | 1311 |
 
 @section occt_shg_6 Shape Processing
 
