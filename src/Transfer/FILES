@@ -1,6 +1,4 @@
 Transfer_Actor.gxx
-Transfer_ActorDispatch.cxx
-Transfer_ActorDispatch.hxx
 Transfer_ActorOfFinderProcess.cxx
 Transfer_ActorOfFinderProcess.hxx
 Transfer_ActorOfProcessForFinder.hxx
@@ -15,8 +13,6 @@ Transfer_BinderOfTransientInteger.cxx
 Transfer_BinderOfTransientInteger.hxx
 Transfer_DataInfo.cxx
 Transfer_DataInfo.hxx
-Transfer_DispatchControl.cxx
-Transfer_DispatchControl.hxx
 Transfer_Finder.cxx
 Transfer_Finder.hxx
 Transfer_FinderProcess.cxx
@@ -50,8 +46,6 @@ Transfer_SimpleBinderOfTransient.hxx
 Transfer_StatusExec.hxx
 Transfer_StatusResult.hxx
 Transfer_TransferDeadLoop.hxx
-Transfer_TransferDispatch.cxx
-Transfer_TransferDispatch.hxx
 Transfer_TransferFailure.hxx
 Transfer_TransferInput.cxx
 Transfer_TransferInput.hxx
@@ -59,8 +53,6 @@ Transfer_TransferIterator.cxx
 Transfer_TransferIterator.hxx
 Transfer_TransferMapOfProcessForFinder.hxx
 Transfer_TransferMapOfProcessForTransient.hxx
-Transfer_TransferOutput.cxx
-Transfer_TransferOutput.hxx
 Transfer_TransferProcess.gxx
 Transfer_TransientListBinder.cxx
 Transfer_TransientListBinder.hxx

@@ -102,7 +102,6 @@ Interface_STAT.cxx
 Interface_STAT.hxx
 Interface_Static.cxx
 Interface_Static.hxx
-Interface_Statics.hxx
 Interface_StaticSatisfies.hxx
 Interface_StaticStandards.cxx
 Interface_Translates.hxx

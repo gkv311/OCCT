@@ -24,6 +24,7 @@
 #include <Interface_InterfaceModel.hxx>
 #include <Interface_Macros.hxx>
 #include <Interface_MSG.hxx>
+#include <Interface_ShareFlags.hxx>
 #include <Interface_Static.hxx>
 #include <Message_ProgressScope.hxx>
 #include <ShapeFix.hxx>
@@ -39,7 +40,6 @@
 #include <Transfer_ResultFromModel.hxx>
 #include <Transfer_ResultFromTransient.hxx>
 #include <Transfer_SimpleBinderOfTransient.hxx>
-#include <Transfer_TransferOutput.hxx>
 #include <Transfer_TransientProcess.hxx>
 #include <TransferBRep.hxx>
 #include <TransferBRep_ShapeBinder.hxx>
@@ -786,7 +786,6 @@ Standard_Integer XSControl_TransferReader::TransferOne
   Standard_Integer level = myTP->TraceLevel();
   
 
-  Transfer_TransferOutput TP (myTP,myModel);
   if (myGraph.IsNull()) myTP->SetModel(myModel);
   else                  myTP->SetGraph(myGraph);
 
@@ -809,7 +808,7 @@ Standard_Integer XSControl_TransferReader::TransferOne
   //  seule difference entre TransferRoots et TransferOne
   Standard_Integer res = 0;
   const Handle(Standard_Transient)& obj = ent;
-  TP.Transfer (obj, theProgress);
+  myTP->Transfer (obj, theProgress);
   if (theProgress.UserBreak())
     return res;
   myTP->SetRoot (obj);
@@ -842,7 +841,6 @@ Standard_Integer XSControl_TransferReader::TransferList
 
   Standard_Integer level = myTP->TraceLevel();
 
-  Transfer_TransferOutput TP (myTP,myModel);
   if (myGraph.IsNull()) myTP->SetModel(myModel);
   else                  myTP->SetGraph(myGraph);
 
@@ -870,7 +868,7 @@ Standard_Integer XSControl_TransferReader::TransferList
   Message_ProgressScope aPS(theProgress, NULL, nb);
   for (i = 1; i <= nb && aPS.More(); i++) {
     obj = list->Value(i);
-    TP.Transfer (obj, aPS.Next());
+    myTP->Transfer (obj, aPS.Next());
     myTP->SetRoot (obj);
 
     //  Resultat ...
@@ -900,7 +898,6 @@ Standard_Integer XSControl_TransferReader::TransferRoots(const Interface_Graph& 
   if (!BeginTransfer()) return -1;
   Standard_Integer level = myTP->TraceLevel();
 
-  Transfer_TransferOutput TP (myTP,myModel);
   if (myGraph.IsNull()) myTP->SetModel(myModel);
   else                  myTP->SetGraph(myGraph);
 
@@ -920,7 +917,16 @@ Standard_Integer XSControl_TransferReader::TransferRoots(const Interface_Graph& 
     sout<<"\n*******************************************************************\n";
   }
 
-  TP.TransferRoots (G, theProgress);
+  Interface_ShareFlags tool (G);
+  myTP->SetModel (G.Model());
+  Interface_EntityIterator list = tool.RootEntities();
+  Message_ProgressScope aPS(theProgress, nullptr, list.NbEntities());
+  for (list.Start(); list.More() && aPS.More(); list.Next())
+  {
+    const Handle(Standard_Transient)& ent = list.Value();
+    if (myTP->Transfer (ent, aPS.Next()))
+      myTP->SetRoot (ent);
+  }
   if (theProgress.UserBreak())
     return -1;
 
