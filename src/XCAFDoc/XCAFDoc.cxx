@@ -14,6 +14,7 @@
 #include <XCAFDoc.hxx>
 #include <XCAFDoc_ColorType.hxx>
 
+#include <NCollection_StdAllocator.hxx>
 #include <TCollection_HAsciiString.hxx>
 #include <TDF_Reference.hxx>
 #include <TDF_Tool.hxx>
@@ -23,6 +24,7 @@
 #include <TDataStd_ByteArray.hxx>
 #include <TDataStd_IntegerArray.hxx>
 #include <TDataStd_Name.hxx>
+#include <TDataStd_NamedData.hxx>
 #include <XCAFDoc_LengthUnit.hxx>
 #include <TDataStd_RealArray.hxx>
 #include <TDataStd_TreeNode.hxx>
@@ -38,6 +40,9 @@
 #include <XCAFDoc_ShapeMapTool.hxx>
 #include <XCAFDoc_Volume.hxx>
 #include <XCAFDoc_VisMaterial.hxx>
+
+#include <algorithm>
+#include <vector>
 
 //=======================================================================
 //function : ShapeRefGUID
@@ -480,6 +485,86 @@ TCollection_AsciiString XCAFDoc::AttributeInfo (const Handle(TDF_Attribute)& the
   else if ( theAtt->IsKind(STANDARD_TYPE(TDataStd_UAttribute)) ) {
     if ( theAtt->ID() == XCAFDoc::AssemblyGUID() ) anInfo += TCollection_AsciiString ( "is assembly" );
     if ( theAtt->ID() == XCAFDoc::InvisibleGUID() ) anInfo += TCollection_AsciiString ( "invisible" );
+  }
+  else if (theAtt->IsKind(STANDARD_TYPE(TDataStd_NamedData))) {
+    const Handle(TDataStd_NamedData) aNamedData = Handle(TDataStd_NamedData)::DownCast(theAtt);
+    aNamedData->LoadDeferredData();
+
+    struct KeyValue
+    {
+      TCollection_ExtendedString Key;
+      TCollection_AsciiString Value;
+
+      bool operator<(const KeyValue& theOther) const {return Key.IsLess(theOther.Key); }
+      bool operator==(const KeyValue& theOther) const {return Key.IsEqual(theOther.Key); }
+    };
+    std::vector<KeyValue, NCollection_StdAllocator<KeyValue>> aMetadata;
+
+    const auto formatReal = [](const double theVal) -> TCollection_AsciiString
+    {
+      return TCollection_AsciiString(theVal);
+    };
+
+    const auto formatByte = [](const Standard_Byte theVal) -> TCollection_AsciiString
+    {
+      return TCollection_AsciiString((int)theVal);
+    };
+
+    if (aNamedData->HasIntegers())
+    {
+      for (const std::pair<const TCollection_ExtendedString, Standard_Integer>& anIter : aNamedData->GetIntegersContainer())
+        aMetadata.push_back(KeyValue{anIter.first, anIter.second});
+    }
+    if (aNamedData->HasReals())
+    {
+      for (const std::pair<const TCollection_ExtendedString, Standard_Real>& anIter : aNamedData->GetRealsContainer())
+        aMetadata.push_back(KeyValue{anIter.first, formatReal(anIter.second)});
+    }
+    if (aNamedData->HasStrings())
+    {
+      for (const std::pair<const TCollection_ExtendedString, TCollection_ExtendedString>& anIter : aNamedData->GetStringsContainer())
+        aMetadata.push_back(KeyValue{anIter.first, anIter.second});
+    }
+    if (aNamedData->HasBytes())
+    {
+      for (const std::pair<const TCollection_ExtendedString, Standard_Byte>& anIter : aNamedData->GetBytesContainer())
+        aMetadata.push_back(KeyValue{anIter.first, formatByte(anIter.second)});
+    }
+    if (aNamedData->HasArraysOfIntegers())
+    {
+      for (const std::pair<const TCollection_ExtendedString, Handle(TColStd_HArray1OfInteger)>& anIter : aNamedData->GetArraysOfIntegersContainer())
+      {
+        TCollection_AsciiString aMessage;
+        for (const Standard_Integer aSubIter : anIter.second->Array1())
+        {
+          if (!aMessage.IsEmpty())
+            aMessage += " ";
+
+          aMessage += aSubIter;
+        }
+        aMetadata.push_back(KeyValue{anIter.first, aMessage});
+      }
+    }
+    if (aNamedData->HasArraysOfReals())
+    {
+      for (const std::pair<const TCollection_ExtendedString, Handle(TColStd_HArray1OfReal)>& anIter : aNamedData->GetArraysOfRealsContainer())
+      {
+        TCollection_AsciiString aMessage;
+        for (const Standard_Real aSubIter : anIter.second->Array1())
+        {
+          if (!aMessage.IsEmpty())
+            aMessage += " ";
+
+          aMessage += formatReal(aSubIter);
+        }
+        aMetadata.push_back(KeyValue{anIter.first, aMessage});
+      }
+    }
+
+    // this might not fit into line, but it is still useful see something
+    std::sort(aMetadata.begin(), aMetadata.end());
+    for (const KeyValue& aKeyValue : aMetadata)
+      anInfo = anInfo +"{" + aKeyValue.Key + "=" + aKeyValue.Value + "}";
   }
   else if ( theAtt->IsKind(STANDARD_TYPE(XCAFDoc_Color)) ) {
     Handle(XCAFDoc_Color) val = Handle(XCAFDoc_Color)::DownCast ( theAtt );
