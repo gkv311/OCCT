@@ -107,7 +107,8 @@ static Standard_Boolean Perform (TColStd_Array1OfReal& theParameters,
                                  const Standard_Real theU1, const Standard_Real theU2,
                                  const Standard_Real theTotalLength,
                                  Standard_Integer& theNbPoints,
-                                 const Standard_Real theEPSILON)
+                                 const Standard_Real theEPSILON,
+                                 const Standard_Real theTol)
 {
   Standard_Boolean isLocalDone = Standard_True;
   Standard_Real aUU1 = Min (theU1, theU2), aUU2 = Max (theU1, theU2);
@@ -117,6 +118,9 @@ static Standard_Boolean Perform (TColStd_Array1OfReal& theParameters,
   Standard_Real aDelta = (theAbscissa / theTotalLength) * (aUU2 - aUU1);
   Standard_Integer anIndex = 1;
   theParameters.SetValue (anIndex, aUU1);
+
+  const typename GCPnts_TCurveTypes<TheCurve>::Point aPEnd = theC.Value(aUU2);
+  const Standard_Real aTol2 = theTol * theTol;
   for (Standard_Boolean isNotDone = Standard_True; isNotDone; )
   {
     Standard_Real aUi = theParameters.Value (anIndex) + aDelta;
@@ -137,7 +141,13 @@ static Standard_Boolean Perform (TColStd_Array1OfReal& theParameters,
     {
       anIndex += 1;
       aUi = anAbscissaFinder.Parameter();
-      if (Abs (aUi - aUU2) <= theEPSILON)
+      // theEPSILON is a parametric tolerance obtained from theTol3d through Resolution(),
+      // which converts using the curve's largest derivative;
+      // where the local derivative is much smaller it is far too tight.
+      // Also accept a point that coincides with the end within theTol3d,
+      // otherwise the walk takes one more step and appends a duplicate.
+      if (Abs(aUi - aUU2) <= theEPSILON
+       || (aUU2 - aUi < aDelta && theC.Value(aUi).SquareDistance(aPEnd) <= aTol2))
       {
         theParameters.SetValue (anIndex, aUU2);
         isNotDone = Standard_False;
@@ -472,7 +482,8 @@ void GCPnts_UniformAbscissa::initialize (const TheCurve& theC,
                         theU1, theU2,
                         aL,
                         myNbPoints,
-                        anEPSILON);
+                        anEPSILON,
+                        Max(theTol, Precision::Confusion()));
       break;
     }
   }
@@ -591,7 +602,8 @@ void GCPnts_UniformAbscissa::initialize (const TheCurve& theC,
                         theU1, theU2,
                         aL,
                         myNbPoints,
-                        anEPSILON);
+                        anEPSILON,
+                        Max(theTol, Precision::Confusion()));
       break;
     }
   }
