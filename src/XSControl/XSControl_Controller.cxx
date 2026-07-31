@@ -83,7 +83,7 @@ XSControl_Controller::XSControl_Controller (const Standard_CString theLongName, 
 
 void XSControl_Controller::TraceStatic (const Standard_CString theName, const Standard_Integer theUse)
 {
-  Handle(Interface_Static) val = Interface_Static::Static(theName);
+  Handle(Interface_TypedValue) val = Interface_Static::Static(theName);
   if (val.IsNull()) return;
   myParams.Append (val);
   myParamUses.Append(theUse);

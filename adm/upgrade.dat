@@ -95,6 +95,7 @@ GeomAdaptor_HSurface GeomAdaptor_Surface
 GeomAdaptor_HSurfaceOfLinearExtrusion GeomAdaptor_SurfaceOfLinearExtrusion
 GeomAdaptor_HSurfaceOfRevolution GeomAdaptor_SurfaceOfRevolution
 PrsMgr_PresentationManager3d PrsMgr_PresentationManager
+Handle(Interface_Static) Handle(Interface_TypedValue)
 
 [tcollection]
 AdvApp2Var_SequenceOfNode

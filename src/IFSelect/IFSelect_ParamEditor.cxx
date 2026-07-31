@@ -98,8 +98,7 @@ Handle(IFSelect_ParamEditor)  IFSelect_ParamEditor::StaticEditor
 //  if (nb == 0) return editor;
   editor = new IFSelect_ParamEditor (nb+10,label);
   for (i = 1; i <= nb; i ++) {
-    Handle(Interface_Static) val = Interface_Static::Static
-      (list->Value(i)->ToCString());
+    Handle(Interface_TypedValue) val = Interface_Static::Static(list->Value(i)->ToCString());
     if (!val.IsNull()) editor->AddValue(val);
   }
   return editor;
