@@ -77,7 +77,9 @@ static bool initOnce()
     Interface_Static::Init("step","write.step.schema",'&',"eval AP203");
     Interface_Static::Init("step","write.step.schema",'&',"eval AP214IS");
     Interface_Static::Init("step","write.step.schema",'&',"eval AP242DIS");
-    Interface_Static::SetCVal("write.step.schema","AP214IS"); 
+    Interface_Static::SetCVal("write.step.schema","AP214IS");
+    Interface_Static::SetDescription("write.step.schema",
+                                     "Schema for output STEP file");
 
     // Type of Product Definition for reading
     // Note: the numbers should be consistent with function FindShapeReprType()
@@ -92,6 +94,8 @@ static bool initOnce()
     Interface_Static::Init("step","read.step.shape.repr",'&',"eval EBWSR"); // 6
     Interface_Static::Init("step","read.step.shape.repr",'&',"eval GBWSR"); // 7
     Interface_Static::SetCVal("read.step.shape.repr","All");
+    Interface_Static::SetDescription("read.step.shape.repr",
+                                     "Type of Product Definition to read from STEP");
 
     // Mode for reading shapes attached to main SDR by SRR
     // (hybrid model representation in AP203 since 1998)
@@ -100,6 +104,8 @@ static bool initOnce()
     Interface_Static::Init("step","read.step.shape.relationship",'&',"eval OFF");
     Interface_Static::Init("step","read.step.shape.relationship",'&',"eval ON");
     Interface_Static::SetCVal("read.step.shape.relationship","ON");
+    Interface_Static::SetDescription("read.step.shape.relationship",
+                                     "Shape Representation Relationships (AP203 hybrid models) for STEP reader");
 
     // Mode for reading shapes attached to Product by ShapeAspect 
     // (hybrid model representation in AP203 before 1998)
@@ -108,6 +114,8 @@ static bool initOnce()
     Interface_Static::Init("step","read.step.shape.aspect",'&',"eval OFF");
     Interface_Static::Init("step","read.step.shape.aspect",'&',"eval ON");
     Interface_Static::SetCVal("read.step.shape.aspect","ON");
+    Interface_Static::SetDescription("read.step.shape.aspect",
+                                     "Shape Aspect entities to read or not from STEP");
 
     // Mode for reading SDR and ShapeRepr if it is necessary
     Interface_Static::Init("step","read.step.product.mode",'e',"");
@@ -115,6 +123,8 @@ static bool initOnce()
     Interface_Static::Init("step","read.step.product.mode",'&',"eval OFF");
     Interface_Static::Init("step","read.step.product.mode",'&',"eval ON");
     Interface_Static::SetCVal("read.step.product.mode","ON");
+    Interface_Static::SetDescription("read.step.product.mode",
+                                     "Read STEP geometry from");
 
     // Order of reading ShapeDefinitionRepresentation in ProductDefinition
     Interface_Static::Init("step","read.step.product.context",'e',"");
@@ -123,6 +133,8 @@ static bool initOnce()
     Interface_Static::Init("step","read.step.product.context",'&',"eval design");  // 2
     Interface_Static::Init("step","read.step.product.context",'&',"eval analysis");// 3
     Interface_Static::SetCVal("read.step.product.context","all");
+    Interface_Static::SetDescription("read.step.product.context",
+                                     "Product context to read from STEP");
 
     // What we try to read in ProductDefinition
     Interface_Static::Init("step","read.step.assembly.level",'e',"");
@@ -132,6 +144,8 @@ static bool initOnce()
     Interface_Static::Init("step","read.step.assembly.level",'&',"eval structure");// 3
     Interface_Static::Init("step","read.step.assembly.level",'&',"eval shape");    // 4
     Interface_Static::SetCVal("read.step.assembly.level","all");
+    Interface_Static::SetDescription("read.step.assembly.level",
+                                     "Read STEP assembly as");
 
     // unit: supposed to be cascade unit (target unit for reading)
     Interface_Static::Init("step","write.step.unit", 'e',"");
@@ -155,6 +169,8 @@ static bool initOnce()
     Interface_Static::Init ("step","read.step.nonmanifold",'&',"eval Off");
     Interface_Static::Init ("step","read.step.nonmanifold",'&',"eval On");
     Interface_Static::SetIVal("read.step.nonmanifold",0); 
+    Interface_Static::SetDescription("read.step.nonmanifold",
+                                     "Non-manifold topology reading from STEP");
 
     // Non-manifold topology writing: OFF by default (ssv; 26.11.2010)
     Interface_Static::Init ("step","write.step.nonmanifold",'e',"");
@@ -162,6 +178,8 @@ static bool initOnce()
     Interface_Static::Init ("step","write.step.nonmanifold",'&',"eval Off");
     Interface_Static::Init ("step","write.step.nonmanifold",'&',"eval On");
     Interface_Static::SetIVal("write.step.nonmanifold",0); 
+    Interface_Static::SetDescription("write.step.nonmanifold",
+                                     "Non-manifold topology writing into STEP");
 
     // I-Deas-like STEP processing: OFF by default (ssv; 22.11.2010)
     Interface_Static::Init ("step","read.step.ideas",'e',"");
@@ -169,6 +187,8 @@ static bool initOnce()
     Interface_Static::Init ("step","read.step.ideas",'&',"eval Off");
     Interface_Static::Init ("step","read.step.ideas",'&',"eval On");
     Interface_Static::SetIVal("read.step.ideas",0); 
+    Interface_Static::SetDescription("read.step.ideas",
+                                     "I-Deas-like STEP processing");
 
     //Parameter to write all free vertices in one SDR (name and style of vertex are lost) (default) 
     //or each vertex in its own SDR (name and style of vertex are exported). (ika; 21.07.2014) 
@@ -246,6 +266,8 @@ static bool initOnce()
     Interface_Static::Init("step", "read.step.all.shapes", '&', "eval Off");
     Interface_Static::Init("step", "read.step.all.shapes", '&', "eval On");
     Interface_Static::SetIVal("read.step.all.shapes", 0);
+    Interface_Static::SetDescription("read.step.all.shapes",
+                                     "Read all top level solids and shells from STEP");
 
      // Mode for reading constructive geometry representation relationship to read
     //StepRepr_ConstructiveGeometryRepresentation method implemented only for StepGeom_MakeAxis2Placement3d
@@ -256,6 +278,8 @@ static bool initOnce()
     Interface_Static::Init("step","read.step.constructivegeom.relationship",'&',"eval OFF");
     Interface_Static::Init("step","read.step.constructivegeom.relationship",'&',"eval ON");
     Interface_Static::SetCVal("read.step.constructivegeom.relationship","OFF");
+    Interface_Static::SetDescription("read.step.constructivegeom.relationship",
+                                     "Read constructive geometry representation relationship from STEP");
 
     // Mode to variate apply or not transformation placed in the root shape representation.
     // Issues #29068 and #31491.
@@ -264,6 +288,8 @@ static bool initOnce()
     Interface_Static::Init("step", "read.step.root.transformation", '&', "eval OFF");
     Interface_Static::Init("step", "read.step.root.transformation", '&', "eval ON");
     Interface_Static::SetCVal("read.step.root.transformation", "ON");
+    Interface_Static::SetDescription("read.step.root.transformation",
+                                     "Mode to variate apply or not transformation placed in the root shape representation from STEP");
 
     // STEP file encoding for names translation
     // Note: the numbers should be consistent with Resource_FormatType enumeration
@@ -295,6 +321,8 @@ static bool initOnce()
     Interface_Static::Init("step", "read.step.codepage", '&', "eval iso8859-9");    // Resource_FormatType_iso8859_9 23
     Interface_Static::Init("step", "read.step.codepage", '&', "eval CP850");        // Resource_FormatType_CP850 24
     Interface_Static::SetCVal("read.step.codepage", "UTF8");
+    Interface_Static::SetDescription("read.step.codepage",
+                                     "Read STEP file from encoding");
 
     // Tessellated geometry reading: Off by default
     Interface_Static::Init("step", "read.step.tessellated", 'e', "");
@@ -303,6 +331,8 @@ static bool initOnce()
     Interface_Static::Init("step", "read.step.tessellated", '&', "eval On");        // 1
     Interface_Static::Init("step", "read.step.tessellated", '&', "eval OnNoBRep");  // 2
     Interface_Static::SetCVal("read.step.tessellated", "On");
+    Interface_Static::SetDescription("read.step.tessellated",
+                                     "Read tessellated geometry from STEP");
 
     // Tessellated geometry writing: Off by default
     Interface_Static::Init("step", "write.step.tessellated", 'e', "");
@@ -311,6 +341,8 @@ static bool initOnce()
     Interface_Static::Init("step", "write.step.tessellated", '&', "eval On");       // 1
     Interface_Static::Init("step", "write.step.tessellated", '&', "eval OnNoBRep"); // 2
     Interface_Static::SetCVal("write.step.tessellated", "OnNoBRep");
+    Interface_Static::SetDescription("write.step.tessellated",
+                                     "Write tessellated geometry into STEP");
 
     Standard_STATIC_ASSERT((int)Resource_FormatType_CP850 - (int)Resource_FormatType_CP1250 == 18); // "Error: Invalid Codepage Enumeration"
   }

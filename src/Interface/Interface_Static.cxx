@@ -16,6 +16,7 @@
 #include <NCollection_StdAllocator.hxx>
 #include <TCollection_HAsciiString.hxx>
 #include <Standard_Mutex.hxx>
+#include <Standard_NullObject.hxx>
 
 #include <algorithm>
 #include <vector>
@@ -231,6 +232,26 @@ Standard_Boolean  Interface_Static::SetRVal
     return Standard_False;
 
   return (*anItem)->SetRealValue(val);
+}
+
+Standard_CString Interface_Static::Description (const Standard_CString name)
+{
+  Standard_Mutex::Sentry aSentry(theMutex);
+  const Handle(Interface_TypedValue)* item = theValuesMap.Seek(name);
+  if (item == nullptr || item->IsNull())
+    throw Standard_NullObject("Interface_Static::Description: incorrect parameter");
+
+  return (*item)->Description().ToCString();
+}
+
+void Interface_Static::SetDescription (const Standard_CString name, const Standard_CString desc)
+{
+  Standard_Mutex::Sentry aSentry(theMutex);
+  const Handle(Interface_TypedValue)* item = theValuesMap.Seek(name);
+  if (item == nullptr || item->IsNull())
+    throw Standard_NullObject("Interface_Static::SetDescription: incorrect parameter");
+
+  (*item)->SetDescription(desc);
 }
 
 Handle(TColStd_HSequenceOfHAsciiString) Interface_Static::Items (const Standard_CString theFamily)
