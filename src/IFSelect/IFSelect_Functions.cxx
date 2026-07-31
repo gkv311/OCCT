@@ -839,8 +839,15 @@ static IFSelect_ReturnStatus fun27
       {
         continue;
       }
-      sout<<li->Value(i)->String();
-      sout<<" : "<<Interface_Static::CVal(li->Value(i)->ToCString())<<std::endl;
+
+      TCollection_AsciiString aNameVal = li->Value(i)->String() + " : " + Interface_Static::CVal(li->Value(i)->ToCString());
+      const char* aDesc = Interface_Static::Description(li->Value(i)->ToCString());
+      if (*aDesc != '\0')
+      {
+        aNameVal.LeftJustify(50, ' ');
+        aNameVal = aNameVal + " | " + aDesc;
+      }
+      sout << aNameVal << std::endl;
     }
     return IFSelect_RetVoid;
   } else if (atoi(arg1) > 0) {

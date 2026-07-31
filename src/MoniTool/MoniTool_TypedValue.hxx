@@ -82,7 +82,13 @@ public:
   
   //! Enforces a Definition
   Standard_EXPORT void SetDefinition (const Standard_CString deftext);
-  
+
+  //! Returns the description.
+  const TCollection_AsciiString& Description() const { return thedesc; }
+
+  //! Set the description.
+  void SetDescription (const TCollection_AsciiString& desc) { thedesc = desc; }
+
   //! Prints definition, specification, and actual status and value
   Standard_EXPORT virtual void Print (Standard_OStream& S) const;
   
@@ -104,18 +110,18 @@ public:
   //! eval ??   : add a non-authorised enum value (to be skipped)
   //! tmax   l  : maximum length for a text
   Standard_EXPORT Standard_Boolean AddDef (const Standard_CString initext);
-  
+
   //! Sets a label, which can then be displayed
-  Standard_EXPORT void SetLabel (const Standard_CString label);
-  
+  void SetLabel (const Standard_CString label) { thelabel = label; }
+
   //! Returns the label, if set; else returns an empty string
-  Standard_EXPORT Standard_CString Label() const;
-  
+  Standard_CString Label() const { return thelabel.ToCString(); }
+
   //! Sets a maximum length for a text (active only for a free text)
-  Standard_EXPORT void SetMaxLength (const Standard_Integer max);
-  
+  void SetMaxLength (const Standard_Integer max) { themaxlen = Max(max, 0); }
+
   //! Returns the maximum length, 0 if not set
-  Standard_EXPORT Standard_Integer MaxLength() const;
+  Standard_Integer MaxLength() const { return themaxlen; }
   
   //! Sets an Integer limit (included) to <val>, the upper limit
   //! if <max> is True, the lower limit if <max> is False
@@ -134,15 +140,15 @@ public:
   //! False). Returns True if this limit is defined, False else
   //! (in that case, gives the natural limit for Real)
   Standard_EXPORT Standard_Boolean RealLimit (const Standard_Boolean max, Standard_Real& val) const;
-  
+
   //! Sets (Clears if <def> empty) a unit definition, as an equation
   //! of dimensions. TypedValue just records this definition, does
   //! not exploit it, to be done as required by user applications
-  Standard_EXPORT void SetUnitDef (const Standard_CString def);
-  
+  void SetUnitDef (const Standard_CString def) { theunidef = def; }
+
   //! Returns the recorded unit definition, empty if not set
-  Standard_EXPORT Standard_CString UnitDef() const;
-  
+  Standard_CString UnitDef() const { return theunidef.ToCString(); }
+
   //! For an enumeration, precises the starting value (default 0)
   //! and the match condition : if True (D), the string value must
   //! match the definition, else it may take another value : in that
@@ -200,12 +206,12 @@ public:
   Standard_EXPORT Standard_Boolean IsSetValue() const;
   
   //! Returns the value, as a cstring. Empty if not set.
-  Standard_EXPORT Standard_CString CStringValue() const;
-  
+  Standard_CString CStringValue() const { return !thehval.IsNull() ? thehval->ToCString() : ""; }
+
   //! Returns the value, as a Handle (can then be shared)
   //! Null if not defined
-  Standard_EXPORT Handle(TCollection_HAsciiString) HStringValue() const;
-  
+  const Handle(TCollection_HAsciiString)& HStringValue() const { return thehval; }
+
   //! Interprets a value.
   //! <native> True  : returns a native value
   //! <native> False : returns a coded  value
@@ -247,7 +253,7 @@ public:
   //! For type = Enum, the designated rank (see Enum definition)
   //! StartEnum - 1 if not set or not in the definition
   //! Else, returns 0
-  Standard_EXPORT Standard_Integer IntegerValue() const;
+  Standard_Integer IntegerValue() const { return theival; }
   
   //! Changes the value as an integer, only for Integer or Enum
   Standard_EXPORT virtual Standard_Boolean SetIntegerValue (const Standard_Integer ival);
@@ -262,13 +268,13 @@ public:
   //! Returns the value as Transient Object, only for Object/Entity
   //! Remark that the "HString value" is IGNORED here
   //! Null if not set; remains to be casted
-  Standard_EXPORT Handle(Standard_Transient) ObjectValue() const;
-  
+  const Handle(Standard_Transient)& ObjectValue() const { return theoval; }
+
   //! Same as ObjectValue, but avoids DownCast : the receiving
   //! variable is directly loaded. It is assumed that it complies
   //! with the definition of ObjectType ! Otherwise, big trouble
-  Standard_EXPORT void GetObjectValue (Handle(Standard_Transient)& val) const;
-  
+  void GetObjectValue (Handle(Standard_Transient)& val) const { val = theoval; }
+
   //! Changes the value as Transient Object, only for Object/Entity
   //! Returns False if DynamicType does not satisfy ObjectType
   //! Can be redefined to be managed (in a subclass)
@@ -286,6 +292,7 @@ private:
   TCollection_AsciiString thename;
   TCollection_AsciiString thedef;
   TCollection_AsciiString thelabel;
+  TCollection_AsciiString thedesc;
   MoniTool_ValueType thetype;
   Handle(Standard_Type) theotyp;
   Standard_Integer thelims;

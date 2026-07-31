@@ -138,7 +138,13 @@ public:
   //! parameter does not exist. The modification is specified
   //! by the real number value val.
   Standard_EXPORT static Standard_Boolean SetRVal (const Standard_CString name, const Standard_Real val);
-  
+
+  //! Returns parameter description.
+  Standard_EXPORT static Standard_CString Description (const Standard_CString name);
+
+  //! Sets parameter description.
+  Standard_EXPORT static void SetDescription (const Standard_CString name, const Standard_CString desc);
+
   //! Sets a Static to be "uptodate"
   //! Returns False if <name> is not present
   //! This status can be used by a reinitialisation procedure to

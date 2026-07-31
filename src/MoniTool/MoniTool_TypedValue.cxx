@@ -14,7 +14,6 @@
 #include <MoniTool_TypedValue.hxx>
 
 #include <MoniTool_Element.hxx>
-#include <OSD_Path.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_Transient.hxx>
 #include <Standard_Type.hxx>
@@ -26,14 +25,6 @@
 IMPLEMENT_STANDARD_RTTIEXT(MoniTool_TypedValue,Standard_Transient)
 
 //  Fonctions Satisfies offertes en standard ...
-/* Not Used
-
-static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
-{
-  OSD_Path apath;
-  return apath.IsValid (TCollection_AsciiString(val->ToCString()));
-}
-*/
 
     MoniTool_TypedValue::MoniTool_TypedValue
   (const Standard_CString name,
@@ -196,16 +187,26 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
 
 //  ##   Print   ##
 
-    void  MoniTool_TypedValue::Print (Standard_OStream& S) const
+void MoniTool_TypedValue::Print (Standard_OStream& S) const
 {
-  S <<"--- Typed Value : "<<Name();
-  if (thelabel.Length() > 0) S <<"  Label : "<<Label();
-  S <<std::endl<<"--- Type : "<<Definition()<<std::endl<<"--- Value : ";
+  S << "--- Typed Value : " << Name();
 
+  if (!thelabel.IsEmpty())
+    S << "  Label : " << thelabel;
+
+  S << "\n--- Type : " << Definition();
+
+  S << "\n--- Value : ";
   PrintValue (S);
-  S <<std::endl;
+  S << "\n";
 
-  if (thesatisf) S <<" -- Specific Function for Satisfies : "<<thesatisn.ToCString()<<std::endl;
+  if (!thedesc.IsEmpty())
+    S << "--- Description : " << thedesc << "\n";
+
+  if (thesatisf)
+    S << " -- Specific Function for Satisfies : " << thesatisn << "\n";
+
+  S << std::endl;
 }
 
 
@@ -265,21 +266,6 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
 }
 
 
-    void  MoniTool_TypedValue::SetLabel (const Standard_CString label)
-      {  thelabel.Clear();  thelabel.AssignCat (label);  }
-
-    Standard_CString  MoniTool_TypedValue::Label  () const
-      {  return thelabel.ToCString();    }
-
-
-
-    void  MoniTool_TypedValue::SetMaxLength
-  (const Standard_Integer max)
-      {  themaxlen = max;  if (max < 0) themaxlen = 0;  }
-
-    Standard_Integer  MoniTool_TypedValue::MaxLength () const
-      {  return themaxlen;  }
-
     void  MoniTool_TypedValue::SetIntegerLimit
   (const Standard_Boolean max, const Standard_Integer val)
 {
@@ -316,12 +302,6 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
   else     { res = (thelims & 1) != 0; val = (res ? therealow : RealFirst()); }
   return res;
 }
-
-    void   MoniTool_TypedValue::SetUnitDef (const Standard_CString def)
-      {  theunidef.Clear();  theunidef.AssignCat(def);  }
-
-    Standard_CString  MoniTool_TypedValue::UnitDef () const
-      {  return  theunidef.ToCString();  }
 
 //  ******  les enums  ******
 
@@ -506,12 +486,6 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
   return Standard_False;
 }
 
-    Standard_CString MoniTool_TypedValue::CStringValue () const
-      {  if (thehval.IsNull()) return "";  return thehval->ToCString();  }
-
-    Handle(TCollection_HAsciiString) MoniTool_TypedValue::HStringValue () const
-      {  return thehval;  }
-
     Handle(TCollection_HAsciiString)  MoniTool_TypedValue::Interpret
   (const Handle(TCollection_HAsciiString)& hval,
    const Standard_Boolean native) const
@@ -625,9 +599,6 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
   return Standard_True;
 }
 
-    Standard_Integer  MoniTool_TypedValue::IntegerValue () const
-      {  return theival;  }
-
     Standard_Boolean  MoniTool_TypedValue::SetIntegerValue
   (const Standard_Integer ival)
 {
@@ -656,12 +627,6 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
   thehval->Clear();  thehval->AssignCat (hval->ToCString());
   return Standard_True;
 }
-
-    Handle(Standard_Transient)  MoniTool_TypedValue::ObjectValue () const
-      {  return theoval;  }
-
-    void  MoniTool_TypedValue::GetObjectValue (Handle(Standard_Transient)& val) const
-      {  val = theoval;  }
 
     Standard_Boolean  MoniTool_TypedValue::SetObjectValue
   (const Handle(Standard_Transient)& obj)
