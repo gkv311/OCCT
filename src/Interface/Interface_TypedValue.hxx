@@ -29,7 +29,8 @@ class Interface_TypedValue;
 DEFINE_STANDARD_HANDLE(Interface_TypedValue, MoniTool_TypedValue)
 
 //! Now strictly equivalent to TypedValue from MoniTool,
-//! except for ParamType which remains for compatibility reasons
+//! except for ParamType which is redefined for legacy reasons,
+//! and additional field Family.
 //!
 //! This class allows to dynamically manage .. typed values, i.e.
 //! values which have an alphanumeric expression, but with
@@ -48,61 +49,70 @@ class Interface_TypedValue : public MoniTool_TypedValue
 
 public:
 
-  
-  //! Creates a TypedValue, with a name
-  //!
-  //! type gives the type of the parameter, default is free text
-  //! Also available : Integer, Real, Enum, Entity (i.e. Object)
-  //! More precise specifications, titles, can be given to the
-  //! TypedValue once created
-  //!
-  //! init gives an initial value. If it is not given, the
-  //! TypedValue begins as "not set", its value is empty
-  Standard_EXPORT Interface_TypedValue(const Standard_CString name, const Interface_ParamType type = Interface_ParamText, const Standard_CString init = "");
-  
-  //! Returns the type
-  //! I.E. calls ValueType then makes correspondence between
-  //! ParamType from Interface (which remains for compatibility
-  //! reasons) and ValueType from MoniTool
-  Standard_EXPORT Interface_ParamType Type() const;
-  
-  //! Correspondence ParamType from Interface to ValueType from MoniTool
-  Standard_EXPORT static MoniTool_ValueType ParamTypeToValueType (const Interface_ParamType typ);
-  
-  //! Correspondence ParamType from Interface to ValueType from MoniTool
-  Standard_EXPORT static Interface_ParamType ValueTypeToParamType (const MoniTool_ValueType typ);
+  //! Creates a new parameter with the given name.
+  //! More precise specifications, titles, can be given to the object once created.
+  //! @param[in] name parameter name
+  //! @param[in] type gives the type of the parameter, default is free text;
+  //!            also available : Integer, Real, Enum, Entity (i.e. Object)
+  //! @param[in] init gives an initial value; if it is not given, the
+  //!            value begins as "not set", its value is empty
+  Standard_EXPORT Interface_TypedValue(const Standard_CString name,
+                                       const Interface_ParamType type = Interface_ParamText,
+                                       const Standard_CString init = "");
 
+  //! Creates a new parameter with an additional parameter @p family.
+  //! @param[in] family additional name for logical grouping or related parameters
+  //! @param[in] name parameter name
+  //! @param[in] type gives the type of the parameter, default is free text;
+  //!            also available : Integer, Real, Enum, Entity (i.e. Object)
+  //! @param[in] init gives an initial value; if it is not given, the
+  //!            value begins as "not set", its value is empty
+  Standard_EXPORT Interface_TypedValue(const Standard_CString family,
+                                       const Standard_CString name,
+                                       const Interface_ParamType type = Interface_ParamText,
+                                       const Standard_CString init = "");
 
+  //! Creates a new parameter with same definition as another one @p other
+  //! (value is copied, except for Entity - it remains NULL).
+  Standard_EXPORT Interface_TypedValue(const Standard_CString family,
+                                       const Standard_CString name,
+                                       const Handle(Interface_TypedValue)& other);
 
+  //! Returns the family. It can be: a resource name for applis,
+  //! an internal name between : $e (environment variables),
+  //! $l (other, purely local)
+  Standard_CString Family() const { return myFamily.ToCString(); }
+
+  //! Prints definition, specification, and actual status and value.
+  Standard_EXPORT void Print(Standard_OStream& S) const Standard_OVERRIDE;
+
+  //! Returns the type; i.e. calls ValueType then makes correspondence between Interface_ParamType
+  //! (which remains for compatibility reasons) and MoniTool_ValueType.
+  Interface_ParamType Type() const
+  {
+    return ValueTypeToParamType(ValueType());
+  }
+
+public:
+
+  //! Correspondence Interface_ParamType to MoniTool_ValueType.
+  static MoniTool_ValueType ParamTypeToValueType (const Interface_ParamType typ)
+  {
+    return (MoniTool_ValueType)typ;
+  }
+
+  //! Correspondence Interface_ParamType to MoniTool_ValueType.
+  static Interface_ParamType ValueTypeToParamType (const MoniTool_ValueType typ)
+  {
+    return (Interface_ParamType)typ;
+  }
 
   DEFINE_STANDARD_RTTIEXT(Interface_TypedValue,MoniTool_TypedValue)
 
-protected:
-
-
-
-
 private:
 
-
-  TCollection_AsciiString thename;
-  TCollection_AsciiString thedef;
-  TCollection_AsciiString thelabel;
-  Handle(Standard_Type) theotyp;
-  TCollection_AsciiString theunidef;
-  Handle(TColStd_HArray1OfAsciiString) theenums;
-  NCollection_DataMap<TCollection_AsciiString, Standard_Integer> theeadds;
-  TCollection_AsciiString thesatisn;
-  Handle(TCollection_HAsciiString) thehval;
-  Handle(Standard_Transient) theoval;
-
+  TCollection_AsciiString myFamily;
 
 };
-
-
-
-
-
-
 
 #endif // _Interface_TypedValue_HeaderFile

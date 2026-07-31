@@ -277,48 +277,8 @@ public:
   //! Returns the type name of the ObjectValue, or an empty string
   //! if not set
   Standard_EXPORT Standard_CString ObjectTypeName() const;
-  
-  //! Adds a TypedValue in the library.
-  //! It is recorded then will be accessed by its Name
-  //! Its Definition may be imposed, else it is computed as usual
-  //! By default it will be accessed by its Definition (string)
-  //! Returns True if done, False if tv is Null or brings no
-  //! Definition or <def> not defined
-  //!
-  //! If a TypedValue was already recorded under this name, it is
-  //! replaced
-  Standard_EXPORT static Standard_Boolean AddLib (const Handle(MoniTool_TypedValue)& tv, const Standard_CString def = "");
-  
-  //! Returns the TypedValue bound with a given Name
-  //! Null Handle if none recorded
-  //! Warning : it is the original, not duplicated
-  Standard_EXPORT static Handle(MoniTool_TypedValue) Lib (const Standard_CString def);
-  
-  //! Returns a COPY of the TypedValue bound with a given Name
-  //! Null Handle if none recorded
-  Standard_EXPORT static Handle(MoniTool_TypedValue) FromLib (const Standard_CString def);
-  
-  //! Returns the list of names of items of the Library of Types
-  //! --    Library of TypedValue as Valued Parameters,    -- --
-  //! accessed by parameter name
-  //! for use by management of Static Parameters
-  Standard_EXPORT static Handle(TColStd_HSequenceOfAsciiString) LibList();
-  
-  //! Returns a static value from its name, null if unknown
-  Standard_EXPORT static Handle(MoniTool_TypedValue) StaticValue (const Standard_CString name);
-
-
-
 
   DEFINE_STANDARD_RTTIEXT(MoniTool_TypedValue,Standard_Transient)
-
-protected:
-
-  
-  //! Gives the internal library of static values
-  Standard_EXPORT static NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)>& Stats();
-
-
 
 private:
 

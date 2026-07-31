@@ -22,40 +22,8 @@
 #include <TCollection_HAsciiString.hxx>
 
 #include <stdio.h>
+
 IMPLEMENT_STANDARD_RTTIEXT(MoniTool_TypedValue,Standard_Transient)
-
-// Not Used :
-//static  char defmess[30];
-static NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)> thelibtv;
-static NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)> astats;
-
-static NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)>& libtv()
-{
-  if (thelibtv.IsEmpty()) {
-    Handle(MoniTool_TypedValue) tv;
-    tv = new MoniTool_TypedValue("Integer",MoniTool_ValueInteger);
-    thelibtv.Bind ("Integer",tv);
-    tv = new MoniTool_TypedValue("Real",MoniTool_ValueReal);
-    thelibtv.Bind ("Real",tv);
-    tv = new MoniTool_TypedValue("Text",MoniTool_ValueText);
-    thelibtv.Bind ("Text",tv);
-    tv = new MoniTool_TypedValue("Transient",MoniTool_ValueIdent);
-    thelibtv.Bind ("Transient",tv);
-    tv = new MoniTool_TypedValue("Boolean",MoniTool_ValueEnum);
-    tv->AddDef ("enum 0");    //    = 0 False  ,  > 0 True
-    tv->AddDef ("eval False");
-    tv->AddDef ("eval True");
-    thelibtv.Bind ("Boolean",tv);
-    tv = new MoniTool_TypedValue("Logical",MoniTool_ValueEnum);
-    tv->AddDef ("enum -1");    //    < 0 False  ,  = 0 Unk  ,  > 0 True
-    tv->AddDef ("eval False");
-    tv->AddDef ("eval Unknown");
-    tv->AddDef ("eval True");
-    thelibtv.Bind ("Logical",tv);
-  }
-  return thelibtv;
-}
-
 
 //  Fonctions Satisfies offertes en standard ...
 /* Not Used
@@ -715,63 +683,3 @@ static Standard_Boolean StaticPath(const Handle(TCollection_HAsciiString)& val)
   return theoval->DynamicType()->Name();
 }
 
-
-//    ########        LIBRARY        ########
-
-    Standard_Boolean  MoniTool_TypedValue::AddLib
-  (const Handle(MoniTool_TypedValue)& tv, const Standard_CString defin)
-{
-  if (tv.IsNull()) return Standard_False;
-  if (defin[0] != '\0') tv->SetDefinition(defin);
-//  else if (tv->Definition() == '\0') return Standard_False;
-  libtv().Bind(tv->Name(),tv);
-  return Standard_True;
-}
-
-    Handle(MoniTool_TypedValue)  MoniTool_TypedValue::Lib
-  (const Standard_CString defin)
-{
-  Handle(MoniTool_TypedValue) val;
-  Handle(Standard_Transient) aTVal;
-  if (libtv().Find(defin, aTVal))
-    val = Handle(MoniTool_TypedValue)::DownCast(aTVal);
-  else
-    val.Nullify();
-  return val;
-}
-
-    Handle(MoniTool_TypedValue)  MoniTool_TypedValue::FromLib
-  (const Standard_CString defin)
-{
-  Handle(MoniTool_TypedValue) val = MoniTool_TypedValue::Lib(defin);
-  if (!val.IsNull()) val = new MoniTool_TypedValue (val);
-  return val;
-}
-
-    Handle(TColStd_HSequenceOfAsciiString)  MoniTool_TypedValue::LibList ()
-{
-  Handle(TColStd_HSequenceOfAsciiString) list = new TColStd_HSequenceOfAsciiString();
-  if (libtv().IsEmpty()) return list;
-  NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)>::Iterator it(libtv());
-  for (; it.More();it.Next()) {
-    list->Append (it.Key());
-  }
-  return list;
-}
-
-NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)>& MoniTool_TypedValue::Stats ()
-{
-  return astats;
-}
-
-    Handle(MoniTool_TypedValue)  MoniTool_TypedValue::StaticValue
-  (const Standard_CString name)
-{
-  Handle(MoniTool_TypedValue) result;
-  Handle(Standard_Transient) aTResult;
-  if (Stats().Find(name, aTResult))
-    result = Handle(MoniTool_TypedValue)::DownCast(aTResult);
-  else
-    result.Nullify();
-  return result;
-}
