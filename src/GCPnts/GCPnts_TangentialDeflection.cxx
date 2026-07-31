@@ -381,10 +381,11 @@ void GCPnts_TangentialDeflection::initialize (const TheCurve& theC,
                                               const Standard_Real theUTol,
                                               const Standard_Real theMinLen)
 {
-  Standard_ConstructionError_Raise_if (theCurvatureDeflection < Precision::Confusion() || theAngularDeflection < Precision::Angular(),
-                                       "GCPnts_TangentialDeflection::Initialize - Zero Deflection")
   myParameters->clear();
   myPoints->clear();
+  if (theCurvatureDeflection < Precision::Confusion() || theAngularDeflection < Precision::Angular())
+    throw Standard_ConstructionError("GCPnts_TangentialDeflection::Initialize - Zero Deflection");
+
   // reserve size for a couple of points
   myPoints->reserve (Max (16, theMinimumOfPoints));
   myParameters->reserve (Max (16, theMinimumOfPoints));
