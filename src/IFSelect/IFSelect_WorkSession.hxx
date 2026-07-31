@@ -402,13 +402,6 @@ public:
   //! - other values are ignored
   Standard_EXPORT Standard_Integer NextIdentForLabel (const Standard_CString label, const Standard_Integer id, const Standard_Integer mode = 0) const;
   
-  //! Creates a parameter as being bound to a Static
-  //! If the Static is Integer, this creates an IntParam bound to
-  //! it by its name. Else this creates a String which is the value
-  //! of the Static.
-  //! Returns a null handle if <statname> is unknown as a Static
-  Standard_EXPORT Handle(Standard_Transient) NewParamFromStatic (const Standard_CString statname, const Standard_CString name = "");
-  
   //! Returns an IntParam, given its Ident in the Session
   //! Null result if <id> is not suitable for an IntParam
   //! (undefined, or defined for another kind of variable)
