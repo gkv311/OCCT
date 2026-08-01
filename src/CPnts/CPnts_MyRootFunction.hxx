@@ -33,9 +33,24 @@
 class CPnts_MyRootFunction  : public math_FunctionWithDerivative
 {
 public:
-
   DEFINE_STANDARD_ALLOC
 
+  //! Integrate theF over [theU1, theU2], splitting the range into two, four, ... equal parts until
+  //! two successive levels agree to CPnts_IntegrationTolerance relatively.
+  //!
+  //! A single fixed-order Gauss rule cannot resolve an integrand that varies sharply across the
+  //! range it covers, and the arc-length integrand |C'(u)| does: over a whole ellipse it has four
+  //! extrema, and the order-10 rule order() gives a conic reads a 1 x 0.05 ellipse 1.7% long. The
+  //! error follows the width of one integration interval rather than the curve's type, so the same
+  //! rule applied to each GeomAbs_CN span of a B-spline is out by 6.0e-5 on a 5-point interpolation.
+  Standard_EXPORT static bool AdaptiveIntegrate(math_Function& theF,
+                                                const Standard_Real theU1,
+                                                const Standard_Real theU2,
+                                                const Standard_Integer theOrder,
+                                                const Standard_Real* theTol,
+                                                Standard_Real& theValue);
+
+public:
   
     CPnts_MyRootFunction();
   

@@ -152,15 +152,13 @@ Standard_Real CPnts_AbscissaPoint::Length(const Adaptor3d_Curve& C,
 					  const Standard_Real U2) 
 {
   CPnts_MyGaussFunction FG;
-//POP pout WNT
-  CPnts_RealFunction rf = f3d;
-  FG.Init(rf,(Standard_Address)&C);
-//  FG.Init(f3d,(Standard_Address)&C);
-  math_GaussSingleIntegration TheLength(FG, U1, U2, order(C));
-  if (!TheLength.IsDone()) {
-    throw Standard_ConstructionError();
-  }
-  return Abs(TheLength.Value());
+  FG.Init(&f3d, (Standard_Address)&C);
+
+  Standard_Real aLength = 0.0;
+  if (!CPnts_MyRootFunction::AdaptiveIntegrate(FG, U1, U2, order(C), nullptr, aLength))
+    throw Standard_ConstructionError("CPnts_AbscissaPoint::Length() unable to integrate");
+
+  return Abs(aLength);
 }
 
 //=======================================================================
@@ -173,15 +171,13 @@ Standard_Real CPnts_AbscissaPoint::Length(const Adaptor2d_Curve2d& C,
 					  const Standard_Real U2) 
 {
   CPnts_MyGaussFunction FG;
-//POP pout WNT
-  CPnts_RealFunction rf = f2d;
-  FG.Init(rf,(Standard_Address)&C);
-//  FG.Init(f2d,(Standard_Address)&C);
-  math_GaussSingleIntegration TheLength(FG, U1, U2, order(C));
-  if (!TheLength.IsDone()) {
-    throw Standard_ConstructionError();
-  }
-  return Abs(TheLength.Value());
+  FG.Init(&f2d, (Standard_Address)&C);
+
+  Standard_Real aLength = 0.0;
+  if (!CPnts_MyRootFunction::AdaptiveIntegrate(FG, U1, U2, order(C), nullptr, aLength))
+    throw Standard_ConstructionError("CPnts_AbscissaPoint::Length() unable to integrate");
+
+  return Abs(aLength);
 }
 
 //=======================================================================
@@ -195,15 +191,13 @@ Standard_Real CPnts_AbscissaPoint::Length(const Adaptor3d_Curve& C,
 					  const Standard_Real Tol) 
 {
   CPnts_MyGaussFunction FG;
-//POP pout WNT
-  CPnts_RealFunction rf = f3d;
-  FG.Init(rf,(Standard_Address)&C);
-//  FG.Init(f3d,(Standard_Address)&C);
-  math_GaussSingleIntegration TheLength(FG, U1, U2, order(C), Tol);
-  if (!TheLength.IsDone()) {
-    throw Standard_ConstructionError();
-  }
-  return Abs(TheLength.Value());
+  FG.Init(&f3d, (Standard_Address)&C);
+
+  Standard_Real aLength = 0.;
+  if (!CPnts_MyRootFunction::AdaptiveIntegrate(FG, U1, U2, order(C), &Tol, aLength))
+    throw Standard_ConstructionError("CPnts_AbscissaPoint::Length() unable to integrate");
+
+  return Abs(aLength);
 }
 
 //=======================================================================
@@ -217,15 +211,13 @@ Standard_Real CPnts_AbscissaPoint::Length(const Adaptor2d_Curve2d& C,
 					  const Standard_Real Tol) 
 {
   CPnts_MyGaussFunction FG;
-//POP pout WNT
-  CPnts_RealFunction rf = f2d;
-  FG.Init(rf,(Standard_Address)&C);
-//  FG.Init(f2d,(Standard_Address)&C);
-  math_GaussSingleIntegration TheLength(FG, U1, U2, order(C), Tol);
-  if (!TheLength.IsDone()) {
-    throw Standard_ConstructionError();
-  }
-  return Abs(TheLength.Value());
+  FG.Init(&f2d, (Standard_Address)&C);
+
+  Standard_Real aLength = 0.0;
+  if (!CPnts_MyRootFunction::AdaptiveIntegrate(FG, U1, U2, order(C), &Tol, aLength))
+    throw Standard_ConstructionError("CPnts_AbscissaPoint::Length() unable to integrate");
+
+  return Abs(aLength);
 }
 
 //=======================================================================
