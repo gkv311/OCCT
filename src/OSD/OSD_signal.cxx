@@ -761,10 +761,6 @@ typedef void (* SIG_PFV) (int);
 
 #include <signal.h>
 
-#if !defined(__ANDROID__) && !defined(__QNX__) && !defined(__EMSCRIPTEN__)
-  #include <sys/signal.h>
-#endif
-
 // the bits FE_UNDERFLOW / __fpcr_trap_underflow also work (tested on Linux x86_64, macOS ARM64),
 // but we don't add them for more consistency within MSVC
 #define _OSD_FPX (FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW)
@@ -1021,7 +1017,7 @@ void OSD::SetFloatingSignal (Standard_Boolean theFloatingSignal)
     anFEnv.__fpcr &= ~_OSD_FPRC_TRAP_BITS;
 
   fesetenv(&anFEnv);
-#elif defined (__linux__)
+#elif defined(__gnu_linux__)
   feclearexcept (FE_ALL_EXCEPT);
   if (theFloatingSignal)
   {
@@ -1058,7 +1054,7 @@ Standard_Boolean OSD::ToCatchFloatingSignals()
   fenv_t anFEnv = {};
   fegetenv(&anFEnv);
   return (anFEnv.__fpcr & _OSD_FPRC_TRAP_BITS) != 0;
-#elif defined (__linux__)
+#elif defined(__gnu_linux__)
   return (fegetexcept() & _OSD_FPX) != 0;
 #else
   return Standard_False;
