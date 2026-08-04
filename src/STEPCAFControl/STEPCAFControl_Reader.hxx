@@ -37,6 +37,7 @@ class StepRepr_RepresentationItem;
 class Transfer_Binder;
 class Transfer_TransientProcess;
 class StepBasic_NamedUnit;
+class StepBasic_Product;
 class StepShape_ConnectedFaceSet;
 class StepShape_ShapeDefinitionRepresentation;
 class StepRepr_NextAssemblyUsageOccurrence;
@@ -165,7 +166,12 @@ public:
   Standard_EXPORT void SetMetaMode(const Standard_Boolean theMetaMode);
 
   Standard_EXPORT Standard_Boolean GetMetaMode() const;
-  
+
+  //! MetaMode for indicate whether to read Product Metadata or not.
+  Standard_EXPORT void SetProductMetaMode(const Standard_Boolean theProductMetaMode);
+
+  Standard_EXPORT Standard_Boolean GetProductMetaMode() const;
+
   //! Set SHUO mode for indicate write SHUO or not.
   Standard_EXPORT void SetSHUOMode (const Standard_Boolean shuomode);
   
@@ -242,6 +248,9 @@ protected:
   Standard_EXPORT Standard_Boolean ReadMetadata(const Handle(XSControl_WorkSession)& theWS,
                                                 const Handle(TDocStd_Document)& theDoc,
                                                 const StepData_Factors& theLocalFactors) const;
+
+  Standard_EXPORT Standard_Boolean ReadProductMetadata(const Handle(XSControl_WorkSession)& theWS,
+                                                       const Handle(TDocStd_Document)&      theDoc) const;
 
   //! Reads layers of parts defined in the STEP model and
   //! set reference between shape and layers in the DECAF document
@@ -340,6 +349,35 @@ private:
                                   const StepData_Factors& theLocalFactors,
                                   Handle(TDataStd_NamedData)& theAttr) const;
 
+  //! Returns the label of the shape associated with the given product definition.
+  //! @param theTransferProcess The transfer process to use for finding the label.
+  //! @param theProductDefinition The product definition for which to find the label.
+  //! @return The label of the shape associated with the given product definition.
+  TDF_Label getShapeLabelFromProductDefinition(
+    const Handle(Transfer_TransientProcess)&   theTransferProcess,
+    const Handle(StepBasic_ProductDefinition)& theProductDefinition) const;
+
+  //! Collects shape labels from the given property definition.
+  //! @param[out] theLabels collected shape labels
+  //! @param[in]  theWorkSession The work session to use for collecting shape labels
+  //! @param[in]  theTransferProcess The transfer process to use for collecting shape labels
+  //! @param[in]  theSource The property definition from which to collect shape labels
+  void collectShapeLabels(NCollection_List<TDF_Label>&               theLabels,
+                          const Handle(XSControl_WorkSession)&       theWorkSession,
+                          const Handle(Transfer_TransientProcess)&   theTransferProcess,
+                          const Handle(StepRepr_PropertyDefinition)& theSource) const;
+
+  //! Collects binders from the given property definition and stores them in the binder list.
+  //! @param[out] theBinders The list to store the collected binders.
+  //! @param[in]  theWorkSession The work session to use for collecting binders.
+  //! @param[in]  theTransientProcess The transient process to use for collecting binders.
+  //! @param[in]  theSource The property definition from which to collect binders.
+  void collectBinders(NCollection_List<Handle(Transfer_Binder)>& theBinders,
+                      const Handle(XSControl_WorkSession)&       theWorkSession,
+                      const Handle(Transfer_TransientProcess)&   theTransientProcess,
+                      const Handle(StepRepr_PropertyDefinition)& theSource) const;
+
+
 private:
 
   STEPControl_Reader myReader;
@@ -350,6 +388,7 @@ private:
   Standard_Boolean myLayerMode;
   Standard_Boolean myPropsMode;
   Standard_Boolean myMetaMode;
+  Standard_Boolean myProductMetaMode;
   Standard_Boolean mySHUOMode;
   Standard_Boolean myGDTMode;
   Standard_Boolean myMatMode;

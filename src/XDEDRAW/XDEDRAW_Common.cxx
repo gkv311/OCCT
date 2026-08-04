@@ -437,6 +437,7 @@ static Standard_Integer ReadStep(Draw_Interpretor& di, Standard_Integer argc, co
         case 'l' : aReader.SetLayerMode (aMode); break;
         case 'v' : aReader.SetPropsMode (aMode); break;
         case 'm' : aReader.SetMetaMode (aMode); break;
+        case 'p' : aReader.SetProductMetaMode (aMode); break;
         default:
         {
           Message::SendFail() << "Syntax error at '" << aModeStr << "'\n";
@@ -1350,6 +1351,7 @@ void XDEDRAW_Common::InitCommands(Draw_Interpretor& di)
          "\n\t\t:                +l or -l : Read layers"
          "\n\t\t:                +v or -v : Read validation properties"
          "\n\t\t:                +m or -m : Read metadata (user-defined properties)"
+         "\n\t\t:                +p or -p : Read product metadata"
          "\n\t\t:  -stream read using istream reading interface (testing)",
          __FILE__, ReadStep, g);
   di.Add("WriteStep" ,
