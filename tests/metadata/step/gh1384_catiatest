@@ -2,10 +2,16 @@
 set filename gh1384_catiatest_metadata.stp
 
 set ref_data {
+Property for [0:1:1:1]:
+ProductDefinition :  
+ProductID : 测试数据
 Property for [0:1:1:2]:
 PartHeight : 284.75
 PartSource : 自定义模型库
 PartType : 158
+ProductDefinition :  
+ProductID : Pyramid
+ProductName : 部件
 一级分类名称 : 基本三维图形
 
 }
