@@ -114,6 +114,8 @@ bool STEPCAFControl_ConfigurationNode::Load(const Handle(DE_ConfigurationContext
     theResource->BooleanVal("read.props", InternalParameters.ReadProps, aScope);
   InternalParameters.ReadMetadata =
     theResource->BooleanVal("read.metadata", InternalParameters.ReadMetadata, aScope);
+  InternalParameters.ReadProductMetadata =
+    theResource->BooleanVal("read.productmetadata", InternalParameters.ReadProductMetadata, aScope);
 
   InternalParameters.WritePrecisionMode = (WriteMode_PrecisionMode)
     theResource->IntegerVal("write.precision.mode", InternalParameters.WritePrecisionMode, aScope);
@@ -372,6 +374,13 @@ TCollection_AsciiString STEPCAFControl_ConfigurationNode::Save() const
   aResult += "!Setting up the read.metadata parameter which is used to indicate read Metadata or not\n";
   aResult += "!Default value: 0(\"OFF\"). Available values: 0(\"OFF\"), 1(\"ON\")\n";
   aResult += aScope + "read.metadata :\t " + InternalParameters.ReadMetadata + "\n";
+  aResult += "!\n";
+
+  aResult += "!\n";
+  aResult += "!Setting up the read.productmetadata parameter which is used to indicate whether to "
+             "read Product Metadata or not\n";
+  aResult += "!Default value: 0(\"OFF\"). Available values: 0(\"OFF\"), 1(\"ON\")\n";
+  aResult += aScope + "read.productmetadata :\t " + InternalParameters.ReadProductMetadata + "\n";
   aResult += "!\n";
 
   aResult += "!\n";

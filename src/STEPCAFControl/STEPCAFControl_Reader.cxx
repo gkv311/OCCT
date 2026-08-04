@@ -292,6 +292,7 @@ STEPCAFControl_Reader::STEPCAFControl_Reader()
   myLayerMode(Standard_True),
   myPropsMode(Standard_True),
   myMetaMode(Standard_True),
+  myProductMetaMode(Standard_False),
   mySHUOMode(Standard_False),
   myGDTMode(Standard_True),
   myMatMode(Standard_True),
@@ -727,6 +728,10 @@ Standard_Boolean STEPCAFControl_Reader::Transfer (STEPControl_Reader &reader,
   // read metadata
   if (GetMetaMode())
     ReadMetadata(reader.WS(), doc, aLocalFactors);
+
+  // read product metadata
+  if (GetProductMetaMode())
+    ReadProductMetadata(reader.WS(), doc);
 
   // Expand resulting CAF structure for sub-shapes (optionally with their
   // names) if requested
@@ -5228,6 +5233,24 @@ Standard_Boolean STEPCAFControl_Reader::GetMetaMode() const
 }
 
 //=======================================================================
+//function : SetProductMetaMode
+//purpose  :
+//=======================================================================
+void STEPCAFControl_Reader::SetProductMetaMode(const Standard_Boolean theProductMetaMode)
+{
+  myProductMetaMode = theProductMetaMode;
+}
+
+//=======================================================================
+//function : GetProductMetaMode
+//purpose  :
+//=======================================================================
+Standard_Boolean STEPCAFControl_Reader::GetProductMetaMode() const
+{
+  return myProductMetaMode;
+}
+
+//=======================================================================
 //function : SetSHUOMode
 //purpose  : 
 //=======================================================================
@@ -5309,230 +5332,326 @@ Standard_Boolean STEPCAFControl_Reader::GetViewMode() const
 }
 
 //=======================================================================
-//function : ReadMetadata
-//purpose  : 
+//function : getShapeLabelFromProductDefinition
+//purpose  :
 //=======================================================================
-Standard_Boolean STEPCAFControl_Reader::ReadMetadata(const Handle(XSControl_WorkSession)& theWS,
-                                                     const Handle(TDocStd_Document)& theDoc,
-                                                     const StepData_Factors& theLocalFactors) const
+TDF_Label STEPCAFControl_Reader::getShapeLabelFromProductDefinition(
+  const Handle(Transfer_TransientProcess)&   theTransferProcess,
+  const Handle(StepBasic_ProductDefinition)& theProductDefinition) const
 {
-  const Handle(Interface_InterfaceModel)& aModel = theWS->Model();
-  const Handle(XSControl_TransferReader)& aTR = theWS->TransferReader();
-  const Handle(Transfer_TransientProcess)& aTP = aTR->TransientProcess();
-  Handle(XCAFDoc_ShapeTool) aSTool = XCAFDoc_DocumentTool::ShapeTool(theDoc->Main());
-  if (aSTool.IsNull())
-  {
-    return Standard_False;
-  }
+  Handle(Transfer_Binder) aBinder = theTransferProcess->Find(theProductDefinition);
+  if (aBinder.IsNull())
+    return TDF_Label();
 
-  Standard_Integer aNb = aModel->NbEntities();
-  STEPConstruct_Tool aTool(theWS);
+  const TopoDS_Shape aShape = TransferBRep::ShapeResult(theTransferProcess, aBinder);
+  if (aShape.IsNull())
+    return TDF_Label();
 
-  for (Standard_Integer anEntityInd = 1; anEntityInd <= aNb; ++anEntityInd)
+  TDF_Label aShapeLabel;
+  myMap.Find(aShape, aShapeLabel);
+  return aShapeLabel;
+}
+
+//=======================================================================
+//function : collectShapeLabels
+//purpose  :
+//=======================================================================
+void STEPCAFControl_Reader::collectShapeLabels(NCollection_List<TDF_Label>&               theLabels,
+                                               const Handle(XSControl_WorkSession)&       theWorkSession,
+                                               const Handle(Transfer_TransientProcess)&   theTransferProcess,
+                                               const Handle(StepRepr_PropertyDefinition)& theSource) const
+{
+  theLabels.Clear();
+
+  NCollection_List<Handle(Transfer_Binder)> aBinders;
+  collectBinders(aBinders, theWorkSession, theTransferProcess, theSource);
+  if (aBinders.IsEmpty())
+    return;
+
+  for (const Handle(Transfer_Binder)& aBindIt : aBinders)
   {
-    Handle(Standard_Transient) anEntity = aModel->Value(anEntityInd);
-    Handle(StepBasic_GeneralProperty) aGeneralProp = Handle(StepBasic_GeneralProperty)::DownCast(anEntity);
-    if (aGeneralProp.IsNull())
+    const TopoDS_Shape aShape = TransferBRep::ShapeResult(theTransferProcess, aBindIt);
+    if (aShape.IsNull())
       continue;
 
-    Handle(StepBasic_GeneralPropertyAssociation) aPropAssociation;
-    NCollection_List< Handle(StepRepr_PropertyDefinition)> aPropDefinitionList;
-    Interface_EntityIterator aSharingListOfGP = theWS->Graph().Sharings(aGeneralProp);
-    for (aSharingListOfGP.Start(); aSharingListOfGP.More(); aSharingListOfGP.Next())
-    {
-      aPropAssociation = Handle(StepBasic_GeneralPropertyAssociation)::DownCast(aSharingListOfGP.Value());
-      if (aPropAssociation.IsNull())
-        continue;
+    TDF_Label aShapeResultLabel;
+    if (myMap.Find(aShape, aShapeResultLabel))
+      theLabels.Append(aShapeResultLabel);
+  }
+}
 
-      aPropDefinitionList.Append(aPropAssociation->PropertyDefinition());
+//! Collects a group of related property definitions from the given property definition.
+//! @p theProperty itself will be added to the result as well.
+//! @param[out] theList collected related property definitions
+//! @param[in]  theWorkSession The work session to use for collecting related property definitions
+//! @param[in]  theProperty The property definition from which to collect related property definitions
+static void collectRelatedPropertyDefinitions(NCollection_List<Handle(StepRepr_PropertyDefinition)>& theList,
+                                              const Handle(XSControl_WorkSession)& theWorkSession,
+                                              const Handle(StepRepr_PropertyDefinition)& theProperty)
+{
+  theList.Clear();
+  theList.Append(theProperty);
+
+  Interface_EntityIterator aSharingsListOfPD = theWorkSession->Graph().Sharings(theProperty);
+  for (aSharingsListOfPD.Start(); aSharingsListOfPD.More(); aSharingsListOfPD.Next())
+  {
+    Handle(StepRepr_PropertyDefinitionRelationship) aRel =
+      Handle(StepRepr_PropertyDefinitionRelationship)::DownCast(aSharingsListOfPD.Value());
+    if (aRel.IsNull())
+      continue;
+
+    Handle(StepRepr_PropertyDefinition) aGroupedProp = aRel->RelatedPropertyDefinition();
+    if (!aGroupedProp.IsNull())
+      theList.Append(aGroupedProp);
+  }
+}
+
+//! Helper method to get NamedData attribute assigned to the given label.
+//! @param theLabel The label to get NamedData attribute from.
+//! @return Handle to the NamedData attribute. Guarantees that the attribute is never null.
+static Handle(TDataStd_NamedData) getNamedData(const TDF_Label& theLabel)
+{
+  Handle(TDataStd_NamedData) anAttribute;
+  if (!theLabel.FindAttribute(TDataStd_NamedData::GetID(), anAttribute))
+  {
+    anAttribute = new TDataStd_NamedData();
+    theLabel.AddAttribute(anAttribute);
+  }
+  return anAttribute;
+}
+
+//=======================================================================
+//function : collectBinders
+//purpose  :
+//=======================================================================
+void STEPCAFControl_Reader::collectBinders(NCollection_List<Handle(Transfer_Binder)>& theBinders,
+                                           const Handle(XSControl_WorkSession)&       theWorkSession,
+                                           const Handle(Transfer_TransientProcess)&   theTransientProcess,
+                                           const Handle(StepRepr_PropertyDefinition)& theSource) const
+{
+  Interface_EntityIterator aSharedListOfPD = theWorkSession->Graph().Shareds(theSource);
+  for (aSharedListOfPD.Start(); aSharedListOfPD.More(); aSharedListOfPD.Next())
+  {
+    // Acquire binder from StepBasic_ProductDefinition.
+    Handle(StepBasic_ProductDefinition) aProductDefinition =
+      Handle(StepBasic_ProductDefinition)::DownCast(aSharedListOfPD.Value());
+    if (!aProductDefinition.IsNull())
+    {
+      const Handle(Transfer_Binder) aBinder = theTransientProcess->Find(aProductDefinition);
+      if (!aBinder.IsNull())
+        theBinders.Append(aBinder);
+
+      continue;
     }
 
-    if (aPropDefinitionList.IsEmpty())
+    // Acquire binder from StepRepr_ProductDefinitionShape.
+    Handle(StepRepr_ProductDefinitionShape) aProductDefinitionShape =
+      Handle(StepRepr_ProductDefinitionShape)::DownCast(aSharedListOfPD.Value());
+    if (!aProductDefinitionShape.IsNull())
+    {
+      Handle(StepBasic_ProductDefinition) aProductDef =
+        aProductDefinitionShape->Definition().ProductDefinition();
+      const Handle(Transfer_Binder) aBinder = theTransientProcess->Find(aProductDef);
+      if (!aBinder.IsNull())
+        theBinders.Append(aBinder);
+
+      continue;
+    }
+
+    // Acquire binder from StepRepr_NextAssemblyUsageOccurrence.
+    Handle(StepRepr_NextAssemblyUsageOccurrence) aNextAssembUsOcc =
+      Handle(StepRepr_NextAssemblyUsageOccurrence)::DownCast(aSharedListOfPD.Value());
+    if (!aNextAssembUsOcc.IsNull())
+    {
+      const Handle(Transfer_Binder) aBinder = theTransientProcess->Find(aNextAssembUsOcc);
+      if (!aBinder.IsNull())
+        theBinders.Append(aBinder);
+
+      continue;
+    }
+
+    Handle(StepRepr_ShapeAspect) aShapeAspect =
+      Handle(StepRepr_ShapeAspect)::DownCast(aSharedListOfPD.Value());
+    if (!aShapeAspect.IsNull())
+    {
+      Interface_EntityIterator aSharedListOfSA = theWorkSession->Graph().Sharings(aShapeAspect);
+      for (aSharedListOfSA.Start(); aSharedListOfSA.More(); aSharedListOfSA.Next())
+      {
+        Handle(StepAP242_DraughtingModelItemAssociation) aDMIA =
+          Handle(StepAP242_DraughtingModelItemAssociation)::DownCast(aSharedListOfSA.Value());
+        if (!aDMIA.IsNull())
+          break;
+
+        Handle(StepAP242_ItemIdentifiedRepresentationUsage) anItemIdentUsage =
+          Handle(StepAP242_ItemIdentifiedRepresentationUsage)::DownCast(aSharedListOfSA.Value());
+        if (!anItemIdentUsage.IsNull())
+        {
+          for (Standard_Integer anIndex = 1; anIndex <= anItemIdentUsage->NbIdentifiedItem(); ++anIndex)
+          {
+            Handle(StepRepr_RepresentationItem) aReprItem = anItemIdentUsage->IdentifiedItemValue(anIndex);
+            if (aReprItem.IsNull())
+              continue;
+
+            const Handle(Transfer_Binder) aBinder = theTransientProcess->Find(aReprItem);
+            if (!aBinder.IsNull())
+              theBinders.Append(aBinder);
+          }
+          continue;
+        }
+
+        Handle(StepRepr_PropertyDefinition) aPropDef =
+          Handle(StepRepr_PropertyDefinition)::DownCast(aSharedListOfSA.Value());
+        if (!aPropDef.IsNull() && aPropDef != theSource)
+        {
+          Interface_EntityIterator aSharingListOfPD = theWorkSession->Graph().Sharings(aPropDef);
+          for (aSharingListOfPD.Start(); aSharingListOfPD.More(); aSharingListOfPD.Next())
+          {
+            Handle(StepShape_ShapeDefinitionRepresentation) aShDef =
+              Handle(StepShape_ShapeDefinitionRepresentation)::DownCast(aSharingListOfPD.Value());
+            if (aShDef.IsNull())
+              continue;
+
+            findReprItems(theWorkSession, aShDef, theBinders);
+          }
+          continue;
+        }
+
+        Handle(StepShape_ShapeDefinitionRepresentation) aShapeDefRepr =
+          Handle(StepShape_ShapeDefinitionRepresentation)::DownCast(aSharedListOfSA.Value());
+        if (!aShapeDefRepr.IsNull())
+          findReprItems(theWorkSession, aShapeDefRepr, theBinders);
+      }
+    }
+  }
+}
+
+//! Collects property definitions from the given general property.
+//! @param[out] theList collected property definitions
+//! @param[in]  theWorkSession The work session to use for collecting property definitions
+//! @param[in]  theGeneralProperty The general property from which to collect property definitions
+static void collectPropertyDefinitions(NCollection_List<Handle(StepRepr_PropertyDefinition)>& theList,
+                                       const Handle(XSControl_WorkSession)& theWorkSession,
+                                       const Handle(Standard_Transient)& theGeneralProperty)
+{
+  theList.Clear();
+
+  Handle(StepBasic_GeneralProperty) aGeneralProp = Handle(StepBasic_GeneralProperty)::DownCast(theGeneralProperty);
+  if (aGeneralProp.IsNull())
+    return;
+
+  Interface_EntityIterator aSharingListOfGP = theWorkSession->Graph().Sharings(aGeneralProp);
+  for (aSharingListOfGP.Start(); aSharingListOfGP.More(); aSharingListOfGP.Next())
+  {
+    Handle(StepBasic_GeneralPropertyAssociation) aPropAssociation =
+      Handle(StepBasic_GeneralPropertyAssociation)::DownCast(aSharingListOfGP.Value());
+    if (aPropAssociation.IsNull())
       continue;
 
-    NCollection_List< Handle(StepRepr_PropertyDefinition)>::Iterator aPropDefIter(aPropDefinitionList);
-    for ( ; aPropDefIter.More(); aPropDefIter.Next())
+    theList.Append(aPropAssociation->PropertyDefinition());
+  }
+}
+
+//=======================================================================
+//function : ReadMetadata
+//purpose  :
+//=======================================================================
+Standard_Boolean STEPCAFControl_Reader::ReadMetadata(const Handle(XSControl_WorkSession)& theWS,
+                                                     const Handle(TDocStd_Document)&      theDoc,
+                                                     const StepData_Factors& theLocalFactors) const
+{
+  if (XCAFDoc_DocumentTool::ShapeTool(theDoc->Main()).IsNull())
+    return Standard_False;
+
+  const Handle(Interface_InterfaceModel)&  aModel = theWS->Model();
+  const Handle(Transfer_TransientProcess)& aTransientProcess = theWS->TransferReader()->TransientProcess();
+
+  NCollection_List<Handle(StepRepr_PropertyDefinition)> aPropDefList;
+  NCollection_List<Handle(StepRepr_PropertyDefinition)> aGroupedProperties;
+  NCollection_List<TDF_Label> aLabels;
+  for (Standard_Integer anEntityInd = 1; anEntityInd <= aModel->NbEntities(); ++anEntityInd)
+  {
+    collectPropertyDefinitions(aPropDefList, theWS, aModel->Value(anEntityInd));
+    for (const Handle(StepRepr_PropertyDefinition)& aPropertyDefinition : aPropDefList)
     {
-      Handle(StepRepr_PropertyDefinition) aPropDefinition = aPropDefIter.Value();
+      // Collect all the related PropertyDefinitions.
+      collectRelatedPropertyDefinitions(aGroupedProperties, theWS, aPropertyDefinition);
 
-      // check group of PropertyDefinition
-      NCollection_List<Handle(StepRepr_PropertyDefinition)> aGroupedProperties;
-      Interface_EntityIterator aSharingsListOfPD = theWS->Graph().Sharings(aPropDefinition);
-      for (aSharingsListOfPD.Start(); aSharingsListOfPD.More(); aSharingsListOfPD.Next())
+      // Collect all the shapes labels.
+      collectShapeLabels(aLabels, theWS, aTransientProcess, aPropertyDefinition);
+
+      // Fill all atributes for each shape label.
+      for (const TDF_Label& aLabel : aLabels)
       {
-        Handle(StepRepr_PropertyDefinitionRelationship) aRel =
-          Handle(StepRepr_PropertyDefinitionRelationship)::DownCast(aSharingsListOfPD.Value());
-        if (aRel.IsNull())
-        {
-          continue;
-        }
-
-        Handle(StepRepr_PropertyDefinition) aGroupedProp = aRel->RelatedPropertyDefinition();
-        if (!aGroupedProp.IsNull())
-        {
-          aGroupedProperties.Append(aGroupedProp);
-        }
-      }
-
-      NCollection_List<Handle(Transfer_Binder)> aBinders;
-      Interface_EntityIterator aSharedListOfPD = theWS->Graph().Shareds(aPropDefinition);
-      for (aSharedListOfPD.Start(); aSharedListOfPD.More(); aSharedListOfPD.Next())
-      {
-        Handle(Transfer_Binder) aBinder;
-        Handle(StepBasic_ProductDefinition) aProductDefinition =
-          Handle(StepBasic_ProductDefinition)::DownCast(aSharedListOfPD.Value());
-        if (!aProductDefinition.IsNull())
-        {
-          aBinder = aTP->Find(aProductDefinition);
-          if (!aBinder.IsNull())
-          {
-            aBinders.Append(aBinder);
-          }
-          continue;
-        }
-
-        Handle(StepRepr_ProductDefinitionShape) aProductDefinitionShape =
-          Handle(StepRepr_ProductDefinitionShape)::DownCast(aSharedListOfPD.Value());
-        if (!aProductDefinitionShape.IsNull())
-        {
-          Handle(StepBasic_ProductDefinition) aProductDef =
-            aProductDefinitionShape->Definition().ProductDefinition();
-          aBinder = aTP->Find(aProductDef);
-          if (!aBinder.IsNull())
-          {
-            aBinders.Append(aBinder);
-          }
-          continue;
-        }
-
-        Handle(StepRepr_NextAssemblyUsageOccurrence) aNextAssembUsOcc =
-          Handle(StepRepr_NextAssemblyUsageOccurrence)::DownCast(aSharedListOfPD.Value());
-        if (!aNextAssembUsOcc.IsNull())
-        {
-          aBinder = aTP->Find(aNextAssembUsOcc);
-          if (!aBinder.IsNull())
-          {
-            aBinders.Append(aBinder);
-          }
-          continue;
-        }
-
-        Handle(StepRepr_ShapeAspect) aShapeAspect =
-          Handle(StepRepr_ShapeAspect)::DownCast(aSharedListOfPD.Value());
-        if (!aShapeAspect.IsNull())
-        {
-          TDF_Label aLabel;
-          if (!aBinder.IsNull())
-          {
-            TopoDS_Shape aShape = TransferBRep::ShapeResult(aTP, aBinder);
-            if (aShape.IsNull())
-              continue;
-
-            if (myMap.IsBound(aShape))
-            {
-              aLabel = myMap.Find(aShape);
-            }
-          }
-          Interface_EntityIterator aSharedListOfSA = theWS->Graph().Sharings(aShapeAspect);
-          for (aSharedListOfSA.Start(); aSharedListOfSA.More(); aSharedListOfSA.Next())
-          {
-            Handle(StepAP242_DraughtingModelItemAssociation) aDMIA =
-              Handle(StepAP242_DraughtingModelItemAssociation)::DownCast(aSharedListOfSA.Value());
-            if (!aDMIA.IsNull())
-              break;
-
-            Handle(StepAP242_ItemIdentifiedRepresentationUsage) anItemIdentUsage =
-              Handle(StepAP242_ItemIdentifiedRepresentationUsage)::DownCast(aSharedListOfSA.Value());
-            if (!anItemIdentUsage.IsNull())
-            {
-              for (Standard_Integer anIndex = 1; anIndex <= anItemIdentUsage->NbIdentifiedItem(); ++anIndex)
-              {
-                Handle(StepRepr_RepresentationItem) aReprItem = anItemIdentUsage->IdentifiedItemValue(anIndex);
-                if (aReprItem.IsNull())
-                  continue;
-                aBinder = aTP->Find(aReprItem);
-                if (!aBinder.IsNull())
-                {
-                  aBinders.Append(aBinder);
-                }
-              }
-              continue;
-            }
-
-            Handle(StepRepr_PropertyDefinition) aPropDef =
-              Handle(StepRepr_PropertyDefinition)::DownCast(aSharedListOfSA.Value());
-            if (!aPropDef.IsNull() && aPropDef != aPropDefinition)
-            {
-              Interface_EntityIterator aSharingListOfPD = theWS->Graph().Sharings(aPropDef);
-              for (aSharingListOfPD.Start(); aSharingListOfPD.More(); aSharingListOfPD.Next())
-              {
-                Handle(StepShape_ShapeDefinitionRepresentation) aShDef =
-                  Handle(StepShape_ShapeDefinitionRepresentation)::DownCast(aSharingListOfPD.Value());
-                if (aShDef.IsNull())
-                  continue;
-
-                findReprItems(theWS, aShDef, aBinders);
-              }
-              continue;
-            }
-
-            Handle(StepShape_ShapeDefinitionRepresentation) aShapeDefRepr =
-              Handle(StepShape_ShapeDefinitionRepresentation)::DownCast(aSharedListOfSA.Value());
-            if (!aShapeDefRepr.IsNull())
-            {
-              findReprItems(theWS, aShapeDefRepr, aBinders);
-            }
-          }
-        }
-      }
-
-      if (aBinders.IsEmpty())
-        continue;
-
-      TDF_LabelSequence aLabelSeq;
-      NCollection_List<Handle(Transfer_Binder)>::Iterator aBindIt(aBinders);
-      for (; aBindIt.More(); aBindIt.Next())
-      {
-        TopoDS_Shape aShape = TransferBRep::ShapeResult(aTP, aBindIt.Value());
-        if (aShape.IsNull())
-          continue;
-
-        TDF_Label aShapeLabel;
-        if (myMap.IsBound(aShape))
-        {
-          aShapeLabel = myMap.Find(aShape);
-        }
-        if (!aShapeLabel.IsNull())
-        {
-          aLabelSeq.Append(aShapeLabel);
-        }
-      }
-
-      //create metadata
-      for (TDF_LabelSequence::Iterator aLabelIt(aLabelSeq); aLabelIt.More(); aLabelIt.Next())
-      {
-        TDF_Label aLabel = aLabelIt.Value();
-        Handle(TDataStd_NamedData) anAttr;
-        if (!aLabel.FindAttribute(TDataStd_NamedData::GetID(), anAttr))
-        {
-          anAttr = new TDataStd_NamedData;
-          aLabel.AddAttribute(anAttr);
-        }
-
-        fillAttributes(theWS, aPropDefinition, theLocalFactors, anAttr);
-        if (!aGroupedProperties.IsEmpty())
-        {
-          NCollection_List<Handle(StepRepr_PropertyDefinition)>::Iterator aPropIt(aGroupedProperties);
-          for ( ; aPropIt.More(); aPropIt.Next())
-          {
-            fillAttributes(theWS, aPropIt.Value(), theLocalFactors, anAttr);
-          }
-        }
+        Handle(TDataStd_NamedData) anAttribute = getNamedData(aLabel);
+        for (const Handle(StepRepr_PropertyDefinition)& aPropDefinition : aGroupedProperties)
+          fillAttributes(theWS, aPropDefinition, theLocalFactors, anAttribute);
       }
     }
   }
 
   return Standard_True;
+}
+
+//! Returns the product associated with the given product definition.
+//! @param theProductDefinition The product definition for which to get the product
+//! @return The product associated with the given product definition
+static Handle(StepBasic_Product) getProductFromProductDefinition(const Handle(StepBasic_ProductDefinition)& theProductDefinition)
+{
+  Handle(StepBasic_ProductDefinitionFormation) aFormation = theProductDefinition->Formation();
+  if (aFormation.IsNull())
+    return nullptr;
+
+  return aFormation->OfProduct();
+}
+
+//=======================================================================
+//function : ReadProductMetadata
+//purpose  :
+//=======================================================================
+Standard_Boolean STEPCAFControl_Reader::ReadProductMetadata(const Handle(XSControl_WorkSession)& theWS,
+                                                            const Handle(TDocStd_Document)&      theDoc) const
+{
+  if (XCAFDoc_DocumentTool::ShapeTool(theDoc->Main()).IsNull())
+    return Standard_False;
+
+  const Handle(Interface_InterfaceModel)&  aModel = theWS->Model();
+  const Handle(Transfer_TransientProcess)& aTransientProcess =
+    theWS->TransferReader()->TransientProcess();
+
+  for (Standard_Integer anEntityInd = 1; anEntityInd <= aModel->NbEntities(); ++anEntityInd)
+  {
+    // Processing only StepBasic_ProductDefinition entities.
+    const Handle(StepBasic_ProductDefinition) aProdDefinition =
+      Handle(StepBasic_ProductDefinition)::DownCast(aModel->Value(anEntityInd));
+    if (aProdDefinition.IsNull())
+      continue;
+
+    // Prepare required data for processing: ShapeLabel and Product entity.
+    const TDF_Label aShapeLabel = getShapeLabelFromProductDefinition(aTransientProcess, aProdDefinition);
+    if (aShapeLabel.IsNull())
+      continue;
+
+    const Handle(StepBasic_Product) aProduct = getProductFromProductDefinition(aProdDefinition);
+    if (aProduct.IsNull())
+      continue;
+
+    // Find or create NamedData attribute for ShapeLabel.
+    Handle(TDataStd_NamedData) anAttribute = getNamedData(aShapeLabel);
+    // Fill NamedData attribute with product metadata.
+    if (aProduct->Id() && !aProduct->Id()->String().IsEmpty())
+      anAttribute->SetString("ProductID", aProduct->Id()->String());
+
+    if (aProduct->Name() && !aProduct->Name()->String().IsEmpty())
+      anAttribute->SetString("ProductName", aProduct->Name()->String());
+
+    if (aProduct->Description() && !aProduct->Description()->String().IsEmpty())
+      anAttribute->SetString("Description", aProduct->Description()->String());
+
+    if (aProdDefinition->Description() && !aProdDefinition->Description()->String().IsEmpty())
+      anAttribute->SetString("ProductDefinition", aProdDefinition->Description()->String());
+  }
+
+  return true;
 }
 
 //=======================================================================

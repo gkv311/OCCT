@@ -4,6 +4,7 @@ set filename bug28444_nist_ftc_06_asme1_ct5240_rd.stp
 set ref_data {
 Property for [0:1:1:1]:
 Density : 1000
+Description : NIST PMI test model downloaded from http://go.usa.gov/mGVm
 Ixx : 2.16819e-05
 Ixy : 0
 Ixz : 0
@@ -15,6 +16,7 @@ Izy : -1.3069e-06
 Izz : 2.63853e-05
 Length : 0
 Mass : 3.32387
+ProductID : NIST PMI FTC 06 ASME1
 Surface : 0.28317
 Volume : 0.00332387
 xCenterOfGravity : -0

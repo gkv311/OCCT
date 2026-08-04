@@ -14,6 +14,8 @@ MTIME : 1418096844
 MaterialMissingAssignments : TRUE
 MaterialMultipleAssigned : FALSE
 Part Number : NIST PMI CTC 05 ASME1
+ProductID : nist_ctc_05_asme1
+ProductName : nist_ctc_05_asme1
 Revision : D
 
 }
