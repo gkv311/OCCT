@@ -3,28 +3,37 @@ set filename bug28345_30338.stp
 
 set ref_data {
 Property for [0:1:1:1]:
+Description : NOT SPECIFIED
 H_CIP : 55.546
+ProductID : MVE0300X02S030_ASM
+ProductName : MVE0300X02S030_ASM
 Property for [0:1:1:2]:
 A : 3
 B : 16
 C : 140
 D : 3
 DESCRIPTION : 
+Description : NOT SPECIFIED
 E : 55
 F : 0.3
 H : 45
 I : 15
 MODELED_BY : 
+ProductID : CUT_MVE0300X02S030
+ProductName : CUT_MVE0300X02S030
 Property for [0:1:1:3]:
 A : 3
 B : 16
 C : 140
 D : 3
 DESCRIPTION : 
+Description : NOT SPECIFIED
 E : 55
 F : 0.3
 H : 45
 I : 15
 MODELED_BY : 
+ProductID : NOCUT_MVE0300X02S030
+ProductName : NOCUT_MVE0300X02S030
 
 }
