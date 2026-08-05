@@ -177,6 +177,7 @@ Law_Interpolate::Law_Interpolate
  myTangentRequest(Standard_False) 
      
 {
+  (void)myTolerance; // suppress -Wunused-private-field as this property is indeed ignored
 //Standard_Integer ii;
   myTangents = new TColStd_HArray1OfReal (myPoints->Lower(),
 					  myPoints->Upper());
