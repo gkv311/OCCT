@@ -63,6 +63,15 @@ void BRepOffsetAPI_FindContigousEdges::Perform()
   mySewing->Perform();
 }
 
+//=======================================================================
+//function : NbEdges
+//purpose  :
+//=======================================================================
+
+Standard_Integer BRepOffsetAPI_FindContigousEdges::NbEdges() const
+{
+  return mySewing->NbFreeEdges() + mySewing->NbContigousEdges() + mySewing->NbMultipleEdges();
+}
 
 //=======================================================================
 //function : NbContigousEdges
