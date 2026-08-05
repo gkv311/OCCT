@@ -151,11 +151,7 @@ public:
   //! TangentFlags is true: only these vectors
   //! are set as tangency constraints.
   Standard_EXPORT void Load (const TColgp_Array1OfVec& Tangents, const Handle(TColStd_HArray1OfBoolean)& TangentFlags, const Standard_Boolean Scale = Standard_True);
-  
-  //! Clears all tangency constraints on this
-  //! constrained BSpline curve (as initialized by the function Load).
-  Standard_EXPORT void ClearTangents();
-  
+
   //! Computes the constrained BSpline curve.
   //! Use the function IsDone to verify that the
   //! computation is successful, and then the function Curve to obtain the result.
