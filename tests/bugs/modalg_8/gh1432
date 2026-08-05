@@ -1,0 +1,22 @@
+puts "============"
+puts "NULL dereference in ChFi2d_Builder::AddChamfer() on a repeated edge pair"
+puts "============"
+puts ""
+
+pload MODELING
+
+vertex v1 0 0 0
+vertex v2 1 1 0
+vertex v3 1 0 0
+vertex v4 0 1 0
+edge e12 v1 v2
+edge e23 v2 v3
+edge e34 v3 v4
+edge e41 v4 v1
+wire w e12 e23 e34 e41
+plane pln 0 0 0  0 0 1
+mkface f pln w
+
+# put the same edges twice - shouldn't crash but report error
+puts "REQUIRED ALL: chfi2d : operation failed on e12"
+catch { chfi2d result f e12 e23 CDD 1 1 e12 e23 CDD 1 1 } output
