@@ -747,15 +747,12 @@ const TopTools_SequenceOfShape& BRepFill_CompatibleWires::Shape() const
 
 const TopTools_ListOfShape& BRepFill_CompatibleWires::GeneratedShapes
 (const TopoDS_Edge& SubSection) const
-{  
+{
+  if (const TopTools_ListOfShape* aList = myMap.Seek(SubSection))
+    return *aList;
 
-  if (myMap.IsBound(SubSection)) {
-    return myMap(SubSection);
-  }
-  else {
-    static TopTools_ListOfShape Empty;
-    return Empty;
-  }
+  static const TopTools_ListOfShape Empty;
+  return Empty;
 }
 
 //==========================================================================

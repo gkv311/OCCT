@@ -139,21 +139,15 @@ void BOPDS_CommonBlock::SetRealPaveBlock(const Handle(BOPDS_PaveBlock)& thePB)
 // function:  PaveBlockOnEdge
 // purpose: 
 //=======================================================================
-  Handle(BOPDS_PaveBlock)& BOPDS_CommonBlock::PaveBlockOnEdge(const Standard_Integer aIx)
+const Handle(BOPDS_PaveBlock)& BOPDS_CommonBlock::PaveBlockOnEdge(const Standard_Integer aIx) const
 {
-  static Handle(BOPDS_PaveBlock) aPBs;
-  //
-  Standard_Integer aIOr;
-  BOPDS_ListIteratorOfListOfPaveBlock anIt;
-  //
-  anIt.Initialize(myPaveBlocks);
-  for (; anIt.More(); anIt.Next()) {
-    Handle(BOPDS_PaveBlock)& aPB=anIt.ChangeValue();
-    aIOr=aPB->OriginalEdge();
-    if (aIOr==aIx){
+  for (const Handle(BOPDS_PaveBlock)& aPB : myPaveBlocks)
+  {
+    if (aPB->OriginalEdge() == aIx)
       return aPB;
-    }
   }
+
+  static const Handle(BOPDS_PaveBlock) aPBs;
   return aPBs;
 }
 //=======================================================================
@@ -182,20 +176,7 @@ void BOPDS_CommonBlock::SetRealPaveBlock(const Handle(BOPDS_PaveBlock)& thePB)
 //=======================================================================
   Standard_Boolean BOPDS_CommonBlock::IsPaveBlockOnEdge(const Standard_Integer aIx)const
 {
-  Standard_Boolean bFound;
-  Standard_Integer aIOr;
-  BOPDS_ListIteratorOfListOfPaveBlock anIt;
-  //
-  bFound=Standard_False;
-  anIt.Initialize(myPaveBlocks);
-  for (; anIt.More(); anIt.Next()) {
-    const Handle(BOPDS_PaveBlock)& aPB=anIt.Value();
-    aIOr=aPB->OriginalEdge();
-    if (aIOr==aIx){
-      return !bFound;
-    }
-  }
-  return bFound;
+  return !PaveBlockOnEdge(aIx).IsNull();
 }
 //=======================================================================
 //function : SetEdge

@@ -1119,8 +1119,8 @@ Standard_Integer offsetshape(Draw_Interpretor& theCommands,
 }
 
 static BRepOffset_MakeOffset TheOffset;
-static Standard_Real         TheRadius;
-static Standard_Boolean      theYaBouchon;
+static Standard_Real         TheRadius = 0;
+static Standard_Boolean      theYaBouchon = false;
 static Standard_Real         TheTolerance = Precision::Confusion();
 static Standard_Boolean      TheInter = Standard_False;
 static GeomAbs_JoinType      TheJoin = GeomAbs_Arc;

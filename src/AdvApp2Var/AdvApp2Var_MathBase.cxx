@@ -244,11 +244,18 @@ int mvpscr3_(integer *ncoeff,
 	     doublereal *tparam, 
 	     doublereal *pntcrb);
 
-static struct {
-    doublereal eps1, eps2, eps3, eps4;
-    integer niterm, niterr;
-} mmprcsn_;
 
+static struct {
+    doublereal eps1 = 1.e-9; //!< TOLERANCE OF 3D NULL DISTANCE
+    doublereal eps2 = 1.e-8; //!< TOLERANCE OF ZERO PARAMETRIC DISTANCE
+    doublereal eps3 = 1.e-9; //!< TOLERANCE TO AVOID DIVISION BY 0
+    doublereal eps4 = 1.e-4; //!< TOLERANCE ANGULAR
+
+    integer niterm = 8;  //!< MAX NB OF ITERATIONS
+    integer niterr = 40; //!< NB OF RAPID ITERATIONS
+} const mmprcsn_;
+
+// TODO seems to be these global variables are not protected from concurrency
 static struct {
     doublereal tdebut, tfinal, verifi, cmherm[576];	
 } mmcmher_;
@@ -10029,128 +10036,6 @@ L9999:
     }
  return 0 ;
 } /* mmvncol_ */
-
-//=======================================================================
-//function : AdvApp2Var_MathBase::mmwprcs_
-//purpose  : 
-//=======================================================================
-void AdvApp2Var_MathBase::mmwprcs_(doublereal *epsil1, 
-				   doublereal *epsil2, 
-				   doublereal *epsil3, 
-				   doublereal *epsil4, 
-				   integer *niter1, 
-				   integer *niter2)
-
-{
-
-
-/* ***********************************************************************
- */
-
-/*     FUNCTION : */
-/*     ---------- */
-/*     ACCESS IN WRITING FOR COMMON MPRCSN */
-
-/*     KEYWORDS : */
-/*     ----------- */
-/*     WRITING */
-
-/*     INPUT ARGUMENTS : */
-/*     -------------------- */
-/*     EPSIL1  : TOLERANCE OF 3D NULL DISTANCE */
-/*     EPSIL2  : TOLERANCE OF PARAMETRIC NULL DISTANCE */
-/*     EPSIL3  : TOLERANCE TO AVOID DIVISION BY 0.. */
-/*     EPSIL4  : ANGULAR TOLERANCE */
-/*     NITER1  : MAX NB OF ITERATIONS */
-/*     NITER2  : NB OF RAPID ITERATIONS */
-
-/*     OUTPUT ARGUMENTS : */
-/*     --------------------- */
-/*     NONE */
-
-/*     COMMONS USED : */
-/*     ------------------ */
-
-
-/*     REFERENCES CALLED : */
-/*     --------------------- */
-
-
-/*     DESCRIPTION/NOTES/LIMITATIONS : */
-/*     ----------------------------------- */
-
-/* > */
-/* ***********************************************************************
- */
-/*                            DECLARATIONS */
-/* ***********************************************************************
- */
-
-
-/* ***********************************************************************
- */
-/*                      INITIALIZATIONS */
-/* ***********************************************************************
- */
-
-/* ***********************************************************************
- */
-/*                      PROCESSING */
-/* ***********************************************************************
- */
-
-/* ***********************************************************************
- */
-
-/*     FUNCTION : */
-/*     ---------- */
-/*          GIVES TOLERANCES OF NULLITY IN STRIM */
-/*          AND  LIMITS OF ITERATIVE PROCESSES */
-
-/*          GENERAL CONTEXT, MODIFIABLE BY THE UTILISER */
-
-/*     KEYWORDS : */
-/*     ----------- */
-/*          PARAMETER , TOLERANCE */
-
-/*     DESCRIPTION/NOTES/LIMITATIONS : */
-/*     ----------------------------------- */
-/*       INITIALISATION   :  PROFILE , **VIA MPRFTX** AT INPUT IN STRIM*/
-/*       LOADING OF DEFAULT VALUES OF THE PROFILE IN MPRFTX AT INPUT*/
-/*       IN STRIM. THEY ARE PRESERVED IN THE LOCAL VARIABLES OF MPRFTX */
-
-/*        RESET DEFAULT VALUES                   : MDFINT */
-/*        MODIFICATION INTERACTIVE BY THE USER   : MDBINT */
-
-/*        ACCESS FUNCTION  :  MMEPS1  ...  EPS1 */
-/*                            MEPSPB  ...  EPS3,EPS4 */
-/*                            MEPSLN  ...  EPS2, NITERM , NITERR */
-/*                            MEPSNR  ...  EPS2 , NITERM */
-/*                            MITERR  ...  NITERR */
-
-/* > */
-/* ***********************************************************************
- */
-
-/*     NITERM : MAX NB OF ITERATIONS */
-/*     NITERR : NB OF RAPID ITERATIONS */
-/*     EPS1   : TOLERANCE OF 3D NULL DISTANCE */
-/*     EPS2   : TOLERANCE OF ZERO PARAMETRIC DISTANCE */
-/*     EPS3   : TOLERANCE TO AVOID DIVISION BY 0.. */
-/*     EPS4   : TOLERANCE ANGULAR */
-
-
-/* ***********************************************************************
- */
-    mmprcsn_.eps1 = *epsil1;
-    mmprcsn_.eps2 = *epsil2;
-    mmprcsn_.eps3 = *epsil3;
-    mmprcsn_.eps4 = *epsil4;
-    mmprcsn_.niterm = *niter1;
-    mmprcsn_.niterr = *niter2;
- return ;
-} /* mmwprcs_  */
-
 
 //=======================================================================
 //function : AdvApp2Var_MathBase::pow__di
