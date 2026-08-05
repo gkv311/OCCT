@@ -85,9 +85,9 @@ public:
   Standard_EXPORT void MakeOffsetShape(const Message_ProgressRange& theRange = Message_ProgressRange());
   
   Standard_EXPORT void MakeThickSolid(const Message_ProgressRange& theRange = Message_ProgressRange());
-  
-  Standard_EXPORT const BRepOffset_Analyse& GetAnalyse() const;
-  
+
+  const BRepOffset_Analyse& GetAnalyse() const { return myAnalyse; }
+
   Standard_EXPORT Standard_Boolean IsDone() const;
   
   Standard_EXPORT const TopoDS_Shape& Shape() const;
