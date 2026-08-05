@@ -765,7 +765,7 @@ Standard_Boolean BOPDS_DS::HasPaveBlocks(const Standard_Integer theI)const
 const BOPDS_ListOfPaveBlock& BOPDS_DS::PaveBlocks
   (const Standard_Integer theI)const
 {
-  static BOPDS_ListOfPaveBlock sLPB;
+  static const BOPDS_ListOfPaveBlock sLPB;
   Standard_Integer aRef;
   //
   if (HasPaveBlocks(theI)) { 
@@ -1151,7 +1151,7 @@ Standard_Boolean BOPDS_DS::HasFaceInfo(const Standard_Integer theI)const
 //=======================================================================
 const BOPDS_FaceInfo& BOPDS_DS::FaceInfo(const Standard_Integer theI)const
 {
-  static BOPDS_FaceInfo sFI;
+  static const BOPDS_FaceInfo sFI;
   Standard_Integer aRef;
   //
   if (HasFaceInfo(theI)) { 

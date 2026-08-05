@@ -277,7 +277,6 @@ Handle(Geom2d_Curve) CurveOnSurface(const TopoDS_Edge& E,
   return CurveOnSurface(aLocalEdge,S,l,First,Last);
 }
 
-static Handle(Geom2d_Curve) nullPCurve;
 //=======================================================================
 //function : CurveOnSurface
 //purpose  : 
@@ -307,5 +306,5 @@ Handle(Geom2d_Curve) CurveOnSurface(const TopoDS_Edge& E,
     }
     itcr.Next();
   }
-  return nullPCurve;
+  return Handle(Geom2d_Curve)();
 }

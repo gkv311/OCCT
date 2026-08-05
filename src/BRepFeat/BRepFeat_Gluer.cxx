@@ -64,7 +64,7 @@ const TopTools_ListOfShape& BRepFeat_Gluer::Modified
 	return myGluer.DescendantFaces(TopoDS::Face(F));
     }
   }
-  static TopTools_ListOfShape LIM;
+  static const TopTools_ListOfShape LIM;
   return  LIM;
 }
 

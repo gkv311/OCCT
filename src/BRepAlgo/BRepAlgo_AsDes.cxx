@@ -109,7 +109,8 @@ const TopTools_ListOfShape& BRepAlgo_AsDes::Ascendant(const TopoDS_Shape& S) con
 {
   if (up.IsBound(S))
     return up(S);
-  static TopTools_ListOfShape empty;
+
+  static const TopTools_ListOfShape empty;
   return empty; 
 }
 
@@ -123,7 +124,8 @@ const TopTools_ListOfShape& BRepAlgo_AsDes::Descendant(const TopoDS_Shape& S) co
 {
   if (down.IsBound(S)) 
     return down(S);
-  static TopTools_ListOfShape empty;
+
+  static const TopTools_ListOfShape empty;
   return empty;
 }
 
@@ -134,10 +136,7 @@ const TopTools_ListOfShape& BRepAlgo_AsDes::Descendant(const TopoDS_Shape& S) co
 
 TopTools_ListOfShape& BRepAlgo_AsDes::ChangeDescendant(const TopoDS_Shape& S) 
 {
-  if (down.IsBound(S)) 
-    return down.ChangeFind(S);
-  static TopTools_ListOfShape empty;
-  return empty;
+  return down.ChangeFind(S);
 }
 
 //=======================================================================

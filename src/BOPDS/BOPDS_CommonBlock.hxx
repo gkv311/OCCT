@@ -104,7 +104,7 @@ public:
   //! Selector
   //! Returns the pave block that belongs
   //! to the edge with index <theIx>
-  Standard_EXPORT Handle(BOPDS_PaveBlock)& PaveBlockOnEdge (const Standard_Integer theIndex);
+  Standard_EXPORT const Handle(BOPDS_PaveBlock)& PaveBlockOnEdge (const Standard_Integer theIndex) const;
   
 
   //! Query
