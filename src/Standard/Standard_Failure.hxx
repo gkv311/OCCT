@@ -125,6 +125,26 @@ public:
   //! converted to C++ exception.
   Standard_EXPORT static void Jump(const std::shared_ptr<Standard_Failure>& theFail);
 
+public:
+
+  //! Dummy class to simplify porting.
+  class DummyType
+  {
+  public:
+    DummyType(const Standard_Failure* thePtr) : myPtr(thePtr) {}
+    const char* Name() const { return myPtr->ExceptionType(); }
+    const DummyType* operator->() const { return this; }
+  private:
+    const Standard_Failure* myPtr;
+  };
+
+  //! This method is defined for porting legacy applications using
+  //! 'err.DynamicType()->Name()' for formatting an error message.
+  //! It doesn't return Handle(Standard_Type) as Standard_Failure
+  //! doesn't inherit Standard_Transient anymore.
+  //Standard_DEPRECATED("Deprecated method, ExceptionType() should be used instead")
+  DummyType DynamicType() const { return DummyType(this); }
+
 protected:
 
   //! Used only if standard C++ exceptions are used.
