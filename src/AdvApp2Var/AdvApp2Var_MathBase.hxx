@@ -53,12 +53,6 @@ class AdvApp2Var_MathBase {
 				      doublereal* , 
 				      integer* );
 
-  Standard_EXPORT static void mmwprcs_(doublereal*, 
-				       doublereal*, 
-				       doublereal*, 
-				       doublereal*, 
-				       integer*, 
-				       integer*);
   ///
   Standard_EXPORT static int mmcglc1_(integer *ndimax, 
 				      integer *ndimen, 

@@ -4001,6 +4001,9 @@ void BRepOffset_Tool::CorrectOrientation(const TopoDS_Shape&        SI,
     TopTools_ListIteratorOfListOfShape it(LOF);
     for (; it.More(); it.Next()) {
       const TopoDS_Face&    OF   = TopoDS::Face(it.Value());
+      if (!AsDes->HasDescendant(OF)) {
+        continue;
+      }
       TopTools_ListOfShape& LOE = AsDes->ChangeDescendant(OF);
       TopTools_ListIteratorOfListOfShape itE(LOE);
 

@@ -26,7 +26,6 @@ AdvApp2Var_Iso.cxx
 AdvApp2Var_Iso.hxx
 AdvApp2Var_MathBase.cxx
 AdvApp2Var_MathBase.hxx
-AdvApp2Var_MathBase_mathinit.cxx
 AdvApp2Var_Network.cxx
 AdvApp2Var_Network.hxx
 AdvApp2Var_Node.cxx

@@ -1094,13 +1094,11 @@ void BRepFill_Generator::Perform()
 const TopTools_ListOfShape& 
  BRepFill_Generator::GeneratedShapes (const TopoDS_Shape& SSection) const 
 {
-  if (myMap.IsBound(SSection)) {
-    return myMap(SSection);
-  }
-  else {
-    static TopTools_ListOfShape Empty;
-    return Empty;
-  }
+  if (const TopTools_ListOfShape* aList = myMap.Seek(SSection))
+    return *aList;
+
+  static const TopTools_ListOfShape Empty;
+  return Empty;
 }
 
 //=======================================================================
