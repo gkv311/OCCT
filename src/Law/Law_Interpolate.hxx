@@ -63,10 +63,7 @@ public:
   //! is    Standard_True  use the tangent Tangents.Value(i)
   //! otherwise the tangent is not constrained.
   Standard_EXPORT void Load (const TColStd_Array1OfReal& Tangents, const Handle(TColStd_HArray1OfBoolean)& TangentFlags);
-  
-  //! Clears the tangents if any
-  Standard_EXPORT void ClearTangents();
-  
+
   //! Makes the interpolation
   Standard_EXPORT void Perform();
   
