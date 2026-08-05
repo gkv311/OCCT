@@ -58,7 +58,12 @@ public:
     (void )theFBConfig;
   }
 
+// Construction of a base class Aspect_DisplayConnection makes no sense on most platforms,
+// but this is a very common pattern in OCCT-based applications.
+// Hence, make this constructor public to simplify porting.
+#if !defined(_WIN32) && !defined(__APPLE__) && !defined(__ANDROID__)
 protected:
+#endif
 
   //! Empty constructor.
   Standard_EXPORT Aspect_DisplayConnection();
