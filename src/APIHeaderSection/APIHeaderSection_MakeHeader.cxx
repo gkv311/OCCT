@@ -30,10 +30,7 @@
 #include <StepData_StepModel.hxx>
 #include <TCollection_HAsciiString.hxx>
 
-#include <stdio.h>
 // This is a generic header for any STEP scheme
-static Handle(TCollection_HAsciiString) nulstr;
-static Handle(Interface_HArray1OfHAsciiString) nularr;
 
 APIHeaderSection_MakeHeader::APIHeaderSection_MakeHeader
   (const Handle(StepData_StepModel)& model)
@@ -237,7 +234,7 @@ void APIHeaderSection_MakeHeader::SetName(const Handle(TCollection_HAsciiString)
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::Name() const
 {
-	return (fn.IsNull() ? nulstr : fn->Name());
+  return !fn.IsNull() ? fn->Name() : Handle(TCollection_HAsciiString)();
 }
 
 void APIHeaderSection_MakeHeader::SetTimeStamp(const Handle(TCollection_HAsciiString)& aTimeStamp)
@@ -247,7 +244,7 @@ void APIHeaderSection_MakeHeader::SetTimeStamp(const Handle(TCollection_HAsciiSt
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::TimeStamp() const
 {
-	return (fn.IsNull() ? nulstr : fn->TimeStamp());
+  return !fn.IsNull() ? fn->TimeStamp() : Handle(TCollection_HAsciiString)();
 }
 
 void APIHeaderSection_MakeHeader::SetAuthor(const Handle(Interface_HArray1OfHAsciiString)& aAuthor)
@@ -264,12 +261,12 @@ void APIHeaderSection_MakeHeader::SetAuthorValue(const Standard_Integer num, con
 
 Handle(Interface_HArray1OfHAsciiString) APIHeaderSection_MakeHeader::Author() const
 {
-	return (fn.IsNull() ? nularr : fn->Author());
+  return !fn.IsNull() ? fn->Author() : Handle(Interface_HArray1OfHAsciiString)();
 }
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::AuthorValue(const Standard_Integer num) const
 {
-	return (fn.IsNull() ? nulstr : fn->AuthorValue(num));
+  return !fn.IsNull() ? fn->AuthorValue(num) : Handle(TCollection_HAsciiString)();
 }
 
 Standard_Integer APIHeaderSection_MakeHeader::NbAuthor () const
@@ -291,12 +288,12 @@ void APIHeaderSection_MakeHeader::SetOrganizationValue(const Standard_Integer nu
 
 Handle(Interface_HArray1OfHAsciiString) APIHeaderSection_MakeHeader::Organization() const
 {
-	return (fn.IsNull() ? nularr : fn->Organization());
+  return !fn.IsNull() ? fn->Organization() : Handle(Interface_HArray1OfHAsciiString)();
 }
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::OrganizationValue(const Standard_Integer num) const
 {
-	return (fn.IsNull() ? nulstr : fn->OrganizationValue(num));
+  return !fn.IsNull() ? fn->OrganizationValue(num) : Handle(TCollection_HAsciiString)();
 }
 
 Standard_Integer APIHeaderSection_MakeHeader::NbOrganization () const
@@ -311,7 +308,7 @@ void APIHeaderSection_MakeHeader::SetPreprocessorVersion(const Handle(TCollectio
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::PreprocessorVersion() const
 {
-	return (fn.IsNull() ? nulstr : fn->PreprocessorVersion());
+  return !fn.IsNull() ? fn->PreprocessorVersion() : Handle(TCollection_HAsciiString)();
 }
 
 void APIHeaderSection_MakeHeader::SetOriginatingSystem(const Handle(TCollection_HAsciiString)& aOriginatingSystem)
@@ -321,7 +318,7 @@ void APIHeaderSection_MakeHeader::SetOriginatingSystem(const Handle(TCollection_
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::OriginatingSystem() const
 {
-	return (fn.IsNull() ? nulstr : fn->OriginatingSystem());
+  return !fn.IsNull() ? fn->OriginatingSystem() : Handle(TCollection_HAsciiString)();
 }
 
 void APIHeaderSection_MakeHeader::SetAuthorisation(const Handle(TCollection_HAsciiString)& aAuthorisation)
@@ -331,7 +328,7 @@ void APIHeaderSection_MakeHeader::SetAuthorisation(const Handle(TCollection_HAsc
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::Authorisation() const
 {
-	return (fn.IsNull() ? nulstr : fn->Authorisation());
+  return !fn.IsNull() ? fn->Authorisation() : Handle(TCollection_HAsciiString)();
 }
 
 // ===========
@@ -360,12 +357,12 @@ void APIHeaderSection_MakeHeader::SetSchemaIdentifiersValue(const Standard_Integ
 
 Handle(Interface_HArray1OfHAsciiString) APIHeaderSection_MakeHeader::SchemaIdentifiers() const
 {
-	return (fs.IsNull() ? nularr : fs->SchemaIdentifiers());
+  return !fs.IsNull() ? fs->SchemaIdentifiers() : Handle(Interface_HArray1OfHAsciiString)();
 }
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::SchemaIdentifiersValue(const Standard_Integer num) const
 {
-	return (fs.IsNull() ? nulstr : fs->SchemaIdentifiersValue(num));
+  return !fs.IsNull() ? fs->SchemaIdentifiersValue(num) : Handle(TCollection_HAsciiString)();
 }
 
 Standard_Integer APIHeaderSection_MakeHeader::NbSchemaIdentifiers () const
@@ -426,12 +423,12 @@ void APIHeaderSection_MakeHeader::SetDescriptionValue(const Standard_Integer num
 
 Handle(Interface_HArray1OfHAsciiString) APIHeaderSection_MakeHeader::Description() const
 {
-	return (fd.IsNull() ? nularr : fd->Description());
+  return !fd.IsNull() ? fd->Description() : Handle(Interface_HArray1OfHAsciiString)();
 }
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::DescriptionValue(const Standard_Integer num) const
 {
-	return (fd.IsNull() ? nulstr : fd->DescriptionValue(num));
+  return !fd.IsNull() ? fd->DescriptionValue(num) : Handle(TCollection_HAsciiString)();
 }
 
 Standard_Integer APIHeaderSection_MakeHeader::NbDescription () const
@@ -446,5 +443,5 @@ void APIHeaderSection_MakeHeader::SetImplementationLevel(const Handle(TCollectio
 
 Handle(TCollection_HAsciiString) APIHeaderSection_MakeHeader::ImplementationLevel() const
 {
-	return (fd.IsNull() ? nulstr : fd->ImplementationLevel());
+  return !fd.IsNull() ? fd->ImplementationLevel() : Handle(TCollection_HAsciiString)();
 }

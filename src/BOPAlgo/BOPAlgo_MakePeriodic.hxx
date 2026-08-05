@@ -493,7 +493,7 @@ public: //! @name Getting the identical shapes
   //! @param[in] theS  Shape to get the twins for.
   const TopTools_ListOfShape& GetTwins(const TopoDS_Shape& theS) const
   {
-    static TopTools_ListOfShape empty;
+    static const TopTools_ListOfShape empty;
     const TopTools_ListOfShape* aTwins =
       myRepeatedTwins.IsEmpty() ? myTwins.Seek(theS) : myRepeatedTwins.Seek(theS);
     return (aTwins ? *aTwins : empty);

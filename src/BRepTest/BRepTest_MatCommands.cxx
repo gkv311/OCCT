@@ -55,7 +55,7 @@ static BRepMAT2d_BisectingLocus  MapBiLo;
 static BRepMAT2d_Explorer        anExplo;
 static BRepMAT2d_LinkTopoBilo    TopoBilo;
 static MAT_Side                  SideOfMat = MAT_Left;
-static Standard_Boolean          LinkComputed;
+static Standard_Boolean          LinkComputed = false;
 
 static void DrawCurve(const Handle(Geom2d_Curve)& aCurve,
 		      const Standard_Integer      Indice);

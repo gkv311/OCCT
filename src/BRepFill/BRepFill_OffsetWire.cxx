@@ -455,13 +455,11 @@ const TopTools_ListOfShape& BRepFill_OffsetWire::GeneratedShapes
     myCallGen = Standard_True;
   }
 
-  if (myMap.Contains(SpineShape)) {
-    return myMap.FindFromKey(SpineShape);
-  }
-  else {
-    static TopTools_ListOfShape Empty;
-    return Empty;
-  }
+  if (const TopTools_ListOfShape* aList = myMap.Seek(SpineShape))
+    return *aList;
+
+  static const TopTools_ListOfShape Empty;
+  return Empty;
 }
 
 
