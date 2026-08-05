@@ -17,11 +17,7 @@
 #ifndef _HLRAlgo_PolyHidingData_HeaderFile
 #define _HLRAlgo_PolyHidingData_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-
-#include <Standard_Integer.hxx>
-
+#include <gp_XYZ.hxx>
 
 //! Data structure of a set of Hiding Triangles.
 class HLRAlgo_PolyHidingData
