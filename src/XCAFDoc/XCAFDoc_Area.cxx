@@ -39,7 +39,7 @@ XCAFDoc_Area::XCAFDoc_Area()
 
 const Standard_GUID& XCAFDoc_Area::GetID() 
 {
-  static Standard_GUID AreaID ("efd212f2-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID AreaID ("efd212f2-6dfd-11d4-b9c8-0060b0ee281b");
   return AreaID;
 }
 

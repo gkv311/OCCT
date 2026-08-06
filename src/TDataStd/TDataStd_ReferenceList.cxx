@@ -32,7 +32,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_ReferenceList,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_ReferenceList::GetID() 
 { 
-  static Standard_GUID TDataStd_ReferenceListID ("FCC1A658-59FF-4218-931B-0320A2B469A7");
+  static constexpr Standard_GUID TDataStd_ReferenceListID ("FCC1A658-59FF-4218-931B-0320A2B469A7");
   return TDataStd_ReferenceListID; 
 }
 

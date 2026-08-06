@@ -278,7 +278,7 @@ Standard_Boolean XCAFDoc_ClippingPlaneTool::GetCapping(const TDF_Label& theClipp
 
 const Standard_GUID& XCAFDoc_ClippingPlaneTool::GetID() 
 {
-  static Standard_GUID ColorTblID ("efd213ea-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID ColorTblID ("efd213ea-6dfd-11d4-b9c8-0060b0ee281b");
   return ColorTblID; 
 }
 

@@ -39,7 +39,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDocStd_XLinkRoot,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDocStd_XLinkRoot::GetID() 
 {
-  static Standard_GUID myID("5d587401-5690-11d1-8940-080009dc3333");
+  static constexpr Standard_GUID myID("5d587401-5690-11d1-8940-080009dc3333");
   return myID;
 }
 

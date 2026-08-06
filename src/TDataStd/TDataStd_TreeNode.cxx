@@ -45,7 +45,7 @@ Standard_Boolean TDataStd_TreeNode::Find(const TDF_Label& L,
 
 const Standard_GUID&  TDataStd_TreeNode::GetDefaultTreeID() 
 {  
-  static Standard_GUID TDataStd_TreeNodeID ("2a96b621-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataStd_TreeNodeID ("2a96b621-ec8b-11d0-bee7-080009dc3333");
   return TDataStd_TreeNodeID; 
 }
 

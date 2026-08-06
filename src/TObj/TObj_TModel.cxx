@@ -30,7 +30,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TObj_TModel,TDF_Attribute)
 
 const Standard_GUID& TObj_TModel::GetID() 
 {
-  static Standard_GUID GModelID ("bbdab6a6-dca9-11d4-ba37-0060b0ee18ea");
+  static constexpr Standard_GUID GModelID ("bbdab6a6-dca9-11d4-ba37-0060b0ee18ea");
   return GModelID; 
 }
 

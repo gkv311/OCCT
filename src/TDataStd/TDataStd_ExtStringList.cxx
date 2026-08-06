@@ -32,7 +32,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_ExtStringList,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_ExtStringList::GetID() 
 { 
-  static Standard_GUID TDataStd_ExtStringListID ("D13FBE0A-E084-4912-A99D-7713C59C0AC4");
+  static constexpr Standard_GUID TDataStd_ExtStringListID ("D13FBE0A-E084-4912-A99D-7713C59C0AC4");
   return TDataStd_ExtStringListID; 
 }
 

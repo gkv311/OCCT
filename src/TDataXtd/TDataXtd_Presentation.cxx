@@ -169,7 +169,7 @@ void TDataXtd_Presentation::Unset(const TDF_Label& theLabel)
 //=======================================================================
 const Standard_GUID& TDataXtd_Presentation::GetID()
 {
-  static Standard_GUID TDataXtd_PresentationID("04fb4d00-5690-11d1-8940-080009dc3333");
+  static constexpr Standard_GUID TDataXtd_PresentationID("04fb4d00-5690-11d1-8940-080009dc3333");
   return TDataXtd_PresentationID;
 }
 

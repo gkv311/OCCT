@@ -39,7 +39,7 @@ XCAFDoc_Volume::XCAFDoc_Volume()
 
 const Standard_GUID& XCAFDoc_Volume::GetID() 
 {
-  static Standard_GUID VolumeID ("efd212f1-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID VolumeID ("efd212f1-6dfd-11d4-b9c8-0060b0ee281b");
   return VolumeID;
 }
 

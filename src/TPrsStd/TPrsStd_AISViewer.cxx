@@ -32,7 +32,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TPrsStd_AISViewer,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TPrsStd_AISViewer::GetID () 
 {  
-  static Standard_GUID TPrsStd_AISViewerID("04fb4d05-5690-11d1-8940-080009dc3333");
+  static constexpr Standard_GUID TPrsStd_AISViewerID("04fb4d05-5690-11d1-8940-080009dc3333");
   return TPrsStd_AISViewerID;
 }
 //=======================================================================

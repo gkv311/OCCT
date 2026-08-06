@@ -39,8 +39,8 @@ XCAFDoc_DimTol::XCAFDoc_DimTol()
 
 const Standard_GUID& XCAFDoc_DimTol::GetID() 
 {
-  static Standard_GUID DGTID ("58ed092d-44de-11d8-8776-001083004c77");
-  //static Standard_GUID ID("efd212e9-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID DGTID ("58ed092d-44de-11d8-8776-001083004c77");
+  //static constexpr Standard_GUID ID("efd212e9-6dfd-11d4-b9c8-0060b0ee281b");
   return DGTID; 
   //return ID;
 }

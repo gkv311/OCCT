@@ -51,7 +51,7 @@ enum NotesTool_RootLabels
 const Standard_GUID&
 XCAFDoc_NotesTool::GetID()
 {
-  static Standard_GUID s_ID("8F8174B1-6125-47a0-B357-61BD2D89380C");
+  static constexpr Standard_GUID s_ID("8F8174B1-6125-47a0-B357-61BD2D89380C");
   return s_ID;
 }
 

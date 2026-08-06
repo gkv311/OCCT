@@ -33,7 +33,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_ByteArray,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_ByteArray::GetID() 
 { 
-  static Standard_GUID TDataStd_ByteArrayID ("FD9B918F-2980-4c66-85E0-D71965475290");
+  static constexpr Standard_GUID TDataStd_ByteArrayID ("FD9B918F-2980-4c66-85E0-D71965475290");
   return TDataStd_ByteArrayID; 
 }
 

@@ -53,6 +53,6 @@ Standard_Boolean XCAFPrs_Driver::Update (const TDF_Label& L,
 
 const Standard_GUID& XCAFPrs_Driver::GetID()
 {
-  static Standard_GUID ID("5b896afc-3adf-11d4-b9b7-0060b0ee281b");
+  static constexpr Standard_GUID ID("5b896afc-3adf-11d4-b9b7-0060b0ee281b");
   return ID;
 }

@@ -23,8 +23,8 @@
 #include <XmlXCAFDrivers_DocumentRetrievalDriver.hxx>
 #include <XmlXCAFDrivers_DocumentStorageDriver.hxx>
 
-static Standard_GUID XSStorageDriver  ("f78ff496-a779-11d5-aab4-0050044b1af1");
-static Standard_GUID XSRetrievalDriver("f78ff497-a779-11d5-aab4-0050044b1af1");
+static constexpr Standard_GUID XSStorageDriver  ("f78ff496-a779-11d5-aab4-0050044b1af1");
+static constexpr Standard_GUID XSRetrievalDriver("f78ff497-a779-11d5-aab4-0050044b1af1");
 
 const Handle(Standard_Transient)& XmlXCAFDrivers::Factory(const Standard_GUID& aGUID)
 {

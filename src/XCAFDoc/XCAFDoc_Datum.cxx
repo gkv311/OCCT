@@ -72,8 +72,8 @@ XCAFDoc_Datum::XCAFDoc_Datum()
 
 const Standard_GUID& XCAFDoc_Datum::GetID() 
 {
-  static Standard_GUID DID("58ed092e-44de-11d8-8776-001083004c77");
-  //static Standard_GUID ID("efd212e2-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID DID("58ed092e-44de-11d8-8776-001083004c77");
+  //static constexpr Standard_GUID ID("efd212e2-6dfd-11d4-b9c8-0060b0ee281b");
   return DID;
   //return ID;
 }

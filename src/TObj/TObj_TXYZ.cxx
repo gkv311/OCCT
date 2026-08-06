@@ -38,7 +38,7 @@ TObj_TXYZ::TObj_TXYZ()
 
 const Standard_GUID& TObj_TXYZ::GetID()
 {
-  static Standard_GUID theGUID ("3bbefb50-e618-11d4-ba38-0060b0ee18ea");
+  static constexpr Standard_GUID theGUID ("3bbefb50-e618-11d4-ba38-0060b0ee18ea");
   return theGUID;
 }
 

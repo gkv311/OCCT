@@ -32,7 +32,7 @@ IMPLEMENT_STANDARD_RTTIEXT(XCAFDoc_VisMaterialTool, TDF_Attribute)
 //=======================================================================
 const Standard_GUID& XCAFDoc_VisMaterialTool::GetID()
 {
-  static Standard_GUID THE_VIS_MAT_TOOL_ID ("87B511CE-DA15-4A5E-98AF-E3F46AB5B6E8");
+  static constexpr Standard_GUID THE_VIS_MAT_TOOL_ID ("87B511CE-DA15-4A5E-98AF-E3F46AB5B6E8");
   return THE_VIS_MAT_TOOL_ID;
 }
 

@@ -38,7 +38,7 @@ IMPLEMENT_DERIVED_ATTRIBUTE(TDataXtd_Plane, TDataStd_GenericEmpty)
 //=======================================================================
 const Standard_GUID& TDataXtd_Plane::GetID () 
 {
-  static Standard_GUID TDataXtd_PlaneID("2a96b60c-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataXtd_PlaneID("2a96b60c-ec8b-11d0-bee7-080009dc3333");
   return TDataXtd_PlaneID;
 }
 

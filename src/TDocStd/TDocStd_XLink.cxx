@@ -94,7 +94,7 @@ const Standard_GUID& TDocStd_XLink::ID() const
 
 const Standard_GUID& TDocStd_XLink::GetID() 
 {
-  static Standard_GUID myID("5d587400-5690-11d1-8940-080009dc3333");
+  static constexpr Standard_GUID myID("5d587400-5690-11d1-8940-080009dc3333");
   return myID;
 }
 

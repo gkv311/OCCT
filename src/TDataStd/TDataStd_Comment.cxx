@@ -28,7 +28,7 @@ IMPLEMENT_DERIVED_ATTRIBUTE(TDataStd_Comment, TDataStd_GenericExtString)
 
 const Standard_GUID& TDataStd_Comment::GetID () 
 {
-  static Standard_GUID TDataStd_CommentID ("2a96b616-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataStd_CommentID ("2a96b616-ec8b-11d0-bee7-080009dc3333");
   return TDataStd_CommentID;
 }
 

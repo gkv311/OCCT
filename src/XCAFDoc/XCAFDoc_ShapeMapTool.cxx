@@ -32,7 +32,7 @@ IMPLEMENT_STANDARD_RTTIEXT(XCAFDoc_ShapeMapTool,TDF_Attribute)
 
 const Standard_GUID& XCAFDoc_ShapeMapTool::GetID() 
 {
-  static Standard_GUID ShapeToolID ("3B913F4D-4A82-44ef-A0BF-9E01E9FF317A");
+  static constexpr Standard_GUID ShapeToolID ("3B913F4D-4A82-44ef-A0BF-9E01E9FF317A");
   return ShapeToolID; 
 }
 

@@ -74,7 +74,7 @@ Handle(TDataStd_NoteBook) TDataStd_NoteBook::New (const TDF_Label& label)
 
 const Standard_GUID& TDataStd_NoteBook::GetID() 
 {
-  static Standard_GUID TDataStd_NoteBookID("2a96b609-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataStd_NoteBookID("2a96b609-ec8b-11d0-bee7-080009dc3333");
   return TDataStd_NoteBookID;
 }
 

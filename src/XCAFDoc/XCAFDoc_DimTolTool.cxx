@@ -72,7 +72,7 @@ Handle(XCAFDoc_DimTolTool) XCAFDoc_DimTolTool::Set(const TDF_Label& L)
 
 const Standard_GUID& XCAFDoc_DimTolTool::GetID() 
 {
-  static Standard_GUID DGTTblID ("72afb19b-44de-11d8-8776-001083004c77");
+  static constexpr Standard_GUID DGTTblID ("72afb19b-44de-11d8-8776-001083004c77");
   return DGTTblID; 
 }
 

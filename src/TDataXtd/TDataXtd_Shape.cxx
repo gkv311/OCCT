@@ -118,7 +118,7 @@ TopoDS_Shape TDataXtd_Shape::Get (const TDF_Label& label)
 
 const Standard_GUID& TDataXtd_Shape::GetID() 
 {
-  static Standard_GUID TDataXtd_ShapeID("2a96b620-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataXtd_ShapeID("2a96b620-ec8b-11d0-bee7-080009dc3333");
   return TDataXtd_ShapeID;
 }
 

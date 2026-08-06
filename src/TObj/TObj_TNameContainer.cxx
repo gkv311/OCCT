@@ -37,7 +37,7 @@ TObj_TNameContainer::TObj_TNameContainer()
 
 const Standard_GUID& TObj_TNameContainer::GetID()
 {
-  static Standard_GUID theID ("3bbefb47-e618-11d4-ba38-0060b0ee18ea");
+  static constexpr Standard_GUID theID ("3bbefb47-e618-11d4-ba38-0060b0ee18ea");
   return theID;
 }
   

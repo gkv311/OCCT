@@ -29,7 +29,7 @@
 //=======================================================================
 const Standard_GUID& TFunction_Logbook::GetID() 
 {  
-  static Standard_GUID TFunction_LogbookID("CF519724-5CA4-4B90-835F-8919BE1DDE4B");
+  static constexpr Standard_GUID TFunction_LogbookID("CF519724-5CA4-4B90-835F-8919BE1DDE4B");
   return TFunction_LogbookID; 
 }
 
