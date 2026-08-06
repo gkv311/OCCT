@@ -61,7 +61,7 @@ Handle(XCAFDoc_MaterialTool) XCAFDoc_MaterialTool::Set(const TDF_Label& L)
 
 const Standard_GUID& XCAFDoc_MaterialTool::GetID() 
 {
-  static Standard_GUID MatTblID ("efd212f9-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID MatTblID ("efd212f9-6dfd-11d4-b9c8-0060b0ee281b");
   return MatTblID; 
 }
 

@@ -25,7 +25,7 @@
 //=======================================================================
 const Standard_GUID& TDataXtd_Triangulation::GetID()
 {
-  static Standard_GUID TDataXtd_TriangulationID ("27AE2C44-60B0-41AE-AC18-BA3FDA538D03");
+  static constexpr Standard_GUID TDataXtd_TriangulationID ("27AE2C44-60B0-41AE-AC18-BA3FDA538D03");
   return TDataXtd_TriangulationID; 
 }
 

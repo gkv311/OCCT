@@ -122,7 +122,7 @@ void  DDataStd_DrawPresentation::Update (const TDF_Label& L)
 
 const Standard_GUID& DDataStd_DrawPresentation::GetID() 
 {
-  static Standard_GUID DDataStd_DrawPresentationID("1c0296d4-6dbc-22d4-b9c8-0070b0ee301b");
+  static constexpr Standard_GUID DDataStd_DrawPresentationID("1c0296d4-6dbc-22d4-b9c8-0070b0ee301b");
   return DDataStd_DrawPresentationID;
 }
 

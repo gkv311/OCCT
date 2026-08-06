@@ -38,7 +38,7 @@ enum {
 const Standard_GUID& 
 XCAFDoc_AssemblyItemRef::GetID()
 {
-  static Standard_GUID s_ID("3F2E4CD6-169B-4747-A321-5670E4291F5D");
+  static constexpr Standard_GUID s_ID("3F2E4CD6-169B-4747-A321-5670E4291F5D");
   return s_ID;
 }
 

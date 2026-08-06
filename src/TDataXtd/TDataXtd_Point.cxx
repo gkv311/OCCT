@@ -37,7 +37,7 @@ IMPLEMENT_DERIVED_ATTRIBUTE(TDataXtd_Point, TDataStd_GenericEmpty)
 //=======================================================================
 const Standard_GUID& TDataXtd_Point::GetID() 
 {
-  static Standard_GUID TDataXtd_PointID("2a96b60d-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataXtd_PointID("2a96b60d-ec8b-11d0-bee7-080009dc3333");
   return TDataXtd_PointID;
 }
 

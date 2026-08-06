@@ -27,8 +27,8 @@
 #include <Plugin_Macro.hxx>
 #include <TDocStd_Application.hxx>
 
-static Standard_GUID BinStorageDriver  ("f78ff4a2-a779-11d5-aab4-0050044b1af1");
-static Standard_GUID BinRetrievalDriver("f78ff4a3-a779-11d5-aab4-0050044b1af1");
+static constexpr Standard_GUID BinStorageDriver  ("f78ff4a2-a779-11d5-aab4-0050044b1af1");
+static constexpr Standard_GUID BinRetrievalDriver("f78ff4a3-a779-11d5-aab4-0050044b1af1");
 
 const Handle(Standard_Transient)& BinTObjDrivers::Factory(const Standard_GUID& aGUID)
 {

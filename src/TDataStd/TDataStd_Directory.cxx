@@ -58,7 +58,7 @@ Standard_Boolean TDataStd_Directory::Find (const TDF_Label& current,
 
 const Standard_GUID& TDataStd_Directory::GetID() 
 {
-  static Standard_GUID TDataStd_DirectoryID("2a96b61f-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataStd_DirectoryID("2a96b61f-ec8b-11d0-bee7-080009dc3333");
   return TDataStd_DirectoryID;
 }
 

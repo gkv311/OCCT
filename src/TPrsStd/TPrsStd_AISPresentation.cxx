@@ -107,7 +107,7 @@ Handle(TDataXtd_Presentation) TPrsStd_AISPresentation::getData () const
 //=======================================================================
 const Standard_GUID& TPrsStd_AISPresentation::GetID()
 {
-  static Standard_GUID TPrsStd_AISPresentationID("3680ac6c-47ae-4366-bb94-26abb6e07341");
+  static constexpr Standard_GUID TPrsStd_AISPresentationID("3680ac6c-47ae-4366-bb94-26abb6e07341");
   return TPrsStd_AISPresentationID;
 }
 

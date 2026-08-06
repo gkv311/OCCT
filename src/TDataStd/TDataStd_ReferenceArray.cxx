@@ -32,7 +32,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_ReferenceArray,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_ReferenceArray::GetID() 
 { 
-  static Standard_GUID TDataStd_ReferenceArrayID ("7EE745A6-BB50-446c-BB0B-C195B23AB5CA");
+  static constexpr Standard_GUID TDataStd_ReferenceArrayID ("7EE745A6-BB50-446c-BB0B-C195B23AB5CA");
   return TDataStd_ReferenceArrayID; 
 }
 

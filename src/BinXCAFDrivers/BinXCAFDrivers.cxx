@@ -25,8 +25,8 @@
 #include <Standard_GUID.hxx>
 #include <TDocStd_Application.hxx>
 
-static Standard_GUID BinXCAFStorageDriver  ("a78ff496-a779-11d5-aab4-0050044b1af1");
-static Standard_GUID BinXCAFRetrievalDriver("a78ff497-a779-11d5-aab4-0050044b1af1");
+static constexpr Standard_GUID BinXCAFStorageDriver  ("a78ff496-a779-11d5-aab4-0050044b1af1");
+static constexpr Standard_GUID BinXCAFRetrievalDriver("a78ff497-a779-11d5-aab4-0050044b1af1");
 
 //=======================================================================
 //function :

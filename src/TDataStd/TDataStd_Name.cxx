@@ -25,7 +25,7 @@ IMPLEMENT_DERIVED_ATTRIBUTE(TDataStd_Name,TDataStd_GenericExtString)
 //=======================================================================
 const Standard_GUID& TDataStd_Name::GetID () 
 {
-  static Standard_GUID TDataStd_NameID("2a96b608-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataStd_NameID("2a96b608-ec8b-11d0-bee7-080009dc3333");
   return TDataStd_NameID;
 }
 

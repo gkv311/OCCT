@@ -26,7 +26,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataXtd_Pattern,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataXtd_Pattern::GetID()
 {
-  static Standard_GUID myID("2a96b618-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID myID("2a96b618-ec8b-11d0-bee7-080009dc3333");
   return myID;
 }
 
