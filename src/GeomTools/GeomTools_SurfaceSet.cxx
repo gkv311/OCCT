@@ -84,7 +84,7 @@ void  GeomTools_SurfaceSet::Clear()
 
 Standard_Integer  GeomTools_SurfaceSet::Add(const Handle(Geom_Surface)& S)
 {
-  return myMap.Add(S);
+  return !S.IsNull() ? myMap.Add(S) : 0;
 }
 
 
@@ -110,7 +110,7 @@ Handle(Geom_Surface)  GeomTools_SurfaceSet::Surface
 Standard_Integer  GeomTools_SurfaceSet::Index
   (const Handle(Geom_Surface)& S)const 
 {
-  return myMap.FindIndex(S);
+  return !S.IsNull() ? myMap.FindIndex(S) : 0;
 }
 
 //=======================================================================
