@@ -80,7 +80,7 @@ void  GeomTools_Curve2dSet::Clear()
 
 Standard_Integer  GeomTools_Curve2dSet::Add(const Handle(Geom2d_Curve)& S)
 {
-  return myMap.Add(S);
+  return !S.IsNull() ? myMap.Add(S) : 0;
 }
 
 
@@ -107,7 +107,7 @@ Handle(Geom2d_Curve)  GeomTools_Curve2dSet::Curve2d
 Standard_Integer  GeomTools_Curve2dSet::Index
   (const Handle(Geom2d_Curve)& S)const 
 {
-  return myMap.FindIndex(S);
+  return !S.IsNull() ? myMap.FindIndex(S) : 0;
 }
 
 //=======================================================================
