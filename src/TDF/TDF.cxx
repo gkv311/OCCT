@@ -26,7 +26,7 @@ static TDF_GUIDProgIDMap guidprogidmap;
 
 const Standard_GUID& TDF::LowestID()
 {
-  static Standard_GUID lowestID("00000000-0000-0000-0000-000000000000");
+  static constexpr Standard_GUID lowestID("00000000-0000-0000-0000-000000000000");
   return lowestID;
 }
 
@@ -38,7 +38,7 @@ const Standard_GUID& TDF::LowestID()
 
 const Standard_GUID& TDF::UppestID()
 {
-  static Standard_GUID uppestID("ffffffff-ffff-ffff-ffff-ffffffffffff");
+  static constexpr Standard_GUID uppestID("ffffffff-ffff-ffff-ffff-ffffffffffff");
   return uppestID;
 }
 

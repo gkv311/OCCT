@@ -35,7 +35,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_Expression,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_Expression::GetID() 
 {  
-  static Standard_GUID TDataStd_ExpressionID("ce24146a-8e57-11d1-8953-080009dc4425");
+  static constexpr Standard_GUID TDataStd_ExpressionID("ce24146a-8e57-11d1-8953-080009dc4425");
   return TDataStd_ExpressionID;
 }
 

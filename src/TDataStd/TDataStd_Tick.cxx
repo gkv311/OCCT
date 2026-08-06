@@ -26,7 +26,7 @@ IMPLEMENT_DERIVED_ATTRIBUTE(TDataStd_Tick,TDataStd_GenericEmpty)
 //=======================================================================
 const Standard_GUID& TDataStd_Tick::GetID () 
 {
-  static Standard_GUID TDataStd_TickID("40DC60CD-30B9-41be-B002-4169EFB34EA5");
+  static constexpr Standard_GUID TDataStd_TickID("40DC60CD-30B9-41be-B002-4169EFB34EA5");
   return TDataStd_TickID; 
 }
 

@@ -54,7 +54,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TNaming_NamedShape,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TNaming_NamedShape::GetID() 
 {
-  static Standard_GUID TNaming_NamedShapeID("c4ef4200-568f-11d1-8940-080009dc3333");
+  static constexpr Standard_GUID TNaming_NamedShapeID("c4ef4200-568f-11d1-8940-080009dc3333");
   return TNaming_NamedShapeID;
 }
 

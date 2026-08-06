@@ -31,7 +31,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDF_TagSource,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDF_TagSource::GetID () { 
 
-  static Standard_GUID TDF_TagSourceID("2a96b611-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDF_TagSourceID("2a96b611-ec8b-11d0-bee7-080009dc3333");
   return TDF_TagSourceID;
 }
 

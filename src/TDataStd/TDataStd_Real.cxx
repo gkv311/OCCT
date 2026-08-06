@@ -33,7 +33,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_Real,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_Real::GetID() 
 {
-  static Standard_GUID TDataStd_RealID("2a96b60f-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataStd_RealID("2a96b60f-ec8b-11d0-bee7-080009dc3333");
   return TDataStd_RealID;
 }
 

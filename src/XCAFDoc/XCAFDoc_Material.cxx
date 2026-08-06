@@ -39,7 +39,7 @@ XCAFDoc_Material::XCAFDoc_Material()
 
 const Standard_GUID& XCAFDoc_Material::GetID() 
 {
-  static Standard_GUID MatID ("efd212f8-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID MatID ("efd212f8-6dfd-11d4-b9c8-0060b0ee281b");
   return MatID;
 }
 

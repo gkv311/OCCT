@@ -32,7 +32,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDF_Reference,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDF_Reference::GetID () 
 {
-  static Standard_GUID TDF_ReferenceID("2a96b610-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDF_ReferenceID("2a96b610-ec8b-11d0-bee7-080009dc3333");
   return TDF_ReferenceID;
 }
 

@@ -43,7 +43,7 @@ IMPLEMENT_DERIVED_ATTRIBUTE_WITH_TYPE(XCAFDoc_DocumentTool,TDataStd_GenericEmpty
 //=======================================================================
 const Standard_GUID& XCAFDoc_DocumentTool::GetID() 
 {
-  static Standard_GUID DocumentToolID ("efd212ec-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID DocumentToolID ("efd212ec-6dfd-11d4-b9c8-0060b0ee281b");
   return DocumentToolID; 
 }
 
@@ -56,7 +56,7 @@ namespace {
 
 static const Standard_GUID& GetDocumentToolRefID() 
 {
-  static Standard_GUID DocumentToolRefID ("efd212eb-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID DocumentToolRefID ("efd212eb-6dfd-11d4-b9c8-0060b0ee281b");
   return DocumentToolRefID; 
 }
 }

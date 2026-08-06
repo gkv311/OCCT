@@ -27,7 +27,7 @@ IMPLEMENT_STANDARD_RTTIEXT(XCAFDoc_VisMaterial, TDF_Attribute)
 //=======================================================================
 const Standard_GUID& XCAFDoc_VisMaterial::GetID()
 {
-  static Standard_GUID THE_VIS_MAT_ID ("EBB00255-03A0-4845-BD3B-A70EEDEEFA78");
+  static constexpr Standard_GUID THE_VIS_MAT_ID ("EBB00255-03A0-4845-BD3B-A70EEDEEFA78");
   return THE_VIS_MAT_ID;
 }
 

@@ -42,7 +42,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_NamedData,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_NamedData::GetID() 
 { 
-  static Standard_GUID TDataStd_NamedDataID ("F170FD21-CBAE-4e7d-A4B4-0560A4DA2D16");
+  static constexpr Standard_GUID TDataStd_NamedDataID ("F170FD21-CBAE-4e7d-A4B4-0560A4DA2D16");
   return TDataStd_NamedDataID; 
 }
 

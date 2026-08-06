@@ -39,7 +39,7 @@ XCAFDoc_Location::XCAFDoc_Location()
 
 const Standard_GUID& XCAFDoc_Location::GetID() 
 {
-  static Standard_GUID LocationID ("efd212ef-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID LocationID ("efd212ef-6dfd-11d4-b9c8-0060b0ee281b");
   return LocationID; 
 }
 

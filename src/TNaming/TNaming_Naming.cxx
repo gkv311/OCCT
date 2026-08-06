@@ -185,7 +185,7 @@ Standard_Boolean  TNaming_Naming::Solve (TDF_LabelMap& Valid)
 
 const Standard_GUID& TNaming_Naming::GetID () 
 {
-  static Standard_GUID TNaming_NamingID("c0a19201-5b78-11d1-8940-080009dc3333");
+  static constexpr Standard_GUID TNaming_NamingID("c0a19201-5b78-11d1-8940-080009dc3333");
   return TNaming_NamingID; 
 }
 

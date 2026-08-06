@@ -66,7 +66,7 @@ Handle(XCAFDoc_LayerTool) XCAFDoc_LayerTool::Set(const TDF_Label& L)
 
 const Standard_GUID& XCAFDoc_LayerTool::GetID() 
 {
-  static Standard_GUID LayerTblID ("efd212f4-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID LayerTblID ("efd212f4-6dfd-11d4-b9c8-0060b0ee281b");
   return LayerTblID; 
 }
 

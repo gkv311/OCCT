@@ -63,7 +63,7 @@ static Standard_Boolean theAutoNaming = Standard_True;
 
 const Standard_GUID& XCAFDoc_ShapeTool::GetID() 
 {
-  static Standard_GUID ShapeToolID ("efd212ee-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID ShapeToolID ("efd212ee-6dfd-11d4-b9c8-0060b0ee281b");
   return ShapeToolID; 
 }
 

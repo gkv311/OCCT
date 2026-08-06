@@ -40,7 +40,7 @@ TObj_TObject::TObj_TObject()
 
 const Standard_GUID& TObj_TObject::GetID()
 {
-  static Standard_GUID GInterfaceID ("bbdab6a7-dca9-11d4-ba37-0060b0ee18ea");
+  static constexpr Standard_GUID GInterfaceID ("bbdab6a7-dca9-11d4-ba37-0060b0ee18ea");
   return GInterfaceID;
 }
     

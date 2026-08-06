@@ -35,7 +35,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_IntPackedMap,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_IntPackedMap::GetID()
 {
-  static Standard_GUID theGUID ("7031faff-161e-44df-8239-7c264a81f5a1");
+  static constexpr Standard_GUID theGUID ("7031faff-161e-44df-8239-7c264a81f5a1");
   return theGUID;
 }
 

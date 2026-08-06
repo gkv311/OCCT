@@ -43,7 +43,7 @@ TObj_TReference::TObj_TReference()
 
 const Standard_GUID& TObj_TReference::GetID()
 {
-  static Standard_GUID theGUID ("3bbefb44-e618-11d4-ba38-0060b0ee18ea");
+  static constexpr Standard_GUID theGUID ("3bbefb44-e618-11d4-ba38-0060b0ee18ea");
   return theGUID;
 }
 

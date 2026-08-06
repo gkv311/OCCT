@@ -39,7 +39,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataXtd_PatternStd,TDataXtd_Pattern)
 //=======================================================================
 const Standard_GUID& TDataXtd_PatternStd::GetPatternID() 
 {
-  static Standard_GUID TDataXtd_PatternStdID("2a96b61b-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataXtd_PatternStdID("2a96b61b-ec8b-11d0-bee7-080009dc3333");
   return TDataXtd_PatternStdID;
 }
 

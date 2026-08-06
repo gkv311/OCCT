@@ -59,7 +59,7 @@ Handle(XCAFDoc_ViewTool) XCAFDoc_ViewTool::Set(const TDF_Label& L)
 //=======================================================================
 const Standard_GUID& XCAFDoc_ViewTool::GetID() 
 {
-  static Standard_GUID ViewToolID ("efd213e4-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID ViewToolID ("efd213e4-6dfd-11d4-b9c8-0060b0ee281b");
   return ViewToolID; 
 }
 

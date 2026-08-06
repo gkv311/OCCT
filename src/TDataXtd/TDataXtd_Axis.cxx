@@ -37,7 +37,7 @@ IMPLEMENT_DERIVED_ATTRIBUTE(TDataXtd_Axis, TDataStd_GenericEmpty)
 //=======================================================================
 const Standard_GUID& TDataXtd_Axis::GetID () 
 {
-  static Standard_GUID TDataXtd_AxisID("2a96b601-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDataXtd_AxisID("2a96b601-ec8b-11d0-bee7-080009dc3333");
   return TDataXtd_AxisID;
 }
 

@@ -59,7 +59,7 @@ XCAFDoc_View::XCAFDoc_View()
 //=======================================================================
 const Standard_GUID& XCAFDoc_View::GetID() 
 {
-  static Standard_GUID ViewID ("efd213e8-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID ViewID ("efd213e8-6dfd-11d4-b9c8-0060b0ee281b");
   return ViewID; 
 }
 

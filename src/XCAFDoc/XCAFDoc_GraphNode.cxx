@@ -44,7 +44,7 @@ Standard_Boolean XCAFDoc_GraphNode::Find(const TDF_Label& L,
 
 const Standard_GUID&  XCAFDoc_GraphNode::GetDefaultGraphID() 
 {
-  static Standard_GUID XCAFDoc_GraphNodeID ("efd212f5-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID XCAFDoc_GraphNodeID ("efd212f5-6dfd-11d4-b9c8-0060b0ee281b");
   return XCAFDoc_GraphNodeID; 
 }
 

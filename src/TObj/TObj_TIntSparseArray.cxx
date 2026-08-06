@@ -41,7 +41,7 @@ TObj_TIntSparseArray::TObj_TIntSparseArray ()
 
 const Standard_GUID& TObj_TIntSparseArray::GetID()
 {
-  static Standard_GUID GInterfaceID ("7016dc0c-b118-4433-8ef3-aecdccc79198");
+  static constexpr Standard_GUID GInterfaceID ("7016dc0c-b118-4433-8ef3-aecdccc79198");
   return GInterfaceID;
 }
 

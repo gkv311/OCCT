@@ -31,7 +31,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_BooleanList,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_BooleanList::GetID() 
 { 
-  static Standard_GUID TDataStd_BooleanListID ("23A9D60E-A033-44d8-96EE-015587A41BBC");
+  static constexpr Standard_GUID TDataStd_BooleanListID ("23A9D60E-A033-44d8-96EE-015587A41BBC");
   return TDataStd_BooleanListID; 
 }
 
