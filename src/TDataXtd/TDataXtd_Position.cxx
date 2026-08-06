@@ -72,7 +72,7 @@ Standard_Boolean TDataXtd_Position::Get(const TDF_Label& aLabel, gp_Pnt& aPos)
 //=======================================================================
 const Standard_GUID& TDataXtd_Position::GetID() 
 {
-  static Standard_GUID TDataXtd_Position_guid("55553252-ce0c-11d1-b5d8-00a0c9064368");
+  static constexpr Standard_GUID TDataXtd_Position_guid("55553252-ce0c-11d1-b5d8-00a0c9064368");
   return TDataXtd_Position_guid;
 }
 

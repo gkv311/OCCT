@@ -56,7 +56,7 @@ static Standard_Integer DegreeOf2(const Standard_Integer degree)
 //=======================================================================
 const Standard_GUID& TDataStd_BooleanArray::GetID() 
 { 
-  static Standard_GUID TDataStd_BooleanArrayID ("C7E98E54-B5EA-4aa9-AC99-9164EBD07F10");
+  static constexpr Standard_GUID TDataStd_BooleanArrayID ("C7E98E54-B5EA-4aa9-AC99-9164EBD07F10");
   return TDataStd_BooleanArrayID; 
 }
 

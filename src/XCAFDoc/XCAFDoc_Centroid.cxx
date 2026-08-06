@@ -39,7 +39,7 @@ XCAFDoc_Centroid::XCAFDoc_Centroid()
 
 const Standard_GUID& XCAFDoc_Centroid::GetID() 
 {
-  static Standard_GUID CentroidID ("efd212f3-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID CentroidID ("efd212f3-6dfd-11d4-b9c8-0060b0ee281b");
   return CentroidID; 
 }
 

@@ -31,8 +31,8 @@
 #include <Standard_Transient.hxx>
 #include <TDocStd_Application.hxx>
 
-static Standard_GUID BinStorageDriver  ("03a56835-8269-11d5-aab2-0050044b1af1");
-static Standard_GUID BinRetrievalDriver("03a56836-8269-11d5-aab2-0050044b1af1");
+static constexpr Standard_GUID BinStorageDriver  ("03a56835-8269-11d5-aab2-0050044b1af1");
+static constexpr Standard_GUID BinRetrievalDriver("03a56836-8269-11d5-aab2-0050044b1af1");
 
 //=======================================================================
 //function : Factory

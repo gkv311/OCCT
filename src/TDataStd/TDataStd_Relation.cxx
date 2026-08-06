@@ -35,7 +35,7 @@ IMPLEMENT_DERIVED_ATTRIBUTE(TDataStd_Relation,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_Relation::GetID() 
 {  
-  static Standard_GUID TDataStd_RelationID("ce24146b-8e57-11d1-8953-080009dc4425");
+  static constexpr Standard_GUID TDataStd_RelationID("ce24146b-8e57-11d1-8953-080009dc4425");
   return TDataStd_RelationID;
 }
 

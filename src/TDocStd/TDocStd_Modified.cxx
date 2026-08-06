@@ -116,7 +116,7 @@ void TDocStd_Modified::Clear (const TDF_Label& access)
 
 const Standard_GUID& TDocStd_Modified::GetID() 
 { 
-  static Standard_GUID TDocStd_ModifiedID ("2a96b622-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID TDocStd_ModifiedID ("2a96b622-ec8b-11d0-bee7-080009dc3333");
   return TDocStd_ModifiedID; 
 }
 

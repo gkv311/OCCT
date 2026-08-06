@@ -41,7 +41,7 @@ TDataStd_AsciiString::TDataStd_AsciiString(): myID(GetID())
 
 const Standard_GUID& TDataStd_AsciiString::GetID()
 {
-  static Standard_GUID theGUID ("3bbefc60-e618-11d4-ba38-0060b0ee18ea");
+  static constexpr Standard_GUID theGUID ("3bbefc60-e618-11d4-ba38-0060b0ee18ea");
   return theGUID;
 }
 

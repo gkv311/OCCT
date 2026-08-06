@@ -25,7 +25,7 @@ IMPLEMENT_DERIVED_ATTRIBUTE(XCAFDoc_NoteBalloon, XCAFDoc_NoteComment)
 const Standard_GUID&
 XCAFDoc_NoteBalloon::GetID()
 {
-  static Standard_GUID s_ID("1127951D-87D5-4ecc-89D5-D1406576C43F");
+  static constexpr Standard_GUID s_ID("1127951D-87D5-4ecc-89D5-D1406576C43F");
   return s_ID;
 }
 

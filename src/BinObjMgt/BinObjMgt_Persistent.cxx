@@ -26,18 +26,7 @@
 #define BP_EXTCHARSIZE     ((Standard_Integer)sizeof(Standard_ExtCharacter))
 #define BP_REALSIZE        ((Standard_Integer)sizeof(Standard_Real))
 #define BP_SHORTREALSIZE   ((Standard_Integer)sizeof(Standard_ShortReal))
-#define BP_UUIDSIZE        ((Standard_Integer)sizeof(BinObjMgt_UUID))
-
-// We define a GUID structure that is different from Standard_UUID because
-// the latter contains a 'unsigned long' member that has variables size
-// (4 or 8 bits) thus making the persistent files non-portable.
-// This structure below ensures the portability.
-typedef struct {
-  unsigned int   Data1 ;        // 4-bytes long on all OS
-  unsigned short Data2 ;        // 2-bytes long on all OS
-  unsigned short Data3 ;        // 2-bytes long on all OS
-  unsigned char  Data4[8] ;     // 8-bytes long on all OS
-} BinObjMgt_UUID ;
+#define BP_UUIDSIZE        ((Standard_Integer)sizeof(Standard_UUID))
 
 //=======================================================================
 //function : BinObjMgt_Persistent
@@ -437,23 +426,11 @@ BinObjMgt_Persistent& BinObjMgt_Persistent::PutGUID
 {
   alignOffset (BP_INTSIZE, Standard_True);
   prepareForPut (BP_UUIDSIZE);
-  const Standard_UUID aStandardUUID = theValue.ToUUID();
-  BinObjMgt_UUID anUUID;
-  anUUID.Data1 = (unsigned int)   aStandardUUID.Data1;
-  anUUID.Data2 = (unsigned short) aStandardUUID.Data2;
-  anUUID.Data3 = (unsigned short) aStandardUUID.Data3;
-  anUUID.Data4[0] = aStandardUUID.Data4[0];
-  anUUID.Data4[1] = aStandardUUID.Data4[1];
-  anUUID.Data4[2] = aStandardUUID.Data4[2];
-  anUUID.Data4[3] = aStandardUUID.Data4[3];
-  anUUID.Data4[4] = aStandardUUID.Data4[4];
-  anUUID.Data4[5] = aStandardUUID.Data4[5];
-  anUUID.Data4[6] = aStandardUUID.Data4[6];
-  anUUID.Data4[7] = aStandardUUID.Data4[7];
+  Standard_UUID anUUID = theValue.ToUUID();
 #ifdef DO_INVERSE
-  anUUID.Data1 = (unsigned int)   InverseInt     (anUUID.Data1);
-  anUUID.Data2 = (unsigned short) InverseExtChar (anUUID.Data2);
-  anUUID.Data3 = (unsigned short) InverseExtChar (anUUID.Data3);
+  anUUID.Data1 = (uint32_t)InverseInt    (anUUID.Data1);
+  anUUID.Data2 = (uint16_t)InverseExtChar(anUUID.Data2);
+  anUUID.Data3 = (uint16_t)InverseExtChar(anUUID.Data3);
 #endif
   putArray (&anUUID, BP_UUIDSIZE);
   return *this;
@@ -859,12 +836,13 @@ const BinObjMgt_Persistent& BinObjMgt_Persistent::GetGUID
   alignOffset (BP_INTSIZE);
   if (noMoreData (BP_UUIDSIZE))
     return *this;
-  BinObjMgt_UUID anUUID;
+
+  Standard_UUID anUUID;
   getArray (&anUUID, BP_UUIDSIZE);
 #ifdef DO_INVERSE
-  anUUID.Data1 = (unsigned int)   InverseInt     (anUUID.Data1);
-  anUUID.Data2 = (unsigned short) InverseExtChar (anUUID.Data2);
-  anUUID.Data3 = (unsigned short) InverseExtChar (anUUID.Data3);
+  anUUID.Data1 = (uint32_t)InverseInt    (anUUID.Data1);
+  anUUID.Data2 = (uint16_t)InverseExtChar(anUUID.Data2);
+  anUUID.Data3 = (uint16_t)InverseExtChar(anUUID.Data3);
 #endif
   theValue = Standard_GUID (anUUID.Data1, anUUID.Data2, anUUID.Data3,
                             ((anUUID.Data4[0] << 8) | (anUUID.Data4[1])),

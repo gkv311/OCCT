@@ -27,7 +27,7 @@
 #include <PCDM_StorageDriver.hxx>
 #include <TDocStd_Application.hxx>
 
-static Standard_GUID StdRetrievalDriver ("ad696001-5b34-11d1-b5ba-00a0c9064368");
+static constexpr Standard_GUID StdRetrievalDriver ("ad696001-5b34-11d1-b5ba-00a0c9064368");
 
 //=======================================================================
 //function : Factory

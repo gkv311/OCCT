@@ -31,7 +31,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_IntegerList,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_IntegerList::GetID() 
 { 
-  static Standard_GUID TDataStd_IntegerListID ("E406AA18-FF3F-483b-9A78-1A5EA5D1AA52");
+  static constexpr Standard_GUID TDataStd_IntegerListID ("E406AA18-FF3F-483b-9A78-1A5EA5D1AA52");
   return TDataStd_IntegerListID; 
 }
 

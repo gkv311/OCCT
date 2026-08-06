@@ -463,7 +463,7 @@ Standard_Boolean XCAFDoc_ColorTool::GetColor(const TopoDS_Shape& S,
 
 const Standard_GUID& XCAFDoc_ColorTool::GetID() 
 {
-  static Standard_GUID ColorTblID ("efd212ed-6dfd-11d4-b9c8-0060b0ee281b");
+  static constexpr Standard_GUID ColorTblID ("efd212ed-6dfd-11d4-b9c8-0060b0ee281b");
   return ColorTblID; 
 }
 

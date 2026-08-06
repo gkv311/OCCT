@@ -26,7 +26,7 @@ IMPLEMENT_STANDARD_RTTIEXT(XCAFDoc_NoteBinData, XCAFDoc_Note)
 const Standard_GUID&
 XCAFDoc_NoteBinData::GetID()
 {
-  static Standard_GUID s_ID("E9055501-F0FC-4864-BE4B-284FDA7DDEAC");
+  static constexpr Standard_GUID s_ID("E9055501-F0FC-4864-BE4B-284FDA7DDEAC");
   return s_ID;
 }
 

@@ -36,7 +36,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_Variable,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_Variable::GetID() 
 {  
-  static Standard_GUID TDataStd_VariableID("ce241469-8e57-11d1-8953-080009dc4425");
+  static constexpr Standard_GUID TDataStd_VariableID("ce241469-8e57-11d1-8953-080009dc4425");
   return TDataStd_VariableID;
 }
 

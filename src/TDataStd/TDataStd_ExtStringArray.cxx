@@ -34,7 +34,7 @@ IMPLEMENT_STANDARD_RTTIEXT(TDataStd_ExtStringArray,TDF_Attribute)
 //=======================================================================
 const Standard_GUID& TDataStd_ExtStringArray::GetID() 
 { 
-  static Standard_GUID anExtStringArrayID ("2a96b624-ec8b-11d0-bee7-080009dc3333");
+  static constexpr Standard_GUID anExtStringArrayID ("2a96b624-ec8b-11d0-bee7-080009dc3333");
   return anExtStringArrayID; 
 }
 
