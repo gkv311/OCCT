@@ -1536,7 +1536,6 @@ void BRepFill_CompatibleWires::ComputeOrigin(const  Standard_Boolean /*polar*/ )
   // reorganize the wires respecting orientation and origin
   
   TopoDS_Vertex Vdeb, Vfin;
-  gp_Pnt Pdeb, Psuiv, PPs;
 
   BRepTools_WireExplorer anExp;
 
