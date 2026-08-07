@@ -67,13 +67,15 @@ public:
 
   //! Creates an object corresponding to the reference
   //! coordinate system (OXYZ).
-  gp_Ax3() : vydir (0., 1., 0.)
-  // vxdir(1.,0.,0.) use default ctor of gp_Dir, as it creates the same dir(1,0,0)
+  constexpr gp_Ax3()
+  : axis (gp_Ax1::OZ()),
+    vydir (gp_Dir::DY()),
+    vxdir (gp_Dir::DX())
   {}
 
   //! Creates  a  coordinate  system from a right-handed
   //! coordinate system.
-  gp_Ax3 (const gp_Ax2& theA);
+  constexpr gp_Ax3 (const gp_Ax2& theA) noexcept;
 
   //! Creates a  right handed axis placement with the
   //! "Location" point theP and  two directions, theN gives the
@@ -152,7 +154,7 @@ public:
 
   //! Returns the main axis of <me>. It is the "Location" point
   //! and the main "Direction".
-  const gp_Ax1& Axis() const { return axis; }
+  constexpr const gp_Ax1& Axis() const noexcept { return axis; }
 
   //! Computes a right-handed coordinate system with the
   //! same "X Direction" and "Y Direction" as those of this
@@ -163,16 +165,16 @@ public:
   gp_Ax2 Ax2() const;
 
   //! Returns the main direction of <me>.
-  const gp_Dir& Direction() const { return axis.Direction(); }
+  constexpr const gp_Dir& Direction() const noexcept { return axis.Direction(); }
 
   //! Returns the "Location" point (origin) of <me>.
-  const gp_Pnt& Location() const { return axis.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return axis.Location(); }
 
   //! Returns the "XDirection" of <me>.
-  const gp_Dir& XDirection() const { return vxdir; }
+  constexpr const gp_Dir& XDirection() const noexcept { return vxdir; }
 
   //! Returns the "YDirection" of <me>.
-  const gp_Dir& YDirection() const { return vydir; }
+  constexpr const gp_Dir& YDirection() const noexcept { return vydir; }
 
   //! Returns  True if  the  coordinate  system is right-handed. i.e.
   //! XDirection().Crossed(YDirection()).Dot(Direction()) > 0
@@ -324,7 +326,7 @@ private:
 // function : gp_Ax3
 // purpose  :
 // =======================================================================
-inline gp_Ax3::gp_Ax3 (const gp_Ax2& theA)
+constexpr gp_Ax3::gp_Ax3 (const gp_Ax2& theA) noexcept
 : axis (theA.Axis()),
   vydir (theA.YDirection()),
   vxdir (theA.XDirection())

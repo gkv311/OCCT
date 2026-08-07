@@ -21,12 +21,12 @@
 
 //! Auxiliary macros to define couple of similar access components as vector methods
 #define NCOLLECTION_VEC_COMPONENTS_3D(theX, theY, theZ) \
-  const NCollection_Vec3<Element_t> theX##theY##theZ() const { return NCollection_Vec3<Element_t>(theX(), theY(), theZ()); } \
-  const NCollection_Vec3<Element_t> theX##theZ##theY() const { return NCollection_Vec3<Element_t>(theX(), theZ(), theY()); } \
-  const NCollection_Vec3<Element_t> theY##theX##theZ() const { return NCollection_Vec3<Element_t>(theY(), theX(), theZ()); } \
-  const NCollection_Vec3<Element_t> theY##theZ##theX() const { return NCollection_Vec3<Element_t>(theY(), theZ(), theX()); } \
-  const NCollection_Vec3<Element_t> theZ##theY##theX() const { return NCollection_Vec3<Element_t>(theZ(), theY(), theX()); } \
-  const NCollection_Vec3<Element_t> theZ##theX##theY() const { return NCollection_Vec3<Element_t>(theZ(), theX(), theY()); }
+  constexpr const NCollection_Vec3<Element_t> theX##theY##theZ() const noexcept { return NCollection_Vec3<Element_t>(theX(), theY(), theZ()); } \
+  constexpr const NCollection_Vec3<Element_t> theX##theZ##theY() const noexcept { return NCollection_Vec3<Element_t>(theX(), theZ(), theY()); } \
+  constexpr const NCollection_Vec3<Element_t> theY##theX##theZ() const noexcept { return NCollection_Vec3<Element_t>(theY(), theX(), theZ()); } \
+  constexpr const NCollection_Vec3<Element_t> theY##theZ##theX() const noexcept { return NCollection_Vec3<Element_t>(theY(), theZ(), theX()); } \
+  constexpr const NCollection_Vec3<Element_t> theZ##theY##theX() const noexcept { return NCollection_Vec3<Element_t>(theZ(), theY(), theX()); } \
+  constexpr const NCollection_Vec3<Element_t> theZ##theX##theY() const noexcept { return NCollection_Vec3<Element_t>(theZ(), theX(), theY()); }
 
 //! Generic 3-components vector.
 //! To be used as RGB color pixel or XYZ 3D-point.
@@ -40,39 +40,39 @@ public:
   typedef Element_t CArray_t[3];
 
   //! Returns the number of components.
-  static int Length()
+  static constexpr int Length()
   {
     return 3;
   }
 
   //! Empty constructor. Construct the zero vector.
-  NCollection_Vec3()
+  constexpr NCollection_Vec3() noexcept
+  : v{}
   {
-    std::memset (this, 0, sizeof(NCollection_Vec3));
+    //
   }
 
   //! Initialize ALL components of vector within specified value.
-  explicit NCollection_Vec3 (Element_t theValue)
+  explicit constexpr NCollection_Vec3 (Element_t theValue) noexcept
+  : v{theValue, theValue, theValue}
   {
-    v[0] = v[1] = v[2] = theValue;
+    //
   }
 
   //! Per-component constructor.
-  NCollection_Vec3 (const Element_t theX,
-                    const Element_t theY,
-                    const Element_t theZ)
+  constexpr NCollection_Vec3 (const Element_t theX,
+                              const Element_t theY,
+                              const Element_t theZ) noexcept
+  : v{theX, theY, theZ}
   {
-    v[0] = theX;
-    v[1] = theY;
-    v[2] = theZ;
+    //
   }
 
   //! Constructor from 2-components vector + optional 3rd value.
-  explicit NCollection_Vec3 (const NCollection_Vec2<Element_t>& theVec2, Element_t theZ = Element_t(0))
+  explicit constexpr NCollection_Vec3 (const NCollection_Vec2<Element_t>& theVec2, Element_t theZ = Element_t(0)) noexcept
+  : v{theVec2[0], theVec2[1], theZ}
   {
-    v[0] = theVec2[0];
-    v[1] = theVec2[1];
-    v[2] = theZ;
+    //
   }
 
   //! Conversion constructor (explicitly converts some 3-component vector with other element type
@@ -107,22 +107,22 @@ public:
   }
 
   //! Alias to 1st component as X coordinate in XYZ.
-  Element_t x() const { return v[0]; }
+  constexpr Element_t x() const noexcept { return v[0]; }
 
   //! Alias to 1st component as RED channel in RGB.
-  Element_t r() const { return v[0]; }
+  constexpr Element_t r() const noexcept { return v[0]; }
 
   //! Alias to 2nd component as Y coordinate in XYZ.
-  Element_t y() const { return v[1]; }
+  constexpr Element_t y() const noexcept { return v[1]; }
 
   //! Alias to 2nd component as GREEN channel in RGB.
-  Element_t g() const { return v[1]; }
+  constexpr Element_t g() const noexcept { return v[1]; }
 
   //! Alias to 3rd component as Z coordinate in XYZ.
-  Element_t z() const { return v[2]; }
+  constexpr Element_t z() const noexcept { return v[2]; }
 
   //! Alias to 3rd component as BLUE channel in RGB.
-  Element_t b() const { return v[2]; }
+  constexpr Element_t b() const noexcept { return v[2]; }
 
   //! @return 2 components by their names in specified order (in GLSL-style)
   NCOLLECTION_VEC_COMPONENTS_2D(x, y)
@@ -392,19 +392,19 @@ public:
   }
 
   //! Construct DX unit vector.
-  static NCollection_Vec3 DX()
+  static constexpr NCollection_Vec3 DX()
   {
     return NCollection_Vec3 (Element_t(1), Element_t(0), Element_t(0));
   }
 
   //! Construct DY unit vector.
-  static NCollection_Vec3 DY()
+  static constexpr NCollection_Vec3 DY()
   {
     return NCollection_Vec3 (Element_t(0), Element_t(1), Element_t(0));
   }
 
   //! Construct DZ unit vector.
-  static NCollection_Vec3 DZ()
+  static constexpr NCollection_Vec3 DZ()
   {
     return NCollection_Vec3 (Element_t(0), Element_t(0), Element_t(1));
   }

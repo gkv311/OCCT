@@ -30,17 +30,28 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Returns a matrix with zero coefficients.
+  static constexpr gp_Mat Zero() noexcept { return gp_Mat(); }
+
+  //! Returns a matrix with (1, 1, 1) diagonal.
+  static constexpr gp_Mat Identity() noexcept { return gp_Mat(1, 0, 0, 0, 1, 0, 0, 0, 1); }
+
+public:
+
   //! creates  a matrix with null coefficients.
-  gp_Mat()
+  constexpr gp_Mat() noexcept
+  : myMat{{}, {}, {}}
   {
-    myMat[0][0] = myMat[0][1] = myMat[0][2] =
-    myMat[1][0] = myMat[1][1] = myMat[1][2] =
-    myMat[2][0] = myMat[2][1] = myMat[2][2] = 0.0;
+    //
   }
 
-  gp_Mat (const Standard_Real theA11, const Standard_Real theA12, const Standard_Real theA13,
-          const Standard_Real theA21, const Standard_Real theA22, const Standard_Real theA23,
-          const Standard_Real theA31, const Standard_Real theA32, const Standard_Real theA33);
+  constexpr gp_Mat (const Standard_Real theA11, const Standard_Real theA12, const Standard_Real theA13,
+                    const Standard_Real theA21, const Standard_Real theA22, const Standard_Real theA23,
+                    const Standard_Real theA31, const Standard_Real theA32, const Standard_Real theA33) noexcept
+  : myMat{{theA11, theA12, theA13}, {theA21, theA22, theA23}, {theA31, theA32, theA33}}
+  {
+    //
+  }
 
   //! Creates a matrix.
   //! theCol1, theCol2, theCol3 are the 3 columns of the matrix.
@@ -287,25 +298,6 @@ private:
   Standard_Real myMat[3][3];
 
 };
-
-//=======================================================================
-//function : gp_Mat
-// purpose :
-//=======================================================================
-inline gp_Mat::gp_Mat (const Standard_Real theA11, const Standard_Real theA12, const Standard_Real theA13,
-                       const Standard_Real theA21, const Standard_Real theA22, const Standard_Real theA23,
-                       const Standard_Real theA31, const Standard_Real theA32, const Standard_Real theA33)
-{
-  myMat[0][0] = theA11;
-  myMat[0][1] = theA12;
-  myMat[0][2] = theA13;
-  myMat[1][0] = theA21;
-  myMat[1][1] = theA22;
-  myMat[1][2] = theA23;
-  myMat[2][0] = theA31;
-  myMat[2][1] = theA32;
-  myMat[2][2] = theA33;
-}
 
 //=======================================================================
 //function : Add

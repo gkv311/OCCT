@@ -62,12 +62,13 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Returns the Identity transformation.
-  gp_GTrsf()
+  constexpr gp_GTrsf() noexcept
+  : matrix(gp_Mat::Identity()),
+    loc(0.0, 0.0, 0.0),
+    shape(gp_Identity),
+    scale(1.0)
   {
-    shape = gp_Identity;
-    matrix.SetScale (1.0);
-    loc.SetCoord (0.0, 0.0, 0.0);
-    scale = 1.0;
+    //
   }
 
   //! Converts the gp_Trsf transformation theT into a
@@ -84,12 +85,13 @@ public:
   //! Creates a transformation based on the matrix theM and the
   //! vector theV where theM defines the vectorial part of
   //! the transformation, and V the translation part, or
-  gp_GTrsf (const gp_Mat& theM, const gp_XYZ& theV)
+  constexpr gp_GTrsf (const gp_Mat& theM, const gp_XYZ& theV) noexcept
   : matrix (theM),
-    loc (theV)
+    loc (theV),
+    shape(gp_Other),
+    scale(0.0)
   {
-    shape = gp_Other;
-    scale = 0.0;
+    //
   }
 
   //! Changes this transformation into an affinity of ratio theRatio

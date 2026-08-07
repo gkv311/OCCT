@@ -44,17 +44,17 @@ public:
 
   //! Creates a Line corresponding to Z axis of the
   //! reference coordinate system.
-  gp_Lin() {}
+  constexpr gp_Lin() noexcept {}
 
   //! Creates a line defined by axis theA1.
-  gp_Lin (const gp_Ax1& theA1)
+  constexpr gp_Lin (const gp_Ax1& theA1) noexcept
   : pos (theA1)
   {}
 
   //! Creates a line passing through point theP and parallel to
   //! vector theV (theP and theV are, respectively, the origin and
   //! the unit vector of the positioning axis of the line).
-  gp_Lin (const gp_Pnt& theP, const gp_Dir& theV)
+  constexpr gp_Lin (const gp_Pnt& theP, const gp_Dir& theV) noexcept
   : pos (theP, theV)
   {}
 
@@ -67,11 +67,9 @@ public:
   //! Note:
   //! -   Reverse assigns the result to this line, while
   //! -   Reversed creates a new one.
-  Standard_NODISCARD gp_Lin Reversed() const
+  Standard_NODISCARD gp_Lin Reversed() const noexcept
   {
-    gp_Lin aL = *this;
-    aL.pos.Reverse();
-    return aL;
+    return gp_Lin(pos.Reversed());
   }
 
   //! Changes the direction of the line.
@@ -86,14 +84,14 @@ public:
   void SetPosition (const gp_Ax1& theA1) { pos = theA1; }
 
   //! Returns the direction of the line.
-  const gp_Dir& Direction() const { return pos.Direction(); }
+  constexpr const gp_Dir& Direction() const noexcept { return pos.Direction(); }
 
   //! Returns the location point (origin) of the line.
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Returns the axis placement one axis with the same
   //! location and direction as <me>.
-  const gp_Ax1& Position() const { return pos; }
+  constexpr const gp_Ax1& Position() const noexcept { return pos; }
 
   //! Computes the angle between two lines in radians.
   Standard_Real Angle (const gp_Lin& theOther) const

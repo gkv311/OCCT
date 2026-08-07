@@ -33,13 +33,13 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates XY object with zero coordinates (0,0).
-  gp_XY()
+  constexpr gp_XY() noexcept
   : x (0.),
     y (0.)
   {}
 
   //! a number pair defined by the XY coordinates
-  gp_XY (const Standard_Real theX, const Standard_Real theY)
+  constexpr gp_XY (const Standard_Real theX, const Standard_Real theY) noexcept
   : x (theX),
     y (theY)
   {}
@@ -92,10 +92,10 @@ public:
   }
 
   //! Returns the X coordinate of this number pair.
-  Standard_Real X() const { return x; }
+  constexpr Standard_Real X() const noexcept { return x; }
 
   //! Returns the Y coordinate of this number pair.
-  Standard_Real Y() const { return y; }
+  constexpr Standard_Real Y() const noexcept { return y; }
 
   //! Computes Sqrt (X*X + Y*Y) where X and Y are the two coordinates of this number pair.
   Standard_Real Modulus() const { return sqrt (x * x + y * y); }

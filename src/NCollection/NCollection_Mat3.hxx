@@ -24,25 +24,38 @@ class NCollection_Mat3
 {
 public:
 
+  //! Get number of rows.
+  static constexpr size_t Rows() { return 3; }
+
+  //! Get number of columns.
+  static constexpr size_t Cols() { return 3; }
+
   //! Return identity matrix.
-  static NCollection_Mat3 Identity()
-  {
-    return NCollection_Mat3();
-  }
+  static constexpr NCollection_Mat3 Identity() noexcept { return NCollection_Mat3(); }
 
   //! Return zero matrix.
-  static NCollection_Mat3 Zero()
-  {
-    NCollection_Mat3 aMat; aMat.InitZero();
-    return aMat;
-  }
+  static constexpr NCollection_Mat3 Zero() noexcept { return NCollection_Mat3(0, 0, 0, 0, 0, 0, 0, 0, 0); }
 
 public:
 
   //! Empty constructor for identity matrix.
-  NCollection_Mat3()
+  constexpr NCollection_Mat3() noexcept
+  : myMat{1, 0, 0,
+          0, 1, 0,
+          0, 0, 1}
   {
-    InitIdentity();
+    //
+  }
+
+  //! Constructor from specified list of values.
+  constexpr NCollection_Mat3(Element_t theA11, Element_t theA12, Element_t theA13,
+                             Element_t theA21, Element_t theA22, Element_t theA23,
+                             Element_t theA31, Element_t theA32, Element_t theA33) noexcept
+  : myMat{theA11, theA12, theA13,
+          theA21, theA22, theA23,
+          theA31, theA32, theA33}
+  {
+    //
   }
 
   //! Conversion constructor (explicitly converts some 3x3 matrix with other element type
@@ -143,7 +156,7 @@ public:
   //! Initialize the zero matrix.
   void InitZero()
   {
-    std::memcpy (this, MyZeroArray, sizeof (NCollection_Mat3));
+    *this = Zero();
   }
 
   //! Checks the matrix for zero (without tolerance).
@@ -155,7 +168,7 @@ public:
   //! Initialize the identity matrix.
   void InitIdentity()
   {
-    std::memcpy (this, MyIdentityArray, sizeof (NCollection_Mat3));
+    *this = Identity();
   }
 
   //! Checks the matrix for identity (without tolerance).

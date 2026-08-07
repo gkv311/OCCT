@@ -30,38 +30,48 @@ public:
 
   //! Get number of rows.
   //! @return number of rows.
-  static size_t Rows()
-  {
-    return 4;
-  }
+  static constexpr size_t Rows() { return 4; }
 
   //! Get number of columns.
   //! @return number of columns.
-  static size_t Cols()
-  {
-    return 4;
-  }
+  static constexpr size_t Cols() { return 4; }
 
   //! Return identity matrix.
-  static NCollection_Mat4 Identity()
-  {
-    return NCollection_Mat4();
-  }
+  static constexpr NCollection_Mat4 Identity() noexcept { return NCollection_Mat4(); }
 
   //! Return zero matrix.
-  static NCollection_Mat4 Zero()
+  static constexpr NCollection_Mat4 Zero() noexcept
   {
-    NCollection_Mat4 aMat; aMat.InitZero();
-    return aMat;
+    return NCollection_Mat4(0, 0, 0, 0,
+                            0, 0, 0, 0,
+                            0, 0, 0, 0,
+                            0, 0, 0, 0);
   }
 
 public:
 
   //! Empty constructor.
   //! Construct the identity matrix.
-  NCollection_Mat4()
+  constexpr NCollection_Mat4() noexcept
+  : myMat{1, 0, 0, 0,
+          0, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 0, 0, 1}
   {
-    InitIdentity();
+    //
+  }
+
+  //! Constructor from specified list of values.
+  constexpr NCollection_Mat4(Element_t theA11, Element_t theA12, Element_t theA13, Element_t theA14,
+                             Element_t theA21, Element_t theA22, Element_t theA23, Element_t theA24,
+                             Element_t theA31, Element_t theA32, Element_t theA33, Element_t theA34,
+                             Element_t theA41, Element_t theA42, Element_t theA43, Element_t theA44) noexcept
+  : myMat{theA11, theA12, theA13, theA14,
+          theA21, theA22, theA23, theA24,
+          theA31, theA32, theA33, theA34,
+          theA41, theA42, theA43, theA44}
+  {
+    //
   }
 
   //! Conversion constructor (explicitly converts some 4 x 4 matrix with other element type
@@ -218,7 +228,7 @@ public:
   //! Initialize the zero matrix.
   void InitZero()
   {
-    std::memcpy (this, MyZeroArray, sizeof (NCollection_Mat4));
+    *this = Zero();
   }
 
   //! Checks the matrix for zero (without tolerance).
@@ -230,7 +240,7 @@ public:
   //! Initialize the identity matrix.
   void InitIdentity()
   {
-    std::memcpy (this, MyIdentityArray, sizeof (NCollection_Mat4));
+    *this = Identity();
   }
 
   //! Checks the matrix for identity (without tolerance).

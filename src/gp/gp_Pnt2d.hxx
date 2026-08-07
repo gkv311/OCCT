@@ -34,16 +34,21 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Return point with zero coordinates.
+  static constexpr gp_Pnt2d Origin() noexcept { return gp_Pnt2d(); }
+
+public:
+
   //! Creates a point with zero coordinates.
-  gp_Pnt2d() {}
+  constexpr gp_Pnt2d() noexcept {}
 
   //! Creates a point with a doublet of coordinates.
-  gp_Pnt2d (const gp_XY& theCoord)
+  constexpr gp_Pnt2d (const gp_XY& theCoord) noexcept
   : coord (theCoord)
   {}
 
   //! Creates a  point with its 2 cartesian's coordinates : theXp, theYp.
-  gp_Pnt2d (const Standard_Real theXp, const Standard_Real theYp)
+  constexpr gp_Pnt2d (const Standard_Real theXp, const Standard_Real theYp) noexcept
   : coord (theXp, theYp)
   {}
 
@@ -75,16 +80,16 @@ public:
   void Coord (Standard_Real& theXp, Standard_Real& theYp) const { coord.Coord (theXp, theYp); }
 
   //! For this point, returns its X  coordinate.
-  Standard_Real X() const { return coord.X(); }
+  constexpr Standard_Real X() const noexcept { return coord.X(); }
 
   //! For this point, returns its Y coordinate.
-  Standard_Real Y() const { return coord.Y(); }
+  constexpr Standard_Real Y() const noexcept { return coord.Y(); }
 
   //! For this point, returns its two coordinates as a number pair.
-  const gp_XY& XY() const { return coord; }
+  constexpr const gp_XY& XY() const noexcept { return coord; }
 
   //! For this point, returns its two coordinates as a number pair.
-  const gp_XY& Coord() const { return coord; }
+  constexpr const gp_XY& Coord() const noexcept { return coord; }
 
   //! Returns the coordinates of this point.
   //! Note: This syntax allows direct modification of the returned value.

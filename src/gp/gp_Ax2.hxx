@@ -56,10 +56,24 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Returns a coordinate system where its origin is (0, 0, 0),
+  //! its "main Direction" is (0, 0, 1) and "X Direction" is (1, 0, 0)
+  static constexpr gp_Ax2 XOY() noexcept { return gp_Ax2(gp_Ax1::OZ(), gp_Dir::DY(), gp_Dir::DX(), 0u); }
+
+  //! Returns a coordinate system where its origin is (0, 0, 0),
+  //! its "main Direction" is (0, 1, 0) and "X Direction" is (0, 0, 1)
+  static constexpr gp_Ax2 ZOX() noexcept { return gp_Ax2(gp_Ax1::OY(), gp_Dir::DX(), gp_Dir::DZ(), 0u); }
+
+  //! Returns a coordinate system where its origin is (0, 0, 0),
+  //! its "main Direction" is (1, 0, 0) and "X Direction" is (0, 1, 0)
+  static constexpr gp_Ax2 YOZ() noexcept { return gp_Ax2(gp_Ax1::OX(), gp_Dir::DZ(), gp_Dir::DY(), 0u); }
+
+public:
+
   //! Creates an object corresponding to the reference
   //! coordinate system (OXYZ).
-  gp_Ax2() : vydir(0.,1.,0.)
-  // vxdir(1.,0.,0.) use default ctor of gp_Dir, as it creates the same dir(1,0,0)
+  constexpr gp_Ax2() noexcept
+  : axis(gp_Ax1::OZ()), vydir(gp_Dir::DY()), vxdir(gp_Dir::DX())
   {}
 
   //! Creates an axis placement with an origin P such that:
@@ -138,19 +152,19 @@ public:
 
   //! Returns the main axis of <me>. It is the "Location" point
   //! and the main "Direction".
-  const gp_Ax1& Axis() const { return axis; }
+  constexpr const gp_Ax1& Axis() const noexcept { return axis; }
 
   //! Returns the main direction of <me>.
-  const gp_Dir& Direction() const { return axis.Direction(); }
+  constexpr const gp_Dir& Direction() const noexcept { return axis.Direction(); }
 
   //! Returns the "Location" point (origin) of <me>.
-  const gp_Pnt& Location() const { return axis.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return axis.Location(); }
 
   //! Returns the "XDirection" of <me>.
-  const gp_Dir& XDirection() const { return vxdir; }
+  constexpr const gp_Dir& XDirection() const noexcept { return vxdir; }
 
   //! Returns the "YDirection" of <me>.
-  const gp_Dir& YDirection() const { return vydir; }
+  constexpr const gp_Dir& YDirection() const noexcept { return vydir; }
 
   Standard_Boolean IsCoplanar (const gp_Ax2& Other, const Standard_Real LinearTolerance, const Standard_Real AngularTolerance) const;
 
@@ -357,6 +371,17 @@ public:
 
   //! Inits the content of me from the stream
   Standard_EXPORT Standard_Boolean InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos);
+
+private:
+
+  //! Private constructor with no checks.
+  constexpr gp_Ax2 (const gp_Ax1& D, const gp_Dir& Vy, const gp_Dir& Vx, unsigned char) noexcept
+  : axis (D),
+    vydir (Vy),
+    vxdir (Vx)
+  {
+    //
+  }
 
 private:
 

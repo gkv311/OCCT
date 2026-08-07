@@ -33,18 +33,18 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates a zero vector.
-  gp_Vec() {}
+  constexpr gp_Vec() noexcept {}
 
   //! Creates a unitary vector from a direction theV.
-  gp_Vec (const gp_Dir& theV);
+  constexpr gp_Vec (const gp_Dir& theV) noexcept;
 
   //! Creates a vector with a triplet of coordinates.
-  gp_Vec (const gp_XYZ& theCoord)
+  constexpr gp_Vec (const gp_XYZ& theCoord) noexcept
   : coord (theCoord)
   {}
 
   //! Creates a point with its three cartesian coordinates.
-  gp_Vec (const Standard_Real theXv, const Standard_Real theYv, const Standard_Real theZv)
+  constexpr gp_Vec (const Standard_Real theXv, const Standard_Real theYv, const Standard_Real theZv) noexcept
   : coord (theXv, theYv, theZv)
   {}
 
@@ -96,17 +96,17 @@ public:
   }
 
   //! For this vector, returns its X coordinate.
-  Standard_Real X() const { return coord.X(); }
+  constexpr Standard_Real X() const noexcept { return coord.X(); }
 
   //! For this vector, returns its Y coordinate.
-  Standard_Real Y() const { return coord.Y(); }
+  constexpr Standard_Real Y() const noexcept { return coord.Y(); }
 
   //! For this vector, returns its Z  coordinate.
-  Standard_Real Z() const { return coord.Z(); }
+  constexpr Standard_Real Z() const noexcept { return coord.Z(); }
 
   //! For this vector, returns
   //! -   its three coordinates as a number triple
-  const gp_XYZ& XYZ() const { return coord; }
+  constexpr const gp_XYZ& XYZ() const noexcept { return coord; }
 
   //! Returns True if the two vectors have the same magnitude value
   //! and the same direction. The precision values are theLinearTolerance
@@ -428,9 +428,10 @@ private:
 //function :  gp_Vec
 // purpose :
 //=======================================================================
-inline gp_Vec::gp_Vec (const gp_Dir& theV)
+constexpr gp_Vec::gp_Vec (const gp_Dir& theV) noexcept
+: coord(theV.XYZ())
 {
-  coord = theV.XYZ();
+  //
 }
 
 //=======================================================================

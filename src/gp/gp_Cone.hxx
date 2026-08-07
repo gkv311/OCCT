@@ -55,7 +55,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates an indefinite Cone.
-  gp_Cone()
+  constexpr gp_Cone() noexcept
   : radius (RealLast()),
     semiAngle (M_PI * 0.25)
   {}
@@ -123,7 +123,7 @@ public:
   Standard_Boolean Direct() const { return pos.Direct(); }
 
   //! returns the symmetry axis of the cone.
-  const gp_Ax1& Axis() const { return pos.Axis(); }
+  constexpr const gp_Ax1& Axis() const noexcept { return pos.Axis(); }
 
   //! Computes the coefficients of the implicit equation of the quadric
   //! in the absolute cartesian coordinates system :
@@ -134,23 +134,23 @@ public:
                                      Standard_Real& theC1, Standard_Real& theC2, Standard_Real& theC3, Standard_Real& theD) const;
 
   //! returns the "Location" point of the cone.
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Returns the local coordinates system of the cone.
-  const gp_Ax3& Position() const { return pos; }
+  constexpr const gp_Ax3& Position() const noexcept { return pos; }
 
   //! Returns the radius of the cone in the reference plane.
-  Standard_Real RefRadius() const { return radius; }
+  constexpr Standard_Real RefRadius() const noexcept { return radius; }
 
   //! Returns the half-angle at the apex of this cone.
   //! Attention! Semi-angle can be negative.
-  Standard_Real SemiAngle() const { return semiAngle; }
+  constexpr Standard_Real SemiAngle() const noexcept { return semiAngle; }
 
   //! Returns the XAxis of the reference plane.
-  gp_Ax1 XAxis() const  { return gp_Ax1 (pos.Location(), pos.XDirection()); }
+  constexpr gp_Ax1 XAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.XDirection()); }
 
   //! Returns the YAxis of the reference plane.
-  gp_Ax1 YAxis() const  { return gp_Ax1 (pos.Location(), pos.YDirection()); }
+  constexpr gp_Ax1 YAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.YDirection()); }
 
   Standard_EXPORT void Mirror (const gp_Pnt& theP);
 

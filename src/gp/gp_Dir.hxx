@@ -39,8 +39,19 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Return DX direction.
+  static constexpr gp_Dir DX() { return gp_Dir(1.0, 0.0, 0.0, 0u); }
+
+  //! Return DY direction.
+  static constexpr gp_Dir DY() { return gp_Dir(0.0, 1.0, 0.0, 0u); }
+
+  //! Return DZ direction.
+  static constexpr gp_Dir DZ() { return gp_Dir(0.0, 0.0, 1.0, 0u); }
+
+public:
+
   //! Creates a direction corresponding to X axis.
-  gp_Dir()
+  constexpr gp_Dir() noexcept
   : coord (1., 0., 0.)
   {}
 
@@ -105,16 +116,16 @@ public:
   void Coord (Standard_Real& theXv, Standard_Real& theYv, Standard_Real& theZv) const  { coord.Coord (theXv, theYv, theZv); }
 
   //! Returns the X coordinate for a  unit vector.
-  Standard_Real X() const { return coord.X(); }
+  constexpr Standard_Real X() const noexcept { return coord.X(); }
 
   //! Returns the Y coordinate for a  unit vector.
-  Standard_Real Y() const { return coord.Y(); }
+  constexpr Standard_Real Y() const noexcept { return coord.Y(); }
 
   //! Returns the Z coordinate for a  unit vector.
-  Standard_Real Z() const { return coord.Z(); }
+  constexpr Standard_Real Z() const noexcept { return coord.Z(); }
 
   //! for this unit vector, returns  its three coordinates as a number triplea.
-  const gp_XYZ& XYZ() const { return coord; }
+  constexpr const gp_XYZ& XYZ() const noexcept { return coord; }
 
   //! Returns True if the angle between the two directions is
   //! lower or equal to theAngularTolerance.
@@ -215,14 +226,12 @@ public:
   //! Performs the symmetrical transformation of a direction
   //! with respect to the direction V which is the center of
   //! the  symmetry.]
-  Standard_NODISCARD gp_Dir Reversed() const
+  Standard_NODISCARD gp_Dir Reversed() const noexcept
   {
-    gp_Dir aV = *this;
-    aV.coord.Reverse();
-    return aV;
+    return gp_Dir(-coord.X(), -coord.Y(), -coord.Z(), 0u);
   }
 
-  Standard_NODISCARD gp_Dir operator -() const { return Reversed(); }
+  Standard_NODISCARD gp_Dir operator-() const noexcept { return Reversed(); }
 
   Standard_EXPORT void Mirror (const gp_Dir& theV);
 
@@ -285,6 +294,15 @@ public:
 
   //! Inits the content of me from the stream
   Standard_EXPORT Standard_Boolean InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos);
+
+private:
+
+  //! Private constructor with no normalization.
+  constexpr gp_Dir (const Standard_Real theXv, const Standard_Real theYv, const Standard_Real theZv, unsigned char) noexcept
+  : coord(theXv, theYv, theZv)
+  {
+    //
+  }
 
 private:
 

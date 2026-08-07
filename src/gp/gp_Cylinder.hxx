@@ -45,7 +45,10 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates a indefinite cylinder.
-  gp_Cylinder() { radius = RealLast(); }
+  constexpr gp_Cylinder() noexcept : radius(RealLast())
+  {
+    //
+  }
 
   //! Creates a cylinder of radius Radius, whose axis is the "main
   //! Axis" of theA3. theA3 is the local coordinate system of the cylinder.   Raises ConstructionErrord if theRadius < 0.0
@@ -87,7 +90,7 @@ public:
   Standard_Boolean Direct() const { return pos.Direct(); }
 
   //! Returns the symmetry axis of the cylinder.
-  const gp_Ax1& Axis() const { return pos.Axis(); }
+  constexpr const gp_Ax1& Axis() const noexcept { return pos.Axis(); }
 
   //! Computes the coefficients of the implicit equation of the quadric
   //! in the absolute cartesian coordinate system :
@@ -98,19 +101,19 @@ public:
                                      Standard_Real& theC1, Standard_Real& theC2, Standard_Real& theC3, Standard_Real& theD) const;
 
   //! Returns the "Location" point of the cylinder.
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Returns the local coordinate system of the cylinder.
-  const gp_Ax3& Position() const { return pos; }
+  constexpr const gp_Ax3& Position() const noexcept { return pos; }
 
   //! Returns the radius of the cylinder.
-  Standard_Real Radius() const { return radius; }
+  constexpr Standard_Real Radius() const noexcept { return radius; }
 
   //! Returns the axis X of the cylinder.
-  gp_Ax1 XAxis() const { return gp_Ax1 (pos.Location(), pos.XDirection()); }
+  constexpr gp_Ax1 XAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.XDirection()); }
 
   //! Returns the axis Y of the cylinder.
-  gp_Ax1 YAxis() const { return gp_Ax1 (pos.Location(), pos.YDirection()); }
+  constexpr gp_Ax1 YAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.YDirection()); }
 
   Standard_EXPORT void Mirror (const gp_Pnt& theP);
 

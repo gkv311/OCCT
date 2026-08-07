@@ -53,7 +53,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! creates an indefinite circle.
-  gp_Circ2d()
+  constexpr gp_Circ2d() noexcept
   : radius  (RealLast())
   {}
 
@@ -134,23 +134,23 @@ public:
   Standard_Real Length() const { return 2. * M_PI * radius; }
 
   //! Returns the location point (center) of the circle.
-  const gp_Pnt2d& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt2d& Location() const noexcept { return pos.Location(); }
 
   //! Returns the radius value of the circle.
-  Standard_Real Radius() const { return radius; }
+  constexpr Standard_Real Radius() const noexcept { return radius; }
 
   //! returns the position of the circle.
-  const gp_Ax22d& Axis() const { return pos; }
+  constexpr const gp_Ax22d& Axis() const noexcept { return pos; }
 
   //! returns the position of the circle. Idem Axis(me).
-  const gp_Ax22d& Position() const { return pos; }
+  const gp_Ax22d& Position() const noexcept { return pos; }
 
   //! returns the X axis of the circle.
-  gp_Ax2d XAxis() const { return gp_Ax2d (pos.XAxis()); }
+  constexpr gp_Ax2d XAxis() const noexcept { return gp_Ax2d (pos.XAxis()); }
 
   //! Returns the Y axis of the circle.
   //! Reverses the direction of the circle.
-  gp_Ax2d YAxis() const { return gp_Ax2d (pos.YAxis()); }
+  constexpr gp_Ax2d YAxis() const noexcept { return gp_Ax2d (pos.YAxis()); }
 
   //! Reverses the orientation of the local coordinate system
   //! of this circle (the "Y Direction" is reversed) and therefore

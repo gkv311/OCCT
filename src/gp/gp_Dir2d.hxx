@@ -38,8 +38,16 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Return DX direction.
+  static constexpr gp_Dir2d DX() { return gp_Dir2d(1.0, 0.0, 0u); }
+
+  //! Return DY direction.
+  static constexpr gp_Dir2d DY() { return gp_Dir2d(0.0, 1.0, 0u); }
+
+public:
+
   //! Creates a direction corresponding to X axis.
-  gp_Dir2d()
+  constexpr gp_Dir2d() noexcept
   : coord (1., 0.)
   {}
 
@@ -140,15 +148,15 @@ public:
   void Coord (Standard_Real& theXv, Standard_Real& theYv) const  { coord.Coord (theXv, theYv); }
 
   //! For this unit vector, returns its X coordinate.
-  Standard_Real X() const { return coord.X(); }
+  constexpr Standard_Real X() const noexcept { return coord.X(); }
 
   //! For this unit vector, returns its Y coordinate.
-  Standard_Real Y() const { return coord.Y(); }
+  constexpr Standard_Real Y() const noexcept { return coord.Y(); }
 
   //! For this unit vector, returns its two coordinates as a number pair.
   //! Comparison between Directions
   //! The precision value is an input data.
-  const gp_XY& XY() const { return coord; }
+  constexpr const gp_XY& XY() const noexcept { return coord; }
 
   //! Returns True if the two vectors have the same direction
   //! i.e. the angle between this unit vector and the
@@ -188,14 +196,12 @@ public:
   void Reverse() { coord.Reverse(); }
 
   //! Reverses the orientation of a direction
-  Standard_NODISCARD gp_Dir2d Reversed() const
+  Standard_NODISCARD gp_Dir2d Reversed() const noexcept
   {
-    gp_Dir2d aV = *this;
-    aV.coord.Reverse();
-    return aV;
+    return gp_Dir2d(-coord.X(), -coord.Y(), 0u);
   }
 
-  Standard_NODISCARD gp_Dir2d operator -() const { return Reversed(); }
+  Standard_NODISCARD gp_Dir2d operator-() const noexcept { return Reversed(); }
 
   Standard_EXPORT void Mirror (const gp_Dir2d& theV);
 
@@ -237,6 +243,14 @@ public:
 
   //! Dumps the content of me into the stream
   Standard_EXPORT void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
+
+private:
+  //! Private constructor with no normalization.
+  constexpr gp_Dir2d (const Standard_Real theXv, const Standard_Real theYv, unsigned char) noexcept
+  : coord(theXv, theYv)
+  {
+    //
+  }
 
 private:
 

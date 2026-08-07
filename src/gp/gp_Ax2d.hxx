@@ -45,15 +45,23 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Returns an axis with (0.0, 0.0) origin and DX direction (1.0, 0.0).
+  static constexpr gp_Ax2d OX() noexcept { return gp_Ax2d(gp_Pnt2d::Origin(), gp_Dir2d::DX()); }
+
+  //! Returns an axis with (0.0, 0.0) origin and DY direction (1.0, 0.0).
+  static constexpr gp_Ax2d OY() noexcept { return gp_Ax2d(gp_Pnt2d::Origin(), gp_Dir2d::DY()); }
+
+public:
+
   //! Creates an axis object representing X axis of the reference co-ordinate system.
-  gp_Ax2d() : loc(0.,0.)
-  //vdir(1.,0.) use default ctor of gp_Dir2d, as it creates the same dir (1,0)
+  constexpr gp_Ax2d() noexcept
+  : vdir(gp_Dir2d::DX())
   {}
 
   //! Creates an Ax2d.
   //! <theP> is the "Location" point of the axis placement
   //! and theV is the "Direction" of the axis placement.
-  gp_Ax2d (const gp_Pnt2d& theP, const gp_Dir2d& theV)
+  constexpr gp_Ax2d (const gp_Pnt2d& theP, const gp_Dir2d& theV) noexcept
   : loc (theP),
     vdir (theV)
   {}
@@ -65,10 +73,10 @@ public:
   void SetDirection (const gp_Dir2d& theV) { vdir = theV; }
 
   //! Returns the origin of <me>.
-  const gp_Pnt2d& Location() const { return loc; }
+  constexpr const gp_Pnt2d& Location() const noexcept { return loc; }
 
   //! Returns the direction of <me>.
-  const gp_Dir2d& Direction() const { return vdir; }
+  constexpr const gp_Dir2d& Direction() const noexcept { return vdir; }
 
   //! Returns True if  :
   //! . the angle between <me> and <Other> is lower or equal

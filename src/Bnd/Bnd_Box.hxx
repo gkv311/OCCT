@@ -67,7 +67,15 @@ public:
   
   //! Creates an empty Box.
   //! The constructed box is qualified Void. Its gap is null.
-  Standard_EXPORT Bnd_Box();
+  constexpr Bnd_Box() noexcept
+  : Xmin(RealLast()), Xmax(-RealLast()),
+    Ymin(RealLast()), Ymax(-RealLast()),
+    Zmin(RealLast()), Zmax(-RealLast()),
+    Gap(0.0),
+    Flags(VoidMask)
+  {
+    //
+  }
 
   //! Creates a bounding box, it contains:
   //! -   minimum/maximum point of bounding box,

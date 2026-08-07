@@ -29,10 +29,26 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Returns a matrix with zero coefficients.
+  static constexpr gp_Mat2d Zero() noexcept { return gp_Mat2d(); }
+
+  //! Returns a matrix with (1, 1) diagonal.
+  static constexpr gp_Mat2d Identity() noexcept { return gp_Mat2d(1, 0, 0, 1); }
+
+public:
+
   //! Creates  a matrix with null coefficients.
-  gp_Mat2d()
+  constexpr gp_Mat2d() noexcept
+  : myMat{{},{}}
   {
-    myMat[0][0] = myMat[0][1] = myMat[1][0] = myMat[1][1] = 0.0;
+    //
+  }
+
+  constexpr gp_Mat2d (const Standard_Real theA11, const Standard_Real theA12,
+                      const Standard_Real theA21, const Standard_Real theA22) noexcept
+  : myMat{{theA11, theA12}, {theA21, theA22}}
+  {
+    //
   }
 
   //! theCol1, theCol2 are the 2 columns of the matrix.

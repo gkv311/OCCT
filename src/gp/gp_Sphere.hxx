@@ -46,7 +46,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates an indefinite sphere.
-  gp_Sphere()
+  constexpr gp_Sphere() noexcept
   : radius (RealLast())
   {}
 
@@ -108,13 +108,13 @@ public:
 
   //! --- Purpose ;
   //! Returns the center of the sphere.
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Returns the local coordinates system of the sphere.
-  const gp_Ax3& Position() const { return pos; }
+  constexpr const gp_Ax3& Position() const noexcept { return pos; }
 
   //! Returns the radius of the sphere.
-  Standard_Real Radius() const { return radius; }
+  constexpr Standard_Real Radius() const noexcept { return radius; }
 
   //! Computes the volume of the sphere
   Standard_Real Volume() const
@@ -123,13 +123,13 @@ public:
   }
 
   //! Returns the axis X of the sphere.
-  gp_Ax1 XAxis() const
+  constexpr gp_Ax1 XAxis() const noexcept
   {
     return gp_Ax1 (pos.Location(), pos.XDirection());
   }
 
   //! Returns the axis Y of the sphere.
-  gp_Ax1 YAxis() const
+  constexpr gp_Ax1 YAxis() const noexcept
   {
     return gp_Ax1 (pos.Location(), pos.YDirection());
   }

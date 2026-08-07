@@ -59,7 +59,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! creates an indefinite Torus.
-  gp_Torus()
+  constexpr gp_Torus() noexcept
   : majorRadius (RealLast()),
     minorRadius (RealSmall())
   {}
@@ -129,7 +129,7 @@ public:
   Standard_Boolean Direct() const { return pos.Direct(); }
 
   //! returns the symmetry axis of the torus.
-  const gp_Ax1& Axis() const { return pos.Axis(); }
+  constexpr const gp_Ax1& Axis() const noexcept { return pos.Axis(); }
 
   //! Computes the coefficients of the implicit equation of the surface
   //! in the absolute Cartesian coordinate system:
@@ -153,16 +153,16 @@ public:
   Standard_EXPORT void Coefficients (TColStd_Array1OfReal& theCoef) const;
 
   //! Returns the Torus's location.
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Returns the local coordinates system of the torus.
-  const gp_Ax3& Position() const { return pos; }
+  constexpr const gp_Ax3& Position() const noexcept { return pos; }
 
   //! returns the major radius of the torus.
-  Standard_Real MajorRadius() const { return majorRadius; }
+  constexpr Standard_Real MajorRadius() const noexcept { return majorRadius; }
 
   //! returns the minor radius of the torus.
-  Standard_Real MinorRadius() const { return minorRadius; }
+  constexpr Standard_Real MinorRadius() const noexcept { return minorRadius; }
 
   //! Computes the volume of the torus.
   Standard_Real Volume() const
@@ -171,13 +171,13 @@ public:
   }
 
   //! returns the axis X of the torus.
-  gp_Ax1 XAxis() const
+  constexpr gp_Ax1 XAxis() const noexcept
   {
     return gp_Ax1 (pos.Location(), pos.XDirection());
   }
 
   //! returns the axis Y of the torus.
-  gp_Ax1 YAxis() const
+  constexpr gp_Ax1 YAxis() const noexcept
   {
     return gp_Ax1 (pos.Location(), pos.YDirection());
   }

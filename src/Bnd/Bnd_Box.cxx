@@ -33,19 +33,6 @@
 //function : Bnd_Box
 //purpose  : 
 //=======================================================================
-Bnd_Box::Bnd_Box()
-: Xmin (RealLast()), Xmax (-RealLast()),
-  Ymin (RealLast()), Ymax (-RealLast()),
-  Zmin (RealLast()), Zmax (-RealLast()),
-  Gap (0.0)
-{
-  SetVoid();
-}
-
-//=======================================================================
-//function : Bnd_Box
-//purpose  : 
-//=======================================================================
 Bnd_Box::Bnd_Box (const gp_Pnt& theMin, const gp_Pnt& theMax)
 : Gap (0.0)
 {

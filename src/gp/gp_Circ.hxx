@@ -55,7 +55,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates an indefinite circle.
-  gp_Circ() : radius (RealLast())
+  constexpr gp_Circ() noexcept : radius (RealLast())
   {}
 
   //! A2 locates the circle and gives its orientation in 3D space.
@@ -96,7 +96,7 @@ public:
   //! Returns the main axis of the circle.
   //! It is the axis perpendicular to the plane of the circle,
   //! passing through the "Location" point (center) of the circle.
-  const gp_Ax1& Axis() const { return pos.Axis(); }
+  constexpr const gp_Ax1& Axis() const noexcept { return pos.Axis(); }
 
   //! Computes the circumference of the circle.
   Standard_Real Length() const { return 2. * M_PI * radius; }
@@ -104,24 +104,24 @@ public:
   //! Returns the center of the circle. It is the
   //! "Location" point of the local coordinate system
   //! of the circle
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Returns the position of the circle.
   //! It is the local coordinate system of the circle.
-  const gp_Ax2& Position() const { return pos; }
+  constexpr const gp_Ax2& Position() const noexcept { return pos; }
 
   //! Returns the radius of this circle.
-  Standard_Real Radius() const { return radius; }
+  constexpr Standard_Real Radius() const noexcept { return radius; }
 
   //! Returns the "XAxis" of the circle.
   //! This axis is perpendicular to the axis of the conic.
   //! This axis and the "Yaxis" define the plane of the conic.
-  gp_Ax1 XAxis() const { return gp_Ax1 (pos.Location(), pos.XDirection()); }
+  constexpr gp_Ax1 XAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.XDirection()); }
 
   //! Returns the "YAxis" of the circle.
   //! This axis and the "Xaxis" define the plane of the conic.
   //! The "YAxis" is perpendicular to the "Xaxis".
-  gp_Ax1 YAxis() const { return gp_Ax1 (pos.Location(), pos.YDirection()); }
+  constexpr gp_Ax1 YAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.YDirection()); }
 
   //! Computes the minimum of distance between the point theP and
   //! any point on the circumference of the circle.
