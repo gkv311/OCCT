@@ -48,7 +48,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Returns identity transformation.
-  gp_Trsf2d();
+  constexpr gp_Trsf2d() noexcept;
 
   //! Creates a 2d transformation in the XY plane from a
   //! 3d transformation .
@@ -218,12 +218,13 @@ private:
 //function : gp_Trsf2d
 // purpose :
 //=======================================================================
-inline gp_Trsf2d::gp_Trsf2d()
+constexpr gp_Trsf2d::gp_Trsf2d() noexcept
+: scale (1.0),
+  shape (gp_Identity),
+  matrix (gp_Mat2d::Identity()),
+  loc (0.0, 0.0)
 {
-  shape = gp_Identity;
-  scale = 1.0;
-  matrix.SetIdentity();
-  loc.SetCoord (0.0, 0.0);
+  //
 }
 
 //=======================================================================

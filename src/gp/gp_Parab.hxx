@@ -54,7 +54,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates an indefinite Parabola.
-  gp_Parab()
+  constexpr gp_Parab() noexcept
   : focalLength (RealLast())
   {}
 
@@ -109,7 +109,7 @@ public:
   //! Returns the main axis of the parabola.
   //! It is the axis normal to the plane of the parabola passing
   //! through the vertex of the parabola.
-  const gp_Ax1& Axis() const { return pos.Axis(); }
+  constexpr const gp_Ax1& Axis() const noexcept { return pos.Axis(); }
 
   //! Computes the directrix of this parabola.
   //! The directrix is:
@@ -124,14 +124,14 @@ public:
 
   //! Returns the distance between the vertex and the focus
   //! of the parabola.
-  Standard_Real Focal() const { return focalLength; }
+  constexpr Standard_Real Focal() const noexcept { return focalLength; }
 
   //! -   Computes the focus of the parabola.
   gp_Pnt Focus() const;
 
   //! Returns the vertex of the parabola. It is the "Location"
   //! point of the coordinate system of the parabola.
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Computes the parameter of the parabola.
   //! It is the distance between the focus and the directrix of
@@ -139,15 +139,15 @@ public:
   Standard_Real Parameter() const { return 2.0 * focalLength; }
 
   //! Returns the local coordinate system of the parabola.
-  const gp_Ax2& Position() const { return pos; }
+  constexpr const gp_Ax2& Position() const noexcept { return pos; }
 
   //! Returns the symmetry axis of the parabola. The location point
   //! of the axis is the vertex of the parabola.
-  gp_Ax1 XAxis() const  { return gp_Ax1 (pos.Location(), pos.XDirection()); }
+  constexpr gp_Ax1 XAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.XDirection()); }
 
   //! It is an axis parallel to the directrix of the parabola.
   //! The location point of this axis is the vertex of the parabola.
-  gp_Ax1 YAxis() const { return gp_Ax1 (pos.Location(), pos.YDirection()); }
+  constexpr gp_Ax1 YAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.YDirection()); }
 
   Standard_EXPORT void Mirror (const gp_Pnt& theP);
 

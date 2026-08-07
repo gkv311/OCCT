@@ -34,7 +34,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates an identity quaternion
-  gp_Quaternion()
+  constexpr gp_Quaternion() noexcept
   : x (0.0),
     y (0.0),
     z (0.0),
@@ -42,7 +42,10 @@ public:
   {}
 
   //! Creates quaternion directly from component values
-  gp_Quaternion (const Standard_Real theX, const Standard_Real theY, const Standard_Real theZ, const Standard_Real theW)
+  constexpr gp_Quaternion (const Standard_Real theX,
+                           const Standard_Real theY,
+                           const Standard_Real theZ,
+                           const Standard_Real theW) noexcept
   : x (theX),
     y (theY),
     z (theZ),
@@ -123,13 +126,13 @@ public:
 
   void Set (const gp_Quaternion& theQuaternion);
 
-  Standard_Real X() const { return x; }
+  constexpr Standard_Real X() const noexcept { return x; }
 
-  Standard_Real Y() const { return y; }
+  constexpr Standard_Real Y() const noexcept { return y; }
 
-  Standard_Real Z() const { return z; }
+  constexpr Standard_Real Z() const noexcept { return z; }
 
-  Standard_Real W() const { return w; }
+  constexpr Standard_Real W() const noexcept { return w; }
 
   //! Make identity quaternion (zero-rotation)
   void SetIdent()

@@ -51,7 +51,7 @@ public:
 
   //! Creates a plane coincident with OXY plane of the
   //! reference coordinate system.
-  gp_Pln() {}
+  constexpr gp_Pln() noexcept {}
 
   //! The coordinate system of the plane is defined with the axis
   //! placement theA3.
@@ -59,7 +59,7 @@ public:
   //! The "Location" of theA3 defines the location (origin) of the plane.
   //! The "XDirection" and "YDirection" of theA3 define the "XAxis" and
   //! the "YAxis" of the plane used to parametrize the plane.
-  gp_Pln (const gp_Ax3& theA3)
+  constexpr gp_Pln (const gp_Ax3& theA3) noexcept
   : pos (theA3)
   {}
 
@@ -104,13 +104,13 @@ public:
   Standard_Boolean Direct() const { return pos.Direct(); }
 
   //! Returns the plane's normal Axis.
-  const gp_Ax1& Axis() const { return pos.Axis(); }
+  constexpr const gp_Ax1& Axis() const noexcept { return pos.Axis(); }
 
   //! Returns the plane's location (origin).
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Returns the local coordinate system of the plane .
-  const gp_Ax3& Position() const { return pos; }
+  constexpr const gp_Ax3& Position() const noexcept { return pos; }
 
   //! Computes the distance between <me> and the point <theP>.
   Standard_Real Distance (const gp_Pnt& theP) const;
@@ -143,10 +143,10 @@ public:
   }
 
   //! Returns the X axis of the plane.
-  gp_Ax1 XAxis() const { return gp_Ax1 (pos.Location(), pos.XDirection()); }
+  constexpr gp_Ax1 XAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.XDirection()); }
 
   //! Returns the Y axis  of the plane.
-  gp_Ax1 YAxis() const { return gp_Ax1 (pos.Location(), pos.YDirection()); }
+  constexpr gp_Ax1 YAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.YDirection()); }
 
   //! Returns true if this plane contains the point theP. This means that
   //! -   the distance between point theP and this plane is less

@@ -109,17 +109,17 @@ public:
 public:
 
   //! Creates uninitialized bounding box.
-  BVH_Box() : myIsInited (Standard_False) {}
+  constexpr BVH_Box() noexcept : myIsInited (Standard_False) {}
 
   //! Creates bounding box of given point.
-  BVH_Box (const BVH_VecNt& thePoint)
+  constexpr BVH_Box (const BVH_VecNt& thePoint) noexcept
   : myMinPoint (thePoint),
     myMaxPoint (thePoint),
     myIsInited (Standard_True) {}
 
   //! Creates bounding box from corner points.
-  BVH_Box (const BVH_VecNt& theMinPoint,
-           const BVH_VecNt& theMaxPoint)
+  constexpr BVH_Box (const BVH_VecNt& theMinPoint,
+                     const BVH_VecNt& theMaxPoint) noexcept
   : myMinPoint (theMinPoint),
     myMaxPoint (theMaxPoint),
     myIsInited (Standard_True) {}

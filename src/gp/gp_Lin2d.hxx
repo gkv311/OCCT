@@ -43,16 +43,16 @@ public:
 
   //! Creates a Line corresponding to X axis of the
   //! reference coordinate system.
-  gp_Lin2d() {}
+  constexpr gp_Lin2d() noexcept {}
 
   //! Creates a line located with theA.
-  gp_Lin2d (const gp_Ax2d& theA)
+  constexpr gp_Lin2d (const gp_Ax2d& theA) noexcept
   : pos (theA)
   {}
 
   //! <theP> is the location point (origin) of the line and
   //! <theV> is the direction of the line.
-  gp_Lin2d (const gp_Pnt2d& theP, const gp_Dir2d& theV)
+  constexpr gp_Lin2d (const gp_Pnt2d& theP, const gp_Dir2d& theV) noexcept
   : pos (theP, theV)
   {}
 
@@ -66,11 +66,9 @@ public:
   //! Note:
   //! -   Reverse assigns the result to this line, while
   //! -   Reversed creates a new one.
-  Standard_NODISCARD gp_Lin2d Reversed() const
+  Standard_NODISCARD gp_Lin2d Reversed() const noexcept
   {
-    gp_Lin2d aL = *this;
-    aL.pos.Reverse();
-    return aL;
+    return gp_Lin2d(pos.Reversed());
   }
 
   //! Changes the direction of the line.
@@ -94,14 +92,14 @@ public:
   }
 
   //! Returns the direction of the line.
-  const gp_Dir2d& Direction() const { return pos.Direction(); }
+  constexpr const gp_Dir2d& Direction() const noexcept { return pos.Direction(); }
 
   //! Returns the location point (origin) of the line.
-  const gp_Pnt2d& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt2d& Location() const noexcept { return pos.Location(); }
 
   //! Returns the axis placement one axis with the same
   //! location and direction as <me>.
-  const gp_Ax2d& Position() const { return pos; }
+  constexpr const gp_Ax2d& Position() const noexcept { return pos; }
 
   //! Computes the angle between two lines in radians.
   Standard_Real Angle (const gp_Lin2d& theOther) const

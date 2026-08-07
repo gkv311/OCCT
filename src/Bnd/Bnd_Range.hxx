@@ -28,7 +28,7 @@ class Bnd_Range
 public:
 
   //! Default constructor. Creates VOID range.
-  Bnd_Range() : myFirst(0.0), myLast(-1.0) {}
+  constexpr Bnd_Range() noexcept : myFirst(0.0), myLast(-1.0) {}
 
   //! Constructor. Never creates VOID range.
   Bnd_Range(const Standard_Real theMin, const Standard_Real theMax) : 

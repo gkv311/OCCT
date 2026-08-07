@@ -48,7 +48,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates an indefinite ellipse.
-  gp_Elips2d()
+  constexpr gp_Elips2d() noexcept
   : majorRadius (RealLast()),
     minorRadius (RealSmall())
   {}
@@ -184,13 +184,13 @@ public:
   gp_Pnt2d Focus2() const;
 
   //! Returns the center of the ellipse.
-  const gp_Pnt2d& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt2d& Location() const noexcept { return pos.Location(); }
 
   //! Returns the major radius of the Ellipse.
-  Standard_Real MajorRadius() const { return majorRadius; }
+  constexpr Standard_Real MajorRadius() const noexcept { return majorRadius; }
 
   //! Returns the minor radius of the Ellipse.
-  Standard_Real MinorRadius() const { return minorRadius; }
+  constexpr Standard_Real MinorRadius() const noexcept { return minorRadius; }
 
   //! Returns p = (1 - e * e) * MajorRadius where e is the eccentricity
   //! of the ellipse.
@@ -198,14 +198,14 @@ public:
   Standard_Real Parameter() const;
 
   //! Returns the major axis of the ellipse.
-  const gp_Ax22d& Axis() const { return pos; }
+  constexpr const gp_Ax22d& Axis() const noexcept { return pos; }
 
   //! Returns the major axis of the ellipse.
-  gp_Ax2d XAxis() const { return pos.XAxis(); }
+  constexpr gp_Ax2d XAxis() const noexcept { return pos.XAxis(); }
 
   //! Returns the minor axis of the ellipse.
   //! Reverses the direction of the circle.
-  gp_Ax2d YAxis() const { return pos.YAxis(); }
+  constexpr gp_Ax2d YAxis() const noexcept { return pos.YAxis(); }
 
   void Reverse()
   {
