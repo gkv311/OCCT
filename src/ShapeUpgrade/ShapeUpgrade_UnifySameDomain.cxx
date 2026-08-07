@@ -3475,7 +3475,6 @@ void ShapeUpgrade_UnifySameDomain::IntUnifyFaces(const TopoDS_Shape& theInpShape
                   (Vperiod != 0. && Abs(StartPoint.Y() - CurPoint.Y()) > Vperiod/2)) //end of parametric space
               {
                 //<edges> do not contain seams => we must reconstruct the seam up to <NextEdge>
-                gp_Pnt2d StartOfNextEdge;
                 TopoDS_Vertex LastVertexOfSeam;
                 ReconstructMissedSeam (RemovedEdges, F_RefFace, CurEdge, CurVertex, CurPoint,
                                        Uperiod, Vperiod, NextEdge, NextPoint);

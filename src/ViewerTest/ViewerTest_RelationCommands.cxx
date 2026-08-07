@@ -1711,7 +1711,6 @@ static int VAngleParam (Draw_Interpretor& theDi, Standard_Integer theArgNum, con
 
 
   TCollection_AsciiString aName (theArgVec[1]);
-  gp_Pln aWorkingPlane;
   Standard_Boolean toUpdate = Standard_True;
 
   NCollection_DataMap<TCollection_AsciiString, TCollection_AsciiString> aStringParams;
