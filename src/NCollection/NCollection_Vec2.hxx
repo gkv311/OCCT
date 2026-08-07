@@ -22,8 +22,8 @@
 //! Auxiliary macros to define couple of similar access components as vector methods.
 //! @return 2 components by their names in specified order
 #define NCOLLECTION_VEC_COMPONENTS_2D(theX, theY) \
-  const NCollection_Vec2<Element_t> theX##theY() const { return NCollection_Vec2<Element_t>(theX(), theY()); } \
-  const NCollection_Vec2<Element_t> theY##theX() const { return NCollection_Vec2<Element_t>(theY(), theX()); }
+  constexpr const NCollection_Vec2<Element_t> theX##theY() const noexcept { return NCollection_Vec2<Element_t>(theX(), theY()); } \
+  constexpr const NCollection_Vec2<Element_t> theY##theX() const noexcept { return NCollection_Vec2<Element_t>(theY(), theX()); }
 
 //! Defines the 2D-vector template.
 //! The main target for this class - to handle raw low-level arrays (from/to graphic driver etc.).
@@ -36,29 +36,31 @@ public:
   typedef Element_t CArray_t[2];
 
   //! Returns the number of components.
-  static int Length()
+  static constexpr int Length()
   {
     return 2;
   }
 
   //! Empty constructor. Construct the zero vector.
-  NCollection_Vec2()
+  constexpr NCollection_Vec2() noexcept
+  : v{}
   {
-    v[0] = v[1] = Element_t(0);
+    //
   }
 
   //! Initialize ALL components of vector within specified value.
-  explicit NCollection_Vec2 (const Element_t theXY)
+  explicit constexpr NCollection_Vec2 (const Element_t theValue) noexcept
+  : v{theValue, theValue}
   {
-    v[0] = v[1] = theXY;
+    //
   }
 
   //! Per-component constructor.
-  NCollection_Vec2 (const Element_t theX,
-                    const Element_t theY)
+  constexpr NCollection_Vec2 (const Element_t theX,
+                              const Element_t theY) noexcept
+  : v{theX, theY}
   {
-    v[0] = theX;
-    v[1] = theY;
+    //
   }
 
   //! Conversion constructor (explicitly converts some 2-component vector with other element type
@@ -82,10 +84,10 @@ public:
   }
 
   //! Alias to 1st component as X coordinate in XY.
-  Element_t x() const { return v[0]; }
+  constexpr Element_t x() const noexcept { return v[0]; }
 
   //! Alias to 2nd component as Y coordinate in XY.
-  Element_t y() const { return v[1]; }
+  constexpr Element_t y() const noexcept { return v[1]; }
 
   //! @return 2 components by their names in specified order (in GLSL-style)
   NCOLLECTION_VEC_COMPONENTS_2D(x, y)
@@ -286,13 +288,13 @@ public:
   }
 
   //! Construct DX unit vector.
-  static NCollection_Vec2 DX()
+  static constexpr NCollection_Vec2 DX()
   {
     return NCollection_Vec2 (Element_t(1), Element_t(0));
   }
 
   //! Construct DY unit vector.
-  static NCollection_Vec2 DY()
+  static constexpr NCollection_Vec2 DY()
   {
     return NCollection_Vec2 (Element_t(0), Element_t(1));
   }

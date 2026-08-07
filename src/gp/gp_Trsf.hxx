@@ -62,7 +62,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Returns the identity transformation.
-  gp_Trsf();
+  constexpr gp_Trsf() noexcept;
 
   //! Creates  a 3D transformation from the 2D transformation theT.
   //! The resulting transformation has a homogeneous
@@ -371,10 +371,10 @@ private:
 //function : gp_Trsf
 // purpose :
 //=======================================================================
-inline gp_Trsf::gp_Trsf ()
+constexpr gp_Trsf::gp_Trsf() noexcept
 : scale (1.0),
   shape (gp_Identity),
-  matrix (1, 0, 0, 0, 1, 0, 0, 0, 1),
+  matrix (gp_Mat::Identity()),
   loc (0.0, 0.0, 0.0)
 {}
 

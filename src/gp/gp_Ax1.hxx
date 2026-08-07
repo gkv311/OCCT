@@ -40,14 +40,25 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Returns an axis in DX (1, 0, 0) direction from zero (0, 0, 0) origin.
+  static constexpr gp_Ax1 OX() noexcept { return gp_Ax1(gp_Pnt::Origin(), gp_Dir::DX()); }
+
+  //! Returns an axis in DY (0, 1, 0) direction from zero (0, 0, 0) origin.
+  static constexpr gp_Ax1 OY() noexcept { return gp_Ax1(gp_Pnt::Origin(), gp_Dir::DY()); }
+
+  //! Returns an axis in DZ (0, 0, 1) direction from zero (0, 0, 0) origin.
+  static constexpr gp_Ax1 OZ() noexcept { return gp_Ax1(gp_Pnt::Origin(), gp_Dir::DZ()); }
+
+public:
+
   //! Creates an axis object representing Z axis of
   //! the reference coordinate system.
-  gp_Ax1()
-  : loc(0.,0.,0.), vdir(0.,0.,1.)
+  constexpr gp_Ax1() noexcept
+  : loc(0.,0.,0.), vdir(gp_Dir::DZ())
   {}
 
   //! P is the location point and V is the direction of <me>.
-  gp_Ax1 (const gp_Pnt& theP, const gp_Dir& theV)
+  constexpr gp_Ax1 (const gp_Pnt& theP, const gp_Dir& theV) noexcept
   : loc(theP), vdir (theV)
   {}
 
@@ -58,10 +69,10 @@ public:
   void SetLocation (const gp_Pnt& theP) { loc = theP; }
 
   //! Returns the direction of <me>.
-  const gp_Dir& Direction() const { return vdir; }
+  constexpr const gp_Dir& Direction() const noexcept { return vdir; }
 
   //! Returns the location point of <me>.
-  const gp_Pnt& Location() const { return loc; }
+  constexpr const gp_Pnt& Location() const noexcept { return loc; }
 
   //! Returns True if  :
   //! . the angle between <me> and <Other> is lower or equal
@@ -104,10 +115,9 @@ public:
   void Reverse() { vdir.Reverse(); }
 
   //! Reverses the unit vector of this axis and creates a new one.
-  Standard_NODISCARD gp_Ax1 Reversed() const
+  Standard_NODISCARD gp_Ax1 Reversed() const noexcept
   {
-    gp_Dir D = vdir.Reversed();
-    return gp_Ax1 (loc, D);
+    return gp_Ax1 (loc, vdir.Reversed());
   }
 
   //! Performs the symmetrical transformation of an axis

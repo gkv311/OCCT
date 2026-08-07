@@ -31,48 +31,47 @@ public:
   typedef Element_t CArray_t[4];
 
   //! Returns the number of components.
-  static int Length()
+  static constexpr int Length()
   {
     return 4;
   }
 
   //! Empty constructor. Construct the zero vector.
-  NCollection_Vec4()
+  constexpr NCollection_Vec4() noexcept
+  : v{}
   {
-    std::memset (this, 0, sizeof(NCollection_Vec4));
+    //
   }
 
   //! Initialize ALL components of vector within specified value.
-  explicit NCollection_Vec4 (const Element_t theValue)
+  explicit constexpr NCollection_Vec4 (const Element_t theValue) noexcept
+  : v{theValue, theValue, theValue, theValue}
   {
-    v[0] = v[1] = v[2] = v[3] = theValue;
+    //
   }
 
   //! Per-component constructor.
-  NCollection_Vec4 (const Element_t theX,
-                    const Element_t theY,
-                    const Element_t theZ,
-                    const Element_t theW)
+  explicit constexpr NCollection_Vec4 (const Element_t theX,
+                                       const Element_t theY,
+                                       const Element_t theZ,
+                                       const Element_t theW) noexcept
+  : v{theX, theY, theZ, theW}
   {
-    v[0] = theX;
-    v[1] = theY;
-    v[2] = theZ;
-    v[3] = theW;
+    //
   }
 
   //! Constructor from 2-components vector.
-  explicit NCollection_Vec4 (const NCollection_Vec2<Element_t>& theVec2)
+  explicit constexpr NCollection_Vec4 (const NCollection_Vec2<Element_t>& theVec2) noexcept
+  : v{theVec2[0], theVec2[1], Element_t(0), Element_t(0)}
   {
-    v[0] = theVec2[0];
-    v[1] = theVec2[1];
-    v[2] = v[3] = Element_t (0);
+    //
   }
 
   //! Constructor from 3-components vector + optional 4th value.
-  explicit NCollection_Vec4(const NCollection_Vec3<Element_t>& theVec3, const Element_t theW = Element_t(0))
+  explicit constexpr NCollection_Vec4(const NCollection_Vec3<Element_t>& theVec3, const Element_t theW = Element_t(0)) noexcept
+  : v{theVec3[0], theVec3[1], theVec3[2], theW}
   {
-    std::memcpy (this, &theVec3, sizeof(NCollection_Vec3<Element_t>));
-    v[3] = theW;
+    //
   }
 
   //! Conversion constructor (explicitly converts some 4-component vector with other element type
@@ -111,28 +110,28 @@ public:
   }
 
   //! Alias to 1st component as X coordinate in XYZW.
-  Element_t x() const { return v[0]; }
+  constexpr Element_t x() const noexcept { return v[0]; }
 
   //! Alias to 1st component as RED channel in RGBA.
-  Element_t r() const { return v[0]; }
+  constexpr Element_t r() const noexcept { return v[0]; }
 
   //! Alias to 2nd component as Y coordinate in XYZW.
-  Element_t y() const { return v[1]; }
+  constexpr Element_t y() const noexcept { return v[1]; }
 
   //! Alias to 2nd component as GREEN channel in RGBA.
-  Element_t g() const { return v[1]; }
+  constexpr Element_t g() const noexcept { return v[1]; }
 
   //! Alias to 3rd component as Z coordinate in XYZW.
-  Element_t z() const { return v[2]; }
+  constexpr Element_t z() const noexcept { return v[2]; }
 
   //! Alias to 3rd component as BLUE channel in RGBA.
-  Element_t b() const { return v[2]; }
+  constexpr Element_t b() const noexcept { return v[2]; }
 
   //! Alias to 4th component as W coordinate in XYZW.
-  Element_t w() const { return v[3]; }
+  constexpr Element_t w() const noexcept { return v[3]; }
 
   //! Alias to 4th component as ALPHA channel in RGBA.
-  Element_t a() const { return v[3]; }
+  constexpr Element_t a() const noexcept { return v[3]; }
 
   //! @return 2 of XYZW components in specified order as vector in GLSL-style
   NCOLLECTION_VEC_COMPONENTS_2D(x, y)

@@ -34,15 +34,18 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Constructs a triangle and sets all indices to zero.
-  Poly_Triangle() { myNodes[0] =  myNodes[1] = myNodes[2] = 0; }
+  constexpr Poly_Triangle() noexcept
+  : myNodes{}
+  {
+    //
+  }
 
   //! Constructs a triangle and sets its three indices,
   //! where these node values are indices in the table of nodes specific to an existing triangulation of a shape.
-  Poly_Triangle (const Standard_Integer theN1, const Standard_Integer theN2, const Standard_Integer theN3)
+  constexpr Poly_Triangle (const Standard_Integer theN1, const Standard_Integer theN2, const Standard_Integer theN3) noexcept
+  : myNodes{theN1, theN2, theN3}
   {
-    myNodes[0] = theN1;
-    myNodes[1] = theN2;
-    myNodes[2] = theN3;
+    //
   }
 
   //! Sets the value of the three nodes of this triangle.

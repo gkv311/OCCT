@@ -144,7 +144,7 @@ public:
 
   //! Returns the distance between the vertex and the focus
   //! of the parabola.
-  Standard_Real Focal() const { return focalLength; }
+  constexpr Standard_Real Focal() const noexcept { return focalLength; }
 
   //! Returns the focus of the parabola.
   gp_Pnt2d Focus() const
@@ -154,15 +154,15 @@ public:
   }
 
   //! Returns the vertex of the parabola.
-  gp_Pnt2d Location() const { return pos.Location(); }
+  constexpr gp_Pnt2d Location() const noexcept { return pos.Location(); }
 
   //! Returns the symmetry axis of the parabola.
   //! The "Location" point of this axis is the vertex of the parabola.
-  gp_Ax2d MirrorAxis() const { return pos.XAxis(); }
+  constexpr gp_Ax2d MirrorAxis() const noexcept { return pos.XAxis(); }
 
   //! Returns the local coordinate system of the parabola.
   //! The "Location" point of this axis is the vertex of the parabola.
-  gp_Ax22d Axis() const { return pos; }
+  constexpr const gp_Ax22d& Axis() const noexcept { return pos; }
 
   //! Returns the distance between the focus and the
   //! directrix of the parabola.

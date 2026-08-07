@@ -46,8 +46,9 @@ public:
 
   //! Creates an object representing the reference
   //! coordinate system (OXY).
-  gp_Ax22d() : vydir (0., 1.)
-  // vxdir(1.,0.) use default ctor of gp_Dir2d, as it creates the same dir(1, 0)
+  constexpr gp_Ax22d() noexcept
+  : vydir(gp_Dir2d::DY()),
+    vxdir(gp_Dir2d::DX())
   {}
 
   //! Creates a coordinate system with origin theP and where:
@@ -147,22 +148,22 @@ public:
   //! -   the origin is that of this coordinate system, and
   //! -   the unit vector is either the "X Direction"  of this coordinate system.
   //! Note: the result is the "X Axis" of this coordinate system.
-  gp_Ax2d XAxis() const { return gp_Ax2d (point, vxdir); }
+  constexpr gp_Ax2d XAxis() const noexcept { return gp_Ax2d (point, vxdir); }
 
   //! Returns an axis, for which
   //! -   the origin is that of this coordinate system, and
   //! - the unit vector is either the  "Y Direction" of this coordinate system.
   //! Note: the result is the "Y Axis" of this coordinate system.
-  gp_Ax2d YAxis() const { return gp_Ax2d (point, vydir); }
+  constexpr gp_Ax2d YAxis() const noexcept { return gp_Ax2d (point, vydir); }
 
   //! Returns the "Location" point (origin) of <me>.
-  const gp_Pnt2d& Location() const { return point; }
+  constexpr const gp_Pnt2d& Location() const noexcept { return point; }
 
   //! Returns the "XDirection" of <me>.
-  const gp_Dir2d& XDirection() const { return vxdir; }
+  constexpr const gp_Dir2d& XDirection() const noexcept { return vxdir; }
 
   //! Returns the "YDirection" of <me>.
-  const gp_Dir2d& YDirection() const { return vydir; }
+  constexpr const gp_Dir2d& YDirection() const noexcept { return vydir; }
 
   Standard_EXPORT void Mirror (const gp_Pnt2d& theP);
 
