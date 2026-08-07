@@ -75,7 +75,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates of an indefinite hyperbola.
-  gp_Hypr()
+  constexpr gp_Hypr() noexcept
   : majorRadius (RealLast()),
     minorRadius (RealFirst())
   {}
@@ -217,15 +217,15 @@ public:
 
   //! Returns  the location point of the hyperbola. It is the
   //! intersection point between the "XAxis" and the "YAxis".
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Returns the major radius of the hyperbola. It is the radius
   //! on the "XAxis" of the hyperbola.
-  Standard_Real MajorRadius() const { return majorRadius; }
+  constexpr Standard_Real MajorRadius() const noexcept { return majorRadius; }
 
   //! Returns the minor radius of the hyperbola. It is the radius
   //! on the "YAxis" of the hyperbola.
-  Standard_Real MinorRadius() const { return minorRadius; }
+  constexpr Standard_Real MinorRadius() const noexcept { return minorRadius; }
 
   //! Returns the branch of hyperbola obtained by doing the
   //! symmetrical transformation of <me> with respect to the

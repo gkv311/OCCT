@@ -35,14 +35,14 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates an XYZ object with zero coordinates (0,0,0)
-  gp_XYZ()
+  constexpr gp_XYZ() noexcept
   : x (0.),
     y (0.),
     z (0.)
   {}
 
   //! creates an XYZ with given coordinates
-  gp_XYZ (const Standard_Real theX, const Standard_Real theY, const Standard_Real theZ)
+  constexpr gp_XYZ (const Standard_Real theX, const Standard_Real theY, const Standard_Real theZ) noexcept
   : x (theX),
     y (theY),
     z (theZ)
@@ -123,13 +123,13 @@ public:
   Standard_Real* ChangeData() { return (&x); }
 
   //! Returns the X coordinate
-  Standard_Real X() const { return x; }
+  constexpr Standard_Real X() const noexcept { return x; }
 
   //! Returns the Y coordinate
-  Standard_Real Y() const { return y; }
+  constexpr Standard_Real Y() const noexcept { return y; }
 
   //! Returns the Z coordinate
-  Standard_Real Z() const { return z; }
+  constexpr Standard_Real Z() const noexcept { return z; }
 
   //! computes Sqrt (X*X + Y*Y + Z*Z) where X, Y and Z are the three coordinates of this XYZ object.
   Standard_Real Modulus() const { return sqrt (x * x + y * y + z * z); }

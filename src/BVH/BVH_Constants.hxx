@@ -39,7 +39,7 @@ enum
 namespace BVH
 {
   //! Minimum node size to split.
-  const double THE_NODE_MIN_SIZE = 1e-5;
+  constexpr double THE_NODE_MIN_SIZE = 1e-5;
 }
 
 #endif // _BVH_Constants_Header

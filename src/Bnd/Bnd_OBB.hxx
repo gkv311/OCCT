@@ -42,9 +42,11 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Empty constructor
-  Bnd_OBB() :myIsAABox(Standard_False)
+  constexpr Bnd_OBB() noexcept
+  : myHDims{-1.0, -1.0, -1.0},
+    myIsAABox(Standard_False)
   {
-    myHDims[0] = myHDims[1] = myHDims[2] = -1.0;
+    //
   }
 
   //! Constructor taking all defining parameters

@@ -53,7 +53,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates an indefinite ellipse.
-  gp_Elips()
+  constexpr gp_Elips() noexcept
   : majorRadius (RealLast()),
     minorRadius (RealSmall())
   {}
@@ -118,7 +118,7 @@ public:
   Standard_Real Area() const { return M_PI * majorRadius * minorRadius; }
 
   //! Computes the axis normal to the plane of the ellipse.
-  const gp_Ax1& Axis() const { return pos.Axis(); }
+  constexpr const gp_Ax1& Axis() const noexcept { return pos.Axis(); }
 
   //! Computes the first or second directrix of this ellipse.
   //! These are the lines, in the plane of the ellipse, normal to
@@ -166,13 +166,13 @@ public:
 
   //! Returns the center of the ellipse. It is the "Location"
   //! point of the coordinate system of the ellipse.
-  const gp_Pnt& Location() const { return pos.Location(); }
+  constexpr const gp_Pnt& Location() const noexcept { return pos.Location(); }
 
   //! Returns the major radius of the ellipse.
-  Standard_Real MajorRadius() const { return majorRadius; }
+  constexpr Standard_Real MajorRadius() const noexcept { return majorRadius; }
 
   //! Returns the minor radius of the ellipse.
-  Standard_Real MinorRadius() const { return minorRadius; }
+  constexpr Standard_Real MinorRadius() const noexcept { return minorRadius; }
 
   //! Returns p = (1 - e * e) * MajorRadius where e is the eccentricity
   //! of the ellipse.
@@ -180,17 +180,17 @@ public:
   Standard_Real Parameter() const;
 
   //! Returns the coordinate system of the ellipse.
-  const gp_Ax2& Position() const { return pos; }
+  constexpr const gp_Ax2& Position() const noexcept { return pos; }
 
   //! Returns the "XAxis" of the ellipse whose origin
   //! is the center of this ellipse. It is the major axis of the
   //! ellipse.
-  gp_Ax1 XAxis() const { return gp_Ax1 (pos.Location(), pos.XDirection()); }
+  constexpr gp_Ax1 XAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.XDirection()); }
 
   //! Returns the "YAxis" of the ellipse whose unit vector is the "X Direction" or the "Y Direction"
   //! of the local coordinate system of this ellipse.
   //! This is the minor axis of the ellipse.
-  gp_Ax1 YAxis() const { return gp_Ax1 (pos.Location(), pos.YDirection()); }
+  constexpr gp_Ax1 YAxis() const noexcept { return gp_Ax1 (pos.Location(), pos.YDirection()); }
 
   Standard_EXPORT void Mirror (const gp_Pnt& theP);
 

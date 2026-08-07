@@ -35,16 +35,21 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Return point with zero coordinates.
+  static constexpr gp_Pnt Origin() noexcept { return gp_Pnt(); }
+
+public:
+
   //! Creates a point with zero coordinates.
-  gp_Pnt() {}
+  constexpr gp_Pnt() noexcept {}
 
   //! Creates a point from a XYZ object.
-  gp_Pnt (const gp_XYZ& theCoord)
+  constexpr gp_Pnt (const gp_XYZ& theCoord) noexcept
   : coord (theCoord)
   {}
 
   //! Creates a  point with its 3 cartesian's coordinates : theXp, theYp, theZp.
-  gp_Pnt (const Standard_Real theXp, const Standard_Real theYp, const Standard_Real theZp)
+  constexpr gp_Pnt (const Standard_Real theXp, const Standard_Real theYp, const Standard_Real theZp) noexcept
   : coord (theXp, theYp, theZp)
   {}
 
@@ -91,19 +96,19 @@ public:
   }
 
   //! For this point, returns its X coordinate.
-  Standard_Real X() const { return coord.X(); }
+  constexpr Standard_Real X() const noexcept { return coord.X(); }
 
   //! For this point, returns its Y coordinate.
-  Standard_Real Y() const { return coord.Y(); }
+  constexpr Standard_Real Y() const noexcept { return coord.Y(); }
 
   //! For this point, returns its Z coordinate.
-  Standard_Real Z() const { return coord.Z(); }
+  constexpr Standard_Real Z() const noexcept { return coord.Z(); }
 
   //! For this point, returns its three coordinates as a XYZ object.
-  const gp_XYZ& XYZ() const { return coord; }
+  constexpr const gp_XYZ& XYZ() const noexcept { return coord; }
 
   //! For this point, returns its three coordinates as a XYZ object.
-  const gp_XYZ& Coord() const { return coord; }
+  constexpr const gp_XYZ& Coord() const noexcept { return coord; }
 
   //! Returns the coordinates of this point.
   //! Note: This syntax allows direct modification of the returned value.
