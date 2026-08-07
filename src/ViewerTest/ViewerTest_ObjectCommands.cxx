@@ -696,7 +696,6 @@ static int VTrihedron (Draw_Interpretor& ,
   }
 
   TCollection_AsciiString aName (theArgVec[1]);
-  gp_Pln aWorkingPlane;
   Standard_Boolean toUpdate = Standard_True;
 
   NCollection_DataMap<TCollection_AsciiString, Standard_Real> aRealParams;
