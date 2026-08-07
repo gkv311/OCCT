@@ -103,6 +103,8 @@ public:
   
   //! Returns the points of the Nth extremum distance.
   //! P1 is on the first curve, P2 on the second one.
+  //! @throws StdFail_NotDone if IsDone() returns FALSE
+  //! @throws Standard_OutOfRange if @p N is not within [1, NbExt()] or if two curves are parallel.
   Standard_EXPORT void Points (const Standard_Integer N,
                                Extrema_POnCurv& P1,
                                Extrema_POnCurv& P2) const;

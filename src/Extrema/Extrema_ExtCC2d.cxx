@@ -414,8 +414,15 @@ void Extrema_ExtCC2d::Points(const Standard_Integer N,
 			      Extrema_POnCurv2d& P1,
 			      Extrema_POnCurv2d& P2) const
 {
-  if(!myDone) throw StdFail_NotDone();
-  if ((N <= 0) || (N > mynbext)) throw Standard_OutOfRange();
+  if (!myDone)
+  {
+    throw StdFail_NotDone();
+  }
+  else if (N < 1 || 2 * N > mypoints.Length())
+  {
+    throw Standard_OutOfRange("Extrema_ExtCC2d::Points() index is out of range");
+  }
+
   P1 = mypoints.Value(2*N-1);
   P2 = mypoints.Value(2*N);
 }
