@@ -276,7 +276,7 @@ static Standard_Boolean KPartCircle
       else
       {
         myIsDone = Standard_False;
-        return Standard_False;
+        return Standard_True;
     }
     }
     else
