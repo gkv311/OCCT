@@ -1,0 +1,22 @@
+puts "============"
+puts "Crash on negative offset applied to a small circular wire"
+puts "============"
+puts ""
+
+pload MODELING
+
+set diameter 2.00
+set offset -0.01
+
+circle c 0 0 0 $diameter/2.0
+mkedge e c
+wire   w e
+compound w cc
+mkoffset res cc 1 $offset i
+checkprops res_1 -l 6.22035
+top
+fit
+xwd ${::imagedir}/${::casename}.png
+
+# for 'end' script
+renamevar res_1 result
