@@ -319,7 +319,7 @@ void GCPnts_TangentialDeflection::PerformLinear (const TheCurve& theC)
   myPoints->push_back (P);
   if (myMinNbPnts > 2)
   {
-    Standard_Real Du = (myLastU - myFirstu) / myMinNbPnts;
+    const Standard_Real Du = (myLastU - myFirstu) / (myMinNbPnts - 1);
     Standard_Real U = myFirstu + Du;
     for (Standard_Integer i = 2; i < myMinNbPnts; i++)
     {

@@ -3,12 +3,15 @@ puts "0025044: BRepMesh tweaks"
 puts "======="
 puts ""
 
+# the meshing is expected to fail due to self-intersected wire
+puts "REQUIRED ALL: Meshing statuses: Failure"
+
 restore [locate_data_file bug25044_face55.brep] result
 tclean result
 
 incmesh result 0.1 -a 5
 
-checktrinfo result -tri
+checktrinfo result -tri 0
 
 vinit
 vsetdispmode 1
