@@ -18,8 +18,6 @@ XSControl_TransferReader.cxx
 XSControl_TransferReader.hxx
 XSControl_TransferWriter.cxx
 XSControl_TransferWriter.hxx
-XSControl_Utils.cxx
-XSControl_Utils.hxx
 XSControl_Vars.cxx
 XSControl_Vars.hxx
 XSControl_WorkSession.cxx
