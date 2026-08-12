@@ -124,11 +124,10 @@ IntImp_ConstIsoparametric IntImp_Int2S:: Perform(const TColStd_Array1OfReal& Par
 {
   gp_Vec DPUV[4];
   gp_Pnt P1,P2;
-  Standard_Real Epsuv[4];
-  Standard_Real DuvBuf[4];
+  Standard_Real DuvBuf[4] = {};
   TColStd_Array1OfReal Duv (DuvBuf[0], 1, 4);
-  Standard_Real UVd[4],UVf[4];
-  IntImp_ConstIsoparametric ChoixIso[4];
+  Standard_Real UVf[4] = {};
+  IntImp_ConstIsoparametric ChoixIso[4] = {};
   IntImp_ConstIsoparametric BestChoix = ChoixRef(0);
   const ThePSurface& Caro1 = myZerParFunc.AuxillarSurface1();
   const ThePSurface& Caro2 = myZerParFunc.AuxillarSurface2();
@@ -136,14 +135,15 @@ IntImp_ConstIsoparametric IntImp_Int2S:: Perform(const TColStd_Array1OfReal& Par
   ThePSurfaceTool::D1(Caro1, Param(1),Param(2),P1,DPUV[0],DPUV[1]);
   ThePSurfaceTool::D1(Caro2, Param(3),Param(4),P2,DPUV[2],DPUV[3]);
 
-  Epsuv[0] = ThePSurfaceTool::UResolution(Caro1,Precision::Confusion());
-  Epsuv[1] = ThePSurfaceTool::VResolution(Caro1,Precision::Confusion());
+  const Standard_Real Epsuv[4] =
+  {
+    ThePSurfaceTool::UResolution(Caro1,Precision::Confusion()),
+    ThePSurfaceTool::VResolution(Caro1,Precision::Confusion()),
+    ThePSurfaceTool::UResolution(Caro2,Precision::Confusion()),
+    ThePSurfaceTool::VResolution(Caro2,Precision::Confusion())
+  };
 
-  Epsuv[2] = ThePSurfaceTool::UResolution(Caro2,Precision::Confusion());
-  Epsuv[3] = ThePSurfaceTool::VResolution(Caro2,Precision::Confusion());
-
-  for (Standard_Integer j=0;j<=3;j++)
-    UVd[j] = Param(j+1);
+  Standard_Real UVd[4] = { Param(1), Param(2), Param(3), Param(4) };
 
   empty = Standard_True;
 
