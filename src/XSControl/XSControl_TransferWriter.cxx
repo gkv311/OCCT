@@ -25,7 +25,6 @@
 #include <Transfer_TransientMapper.hxx>
 #include <XSControl_Controller.hxx>
 #include <XSControl_TransferWriter.hxx>
-#include <XSControl_Utils.hxx>
 #include <ShapeUpgrade_RemoveLocations.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(XSControl_TransferWriter,Standard_Transient)
