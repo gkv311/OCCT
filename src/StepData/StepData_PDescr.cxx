@@ -77,9 +77,6 @@ StepData_PDescr::StepData_PDescr  ()
     void  StepData_PDescr::SetEnum ()
       {  thekind = KindEnum;  }
 
-    void  StepData_PDescr::AddEnumDef (const Standard_CString enumdef)
-      {  theenum.AddDefinition (enumdef);  }
-
     void  StepData_PDescr::SetType  (const Handle(Standard_Type)& atype)
       {  thekind = KindEntity;  thetype = atype;  thednam.Clear();  }
 
@@ -98,8 +95,7 @@ StepData_PDescr::StepData_PDescr  ()
 {
   if (other.IsNull()) return;
   thekind = other->Kind();
-  Standard_Integer i, maxenum = other->EnumMax ();
-  for (i = 0; i <= maxenum; i ++)    AddEnumDef (other->EnumText(i));
+  theenum = other->theenum;
 //  ne sont pas reprises : les SELECT
   thetype = other->Type();
   thearit = other->Arity();
@@ -165,7 +161,7 @@ StepData_PDescr::StepData_PDescr  ()
       {  return theenum.Value (name);  }
 
     Standard_CString  StepData_PDescr::EnumText  (const Standard_Integer val)  const
-      {  return theenum.Text  (val).ToCString();   }
+      {  return theenum.Text (val);  }
 
     Standard_Boolean  StepData_PDescr::IsEntity  () const
       {  return (thekind == KindEntity);  }

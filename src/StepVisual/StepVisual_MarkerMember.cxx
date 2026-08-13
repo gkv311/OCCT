@@ -18,8 +18,9 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(StepVisual_MarkerMember,StepData_SelectInt)
 
-static StepData_EnumTool tool
-  (".DOT.",".X.",".PLUS.",".ASTERISK.",".RING.",".SQUARE.",".TRIANGLE.");
+static constexpr StepData_EnumTool::StringView EnumValues[] =
+{".DOT.",".X.",".PLUS.",".ASTERISK.",".RING.",".SQUARE.",".TRIANGLE."};
+static constexpr StepData_EnumTool tool(EnumValues);
 
     StepVisual_MarkerMember::StepVisual_MarkerMember ()   {  }
 
@@ -33,7 +34,7 @@ static StepData_EnumTool tool
       {  return Standard_True;  }
 
     Standard_CString  StepVisual_MarkerMember::EnumText () const
-      {  return tool.Text(Int()).ToCString();  }
+      {  return tool.Text(Int());  }
 
 void  StepVisual_MarkerMember::SetEnumText (const Standard_Integer /*val*/, 
                                             const Standard_CString text)
