@@ -17,6 +17,7 @@
 #ifndef _StepGeom_PreferredSurfaceCurveRepresentation_HeaderFile
 #define _StepGeom_PreferredSurfaceCurveRepresentation_HeaderFile
 
+#include <StepData_EnumTool.hxx>
 
 enum StepGeom_PreferredSurfaceCurveRepresentation
 {
@@ -24,5 +25,16 @@ StepGeom_pscrCurve3d,
 StepGeom_pscrPcurveS1,
 StepGeom_pscrPcurveS2
 };
+
+//! StepGeom_PreferredSurfaceCurveRepresentation text values.
+static constexpr StepData_EnumTool::StringView StepGeom_PreferredSurfaceCurveRepresentationEnumValues[] =
+{
+  ".CURVE_3D.",  // StepGeom_pscrCurve3d
+  ".PCURVE_S1.", // StepGeom_pscrPcurveS1
+  ".PCURVE_S2.", // StepGeom_pscrPcurveS2
+};
+
+//! StepGeom_PreferredSurfaceCurveRepresentation enumeration conversion tool.
+static constexpr StepData_EnumTool StepGeom_PreferredSurfaceCurveRepresentationEnumTool(StepGeom_PreferredSurfaceCurveRepresentationEnumValues);
 
 #endif // _StepGeom_PreferredSurfaceCurveRepresentation_HeaderFile

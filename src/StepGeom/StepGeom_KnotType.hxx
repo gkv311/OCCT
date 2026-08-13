@@ -17,6 +17,7 @@
 #ifndef _StepGeom_KnotType_HeaderFile
 #define _StepGeom_KnotType_HeaderFile
 
+#include <StepData_EnumTool.hxx>
 
 enum StepGeom_KnotType
 {
@@ -25,5 +26,17 @@ StepGeom_ktUnspecified,
 StepGeom_ktQuasiUniformKnots,
 StepGeom_ktPiecewiseBezierKnots
 };
+
+//! StepGeom_KnotType text values.
+static constexpr StepData_EnumTool::StringView StepGeom_KnotTypeEnumValues[] =
+{
+  ".UNIFORM_KNOTS.",          // StepGeom_ktUniformKnots
+  ".UNSPECIFIED.",            // StepGeom_ktUnspecified
+  ".QUASI_UNIFORM_KNOTS.",    // StepGeom_ktQuasiUniformKnots
+  ".PIECEWISE_BEZIER_KNOTS.", // StepGeom_ktPiecewiseBezierKnots
+};
+
+//! StepGeom_KnotType enumeration conversion tool.
+static constexpr StepData_EnumTool StepGeom_KnotTypeEnumTool(StepGeom_KnotTypeEnumValues);
 
 #endif // _StepGeom_KnotType_HeaderFile

@@ -17,6 +17,7 @@
 #ifndef _StepGeom_BSplineSurfaceForm_HeaderFile
 #define _StepGeom_BSplineSurfaceForm_HeaderFile
 
+#include <StepData_EnumTool.hxx>
 
 enum StepGeom_BSplineSurfaceForm
 {
@@ -32,5 +33,25 @@ StepGeom_bssfQuadricSurf,
 StepGeom_bssfSurfOfLinearExtrusion,
 StepGeom_bssfUnspecified
 };
+
+//! StepGeom_BSplineSurfaceForm text values.
+static constexpr StepData_EnumTool::StringView StepGeom_BSplineSurfaceFormEnumValues[] =
+{
+  ".PLANE_SURF.",               // StepGeom_bssfPlaneSurf
+  ".CYLINDRICAL_SURF.",         // StepGeom_bssfCylindricalSurf
+  ".CONICAL_SURF.",             // StepGeom_bssfConicalSurf
+  ".SPHERICAL_SURF.",           // StepGeom_bssfSphericalSurf
+  ".TOROIDAL_SURF.",            // StepGeom_bssfToroidalSurf
+  ".SURF_OF_REVOLUTION.",       // StepGeom_bssfSurfOfRevolution
+  ".RULED_SURF.",               // StepGeom_bssfRuledSurf
+  ".GENERALISED_CONE.",         // StepGeom_bssfGeneralisedCone
+  ".QUADRIC_SURF.",             // StepGeom_bssfQuadricSurf
+  ".SURF_OF_LINEAR_EXTRUSION.", // StepGeom_bssfSurfOfLinearExtrusion
+  ".UNSPECIFIED.",              // StepGeom_bssfUnspecifieded
+};
+
+//! StepGeom_BSplineSurfaceForm enumeration conversion tool.
+static constexpr StepData_EnumTool StepGeom_BSplineSurfaceFormEnumTool(StepGeom_BSplineSurfaceFormEnumValues);
+
 
 #endif // _StepGeom_BSplineSurfaceForm_HeaderFile

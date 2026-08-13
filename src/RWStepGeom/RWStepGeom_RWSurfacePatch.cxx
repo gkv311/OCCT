@@ -21,12 +21,6 @@
 #include <StepGeom_TransitionCode.hxx>
 #include <TCollection_AsciiString.hxx>
 
-// --- Enum : TransitionCode ---
-static TCollection_AsciiString tcDiscontinuous(".DISCONTINUOUS.");
-static TCollection_AsciiString tcContSameGradientSameCurvature(".CONT_SAME_GRADIENT_SAME_CURVATURE.");
-static TCollection_AsciiString tcContSameGradient(".CONT_SAME_GRADIENT.");
-static TCollection_AsciiString tcContinuous(".CONTINUOUS.");
-
 RWStepGeom_RWSurfacePatch::RWStepGeom_RWSurfacePatch () {}
 
 void RWStepGeom_RWSurfacePatch::ReadStep
@@ -52,11 +46,8 @@ void RWStepGeom_RWSurfacePatch::ReadStep
   StepGeom_TransitionCode aUTransition = StepGeom_tcDiscontinuous;
   if (data->ParamType(num,2) == Interface_ParamEnum) {
     Standard_CString text = data->ParamCValue(num,2);
-    if      (tcDiscontinuous.IsEqual(text)) aUTransition = StepGeom_tcDiscontinuous;
-    else if (tcContSameGradientSameCurvature.IsEqual(text)) aUTransition = StepGeom_tcContSameGradientSameCurvature;
-    else if (tcContSameGradient.IsEqual(text)) aUTransition = StepGeom_tcContSameGradient;
-    else if (tcContinuous.IsEqual(text)) aUTransition = StepGeom_tcContinuous;
-    else ach->AddFail("Enumeration transition_code has not an allowed value");
+    if (!StepGeom_TransitionCodeEnumTool.Value(aUTransition, text))
+      ach->AddFail("Enumeration transition_code has not an allowed value");
   }
   else ach->AddFail("Parameter #2 (u_transition) is not an enumeration");
   
@@ -65,11 +56,8 @@ void RWStepGeom_RWSurfacePatch::ReadStep
   StepGeom_TransitionCode aVTransition = StepGeom_tcDiscontinuous;
   if (data->ParamType(num,3) == Interface_ParamEnum) {
     Standard_CString text = data->ParamCValue(num,3);
-    if      (tcDiscontinuous.IsEqual(text)) aVTransition = StepGeom_tcDiscontinuous;
-    else if (tcContSameGradientSameCurvature.IsEqual(text)) aVTransition = StepGeom_tcContSameGradientSameCurvature;
-    else if (tcContSameGradient.IsEqual(text)) aVTransition = StepGeom_tcContSameGradient;
-    else if (tcContinuous.IsEqual(text)) aVTransition = StepGeom_tcContinuous;
-    else ach->AddFail("Enumeration transition_code has not an allowed value");
+    if (!StepGeom_TransitionCodeEnumTool.Value(aVTransition, text))
+      ach->AddFail("Enumeration transition_code has not an allowed value");
   }
   else ach->AddFail("Parameter #3 (v_transition) is not an enumeration");
   
@@ -103,21 +91,11 @@ void RWStepGeom_RWSurfacePatch::WriteStep
   
   // --- own field : uTransition ---
   
-  switch(ent->UTransition()) {
-  case StepGeom_tcDiscontinuous : SW.SendEnum (tcDiscontinuous); break;
-			   case StepGeom_tcContSameGradientSameCurvature : SW.SendEnum (tcContSameGradientSameCurvature); break;
-			   case StepGeom_tcContSameGradient : SW.SendEnum (tcContSameGradient); break;
-			   case StepGeom_tcContinuous : SW.SendEnum (tcContinuous); break;
-			   }
+  SW.SendEnum (StepGeom_TransitionCodeEnumTool.Text(ent->UTransition()));
   
 	// --- own field : vTransition ---
 
-	switch(ent->VTransition()) {
-	  case StepGeom_tcDiscontinuous : SW.SendEnum (tcDiscontinuous); break;
-	  case StepGeom_tcContSameGradientSameCurvature : SW.SendEnum (tcContSameGradientSameCurvature); break;
-	  case StepGeom_tcContSameGradient : SW.SendEnum (tcContSameGradient); break;
-	  case StepGeom_tcContinuous : SW.SendEnum (tcContinuous); break;
-	}
+	SW.SendEnum (StepGeom_TransitionCodeEnumTool.Text(ent->VTransition()));
 
 	// --- own field : uSense ---
 
