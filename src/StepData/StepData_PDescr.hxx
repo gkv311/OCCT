@@ -75,14 +75,10 @@ public:
   
   //! Sets <me> for a Logical value (false,true,unknown)
   Standard_EXPORT void SetLogical();
-  
+
   //! Sets <me> for an Enum value
-  //! Then, call AddEnumDef ordered from the first one (value 0)
   Standard_EXPORT void SetEnum();
-  
-  //! Adds an enum value as a string
-  Standard_EXPORT void AddEnumDef (const Standard_CString enumdef);
-  
+
   //! Sets <me> for an Entity which must match a Type (early-bound)
   Standard_EXPORT void SetType (const Handle(Standard_Type)& atype);
   
@@ -145,7 +141,6 @@ public:
   Standard_EXPORT Standard_Boolean IsLogical() const;
   
   //! Tells if <me> is for an Enum value
-  //! Then, call AddEnumDef ordered from the first one (value 0)
   //! Managed by an EnumTool
   Standard_EXPORT Standard_Boolean IsEnum() const;
   
