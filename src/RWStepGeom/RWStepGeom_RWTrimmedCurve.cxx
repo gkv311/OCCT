@@ -11,10 +11,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <RWStepGeom_RWTrimmedCurve.hxx>
 
 #include <Interface_Check.hxx>
 #include <Interface_EntityIterator.hxx>
-#include <RWStepGeom_RWTrimmedCurve.hxx>
+#include <StepData_EnumTool.hxx>
 #include <StepData_StepReaderData.hxx>
 #include <StepData_StepWriter.hxx>
 #include <StepGeom_CartesianPoint.hxx>
@@ -23,10 +24,16 @@
 #include <StepGeom_TrimmingSelect.hxx>
 #include <TCollection_AsciiString.hxx>
 
-// --- Enum : TrimmingPreference ---
-static TCollection_AsciiString tpParameter(".PARAMETER.");
-static TCollection_AsciiString tpUnspecified(".UNSPECIFIED.");
-static TCollection_AsciiString tpCartesian(".CARTESIAN.");
+//! StepGeom_TrimmingPreference text values.
+static constexpr StepData_EnumTool::StringView StepGeom_TrimmingPreferenceEnumValues[] =
+{
+  ".CARTESIAN.",   // StepGeom_tpCartesian
+  ".PARAMETER.",   // StepGeom_tpParameter
+  ".UNSPECIFIED.", // StepGeom_tpUnspecified
+};
+
+//! StepGeom_TrimmingPreference enumeration conversion tool.
+static constexpr StepData_EnumTool StepGeom_TrimmingPreferenceEnumTool(StepGeom_TrimmingPreferenceEnumValues);
 
 RWStepGeom_RWTrimmedCurve::RWStepGeom_RWTrimmedCurve () {}
 
@@ -99,10 +106,8 @@ void RWStepGeom_RWTrimmedCurve::ReadStep
   StepGeom_TrimmingPreference aMasterRepresentation = StepGeom_tpCartesian;
   if (data->ParamType(num,6) == Interface_ParamEnum) {
     Standard_CString text = data->ParamCValue(num,6);
-    if      (tpParameter.IsEqual(text)) aMasterRepresentation = StepGeom_tpParameter;
-    else if (tpUnspecified.IsEqual(text)) aMasterRepresentation = StepGeom_tpUnspecified;
-    else if (tpCartesian.IsEqual(text)) aMasterRepresentation = StepGeom_tpCartesian;
-    else ach->AddFail("Enumeration trimming_preference has not an allowed value");
+    if (!StepGeom_TrimmingPreferenceEnumTool.Value(aMasterRepresentation, text))
+      ach->AddFail("Enumeration trimming_preference has not an allowed value");
   }
   else ach->AddFail("Parameter #6 (master_representation) is not an enumeration");
   
@@ -147,18 +152,8 @@ void RWStepGeom_RWTrimmedCurve::WriteStep
   SW.SendBoolean(ent->SenseAgreement());
   
   // --- own field : masterRepresentation ---
-  
-  switch(ent->MasterRepresentation()) {
-  case StepGeom_tpParameter : 
-    SW.SendEnum (tpParameter); 
-    break;
-  case StepGeom_tpUnspecified : 
-    SW.SendEnum (tpUnspecified); 
-    break;
-  case StepGeom_tpCartesian : 
-    SW.SendEnum (tpCartesian); 
-    break;
-  }
+
+  SW.SendEnum (StepGeom_TrimmingPreferenceEnumTool.Text(ent->MasterRepresentation()));
 }
 
 

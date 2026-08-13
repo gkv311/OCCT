@@ -11,9 +11,10 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <RWStepVisual_RWViewVolume.hxx>
 
 #include <Interface_EntityIterator.hxx>
-#include <RWStepVisual_RWViewVolume.hxx>
+#include <StepData_EnumTool.hxx>
 #include <StepData_StepReaderData.hxx>
 #include <StepData_StepWriter.hxx>
 #include <StepGeom_CartesianPoint.hxx>
@@ -21,9 +22,13 @@
 #include <StepVisual_ViewVolume.hxx>
 #include <TCollection_AsciiString.hxx>
 
-// --- Enum : CentralOrParallel ---
-static TCollection_AsciiString copCentral(".CENTRAL.");
-static TCollection_AsciiString copParallel(".PARALLEL.");
+//! StepVisual_CentralOrParallel text values.
+static constexpr StepData_EnumTool::StringView StepVisual_CentralOrParallelEnumValues[] =
+{
+  ".CENTRAL.", // StepVisual_copCentral
+  ".PARALLEL." // StepVisual_copParallel
+};
+static constexpr StepData_EnumTool StepVisual_CentralOrParallelEnumTool(StepVisual_CentralOrParallelEnumValues);
 
 RWStepVisual_RWViewVolume::RWStepVisual_RWViewVolume () {}
 
@@ -44,9 +49,8 @@ void RWStepVisual_RWViewVolume::ReadStep
 	StepVisual_CentralOrParallel aProjectionType = StepVisual_copCentral;
 	if (data->ParamType(num,1) == Interface_ParamEnum) {
 	  Standard_CString text = data->ParamCValue(num,1);
-	  if      (copCentral.IsEqual(text)) aProjectionType = StepVisual_copCentral;
-	  else if (copParallel.IsEqual(text)) aProjectionType = StepVisual_copParallel;
-	  else ach->AddFail("Enumeration central_or_parallel has not an allowed value");
+	  if (!StepVisual_CentralOrParallelEnumTool.Value(aProjectionType, text))
+	    ach->AddFail("Enumeration central_or_parallel has not an allowed value");
 	}
 	else ach->AddFail("Parameter #1 (projection_type) is not an enumeration");
 
@@ -112,10 +116,7 @@ void RWStepVisual_RWViewVolume::WriteStep
 
 	// --- own field : projectionType ---
 
-	switch(ent->ProjectionType()) {
-	  case StepVisual_copCentral : SW.SendEnum (copCentral); break;
-	  case StepVisual_copParallel : SW.SendEnum (copParallel); break;
-	}
+	SW.SendEnum (StepVisual_CentralOrParallelEnumTool.Text (ent->ProjectionType()));
 
 	// --- own field : projectionPoint ---
 

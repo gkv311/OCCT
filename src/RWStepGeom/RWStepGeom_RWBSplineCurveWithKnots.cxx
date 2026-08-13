@@ -26,21 +26,6 @@
 #include <TColStd_HArray1OfInteger.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 
-// --- Enum : KnotType ---
-static TCollection_AsciiString ktUniformKnots(".UNIFORM_KNOTS.");
-static TCollection_AsciiString ktQuasiUniformKnots(".QUASI_UNIFORM_KNOTS.");
-static TCollection_AsciiString ktPiecewiseBezierKnots(".PIECEWISE_BEZIER_KNOTS.");
-static TCollection_AsciiString ktUnspecified(".UNSPECIFIED.");
-
-
-	// --- Enum : BSplineCurveForm ---
-static TCollection_AsciiString bscfEllipticArc(".ELLIPTIC_ARC.");
-static TCollection_AsciiString bscfPolylineForm(".POLYLINE_FORM.");
-static TCollection_AsciiString bscfParabolicArc(".PARABOLIC_ARC.");
-static TCollection_AsciiString bscfCircularArc(".CIRCULAR_ARC.");
-static TCollection_AsciiString bscfUnspecified(".UNSPECIFIED.");
-static TCollection_AsciiString bscfHyperbolicArc(".HYPERBOLIC_ARC.");
-
 RWStepGeom_RWBSplineCurveWithKnots::RWStepGeom_RWBSplineCurveWithKnots () {}
 
 void RWStepGeom_RWBSplineCurveWithKnots::ReadStep
@@ -93,13 +78,8 @@ void RWStepGeom_RWBSplineCurveWithKnots::ReadStep
 	StepGeom_BSplineCurveForm aCurveForm = StepGeom_bscfPolylineForm;
 	if (data->ParamType(num,4) == Interface_ParamEnum) {
 	  Standard_CString text = data->ParamCValue(num,4);
-	  if      (bscfEllipticArc.IsEqual(text)) aCurveForm = StepGeom_bscfEllipticArc;
-	  else if (bscfPolylineForm.IsEqual(text)) aCurveForm = StepGeom_bscfPolylineForm;
-	  else if (bscfParabolicArc.IsEqual(text)) aCurveForm = StepGeom_bscfParabolicArc;
-	  else if (bscfCircularArc.IsEqual(text)) aCurveForm = StepGeom_bscfCircularArc;
-	  else if (bscfUnspecified.IsEqual(text)) aCurveForm = StepGeom_bscfUnspecified;
-	  else if (bscfHyperbolicArc.IsEqual(text)) aCurveForm = StepGeom_bscfHyperbolicArc;
-	  else ach->AddFail("Enumeration b_spline_curve_form has not an allowed value");
+	  if (!StepGeom_BSplineCurveFormEnumTool.Value(aCurveForm, text))
+	    ach->AddFail("Enumeration b_spline_curve_form has not an allowed value");
 	}
 	else ach->AddFail("Parameter #4 (curve_form) is not an enumeration");
 
@@ -150,11 +130,8 @@ void RWStepGeom_RWBSplineCurveWithKnots::ReadStep
 	StepGeom_KnotType aKnotSpec = StepGeom_ktUniformKnots;
 	if (data->ParamType(num,9) == Interface_ParamEnum) {
 	  Standard_CString text = data->ParamCValue(num,9);
-	  if      (ktUniformKnots.IsEqual(text)) aKnotSpec = StepGeom_ktUniformKnots;
-	  else if (ktQuasiUniformKnots.IsEqual(text)) aKnotSpec = StepGeom_ktQuasiUniformKnots;
-	  else if (ktPiecewiseBezierKnots.IsEqual(text)) aKnotSpec = StepGeom_ktPiecewiseBezierKnots;
-	  else if (ktUnspecified.IsEqual(text)) aKnotSpec = StepGeom_ktUnspecified;
-	  else ach->AddFail("Enumeration knot_type has not an allowed value");
+	  if (!StepGeom_KnotTypeEnumTool.Value(aKnotSpec, text))
+	    ach->AddFail("Enumeration knot_type has not an allowed value");
 	}
 	else ach->AddFail("Parameter #9 (knot_spec) is not an enumeration");
 
@@ -188,14 +165,7 @@ void RWStepGeom_RWBSplineCurveWithKnots::WriteStep
 
 	// --- inherited field curveForm ---
 
-	switch(ent->CurveForm()) {
-	  case StepGeom_bscfEllipticArc : SW.SendEnum (bscfEllipticArc); break;
-	  case StepGeom_bscfPolylineForm : SW.SendEnum (bscfPolylineForm); break;
-	  case StepGeom_bscfParabolicArc : SW.SendEnum (bscfParabolicArc); break;
-	  case StepGeom_bscfCircularArc : SW.SendEnum (bscfCircularArc); break;
-	  case StepGeom_bscfUnspecified : SW.SendEnum (bscfUnspecified); break;
-	  case StepGeom_bscfHyperbolicArc : SW.SendEnum (bscfHyperbolicArc); break;
-	}
+	SW.SendEnum (StepGeom_BSplineCurveFormEnumTool.Text(ent->CurveForm()));
 
 	// --- inherited field closedCurve ---
 
@@ -223,12 +193,7 @@ void RWStepGeom_RWBSplineCurveWithKnots::WriteStep
 
 	// --- own field : knotSpec ---
 
-	switch(ent->KnotSpec()) {
-	  case StepGeom_ktUniformKnots : SW.SendEnum (ktUniformKnots); break;
-	  case StepGeom_ktQuasiUniformKnots : SW.SendEnum (ktQuasiUniformKnots); break;
-	  case StepGeom_ktPiecewiseBezierKnots : SW.SendEnum (ktPiecewiseBezierKnots); break;
-	  case StepGeom_ktUnspecified : SW.SendEnum (ktUnspecified); break;
-	}
+	SW.SendEnum (StepGeom_KnotTypeEnumTool.Text(ent->KnotSpec()));
 }
 
 

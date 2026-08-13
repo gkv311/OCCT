@@ -20,11 +20,6 @@
 #include <StepGeom_SurfaceCurve.hxx>
 #include <TCollection_AsciiString.hxx>
 
-// --- Enum : PreferredSurfaceCurveRepresentation ---
-static TCollection_AsciiString pscrPcurveS2(".PCURVE_S2.");
-static TCollection_AsciiString pscrPcurveS1(".PCURVE_S1.");
-static TCollection_AsciiString pscrCurve3d(".CURVE_3D.");
-
 RWStepGeom_RWSurfaceCurve::RWStepGeom_RWSurfaceCurve () {}
 
 void RWStepGeom_RWSurfaceCurve::ReadStep
@@ -71,10 +66,8 @@ void RWStepGeom_RWSurfaceCurve::ReadStep
 	StepGeom_PreferredSurfaceCurveRepresentation aMasterRepresentation = StepGeom_pscrCurve3d;
 	if (data->ParamType(num,4) == Interface_ParamEnum) {
 	  Standard_CString text = data->ParamCValue(num,4);
-	  if      (pscrPcurveS2.IsEqual(text)) aMasterRepresentation = StepGeom_pscrPcurveS2;
-	  else if (pscrPcurveS1.IsEqual(text)) aMasterRepresentation = StepGeom_pscrPcurveS1;
-	  else if (pscrCurve3d.IsEqual(text)) aMasterRepresentation = StepGeom_pscrCurve3d;
-	  else ach->AddFail("Enumeration preferred_surface_curve_representation has not an allowed value");
+	  if (!StepGeom_PreferredSurfaceCurveRepresentationEnumTool.Value(aMasterRepresentation, text))
+	    ach->AddFail("Enumeration preferred_surface_curve_representation has not an allowed value");
 	}
 	else ach->AddFail("Parameter #4 (master_representation) is not an enumeration");
 
@@ -110,11 +103,7 @@ void RWStepGeom_RWSurfaceCurve::WriteStep
 
 	// --- own field : masterRepresentation ---
 
-	switch(ent->MasterRepresentation()) {
-	  case StepGeom_pscrPcurveS2 : SW.SendEnum (pscrPcurveS2); break;
-	  case StepGeom_pscrPcurveS1 : SW.SendEnum (pscrPcurveS1); break;
-	  case StepGeom_pscrCurve3d : SW.SendEnum (pscrCurve3d); break;
-	}
+	SW.SendEnum (StepGeom_PreferredSurfaceCurveRepresentationEnumTool.Text(ent->MasterRepresentation()));
 }
 
 

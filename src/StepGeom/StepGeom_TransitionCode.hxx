@@ -17,6 +17,7 @@
 #ifndef _StepGeom_TransitionCode_HeaderFile
 #define _StepGeom_TransitionCode_HeaderFile
 
+#include <StepData_EnumTool.hxx>
 
 enum StepGeom_TransitionCode
 {
@@ -25,5 +26,17 @@ StepGeom_tcContinuous,
 StepGeom_tcContSameGradient,
 StepGeom_tcContSameGradientSameCurvature
 };
+
+//! StepGeom_TransitionCode text values.
+static constexpr StepData_EnumTool::StringView StepGeom_TransitionCodeEnumValues[] =
+{
+  ".DISCONTINUOUS.",                     // StepGeom_tcDiscontinuous
+  ".CONTINUOUS.",                        // StepGeom_tcContinuous
+  ".CONT_SAME_GRADIENT.",                // StepGeom_tcContSameGradient
+  ".CONT_SAME_GRADIENT_SAME_CURVATURE.", // StepGeom_tcContSameGradientSameCurvature
+};
+
+//! StepGeom_TransitionCode enumeration conversion tool.
+static constexpr StepData_EnumTool StepGeom_TransitionCodeEnumTool(StepGeom_TransitionCodeEnumValues);
 
 #endif // _StepGeom_TransitionCode_HeaderFile
