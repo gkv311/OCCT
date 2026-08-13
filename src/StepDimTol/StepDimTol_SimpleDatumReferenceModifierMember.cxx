@@ -19,8 +19,9 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(StepDimTol_SimpleDatumReferenceModifierMember,StepData_SelectInt)
 
-static StepData_EnumTool tool
-  (".ANY_CROSS_SECTION.",
+static constexpr StepData_EnumTool::StringView EnumValues[] =
+{
+   ".ANY_CROSS_SECTION.",
    ".ANY_LONGITUDINAL_SECTION.",
    ".BASIC.",
    ".CONTACTING_FEATURE.",
@@ -41,7 +42,9 @@ static StepData_EnumTool tool
    ".PITCH_DIAMETER.",
    ".PLANE.",
    ".POINT.",
-   ".TRANSLATION.");
+   ".TRANSLATION.",
+};
+static constexpr StepData_EnumTool tool(EnumValues);
 
 //=======================================================================
 //function : StepDimTol_SimpleDatumReferenceModifierMember
@@ -56,7 +59,7 @@ StepDimTol_SimpleDatumReferenceModifierMember::StepDimTol_SimpleDatumReferenceMo
 //=======================================================================
 
 Standard_CString  StepDimTol_SimpleDatumReferenceModifierMember::EnumText () const
-  {  return tool.Text(Int()).ToCString();  }
+  {  return tool.Text(Int());  }
 
 //=======================================================================
 //function : SetEnumText
