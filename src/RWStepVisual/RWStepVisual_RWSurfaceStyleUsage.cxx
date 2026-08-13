@@ -11,19 +11,26 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <RWStepVisual_RWSurfaceStyleUsage.hxx>
 
 #include <Interface_EntityIterator.hxx>
-#include <RWStepVisual_RWSurfaceStyleUsage.hxx>
+#include <StepData_EnumTool.hxx>
 #include <StepData_StepReaderData.hxx>
 #include <StepData_StepWriter.hxx>
 #include <StepVisual_SurfaceSideStyle.hxx>
 #include <StepVisual_SurfaceStyleUsage.hxx>
 #include <TCollection_AsciiString.hxx>
 
-// --- Enum : SurfaceSide ---
-static TCollection_AsciiString ssNegative(".NEGATIVE.");
-static TCollection_AsciiString ssPositive(".POSITIVE.");
-static TCollection_AsciiString ssBoth(".BOTH.");
+//! StepVisual_SurfaceSide text values.
+static constexpr StepData_EnumTool::StringView StepVisual_SurfaceSideEnumValues[] =
+{
+  ".NEGATIVE.", // StepVisual_ssNegative
+  ".POSITIVE.", // StepVisual_ssPositive
+  ".BOTH.",     // StepVisual_ssBoth
+};
+
+//! StepVisual_SurfaceSide enumeration conversion tool.
+static constexpr StepData_EnumTool StepVisual_SurfaceSideEnumTool(StepVisual_SurfaceSideEnumValues);
 
 RWStepVisual_RWSurfaceStyleUsage::RWStepVisual_RWSurfaceStyleUsage () {}
 
@@ -44,10 +51,8 @@ void RWStepVisual_RWSurfaceStyleUsage::ReadStep
 	StepVisual_SurfaceSide aSide = StepVisual_ssNegative;
 	if (data->ParamType(num,1) == Interface_ParamEnum) {
 	  Standard_CString text = data->ParamCValue(num,1);
-	  if      (ssNegative.IsEqual(text)) aSide = StepVisual_ssNegative;
-	  else if (ssPositive.IsEqual(text)) aSide = StepVisual_ssPositive;
-	  else if (ssBoth.IsEqual(text)) aSide = StepVisual_ssBoth;
-	  else ach->AddFail("Enumeration surface_side has not an allowed value");
+	  if (!StepVisual_SurfaceSideEnumTool.Value(aSide, text))
+	    ach->AddFail("Enumeration surface_side has not an allowed value");
 	}
 	else ach->AddFail("Parameter #1 (side) is not an enumeration");
 
@@ -71,11 +76,7 @@ void RWStepVisual_RWSurfaceStyleUsage::WriteStep
 
 	// --- own field : side ---
 
-	switch(ent->Side()) {
-	  case StepVisual_ssNegative : SW.SendEnum (ssNegative); break;
-	  case StepVisual_ssPositive : SW.SendEnum (ssPositive); break;
-	  case StepVisual_ssBoth : SW.SendEnum (ssBoth); break;
-	}
+	SW.SendEnum (StepVisual_SurfaceSideEnumTool.Text(ent->Side()));
 
 	// --- own field : style ---
 

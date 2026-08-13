@@ -11,19 +11,26 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <RWStepShape_RWBooleanResult.hxx>
 
 #include <Interface_EntityIterator.hxx>
-#include <RWStepShape_RWBooleanResult.hxx>
+#include <StepData_EnumTool.hxx>
 #include <StepData_StepReaderData.hxx>
 #include <StepData_StepWriter.hxx>
 #include <StepShape_BooleanResult.hxx>
 #include <StepShape_SolidModel.hxx>
 #include <TCollection_AsciiString.hxx>
 
-// --- Enum : BooleanOperator ---
-static TCollection_AsciiString boDifference(".DIFFERENCE.");
-static TCollection_AsciiString boIntersection(".INTERSECTION.");
-static TCollection_AsciiString boUnion(".UNION.");
+//! StepShape_BooleanOperator text values.
+static constexpr StepData_EnumTool::StringView StepShape_BooleanOperatorEnumValues[] =
+{
+  ".DIFFERENCE.",   // StepShape_boDifference
+  ".INTERSECTION.", // StepShape_boIntersection
+  ".UNION.",        // StepShape_boUnion
+};
+
+//! StepShape_BooleanOperator enumeration conversion tool.
+static constexpr StepData_EnumTool StepShape_BooleanOperatorEnumTool(StepShape_BooleanOperatorEnumValues);
 
 RWStepShape_RWBooleanResult::RWStepShape_RWBooleanResult () {}
 
@@ -50,10 +57,8 @@ void RWStepShape_RWBooleanResult::ReadStep
 	StepShape_BooleanOperator aOperator = StepShape_boDifference;
 	if (data->ParamType(num,2) == Interface_ParamEnum) {
 	  Standard_CString text = data->ParamCValue(num,2);
-	  if      (boDifference.IsEqual(text)) aOperator = StepShape_boDifference;
-	  else if (boIntersection.IsEqual(text)) aOperator = StepShape_boIntersection;
-	  else if (boUnion.IsEqual(text)) aOperator = StepShape_boUnion;
-	  else ach->AddFail("Enumeration boolean_operator has not an allowed value");
+	  if (!StepShape_BooleanOperatorEnumTool.Value(aOperator, text))
+	    ach->AddFail("Enumeration boolean_operator has not an allowed value");
 	}
 	else ach->AddFail("Parameter #2 (operator) is not an enumeration");
 
@@ -115,11 +120,7 @@ void RWStepShape_RWBooleanResult::WriteStep
 
 	// --- own field : operator ---
 
-	switch(ent->Operator()) {
-	  case StepShape_boDifference : SW.SendEnum (boDifference); break;
-	  case StepShape_boIntersection : SW.SendEnum (boIntersection); break;
-	  case StepShape_boUnion : SW.SendEnum (boUnion); break;
-	}
+	SW.SendEnum (StepShape_BooleanOperatorEnumTool.Text(ent->Operator()));
 
 	// --- own field : firstOperand ---
 	// --- idem au ReadStep : il faut envoyer le bon type :

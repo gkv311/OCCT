@@ -17,6 +17,7 @@
 #ifndef _StepGeom_BSplineCurveForm_HeaderFile
 #define _StepGeom_BSplineCurveForm_HeaderFile
 
+#include <StepData_EnumTool.hxx>
 
 enum StepGeom_BSplineCurveForm
 {
@@ -27,5 +28,19 @@ StepGeom_bscfParabolicArc,
 StepGeom_bscfHyperbolicArc,
 StepGeom_bscfUnspecified
 };
+
+//! StepGeom_BSplineCurveForm text values.
+static constexpr StepData_EnumTool::StringView StepGeom_BSplineCurveFormEnumValues[] =
+{
+  ".POLYLINE_FORM.",  // StepGeom_bscfPolylineForm
+  ".CIRCULAR_ARC.",   // StepGeom_bscfCircularArc
+  ".ELLIPTIC_ARC.",   // StepGeom_bscfEllipticArc
+  ".PARABOLIC_ARC.",  // StepGeom_bscfParabolicArc
+  ".HYPERBOLIC_ARC.", // StepGeom_bscfHyperbolicArc
+  ".UNSPECIFIED.",    // StepGeom_bscfUnspecified
+};
+
+//! StepGeom_BSplineCurveForm enumeration conversion tool.
+static constexpr StepData_EnumTool StepGeom_BSplineCurveFormEnumTool(StepGeom_BSplineCurveFormEnumValues);
 
 #endif // _StepGeom_BSplineCurveForm_HeaderFile

@@ -11,17 +11,22 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
 #include <RWStepBasic_RWCoordinatedUniversalTimeOffset.hxx>
+
 #include <StepBasic_CoordinatedUniversalTimeOffset.hxx>
+#include <StepData_EnumTool.hxx>
 #include <StepData_StepReaderData.hxx>
 #include <StepData_StepWriter.hxx>
 #include <TCollection_AsciiString.hxx>
 
-// --- Enum : AheadOrBehind ---
-static TCollection_AsciiString aobAhead(".AHEAD.");
-static TCollection_AsciiString aobExact(".EXACT.");
-static TCollection_AsciiString aobBehind(".BEHIND.");
+//! StepBasic_AheadOrBehind text values.
+static constexpr StepData_EnumTool::StringView StepBasic_AheadOrBehindEnumValues[] =
+{
+  ".AHEAD.", // StepBasic_aobAhead
+  ".EXACT.", // StepBasic_aobExact
+  ".BEHIND." // StepBasic_aobBehind
+};
+static constexpr StepData_EnumTool StepBasic_AheadOrBehindEnumTool(StepBasic_AheadOrBehindEnumValues);
 
 RWStepBasic_RWCoordinatedUniversalTimeOffset::RWStepBasic_RWCoordinatedUniversalTimeOffset () {}
 
@@ -61,10 +66,8 @@ void RWStepBasic_RWCoordinatedUniversalTimeOffset::ReadStep
 	StepBasic_AheadOrBehind aSense = StepBasic_aobAhead;
 	if (data->ParamType(num,3) == Interface_ParamEnum) {
 	  Standard_CString text = data->ParamCValue(num,3);
-	  if      (aobAhead.IsEqual(text)) aSense = StepBasic_aobAhead;
-	  else if (aobExact.IsEqual(text)) aSense = StepBasic_aobExact;
-	  else if (aobBehind.IsEqual(text)) aSense = StepBasic_aobBehind;
-	  else ach->AddFail("Enumeration ahead_or_behind has not an allowed value");
+	  if (!StepBasic_AheadOrBehindEnumTool.Value(aSense, text))
+	    ach->AddFail("Enumeration ahead_or_behind has not an allowed value");
 	}
 	else ach->AddFail("Parameter #3 (sense) is not an enumeration");
 
@@ -96,9 +99,5 @@ void RWStepBasic_RWCoordinatedUniversalTimeOffset::WriteStep
 
 	// --- own field : sense ---
 
-	switch(ent->Sense()) {
-	  case StepBasic_aobAhead : SW.SendEnum (aobAhead); break;
-	  case StepBasic_aobExact : SW.SendEnum (aobExact); break;
-	  case StepBasic_aobBehind : SW.SendEnum (aobBehind); break;
-	}
+	SW.SendEnum (StepBasic_AheadOrBehindEnumTool.Text(ent->Sense()));
 }

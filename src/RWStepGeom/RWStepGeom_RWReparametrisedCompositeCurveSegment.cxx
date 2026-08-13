@@ -20,12 +20,6 @@
 #include <StepGeom_ReparametrisedCompositeCurveSegment.hxx>
 #include <StepGeom_TransitionCode.hxx>
 
-// --- Enum : TransitionCode ---
-static TCollection_AsciiString tcDiscontinuous(".DISCONTINUOUS.");
-static TCollection_AsciiString tcContSameGradientSameCurvature(".CONT_SAME_GRADIENT_SAME_CURVATURE.");
-static TCollection_AsciiString tcContSameGradient(".CONT_SAME_GRADIENT.");
-static TCollection_AsciiString tcContinuous(".CONTINUOUS.");
-
 RWStepGeom_RWReparametrisedCompositeCurveSegment::RWStepGeom_RWReparametrisedCompositeCurveSegment () {}
 
 void RWStepGeom_RWReparametrisedCompositeCurveSegment::ReadStep
@@ -45,11 +39,8 @@ void RWStepGeom_RWReparametrisedCompositeCurveSegment::ReadStep
 	StepGeom_TransitionCode aTransition = StepGeom_tcDiscontinuous;
 	if (data->ParamType(num,1) == Interface_ParamEnum) {
 	  Standard_CString text = data->ParamCValue(num,1);
-	  if      (tcDiscontinuous.IsEqual(text)) aTransition = StepGeom_tcDiscontinuous;
-	  else if (tcContSameGradientSameCurvature.IsEqual(text)) aTransition = StepGeom_tcContSameGradientSameCurvature;
-	  else if (tcContSameGradient.IsEqual(text)) aTransition = StepGeom_tcContSameGradient;
-	  else if (tcContinuous.IsEqual(text)) aTransition = StepGeom_tcContinuous;
-	  else ach->AddFail("Enumeration transition_code has not an allowed value");
+	  if (!StepGeom_TransitionCodeEnumTool.Value(aTransition, text))
+	    ach->AddFail("Enumeration transition_code has not an allowed value");
 	}
 	else ach->AddFail("Parameter #1 (transition) is not an enumeration");
 
@@ -85,12 +76,7 @@ void RWStepGeom_RWReparametrisedCompositeCurveSegment::WriteStep
 
 	// --- inherited field transition ---
 
-	switch(ent->Transition()) {
-	  case StepGeom_tcDiscontinuous : SW.SendEnum (tcDiscontinuous); break;
-	  case StepGeom_tcContSameGradientSameCurvature : SW.SendEnum (tcContSameGradientSameCurvature); break;
-	  case StepGeom_tcContSameGradient : SW.SendEnum (tcContSameGradient); break;
-	  case StepGeom_tcContinuous : SW.SendEnum (tcContinuous); break;
-	}
+	SW.SendEnum (StepGeom_TransitionCodeEnumTool.Text(ent->Transition()));
 
 	// --- inherited field sameSense ---
 

@@ -11,20 +11,25 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <RWStepBasic_RWProductDefinitionFormationWithSpecifiedSource.hxx>
 
 #include <Interface_EntityIterator.hxx>
-#include <RWStepBasic_RWProductDefinitionFormationWithSpecifiedSource.hxx>
 #include <StepBasic_Product.hxx>
 #include <StepBasic_ProductDefinitionFormationWithSpecifiedSource.hxx>
 #include <StepBasic_Source.hxx>
+#include <StepData_EnumTool.hxx>
 #include <StepData_StepReaderData.hxx>
 #include <StepData_StepWriter.hxx>
 #include <TCollection_AsciiString.hxx>
 
-// --- Enum : Source ---
-static TCollection_AsciiString sBought(".BOUGHT.");
-static TCollection_AsciiString sNotKnown(".NOT_KNOWN.");
-static TCollection_AsciiString sMade(".MADE.");
+//! StepBasic_Source text values.
+static constexpr StepData_EnumTool::StringView StepBasic_SourceEnumValues[] =
+{
+  ".MADE.",     // StepBasic_sMade
+  ".BOUGHT.",   // StepBasic_sBought
+  ".NOT_KNOWN." // StepBasic_sNotKnown
+};
+static constexpr StepData_EnumTool StepBasic_SourceEnumTool(StepBasic_SourceEnumValues);
 
 RWStepBasic_RWProductDefinitionFormationWithSpecifiedSource::RWStepBasic_RWProductDefinitionFormationWithSpecifiedSource () {}
 
@@ -63,10 +68,8 @@ void RWStepBasic_RWProductDefinitionFormationWithSpecifiedSource::ReadStep
 	StepBasic_Source aMakeOrBuy = StepBasic_sNotKnown;
 	if (data->ParamType(num,4) == Interface_ParamEnum) {
 	  Standard_CString text = data->ParamCValue(num,4);
-	  if      (sBought.IsEqual(text)) aMakeOrBuy = StepBasic_sBought;
-	  else if (sNotKnown.IsEqual(text)) aMakeOrBuy = StepBasic_sNotKnown;
-	  else if (sMade.IsEqual(text)) aMakeOrBuy = StepBasic_sMade;
-	  else ach->AddFail("Enumeration source has not an allowed value");
+	  if (!StepBasic_SourceEnumTool.Value(aMakeOrBuy, text))
+	    ach->AddFail("Enumeration source has not an allowed value");
 	}
 	else ach->AddFail("Parameter #4 (make_or_buy) is not an enumeration");
 
@@ -96,11 +99,7 @@ void RWStepBasic_RWProductDefinitionFormationWithSpecifiedSource::WriteStep
 
 	// --- own field : makeOrBuy ---
 
-	switch(ent->MakeOrBuy()) {
-	  case StepBasic_sBought : SW.SendEnum (sBought); break;
-	  case StepBasic_sNotKnown : SW.SendEnum (sNotKnown); break;
-	  case StepBasic_sMade : SW.SendEnum (sMade); break;
-	}
+	SW.SendEnum (StepBasic_SourceEnumTool.Text(ent->MakeOrBuy()));
 }
 
 
