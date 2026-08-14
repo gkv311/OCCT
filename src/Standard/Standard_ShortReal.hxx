@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------
 // ShortRealSmall : Returns the smallest positive ShortReal
 //-------------------------------------------------------------------
-inline Standard_ShortReal     ShortRealSmall() 
+constexpr Standard_ShortReal ShortRealSmall()
 { return FLT_MIN; }
 
 //-------------------------------------------------------------------
@@ -47,60 +47,59 @@ inline Standard_ShortReal     Abs(const Standard_ShortReal Value)
 //-------------------------------------------------------------------
 // ShortRealDigit : Returns the number of digits of precision in a ShortReal
 //-------------------------------------------------------------------
-inline Standard_Integer  ShortRealDigits() 
+constexpr Standard_Integer ShortRealDigits()
 { return FLT_DIG; }
 
 //-------------------------------------------------------------------
 // ShortRealEpsilon : Returns the minimum positive ShortReal such that 
 //               1.0 + x is not equal to 1.0
 //-------------------------------------------------------------------
-inline Standard_ShortReal     ShortRealEpsilon() 
+constexpr Standard_ShortReal ShortRealEpsilon()
 { return FLT_EPSILON; }
 
 //-------------------------------------------------------------------
 // ShortRealFirst : Returns the minimum negative value of a ShortReal
 //-------------------------------------------------------------------
-inline Standard_ShortReal     ShortRealFirst() 
-{ Standard_ShortReal MaxFloatTmp = -FLT_MAX;
-  return MaxFloatTmp; }
+constexpr Standard_ShortReal ShortRealFirst()
+{ return -FLT_MAX; }
   
 //-------------------------------------------------------------------
 // ShortRealFirst10Exp : Returns the minimum value of exponent(base 10) of
 //                  a ShortReal.
 //-------------------------------------------------------------------
-inline Standard_Integer  ShortRealFirst10Exp() 
+constexpr Standard_Integer ShortRealFirst10Exp()
 { return FLT_MIN_10_EXP; }
 
 //-------------------------------------------------------------------
 // ShortRealLast : Returns the maximum value of a ShortReal
 //-------------------------------------------------------------------
-inline Standard_ShortReal     ShortRealLast() 
+constexpr Standard_ShortReal ShortRealLast()
 { return  FLT_MAX; }
 
 //-------------------------------------------------------------------
 // ShortRealLast10Exp : Returns the maximum value of exponent(base 10) of
 //                 a ShortReal.
 //-------------------------------------------------------------------
-inline Standard_Integer  ShortRealLast10Exp() 
+constexpr Standard_Integer ShortRealLast10Exp()
 { return  FLT_MAX_10_EXP; }
 
 //-------------------------------------------------------------------
 // ShortRealMantissa : Returns the size in bits of the matissa part of a 
 //                ShortReal.
 //-------------------------------------------------------------------
-inline Standard_Integer  ShortRealMantissa() 
+constexpr Standard_Integer ShortRealMantissa()
 { return  FLT_MANT_DIG; }
 
 //-------------------------------------------------------------------
 // ShortRealRadix : Returns the radix of exponent representation
 //-------------------------------------------------------------------
-inline Standard_Integer  ShortRealRadix() 
+constexpr Standard_Integer ShortRealRadix()
 { return  FLT_RADIX; }
 
 //-------------------------------------------------------------------
 // ShortRealSize : Returns the size in bits of an integer
 //-------------------------------------------------------------------
-inline Standard_Integer  ShortRealSize() 
+constexpr Standard_Integer ShortRealSize()
 { return BITS(Standard_ShortReal); }
 
 //-------------------------------------------------------------------

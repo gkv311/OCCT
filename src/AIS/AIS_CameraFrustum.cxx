@@ -29,8 +29,8 @@ IMPLEMENT_STANDARD_RTTIEXT(AIS_CameraFrustum, AIS_InteractiveObject)
 
 namespace
 {
-  static const Standard_ShortReal THE_DEFAULT_TRANSPARENCY = 0.7f;
-  static const Quantity_Color     THE_DEFAULT_COLOR = Quantity_NOC_WHITE;
+  static constexpr Standard_ShortReal THE_DEFAULT_TRANSPARENCY = 0.7f;
+  static constexpr Quantity_Color     THE_DEFAULT_COLOR = Quantity_NOC_WHITE;
 }
 
 //=======================================================================

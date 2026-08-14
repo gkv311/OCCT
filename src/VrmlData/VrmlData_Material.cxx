@@ -139,7 +139,7 @@ VrmlData_Material::VrmlData_Material ()
   : myAmbientIntensity        (0.2),
     myShininess               (0.2),
     myTransparency            (0.),
-    myAmbientColor(0., 0., 0., Quantity_TOC_RGB),
+    myAmbientColor            (Quantity_NOC_BLACK),
     myDiffuseColor            (0.8, 0.8, 0.8, Quantity_TOC_sRGB),
     myEmissiveColor           (Quantity_NOC_BLACK),
     mySpecularColor           (Quantity_NOC_BLACK)
@@ -159,7 +159,7 @@ VrmlData_Material::VrmlData_Material (const VrmlData_Scene&  theScene,
     myAmbientIntensity        (theAmbientIntens < 0. ? 0.2 : theAmbientIntens),
     myShininess               (theShininess     < 0. ? 0.2 : theShininess),
     myTransparency            (theTransparency  < 0  ? 0.  : theTransparency),
-    myAmbientColor            (0., 0., 0., Quantity_TOC_RGB),
+    myAmbientColor            (Quantity_NOC_BLACK),
     myDiffuseColor            (0.8, 0.8, 0.8, Quantity_TOC_sRGB),
     myEmissiveColor           (Quantity_NOC_BLACK),
     mySpecularColor           (Quantity_NOC_BLACK)
