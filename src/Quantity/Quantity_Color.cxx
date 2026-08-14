@@ -48,37 +48,6 @@ static Standard_Real TheEpsilon = 0.0001;
   if (theL < 0. || theL > 100. || thec < 0. || thec > 135. || \
       theh < 0.0 || theh > 360.) { throw Standard_OutOfRange("Color out"); }
 
-namespace
-{
-  //! Raw color for defining list of standard color
-  struct Quantity_StandardColor
-  {
-    const char*             StringName;
-    NCollection_Vec3<float> sRgbValues;
-    NCollection_Vec3<float> RgbValues;
-    Quantity_NameOfColor    EnumName;
-
-    Quantity_StandardColor (Quantity_NameOfColor theName,
-                            const char* theStringName,
-                            const NCollection_Vec3<float>& thesRGB,
-                            const NCollection_Vec3<float>& theRGB)
-    : StringName (theStringName),
-      sRgbValues (thesRGB),
-      RgbValues (theRGB),
-      EnumName (theName) {}
-  };
-}
-
-// Note that HTML/hex sRGB representation is ignored
-#define RawColor(theName, theHex, SRGB, sR, sG, sB, RGB, theR, theG, theB) \
-  Quantity_StandardColor(Quantity_NOC_##theName, #theName, NCollection_Vec3<float>(sR##f, sG##f, sB##f), NCollection_Vec3<float>(theR##f, theG##f, theB##f))
-
-//! Name list of standard materials (defined within enumeration).
-static const Quantity_StandardColor THE_COLORS[] =
-{
-#include "Quantity_ColorTable.pxx"
-};
-
 // =======================================================================
 // function : Epsilon
 // purpose  :
@@ -98,43 +67,6 @@ void Quantity_Color::SetEpsilon (const Standard_Real theEpsilon)
 }
 
 // =======================================================================
-// function : valuesOf
-// purpose  :
-// =======================================================================
-NCollection_Vec3<float> Quantity_Color::valuesOf (const Quantity_NameOfColor theName,
-                                                  const Quantity_TypeOfColor theType)
-{
-  if ((Standard_Integer )theName < 0 || (Standard_Integer )theName > Quantity_NOC_WHITE)
-  {
-    throw Standard_OutOfRange("Bad name");
-  }
-
-  const NCollection_Vec3<float>& anRgb = THE_COLORS[theName].RgbValues;
-  switch (theType)
-  {
-    case Quantity_TOC_RGB:  return anRgb;
-    case Quantity_TOC_sRGB: return Convert_LinearRGB_To_sRGB (anRgb);
-    case Quantity_TOC_HLS:  return Convert_LinearRGB_To_HLS (anRgb);
-    case Quantity_TOC_CIELab: return Convert_LinearRGB_To_Lab (anRgb);
-    case Quantity_TOC_CIELch: return Convert_Lab_To_Lch (Convert_LinearRGB_To_Lab (anRgb));
-  }
-  throw Standard_ProgramError("Internal error");
-}
-
-// =======================================================================
-// function : StringName
-// purpose  :
-// =======================================================================
-Standard_CString Quantity_Color::StringName (const Quantity_NameOfColor theName)
-{
-  if ((Standard_Integer )theName < 0 || (Standard_Integer )theName > Quantity_NOC_WHITE)
-  {
-    throw Standard_OutOfRange("Bad name");
-  }
-  return THE_COLORS[theName].StringName;
-}
-
-// =======================================================================
 // function : ColorFromName
 // purpose  :
 // =======================================================================
@@ -150,7 +82,7 @@ Standard_Boolean Quantity_Color::ColorFromName (const Standard_CString theName,
 
   for (Standard_Integer anIter = Quantity_NOC_BLACK; anIter <= Quantity_NOC_WHITE; ++anIter)
   {
-    Standard_CString aColorName = THE_COLORS[anIter].StringName;
+    Standard_CString aColorName = Quantity_NamedColorInfoArray[anIter].StringName;
     if (aName == aColorName)
     {
       theColor = (Quantity_NameOfColor )anIter;
@@ -203,16 +135,6 @@ Quantity_Color::Quantity_Color (const Standard_Real theC1, const Standard_Real t
                                 const Quantity_TypeOfColor theType)
 {
   SetValues (theC1, theC2, theC3, theType);
-}
-
-// =======================================================================
-// function : Quantity_Color
-// purpose  :
-// =======================================================================
-Quantity_Color::Quantity_Color (const NCollection_Vec3<float>& theRgb)
-: myRgb (theRgb)
-{
-  Quantity_ColorValidateRgbRange(theRgb.r(), theRgb.g(), theRgb.b());
 }
 
 // =======================================================================
@@ -384,7 +306,7 @@ Quantity_NameOfColor Quantity_Color::Name() const
   Quantity_NameOfColor aResName = Quantity_NOC_BLACK;
   for (Standard_Integer aColIter = Quantity_NOC_BLACK; aColIter <= Quantity_NOC_WHITE; ++aColIter)
   {
-    const Standard_ShortReal aNewDist2 = (ansRgbVec - THE_COLORS[aColIter].sRgbValues).SquareModulus();
+    const Standard_ShortReal aNewDist2 = (ansRgbVec - Quantity_NamedColorInfoArray[aColIter].sRgbValues).SquareModulus();
     if (aNewDist2 < aDist2)
     {
       aResName = Quantity_NameOfColor (aColIter);

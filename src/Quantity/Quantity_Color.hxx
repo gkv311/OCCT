@@ -38,10 +38,12 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Creates Quantity_NOC_YELLOW color (for historical reasons).
-  Quantity_Color() : myRgb (valuesOf (Quantity_NOC_YELLOW, Quantity_TOC_RGB)) {}
+  constexpr Quantity_Color() noexcept
+  : myRgb(Quantity_NamedColorInfoArray[Quantity_NOC_YELLOW].RgbValues) {}
 
   //! Creates the color from enumeration value.
-  Quantity_Color (const Quantity_NameOfColor theName) : myRgb (valuesOf (theName, Quantity_TOC_RGB)) {}
+  constexpr Quantity_Color (const Quantity_NameOfColor theName)
+  : myRgb(int(theName) >= 0 && int(theName) <= Quantity_NOC_WHITE ? Quantity_NamedColorInfoArray[theName].RgbValues : badEnumVec3()) {}
 
   //! Creates a color according to the definition system theType.
   //! Throws exception if values are out of range.
@@ -51,16 +53,30 @@ public:
                                   const Quantity_TypeOfColor theType);
 
   //! Define color from linear RGB values.
-  Standard_EXPORT explicit Quantity_Color (const NCollection_Vec3<float>& theRgb);
+  constexpr explicit Quantity_Color (const NCollection_Vec3<float>& theRgb)
+  : myRgb(theRgb.r() >= 0.0f && theRgb.r() <= 1.0f
+       && theRgb.g() >= 0.0f && theRgb.g() <= 1.0f
+       && theRgb.b() >= 0.0f && theRgb.b() <= 1.0f
+        ? theRgb : badRgbVec3())
+  {
+    //
+  }
 
   //! Returns the name of the nearest color from the Quantity_NameOfColor enumeration.
   Standard_EXPORT Quantity_NameOfColor Name() const;
 
   //! Updates the color from specified named color.
-  void SetValues (const Quantity_NameOfColor theName) { myRgb = valuesOf (theName, Quantity_TOC_RGB); }
+  void SetValues (const Quantity_NameOfColor theName)
+  {
+    // protect from out-of-range enum casted from integer
+    if (int(theName) < 0 || int(theName) > Quantity_NOC_WHITE)
+      throw Standard_OutOfRange("Quantity_Color::SetValues(), invalid enum");
+
+    myRgb = Quantity_NamedColorInfoArray[theName].RgbValues;
+  }
 
   //! Return the color as vector of 3 float elements.
-  const NCollection_Vec3<float>& Rgb () const { return myRgb; }
+  constexpr const NCollection_Vec3<float>& Rgb() const noexcept { return myRgb; }
 
   //! Return the color as vector of 3 float elements.
   operator const NCollection_Vec3<float>&() const { return myRgb; }
@@ -80,13 +96,13 @@ public:
                                   const Quantity_TypeOfColor theType);
 
   //! Returns the Red component (quantity of red) of the color within range [0.0; 1.0].
-  Standard_Real Red() const { return myRgb.r(); }
+  constexpr Standard_Real Red() const noexcept { return myRgb.r(); }
 
   //! Returns the Green component (quantity of green) of the color within range [0.0; 1.0].
-  Standard_Real Green() const { return myRgb.g(); }
+  constexpr Standard_Real Green() const noexcept { return myRgb.g(); }
 
   //! Returns the Blue component (quantity of blue) of the color within range [0.0; 1.0].
-  Standard_Real Blue() const { return myRgb.b(); }
+  constexpr Standard_Real Blue() const noexcept { return myRgb.b(); }
 
   //! Returns the Hue component (hue angle) of the color
   //! in degrees within range [0.0; 360.0], 0.0 being Red.
@@ -158,7 +174,11 @@ public:
   }
 
   //! Returns the name of the color identified by the given Quantity_NameOfColor enumeration value.
-  Standard_EXPORT static Standard_CString StringName (const Quantity_NameOfColor theColor);
+  static constexpr const char* StringName (const Quantity_NameOfColor theName)
+  {
+    // protect from out-of-range enum casted from integer
+    return int(theName) >= 0 && int(theName) <= Quantity_NOC_WHITE ? Quantity_NamedColorInfoArray[theName].StringName : badEnumString();
+  }
 
   //! Finds color from predefined names.
   //! For example, the name of the color which corresponds to "BLACK" is Quantity_NOC_BLACK.
@@ -369,9 +389,23 @@ public:
 
 private:
 
-  //! Returns the values of a predefined color according to the mode.
-  Standard_EXPORT static NCollection_Vec3<float> valuesOf (const Quantity_NameOfColor theName,
-                                                           const Quantity_TypeOfColor theType);
+  //! Breaks constexpr and throws Standard_OutOfRange exception.
+  static NCollection_Vec3<float> badEnumVec3()
+  {
+    throw Standard_OutOfRange("Quantity_Color, enum is out of range");
+  }
+
+  //! Breaks constexpr and throws Standard_OutOfRange exception.
+  static NCollection_Vec3<float> badRgbVec3()
+  {
+    throw Standard_OutOfRange("Quantity_Color, RGB values are out of range");
+  }
+
+  //! Breaks constexpr and throws Standard_OutOfRange exception.
+  static const char* badEnumString()
+  {
+    throw Standard_OutOfRange("Quantity_Color, enum is out of range");
+  }
 
 private:
 

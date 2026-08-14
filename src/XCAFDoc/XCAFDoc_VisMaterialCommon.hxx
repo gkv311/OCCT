@@ -36,10 +36,10 @@ struct XCAFDoc_VisMaterialCommon
 
   //! Empty constructor.
   XCAFDoc_VisMaterialCommon()
-  : AmbientColor (0.1, 0.1, 0.1, Quantity_TOC_RGB),
-    DiffuseColor (0.8, 0.8, 0.8, Quantity_TOC_RGB),
-    SpecularColor(0.2, 0.2, 0.2, Quantity_TOC_RGB),
-    EmissiveColor(0.0, 0.0, 0.0, Quantity_TOC_RGB),
+  : AmbientColor (Graphic3d_Vec3(0.1f, 0.1f, 0.1f)), // Quantity_TOC_RGB
+    DiffuseColor (Graphic3d_Vec3(0.8f, 0.8f, 0.8f)), // Quantity_TOC_RGB
+    SpecularColor(Graphic3d_Vec3(0.2f, 0.2f, 0.2f)), // Quantity_TOC_RGB
+    EmissiveColor(Graphic3d_Vec3(0.0f, 0.0f, 0.0f)), // Quantity_TOC_RGB
     Shininess (1.0f),
     Transparency (0.0f),
     IsDefined (Standard_True) {}
