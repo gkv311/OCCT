@@ -39,25 +39,6 @@
 #define StepLong 72
 // StepLong : longueur maxi d une ligne de fichier Step
 
-
-//  Constantes litterales (interessantes, pour les performances ET LA MEMOIRE)
-
-static TCollection_AsciiString  textscope    (" &SCOPE");
-static TCollection_AsciiString  textendscope ("        ENDSCOPE");
-static TCollection_AsciiString  textcomm     ("  /*  ");
-static TCollection_AsciiString  textendcomm  ("  */");
-static TCollection_AsciiString  textlist     ("(");
-static TCollection_AsciiString  textendlist  (")");
-static TCollection_AsciiString  textendent   (");");
-static TCollection_AsciiString  textparam    (",");
-static TCollection_AsciiString  textundef    ("$");
-static TCollection_AsciiString  textderived  ("*");
-static TCollection_AsciiString  texttrue     (".T.");
-static TCollection_AsciiString  textfalse    (".F.");
-static TCollection_AsciiString  textunknown  (".U.");
-
-
-
 //=======================================================================
 //function : StepData_StepWriter
 //purpose  : 

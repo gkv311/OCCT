@@ -17,8 +17,6 @@
 #include <StepData_Field.hxx>
 #include <StepData_FieldList.hxx>
 
-static StepData_Field nulfild;
-
 StepData_FieldList::~StepData_FieldList()
 {
 }
