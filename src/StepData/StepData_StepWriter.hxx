@@ -307,6 +307,21 @@ private:
   Handle(TColStd_HArray1OfInteger) thescopeend;
   Handle(TColStd_HArray1OfInteger) thescopenext;
 
+private: // string constants
+
+  const TCollection_AsciiString textscope   {" &SCOPE"};
+  const TCollection_AsciiString textendscope{"        ENDSCOPE"};
+  const TCollection_AsciiString textcomm    {"  /*  "};
+  const TCollection_AsciiString textendcomm {"  */"};
+  const TCollection_AsciiString textlist    {"("};
+  const TCollection_AsciiString textendlist {")"};
+  const TCollection_AsciiString textendent  {");"};
+  const TCollection_AsciiString textparam   {","};
+  const TCollection_AsciiString textundef   {"$"};
+  const TCollection_AsciiString textderived {"*"};
+  const TCollection_AsciiString texttrue    {".T."};
+  const TCollection_AsciiString textfalse   {".F."};
+  const TCollection_AsciiString textunknown {".U."};
 
 };
 

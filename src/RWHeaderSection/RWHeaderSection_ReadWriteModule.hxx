@@ -73,8 +73,10 @@ protected:
 
 private:
 
-
-
+  const TCollection_AsciiString PasReco{""};    // neutralise StartEntity de SW
+  const TCollection_AsciiString Reco_FileName{"FILE_NAME"};
+  const TCollection_AsciiString Reco_FileDescription{"FILE_DESCRIPTION"};
+  const TCollection_AsciiString Reco_FileSchema{"FILE_SCHEMA"};
 
 };
 
