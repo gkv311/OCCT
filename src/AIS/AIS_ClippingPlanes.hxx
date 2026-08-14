@@ -32,7 +32,7 @@ class AIS_ClippingPlanes : public AIS_InteractiveObject
 public:
 
   //! Return default presentation color.
-  static Quantity_Color DefaultPlaneColor() { return Quantity_Color(0.0, 0.4, 0.6, Quantity_TOC_RGB); }
+  static Quantity_Color DefaultPlaneColor() { return Quantity_Color(Graphic3d_Vec3(0.0f, 0.4f, 0.6f)); } // Quantity_TOC_RGB
 
   //! Create clipping planes from bounding box.
   Standard_EXPORT static Handle(Graphic3d_SequenceOfHClipPlane) GetClippingBndBox(const Bnd_Box& theBox);
