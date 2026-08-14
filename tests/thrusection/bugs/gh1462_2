@@ -1,0 +1,25 @@
+puts {
+========
+Modeling - guard silently-uncapped solid in BRepOffsetAPI_ThruSections
+
+Test case: regression guard for the bugfix: a degenerate (point) end must still succeed.
+========
+}
+
+pload MODELING
+
+proc makeCircleWire { theRes theX theY theZ theRadius } {
+  upvar $theRes res
+  circle c $theX $theY $theZ $theRadius
+  mkedge e c
+  wire res e
+}
+
+makeCircleWire s1 0 0 0 10.0
+vertex s2 0 0 20.0
+
+axo
+fit
+xwd ${imagedir}/${casename}_s.png
+
+thrusections result 1 0 s1 s2

@@ -1,0 +1,38 @@
+puts {
+========
+Modeling - guard silently-uncapped solid in BRepOffsetAPI_ThruSections
+
+Test case: BRepOffsetAPI_ThruSections must report f a i l u r e, not a wrong success,
+when a closed section wire is genuinely non-planar (>= 2 periods of out-of-plane variation around the loop).
+Such a wire has no fitting plane and no surface already attached to its edges, soPerformPlan() cannot cap it.
+========
+}
+
+puts "REQUIRED ALL: Error : The command cannot be built."
+
+pload MODELING
+
+# Closed polygonal wire on a cylinder of radius theRadius, with theK periods of sinusoidal
+# out-of-plane variation of amplitude theAmp around the loop. theK == 1 is secretly planar
+# (it is the cylinder's intersection with a tilted plane); theK >= 2 is not.
+proc makeSaddleWire {theRes theRadius theK theAmp theZOffset theN} {
+  upvar #0 pi pi
+  upvar $theRes res
+  set aPnts {}
+  for {set i 0} {$i < $theN} {incr i} {
+    set aTheta [dval 2.0*pi*$i/$theN]
+    set aZ     [dval $theAmp*cos($theK*$aTheta)+$theZOffset]
+    lappend aPnts [dval $theRadius*cos($aTheta)] [dval $theRadius*sin($aTheta)] $aZ
+  }
+  puts $aPnts
+  polyline res -close {*}$aPnts
+}
+
+makeSaddleWire s1 20.0 2 5.0   0.0 60
+makeSaddleWire s2 15.0 2 5.0 -10.0 60
+
+axo
+fit
+xwd ${imagedir}/${casename}_s.png
+
+thrusections result 1 0 s1 s2

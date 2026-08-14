@@ -220,6 +220,13 @@ static TopoDS_Solid MakeSolid(TopoDS_Shell& shell, const TopoDS_Wire& wire1,
     }
   }
 
+  if (!B)
+  {
+    face1.Nullify();
+    face2.Nullify();
+    throw StdFail_NotDone("BRepOffsetAPI_ThruSections: could not close a non-planar extremity");
+  }
+
   TopoDS_Solid solid;
   BB.MakeSolid(solid); 
   BB.Add(solid, shell);
