@@ -1,0 +1,45 @@
+puts {
+========
+Modeling - guard CreateSmoothed's fixed-stride shapes array against a section with more edges than section 1
+
+Test case: algorithm should refuse mismatched section edge counts.
+========
+}
+
+puts "REQUIRED ALL: Error : The command cannot be built."
+puts "REQUIRED ALL: Algorithm has failed"
+
+pload MODELING
+
+# constructs circular wire either as a circle (theN==0) or as a polygon
+proc makeCircleWire { theRes theX theY theZ theRadius {theN 0} } {
+  upvar $theRes res
+  upvar #0 pi pi
+  if { $theN == 0 } {
+    circle c $theX $theY $theZ $theRadius
+    mkedge e c
+    wire res e
+    return
+  }
+
+  set pnts {}
+  for { set i 0 } { $i < $theN } { incr i } {
+    set anAngle [dval 2.0*pi*$i/$theN]
+    lappend pnts [dval $theX+$theRadius*cos($anAngle)] [dval $theY+$theRadius*sin($anAngle)] $theZ
+  }
+  polyline res -close {*}$pnts
+}
+
+# nbEdges = 2, from this section
+makeCircleWire s1 0 0 0  5.0 2
+# 1 edge - fewer
+makeCircleWire s2 0 0 10 3.0
+# 3 edges - more, compensating the shortfall
+makeCircleWire s3 0 0 20 2.0 3
+
+axo
+fit
+xwd ${imagedir}/${casename}_s.png
+
+dsetsignal unset
+thrusections -N result 1 0 s1 s2 s3
