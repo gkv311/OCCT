@@ -1,0 +1,33 @@
+puts {
+========
+Modeling - guard CreateSmoothed's fixed-stride shapes array against a section with more edges than section 1
+
+Test case: an apex section at the start should still build (regression guard for the bugfix).
+========
+}
+
+pload MODELING
+
+# constructs circular wire either as a polygon
+proc makeCircleWire { theRes theX theY theZ theRadius theN } {
+  upvar $theRes res
+  upvar #0 pi pi
+
+  set pnts {}
+  for { set i 0 } { $i < $theN } { incr i } {
+    set anAngle [dval 2.0*pi*$i/$theN]
+    lappend pnts [dval $theX+$theRadius*cos($anAngle)] [dval $theY+$theRadius*sin($anAngle)] $theZ
+  }
+  polyline res -close {*}$pnts
+}
+
+vertex s1 0 0 0
+makeCircleWire s2 0 0 5  4.0 5
+makeCircleWire s3 0 0 10 3.0 5
+
+axo
+fit
+xwd ${imagedir}/${casename}_s.png
+
+dsetsignal unset
+thrusections -N result 1 0 s1 s2 s3
