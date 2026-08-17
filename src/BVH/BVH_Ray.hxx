@@ -16,6 +16,8 @@
 #ifndef _BVH_Ray_Header
 #define _BVH_Ray_Header
 
+#include <BVH_Types.hxx>
+
 //! Describes a ray based on BVH vectors.
 template<class T, int N>
 class BVH_Ray

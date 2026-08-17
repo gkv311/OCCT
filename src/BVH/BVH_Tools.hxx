@@ -18,7 +18,6 @@
 
 #include <BVH_Box.hxx>
 #include <BVH_Ray.hxx>
-#include <BVH_Types.hxx>
 
 //! Defines a set of static methods operating with points and bounding boxes.
 //! \tparam T Numeric data type
@@ -320,8 +319,8 @@ public: //! @name Ray-Box Intersection
       aTimeMax[i] = Max (aNodeMin[i], aNodeMax[i]);
     }
 
-    T aTimeEnter = Max (aTimeMin[0], Max (aTimeMin[1], aTimeMin[2]));
-    T aTimeLeave = Min (aTimeMax[0], Min (aTimeMax[1], aTimeMax[2]));
+    const T aTimeEnter = aTimeMin.maxComp();
+    const T aTimeLeave = aTimeMax.minComp();
 
     Standard_Boolean hasIntersection = aTimeEnter <= aTimeLeave && aTimeLeave >= 0;
     if (hasIntersection)
