@@ -175,18 +175,58 @@ static Standard_Integer trim(Draw_Interpretor& di, Standard_Integer n, const cha
 // polyline
 //=======================================================================
 
-static Standard_Integer polyline(Draw_Interpretor& , Standard_Integer n, const char** a)
+static Standard_Integer polyline(Draw_Interpretor& theDI,
+                                 Standard_Integer theNbArgs,
+                                 const char** theArgVec)
 {
-  if (n < 8) return 1;
-  if (((n-2) % 3) != 0) return 1;
-  Standard_Integer i, j, np = (n-2) / 3;
-  BRepBuilderAPI_MakePolygon W;
-  j = 2;
-  for (i = 1; i <= np; i ++) {
-    W.Add(gp_Pnt(Draw::Atof(a[j]),Draw::Atof(a[j+1]),Draw::Atof(a[j+2])));
-    j += 3;
+  const char* aResName = nullptr;
+  bool toClose = false;
+  BRepBuilderAPI_MakePolygon aTool;
+  NCollection_Vec3<Standard_Real> anXYZ;
+  for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArg(theArgVec[anArgIter]);
+    anArg.LowerCase();
+    if (aResName == nullptr)
+    {
+      aResName = theArgVec[anArgIter];
+    }
+    else if (anArg == "-close")
+    {
+      toClose = true;
+    }
+    else if (anArgIter + 2 < theNbArgs
+          && Draw::ParseReal(theArgVec[anArgIter + 0], anXYZ.x())
+          && Draw::ParseReal(theArgVec[anArgIter + 1], anXYZ.y())
+          && Draw::ParseReal(theArgVec[anArgIter + 2], anXYZ.z()))
+    {
+      aTool.Add(gp_Pnt(anXYZ.x(), anXYZ.y(), anXYZ.z()));
+      anArgIter += 2;
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
   }
-  DBRep::Set(a[1],W.Wire());
+  if (aResName == nullptr)
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
+
+  if (toClose)
+  {
+    aTool.Close();
+  }
+
+  if (!aTool.IsDone())
+  {
+    theDI << "Error: unable to construct polyline";
+    return 1;
+  }
+
+  DBRep::Set(aResName, aTool.Wire());
   return 0;
 }
 
@@ -1986,7 +2026,7 @@ void  BRepTest::CurveCommands(Draw_Interpretor& theCommands)
     range,g);
 
   theCommands.Add("polyline",
-    "polyline name x1 y1 z1 x2 y2 z2 ...",__FILE__,
+    "polyline name [-close] x1 y1 z1 x2 y2 z2 ...",__FILE__,
     polyline,g);
 
   theCommands.Add("polyvertex",
