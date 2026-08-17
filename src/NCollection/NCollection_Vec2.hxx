@@ -33,6 +33,8 @@ class NCollection_Vec2
 
 public:
 
+  typedef Element_t CArray_t[2];
+
   //! Returns the number of components.
   static int Length()
   {
@@ -107,11 +109,17 @@ public:
   //! Check this vector with another vector for non-equality (without tolerance!).
   bool operator!= (const NCollection_Vec2& theOther) const { return !IsEqual (theOther); }
 
+#if defined(_MSC_VER) && (_MSC_VER < 1930)
+  //! Access element by index within [0,1] range - workaround for old msvc.
+  const Element_t& operator[](int theIndex) const { return v[theIndex]; }
+        Element_t& operator[](int theIndex)       { return v[theIndex]; }
+#endif
+
   //! Raw access to the data (for OpenGL exchange).
-  const Element_t* GetData()    const { return v; }
-        Element_t* ChangeData()       { return v; }
-  operator const   Element_t*() const { return v; }
-  operator         Element_t*()       { return v; }
+  const CArray_t&    GetData() const { return v; }
+        CArray_t& ChangeData()       { return v; }
+  operator const   CArray_t&() const { return v; }
+  operator         CArray_t&()       { return v; }
 
   //! Compute per-component summary.
   NCollection_Vec2& operator+= (const NCollection_Vec2& theAdd)
