@@ -34,6 +34,8 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  typedef Standard_Real CArray_t[3];
+
   //! Creates an XYZ object with zero coordinates (0,0,0)
   gp_XYZ()
   : x (0.),
@@ -115,12 +117,12 @@ public:
   //! Returns a const ptr to coordinates location.
   //! Is useful for algorithms, but DOES NOT PERFORM
   //! ANY CHECKS!
-  const Standard_Real* GetData() const { return (&x); }
+  const CArray_t& GetData() const { return *(CArray_t*)&x; }
 
   //! Returns a ptr to coordinates location.
   //! Is useful for algorithms, but DOES NOT PERFORM
   //! ANY CHECKS!
-  Standard_Real* ChangeData() { return (&x); }
+  CArray_t& ChangeData() { return *(CArray_t*)&x; }
 
   //! Returns the X coordinate
   Standard_Real X() const { return x; }

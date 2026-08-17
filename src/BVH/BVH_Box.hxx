@@ -177,75 +177,10 @@ public:
   T Center (const Standard_Integer theAxis) const;
 
   //! Dumps the content of me into the stream
-  void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const
-  {
-    (void)theDepth;
-    OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myIsInited)
-
-    int n = Min (N, 3);
-    if (n == 1)
-    {
-      OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myMinPoint[0])
-      OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myMinPoint[0])
-    }
-    else if (n == 2)
-    {
-      OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "MinPoint", n, myMinPoint[0], myMinPoint[1])
-      OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "MaxPoint", n, myMaxPoint[0], myMaxPoint[1])
-    }
-    else if (n == 3)
-    {
-      OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "MinPoint", n, myMinPoint[0], myMinPoint[1], myMinPoint[2])
-      OCCT_DUMP_FIELD_VALUES_NUMERICAL (theOStream, "MaxPoint", n, myMaxPoint[0], myMaxPoint[1], myMaxPoint[2])
-    }
-  }
+  void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
 
   //! Inits the content of me from the stream
-  Standard_Boolean InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos)
-  {
-    Standard_Integer aPos = theStreamPos;
-
-    Standard_Integer anIsInited = 0;
-    TCollection_AsciiString aStreamStr = Standard_Dump::Text (theSStream);
-
-    OCCT_INIT_FIELD_VALUE_INTEGER (aStreamStr, aPos, anIsInited);
-    myIsInited = anIsInited != 0;
-
-    int n = Min (N, 3);
-    if (n == 1)
-    {
-      Standard_Real aValue;
-      OCCT_INIT_FIELD_VALUE_REAL (aStreamStr, aPos, aValue);
-      myMinPoint[0] = (T)aValue;
-    }
-    else if (n == 2)
-    {
-      Standard_Real aValue1, aValue2;
-      OCCT_INIT_VECTOR_CLASS (aStreamStr, "MinPoint", aPos, n, &aValue1, &aValue2);
-      myMinPoint[0] = (T)aValue1;
-      myMinPoint[1] = (T)aValue2;
-
-      OCCT_INIT_VECTOR_CLASS (aStreamStr, "MaxPoint", aPos, n, &aValue1, &aValue2);
-      myMaxPoint[0] = (T)aValue1;
-      myMaxPoint[1] = (T)aValue2;
-    }
-    else if (n == 3)
-    {
-      Standard_Real aValue1, aValue2, aValue3;
-      OCCT_INIT_VECTOR_CLASS (aStreamStr, "MinPoint", aPos, n, &aValue1, &aValue2, &aValue3);
-      myMinPoint[0] = (T)aValue1;
-      myMinPoint[1] = (T)aValue2;
-      myMinPoint[2] = (T)aValue3;
-
-      OCCT_INIT_VECTOR_CLASS (aStreamStr, "MaxPoint", aPos, n, &aValue1, &aValue2, &aValue3);
-      myMaxPoint[0] = (T)aValue1;
-      myMaxPoint[1] = (T)aValue2;
-      myMaxPoint[2] = (T)aValue3;
-    }
-
-    theStreamPos = aPos;
-    return Standard_True;
-  }
+  Standard_Boolean InitFromJson (const Standard_SStream& theSStream, Standard_Integer& theStreamPos);
 
 public:
 
@@ -326,7 +261,6 @@ public:
     }
     return Standard_False;
   }
-
 
 protected:
 
@@ -555,6 +489,129 @@ template<class T, int N>
 T BVH_Box<T, N>::Center (const Standard_Integer theAxis) const
 {
   return BVH::CenterAxis<T, N>::Center (*this, theAxis);
+}
+
+// =======================================================================
+// function : DumpJson
+// =======================================================================
+template<class T, int N>
+void BVH_Box<T, N>::DumpJson(Standard_OStream& theOStream, Standard_Integer ) const
+{
+  // overloads for template specialization
+  struct MinMaxDumper
+  {
+    static void dump(Standard_OStream& theOStream,
+                     const typename BVH::VectorType<T, 1>::Type& theMin,
+                     const typename BVH::VectorType<T, 1>::Type& theMax)
+    {
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL(theOStream, "MinPoint", 1, theMin)
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL(theOStream, "MaxPoint", 1, theMax)
+    }
+
+    static void dump(Standard_OStream& theOStream,
+                     const typename BVH::VectorType<T, 2>::Type& theMin,
+                     const typename BVH::VectorType<T, 2>::Type& theMax)
+    {
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL(theOStream, "MinPoint", 2, theMin[0], theMin[1])
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL(theOStream, "MaxPoint", 2, theMax[0], theMax[1])
+    }
+
+    static void dump(Standard_OStream& theOStream,
+                     const typename BVH::VectorType<T, 3>::Type& theMin,
+                     const typename BVH::VectorType<T, 3>::Type& theMax)
+    {
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL(theOStream, "MinPoint", 3, theMin[0], theMin[1], theMin[2])
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL(theOStream, "MaxPoint", 3, theMax[0], theMax[1], theMin[2])
+    }
+
+    static void dump(Standard_OStream& theOStream,
+                     const typename BVH::VectorType<T, 4>::Type& theMin,
+                     const typename BVH::VectorType<T, 4>::Type& theMax)
+    {
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL(theOStream, "MinPoint", 4, theMin[0], theMin[1], theMin[2], theMin[3])
+      OCCT_DUMP_FIELD_VALUES_NUMERICAL(theOStream, "MaxPoint", 4, theMax[0], theMax[1], theMin[2], theMin[3])
+    }
+  };
+
+  OCCT_DUMP_FIELD_VALUE_NUMERICAL(theOStream, myIsInited)
+  MinMaxDumper::dump(theOStream, myMinPoint, myMaxPoint);
+}
+
+// =======================================================================
+// function : InitFromJson
+// =======================================================================
+template<class T, int N>
+Standard_Boolean BVH_Box<T, N>::InitFromJson(const Standard_SStream& theSStream, Standard_Integer& theStreamPos)
+{
+  // overloads for template specialization
+  struct MinMaxDumper
+  {
+    static bool init(const TCollection_AsciiString& theStr,
+                     Standard_Integer& thePos,
+                     typename BVH::VectorType<T, 1>::Type& theMin,
+                     typename BVH::VectorType<T, 1>::Type& theMax)
+    {
+      typename BVH::VectorType<T, 1>::Type aT = {};
+      OCCT_INIT_VECTOR_CLASS(theStr, "MinPoint", thePos, 1, aT);
+      theMin = aT;
+      OCCT_INIT_VECTOR_CLASS(theStr, "MaxPoint", thePos, 1, aT);
+      theMax = aT;
+      return true;
+    }
+
+    static bool init(const TCollection_AsciiString& theStr,
+                     Standard_Integer& thePos,
+                     typename BVH::VectorType<T, 2>::Type& theMin,
+                     typename BVH::VectorType<T, 2>::Type& theMax)
+    {
+      typename BVH::VectorType<T, 2>::Type aT;
+      OCCT_INIT_VECTOR_CLASS(theStr, "MinPoint", thePos, 2, aT[0], aT[1]);
+      theMin = aT;
+      OCCT_INIT_VECTOR_CLASS(theStr, "MaxPoint", thePos, 2, aT[0], aT[1]);
+      theMax = aT;
+      return true;
+    }
+
+    static bool init(const TCollection_AsciiString& theStr,
+                     Standard_Integer& thePos,
+                     typename BVH::VectorType<T, 3>::Type& theMin,
+                     typename BVH::VectorType<T, 3>::Type& theMax)
+    {
+      typename BVH::VectorType<T, 3>::Type aT;
+      OCCT_INIT_VECTOR_CLASS(theStr, "MinPoint", thePos, 3, aT[0], aT[1], aT[2]);
+      theMin = aT;
+      OCCT_INIT_VECTOR_CLASS(theStr, "MaxPoint", thePos, 3, aT[0], aT[1], aT[2]);
+      theMax = aT;
+      return true;
+    }
+
+    static bool init(const TCollection_AsciiString& theStr,
+                     Standard_Integer& thePos,
+                     typename BVH::VectorType<T, 4>::Type& theMin,
+                     typename BVH::VectorType<T, 4>::Type& theMax)
+    {
+      typename BVH::VectorType<T, 4>::Type aT;
+      OCCT_INIT_VECTOR_CLASS(theStr, "MinPoint", thePos, 4, aT[0], aT[1], aT[2], aT[3]);
+      theMin = aT;
+      OCCT_INIT_VECTOR_CLASS(theStr, "MaxPoint", thePos, 4, aT[0], aT[1], aT[2], aT[3]);
+      theMax = aT;
+      return true;
+    }
+  };
+
+  Standard_Integer aPos = theStreamPos;
+
+  Standard_Integer anIsInited = 0;
+  TCollection_AsciiString aStreamStr = Standard_Dump::Text(theSStream);
+
+  OCCT_INIT_FIELD_VALUE_INTEGER(aStreamStr, aPos, anIsInited);
+  myIsInited = anIsInited != 0;
+
+  if (!MinMaxDumper::init(aStreamStr, aPos, myMinPoint, myMaxPoint))
+    return false;
+
+  theStreamPos = aPos;
+  return true;
 }
 
 #endif // _BVH_Box_Header

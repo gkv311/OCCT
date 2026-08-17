@@ -18,6 +18,7 @@
 #include <BVH_BinnedBuilder.hxx>
 #include <BVH_SweepPlaneBuilder.hxx>
 #include <BVH_SpatialMedianBuilder.hxx>
+#include <BVH_Tools.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(BVH_BuilderTransient,  Standard_Transient)
 IMPLEMENT_STANDARD_RTTIEXT(BVH_TreeBaseTransient, Standard_Transient)
@@ -157,3 +158,11 @@ template class BVH_DistanceField<Standard_ShortReal, 4>;
 
 template class BVH_Transform<Standard_Real, 4>;
 template class BVH_Transform<Standard_ShortReal, 4>;
+
+template class BVH_Tools<Standard_Real, 2>;
+template class BVH_Tools<Standard_Real, 3>;
+template class BVH_Tools<Standard_Real, 4>;
+
+template class BVH_Tools<Standard_ShortReal, 2>;
+template class BVH_Tools<Standard_ShortReal, 3>;
+template class BVH_Tools<Standard_ShortReal, 4>;
