@@ -398,7 +398,7 @@ Handle(XCAFDimTolObjects_DatumObject) XCAFDoc_Datum::GetObject() const
   Handle(TDataStd_RealArray) aPnt;
   if (Label().FindChild(ChildLab_Pnt).FindAttribute(TDataStd_RealArray::GetID(), aPnt) && aPnt->Length() == 3)
   {
-    gp_Pnt aP(aLoc->Value(aPnt->Lower()), aPnt->Value(aPnt->Lower() + 1), aPnt->Value(aPnt->Lower() + 2));
+    gp_Pnt aP(aPnt->Value(aPnt->Lower()), aPnt->Value(aPnt->Lower() + 1), aPnt->Value(aPnt->Lower() + 2));
     anObj->SetPoint(aP);
   }
 
