@@ -1,0 +1,38 @@
+puts {
+============
+Modeling, GeomPlate_BuildPlateSurface - Report measured point-constraint deviations
+
+Test case: a plate built from point constraints alone never reaches VerifSurface(),
+so that there should be a zero deviation from constraint points.
+============
+}
+
+# Reference values
+set g0_ref 1.7102155340159159e-12
+set g1_ref 0.0
+set g2_ref 0.0
+set area_ref 778.651
+
+pload MODELING
+
+set aPnts {}
+for {set i 0} {$i < 5} {incr i} {
+  for {set j 0} {$j < 5} {incr j} {
+    set x [expr $i * 2.5]
+    set y [expr $j * 2.5]
+    set z [expr 2. * (($i + $j) % 2 ? 1. : -1.) + 0.35 * $x - 0.2 * $y]
+    point p_${i}_${j} $x $y $z
+    lappend aPnts p_${i}_${j}
+  }
+}
+
+gplate result 0 [llength $aPnts] {*}$aPnts -g0error g0_act -g1error g1_act -g2error g2_act
+
+axo
+fit
+xwd ${imagedir}/${casename}.png
+
+checkreal "G0 deviation" [dval g0_act] $g0_ref 1.0e-10 0.001
+checkreal "G1 deviation" [dval g1_act] $g1_ref 1.0e-10 0.001
+checkreal "G2 deviation" [dval g2_act] $g2_ref 1.0e-10 0.001
+checkarea result $area_ref 1e-6 0.001
