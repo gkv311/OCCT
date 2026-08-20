@@ -1,0 +1,39 @@
+puts {
+============
+Modeling, GeomPlate_BuildPlateSurface - Report measured point-constraint deviations
+
+Test case: the accessors document a maximum over the constraints, so VerifPoints() accumulates rather than overwrites.
+The G2 gaps below depend only on V, and the constraints are added with V descending,
+so the largest gap belongs to the first constraint and the last one is measurably smaller.
+============
+}
+
+# Reference values
+set g0_ref 3.7387188599519709e-12
+set g1_ref 3.9052911812877287e-12
+set g2_ref 0.24171642654756936
+set area_ref 1066.66
+
+pload MODELING
+
+sphere s 5.0
+mkface f s
+
+set aPnts {}
+for {set i 0} {$i < 3} {incr i} {
+  for {set j 2} {$j >= 0} {incr j -1} {
+    lappend aPnts [expr $i * 0.7] [expr 0.3 + $j * 0.35] 2 f
+  }
+}
+
+set aNbPoints [expr [llength $aPnts] / 4]
+gplate result 0 $aNbPoints {*}$aPnts -g0error g0_act -g1error g1_act -g2error g2_act
+
+axo
+fit
+xwd ${imagedir}/${casename}.png
+
+checkreal "G0 deviation" [dval g0_act] $g0_ref 1.0e-10 0.001
+checkreal "G1 deviation" [dval g1_act] $g1_ref 1.0e-10 0.001
+checkreal "G2 deviation" [dval g2_act] $g2_ref 1.0e-10 0.001
+checkarea result $area_ref 1e-6 0.001

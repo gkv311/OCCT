@@ -438,6 +438,7 @@ void GeomPlate_BuildPlateSurface::
 void GeomPlate_BuildPlateSurface::Perform(const Message_ProgressRange& theProgress)
 {
   myGeomPlateSurface.Nullify();
+  myG0Error = myG1Error = myG2Error = 0.0;
 #ifdef OCCT_DEBUG
   // Timing
   OSD_Chronometer Chrono;
@@ -674,7 +675,10 @@ void GeomPlate_BuildPlateSurface::Perform(const Message_ProgressRange& theProgre
 	    }
 
 	  if ((NTPntCont != 0)&&(Fini))
-	    { Standard_Real di,an,cu;
+	    {
+	      // deviation from point constraint is ignored and only deviation from curve is stored
+	      // (to be revised if this is a bug or intended behavior)
+	      Standard_Real di,an,cu;
 	      VerifPoints(di,an,cu);
 	    }
 	}
@@ -703,8 +707,9 @@ void GeomPlate_BuildPlateSurface::Perform(const Message_ProgressRange& theProgre
           myPlate.UVBox(Umin,Umax,Vmin,Vmax);
 	  myGeomPlateSurface->SetBounds(Umin,Umax,Vmin,Vmax);
 	  Fini = Standard_True;
-          Standard_Real di,an,cu;
-          VerifPoints(di,an,cu);
+          // No curve constraint here, so VerifSurface() never runs and these are the only measured
+          // deviations this build produces.
+          VerifPoints(myG0Error, myG1Error, myG2Error);
 	}
     } while (!Fini); // End loop for better surface
 #ifdef OCCT_DEBUG
@@ -2538,47 +2543,40 @@ VerifSurface(const Standard_Integer NbBoucle)
 //---------------------------------------------------------
 // Function : VerifPoint
 //---------------------------------------------------------
-void GeomPlate_BuildPlateSurface::
-               VerifPoints (Standard_Real& Dist, 
-			    Standard_Real& Ang, 
-			    Standard_Real& Curv) const
-{ Standard_Integer NTPntCont=myPntCont->Length();
-  gp_Pnt Pi, Pf;
-  gp_Pnt2d P2d;
-  gp_Vec v1i, v1f, v2i, v2f, v3i, v3f;
-  Ang=0;Dist=0,Curv=0;
-  Handle(GeomPlate_PointConstraint) PntCont;
-  for (Standard_Integer i=1;i<=NTPntCont;i++) {
-    PntCont = myPntCont->Value(i);
-    switch (PntCont->Order())
-      { case 0 :
-	  P2d = PntCont->Pnt2dOnSurf();
-	  PntCont->D0(Pi);
-	  myGeomPlateSurface->D0( P2d.Coord(1), P2d.Coord(2), Pf); 
-	  Dist = Pf.Distance(Pi);
-	  break;
-	case 1 :
-	  PntCont->D1(Pi, v1i, v2i);
-	  P2d = PntCont->Pnt2dOnSurf();
-	  myGeomPlateSurface->D1( P2d.Coord(1), P2d.Coord(2), Pf, v1f, v2f); 
-	  Dist = Pf.Distance(Pi);
-	  v3i = v1i^v2i; v3f=v1f^v2f;
-	  Ang=v3f.Angle(v3i);
-	  if (Ang>(M_PI/2))
-	    Ang = M_PI -Ang;
-	  break;
-	case 2 :
-	  Handle(Geom_Surface) Splate (myGeomPlateSurface);
-	  LocalAnalysis_SurfaceContinuity CG2;
-	  P2d = PntCont->Pnt2dOnSurf();
-	  GeomLProp_SLProps Prop (Splate, P2d.Coord(1), P2d.Coord(2), 
-				  2, 0.001);
-	  CG2.ComputeAnalysis(Prop, PntCont->LPropSurf(),GeomAbs_G2);
-	  Dist=CG2.C0Value();
-	  Ang=CG2.G1Angle();
-	  Curv=CG2.G2CurvatureGap();
-	  break;
-	}
+void GeomPlate_BuildPlateSurface::VerifPoints (Standard_Real& theDist,
+                                               Standard_Real& theAng,
+                                               Standard_Real& theCurv) const
+{
+  theAng = theDist = theCurv = 0.0;
+
+  // each deviation is accumulated as a maximum over the constraints
+  Standard_Integer aPrevOrder = -1;
+  GeomLProp_SLProps aProps(0, 0.001);
+
+  LocalAnalysis_SurfaceContinuity aTool;
+  for (const Handle(GeomPlate_PointConstraint)& aPntIter : *myPntCont)
+  {
+    if (aPrevOrder != aPntIter->Order())
+    {
+      aPrevOrder = aPntIter->Order();
+      aProps = GeomLProp_SLProps(myGeomPlateSurface, aPrevOrder, 0.001);
+    }
+
+    const gp_Pnt2d aP2d = aPntIter->Pnt2dOnSurf();
+    aProps.SetParameters(aP2d.X(), aP2d.Y());
+    if (aPntIter->Order() == 0)
+    {
+      gp_Pnt aPnt;
+      aPntIter->D0(aPnt);
+      theDist = Max(theDist, aPnt.Distance(aProps.Value()));
+      continue;
+    }
+
+    aTool.ComputeAnalysis(aProps, aPntIter->LPropSurf(), aPntIter->Order() >= 2 ? GeomAbs_G2 : GeomAbs_G1);
+    theDist = Max(theDist, aTool.C0Value());
+    theAng  = Max(theAng,  aTool.G1Angle());
+    if (aPntIter->Order() >= 2)
+      theCurv = Max(theCurv, aTool.G2CurvatureGap());
   }
 }
 
