@@ -191,122 +191,190 @@ static Standard_Integer plate (Draw_Interpretor & di,Standard_Integer n,const ch
 
 //////////////////////////////////////////////////////////////////////////////// 
 //  commande gplate : resultat face egale a la surface approchee
-//////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////
  
-static Standard_Integer gplate (Draw_Interpretor & di,Standard_Integer n,const char** a)
+static Standard_Integer gplate(Draw_Interpretor& theDI,
+                               Standard_Integer theNbArgs,
+                               const char** theArgVec)
 {
-  if (n < 6 ) return 1; 
-  Standard_Integer NbCurFront=Draw::Atoi(a[2]),
-  NbPointConstraint=Draw::Atoi(a[3]);
-  
-  GeomPlate_BuildPlateSurface Henri(3,15,2);
-  
-  Standard_Integer i;
-  Standard_Integer Conti;
-  Standard_Integer Indice=4;
-//Surface d'init  
-  TopoDS_Shape aLocalFace(DBRep::Get(a[Indice++],TopAbs_FACE));
-  TopoDS_Face SI = TopoDS::Face(aLocalFace);
-//  TopoDS_Face SI = TopoDS::Face(DBRep::Get(a[Indice++],TopAbs_FACE));
-  if(SI.IsNull()) 
-    Indice--;
-  else
-    { Handle(BRepAdaptor_Surface) HSI = new BRepAdaptor_Surface();
-      HSI->Initialize(SI);
-      Henri.LoadInitSurface( BRep_Tool::Surface(HSI->Face()));
-    }
-  for (i=1; i<=NbCurFront ; i++) { 
-    TopoDS_Shape aLocalShape(DBRep::Get(a[Indice++],TopAbs_EDGE));
-    TopoDS_Edge E = TopoDS::Edge(aLocalShape);
-//    TopoDS_Edge E = TopoDS::Edge(DBRep::Get(a[Indice++],TopAbs_EDGE));
-    if(E.IsNull()) return 1;
-    Conti=Draw::Atoi(a[Indice++]);
-    if ((Conti==0)||(Conti==-1))
-      { Handle(BRepAdaptor_Curve) C = new BRepAdaptor_Curve();
-	C->Initialize(E);
-        const Handle(Adaptor3d_Curve)& aC = C; // to avoid ambiguity
-	Handle(GeomPlate_CurveConstraint) Cont= new BRepFill_CurveConstraint(aC,Conti);
-	Henri.Add(Cont);
-     }
-    else 
-      { 
-	aLocalFace = DBRep::Get(a[Indice++],TopAbs_FACE);
-	TopoDS_Face F = TopoDS::Face(aLocalFace);
-//	TopoDS_Face F = TopoDS::Face(DBRep::Get(a[Indice++],TopAbs_FACE));
-	if(F.IsNull()) 
-	  return 1;
-	Handle(BRepAdaptor_Surface) S = new BRepAdaptor_Surface();
-	S->Initialize(F);
-	Handle(BRepAdaptor_Curve2d) C = new BRepAdaptor_Curve2d();
-	C->Initialize(E,F);
-	Adaptor3d_CurveOnSurface ConS(C,S);
-	Handle (Adaptor3d_CurveOnSurface) HConS = new Adaptor3d_CurveOnSurface(ConS);
-	Handle(GeomPlate_CurveConstraint) Cont= new BRepFill_CurveConstraint(HConS,Conti);
-	Henri.Add(Cont);
-      }
+  if (theNbArgs < 6)
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
   }
-  
-  for (i=1; i<=NbPointConstraint ; i++) 
-    { 
-//      gp_Pnt P1,P2,P3;
-      gp_Pnt P1;
-//      gp_Vec V1,V2,V3,V4,V5;
 
-      if (DrawTrSurf::GetPoint(a[Indice], P1) ) 
-	{ Conti=0;
-	  Handle(GeomPlate_PointConstraint) PCont= new GeomPlate_PointConstraint(P1,0);
-	  Henri.Add(PCont);
-	  Indice++;
-	}
-      else
-	{ Standard_Real u=Draw::Atof(a[Indice++]), 
-	                v=Draw::Atof(a[Indice++]);
+  GeomPlate_BuildPlateSurface Henri(3, 15, 2);
 
-	  Conti=Draw::Atoi(a[Indice++]);
-	  aLocalFace = DBRep::Get(a[Indice++],TopAbs_FACE);
-	  TopoDS_Face F = TopoDS::Face(aLocalFace);
-//	  TopoDS_Face F = TopoDS::Face(DBRep::Get(a[Indice++],TopAbs_FACE));
-	  if(F.IsNull()) 
-	    return 1;	
-	  Handle(BRepAdaptor_Surface) HF = new BRepAdaptor_Surface();
-	  HF->Initialize(F);
-	  Handle(GeomPlate_PointConstraint) PCont= new GeomPlate_PointConstraint(u,v,BRep_Tool::Surface(HF->Face()),Conti,0.001,0.001,0.001);
-	  Henri.Add(PCont);
-	}
-    }    
-  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
+  Standard_Integer anArgIter = 2;
+
+  Standard_Integer aNbCurFront = 0;
+  if (!Draw::ParseInteger(theArgVec[anArgIter++], aNbCurFront))
+  {
+    theDI << "Syntax error at '" << theArgVec[anArgIter - 1] << "'";
+    return 1;
+  }
+
+  Standard_Integer aNbPointConstraint = 0;
+  if (!Draw::ParseInteger(theArgVec[anArgIter++], aNbPointConstraint))
+  {
+    theDI << "Syntax error at '" << theArgVec[anArgIter - 1] <<"'";
+    return 1;
+  }
+
+  // optional initial surface
+  const TopoDS_Shape anInitFace = DBRep::GetExisting(theArgVec[anArgIter]);
+  if (!anInitFace.IsNull() && anInitFace.ShapeType() == TopAbs_FACE)
+  {
+    ++anArgIter;
+    const Handle(BRepAdaptor_Surface) aSurfAdaptor = new BRepAdaptor_Surface(TopoDS::Face(anInitFace));
+    Henri.LoadInitSurface(BRep_Tool::Surface(aSurfAdaptor->Face()));
+  }
+
+  const auto parseContinuity = [](const char* theStr, Standard_Integer& theCont) -> bool
+  {
+    const char* aStr = theStr;
+    if (LowerCase(*aStr) == 'g')
+      ++aStr;
+
+    return Draw::ParseInteger(aStr, theCont) && theCont >= -1 && theCont <= 2;
+  };
+
+  for (Standard_Integer anEdgeIter = 1; anEdgeIter <= aNbCurFront; ++anEdgeIter)
+  {
+    const TopoDS_Shape anEdge = DBRep::GetExisting(theArgVec[anArgIter++]);
+    if (anEdge.IsNull() || anEdge.ShapeType() != TopAbs_EDGE)
+    {
+      theDI << "Syntax error: '" << theArgVec[anArgIter - 1] << "' is not an Edge";
+      return 1;
+    }
+
+    Standard_Integer aConti = 0;
+    if (!parseContinuity(theArgVec[anArgIter++], aConti))
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter - 1] << "'";
+      return 1;
+    }
+
+    if ((aConti == 0) || (aConti == -1))
+    {
+      const Handle(BRepAdaptor_Curve)         aCurvAdaptor = new BRepAdaptor_Curve(TopoDS::Edge(anEdge));
+      const Handle(GeomPlate_CurveConstraint) aConstr      = new BRepFill_CurveConstraint(aCurvAdaptor, aConti);
+      Henri.Add(aConstr);
+      continue;
+    }
+
+    const TopoDS_Shape aFace = DBRep::GetExisting(theArgVec[anArgIter++]);
+    if (aFace.IsNull() || aFace.ShapeType() != TopAbs_FACE)
+    {
+      theDI << "Syntax error: '" << theArgVec[anArgIter - 1] << "' is not a Face";
+      return 1;
+    }
+
+    const Handle(BRepAdaptor_Surface)       aSurfAdaptor    = new BRepAdaptor_Surface(TopoDS::Face(aFace));
+    const Handle(BRepAdaptor_Curve2d)       aCurve2dAdaptor = new BRepAdaptor_Curve2d(TopoDS::Edge(anEdge), TopoDS::Face(aFace));
+    const Handle(Adaptor3d_CurveOnSurface)  aCurveOnSurf    = new Adaptor3d_CurveOnSurface(aCurve2dAdaptor, aSurfAdaptor);
+    const Handle(GeomPlate_CurveConstraint) aConstr         = new BRepFill_CurveConstraint(aCurveOnSurf, aConti);
+    Henri.Add(aConstr);
+  }
+
+  for (Standard_Integer aPntIter = 1; aPntIter <= aNbPointConstraint; ++aPntIter)
+  {
+    gp_Pnt aPnt;
+    if (DrawTrSurf::GetPoint(theArgVec[anArgIter], aPnt))
+    {
+      const Handle(GeomPlate_PointConstraint) PCont = new GeomPlate_PointConstraint(aPnt, 0);
+      Henri.Add(PCont);
+      ++anArgIter;
+      continue;
+    }
+
+    Standard_Real aUV[2] = {};
+    if (!Draw::ParseReal(theArgVec[anArgIter + 0], aUV[0])
+     || !Draw::ParseReal(theArgVec[anArgIter + 1], aUV[1]))
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
+    anArgIter += 2;
+
+    Standard_Integer aConti = 0;
+    if (!parseContinuity(theArgVec[anArgIter++], aConti))
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter - 1] << "'";
+      return 1;
+    }
+
+    const TopoDS_Shape aFace = DBRep::GetExisting(theArgVec[anArgIter++]);
+    if (aFace.IsNull() || aFace.ShapeType() != TopAbs_FACE)
+    {
+      theDI << "Syntax error: '" << theArgVec[anArgIter - 1] << "' is not a Face";
+      return 1;
+    }
+
+    const Handle(BRepAdaptor_Surface) aSurfAdaptor = new BRepAdaptor_Surface(TopoDS::Face(aFace));
+    const Handle(GeomPlate_PointConstraint) aPntConstr =
+      new GeomPlate_PointConstraint(aUV[0], aUV[1], BRep_Tool::Surface(aSurfAdaptor->Face()), aConti, 0.001, 0.001, 0.001);
+    Henri.Add(aPntConstr);
+  }
+
+  const char* aGErrVars[3] = {};
+  for (; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArg(theArgVec[anArgIter]);
+    anArg.LowerCase();
+    if ((anArgIter + 1 < theNbArgs) && (anArg == "-g0error" || anArg == "-g1error" || anArg == "-g2error"))
+    {
+      aGErrVars[int(anArg.Value(3)) -'0'] = theArgVec[++anArgIter];
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
+  }
+
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(theDI, 1);
   Henri.Perform(aProgress->Start());
   if (aProgress->UserBreak())
   {
-    di << "Error: UserBreak\n";
+    theDI << "Error: UserBreak\n";
     return 0;
   }
-  Standard_Integer nbcarreau=9;
-  Standard_Integer degmax=8;
-  Standard_Real seuil;
 
-  Handle(GeomPlate_Surface) gpPlate = Henri.Surface();
-  TColgp_SequenceOfXY S2d;
-  TColgp_SequenceOfXYZ S3d;
-  S2d.Clear();
-  S3d.Clear();
-  Henri.Disc2dContour(4,S2d);
-  Henri.Disc3dContour(4,0,S3d);
-  seuil = Max(0.0001,10*Henri.G0Error());
-  GeomPlate_PlateG0Criterion critere (S2d,S3d,seuil);
-  GeomPlate_MakeApprox Mapp(gpPlate,critere,0.0001,nbcarreau,degmax);
-  Handle (Geom_Surface) Surf (Mapp.Surface());
+  if (aGErrVars[0] != nullptr)
+    Draw::Set(aGErrVars[0], Henri.G0Error());
 
-  Standard_Real Umin, Umax, Vmin, Vmax;
-  
-  Henri.Surface()->Bounds( Umin, Umax, Vmin, Vmax);
-  
-  BRepBuilderAPI_MakeFace MF(Surf, Umin, Umax, Vmin, Vmax, Precision::Confusion());
-  
-  DBRep::Set(a[1],MF.Face());
+  if (aGErrVars[1] != nullptr)
+    Draw::Set(aGErrVars[1], Henri.G1Error());
+
+  if (aGErrVars[2] != nullptr)
+    Draw::Set(aGErrVars[2], Henri.G2Error());
+
+  theDI << " dist. max = " << Henri.G0Error() << " ; angle max = " << Henri.G1Error() << " ; diffcurv max = " << Henri.G2Error() << "\n";
+
+  const Standard_Integer nbcarreau = 9;
+  const Standard_Integer degmax = 8;
+
+  TColgp_SequenceOfXY aS2d;
+  TColgp_SequenceOfXYZ aS3d;
+  Henri.Disc2dContour(4, aS2d);
+  Henri.Disc3dContour(4, 0, aS3d);
+
+  const Standard_Real seuil = Max(0.0001, 10 * Henri.G0Error());
+  const GeomPlate_PlateG0Criterion critere(aS2d, aS3d, seuil);
+
+  const Handle(GeomPlate_Surface) aGPlate = Henri.Surface();
+  const GeomPlate_MakeApprox anApproxMaker(aGPlate, critere, 0.0001, nbcarreau, degmax);
+  const Handle(Geom_Surface) aSurf = anApproxMaker.Surface();
+
+  Standard_Real Umin = 0.0, Umax = 0.0, Vmin = 0.0, Vmax = 0.0;
+  aGPlate->Bounds(Umin, Umax, Vmin, Vmax);
+
+  BRepBuilderAPI_MakeFace MF(aSurf, Umin, Umax, Vmin, Vmax, Precision::Confusion());
+
+  DBRep::Set(theArgVec[1], MF.Face());
   return 0;
 }
-
 
 //////////////////////////////////////////////////////////////////////////////// 
 //  commande approxplate : resultat face sur surface approchee
@@ -692,11 +760,25 @@ void  BRepTest::FillingCommands(Draw_Interpretor& theCommands)
 		  plate,
 		  g) ;
 
-  theCommands.Add("gplate",
-		  "gplate result nbrcurfront nbrpntconst [SurfInit] [edge 0] [edge tang (1:G1;2:G2) surf]... [point] [u v tang (1:G1;2:G2) surf] ...",
-		  __FILE__,
-		  gplate,
-		  g) ;
+  theCommands.Add("gplate", R"(
+gplate result nbCurveConstraints nbPntConstraints [faceInit]
+       [[edge {-1,G0}] [edge       {G1,G2} surf] ...]
+       [[point       ] [u v  {-1,G0,G1,G2} surf] ...]
+       [-g0error varName] [-g1error varName] [-g2error varName]
+Computes surface usingGeomPlate_BuildPlateSurface algorithm.
+ result              output surface (Face)
+ nbCurveConstraints  number of curve constraints
+ nbPntConstraints    number of point constraints
+ faceInit            (optional) initial face to take UV-bounded surface from
+ 'edge {-1,G0}'      3d curve (Edge) constraint
+ 'edge {G1,G2} surf' 2d curve (Edge) constraint on a given surface (Face)
+ 'point'             3d point constraint (DRAW point)
+ 'u v GN surf'       2d point constraint on a given surface (Face)
+ {-1,G0,G1,G2}       constraint order (-1 means to skip deviation limits)
+ -g0error            variable name to put maximum G0Error
+ -g1error            variable name to put maximum G1Error
+ -g2error            variable name to put maximum G2Error
+)", __FILE__, gplate, g);
 
   theCommands.Add("approxplate",
 		  "approxplate result nbrpntoncurve nbrcurfront edge face tang (0:vif;1:tang) ... tol nmax degmax crit",
