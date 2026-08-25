@@ -37,8 +37,6 @@ void TopoDS_TShape::DumpJson (Standard_OStream& theOStream, Standard_Integer) co
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myFlags)
 
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, Free())
-
-  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, Free())
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, Locked())
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, Modified())
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, Checked())
