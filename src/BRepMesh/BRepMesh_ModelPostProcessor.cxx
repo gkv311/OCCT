@@ -82,6 +82,8 @@ namespace
     //! Commits all polygons on triangulations correspondent to the given edge.
     void commitPolygons(const IMeshData::IEdgeHandle& theDEdge) const
     {
+      const IMeshData::ListOfIPCurves anEmptyList;
+
       // Collect pcurves associated with the given edge on the specific surface.
       IMeshData::IDMapOfIFacePtrsListOfIPCurves aMapOfPCurves;
       for (Standard_Integer aPCurveIt = 0; aPCurveIt < theDEdge->PCurvesNb(); ++aPCurveIt)
@@ -95,13 +97,12 @@ namespace
           continue;
         }
 
-        if (!aMapOfPCurves.Contains(aDFacePtr))
-        {
-          aMapOfPCurves.Add(aDFacePtr, IMeshData::ListOfIPCurves());
-        }
-
-        IMeshData::ListOfIPCurves& aPCurves = aMapOfPCurves.ChangeFromKey(aDFacePtr);
-        aPCurves.Append(aPCurve);
+        const Standard_Integer     anIndex  = aMapOfPCurves.Add(aDFacePtr, anEmptyList);
+        IMeshData::ListOfIPCurves& aPCurves = aMapOfPCurves.ChangeFromIndex(anIndex);
+        if (aPCurve->GetOrientation() == TopAbs_REVERSED)
+          aPCurves.Append(aPCurve);
+        else
+          aPCurves.Prepend(aPCurve); // make sure to put forward polygon before reversed one
       }
 
       // Commit polygons related to separate face.
@@ -120,6 +121,7 @@ namespace
           const IMeshData::ListOfIPCurves& aPCurves = aPolygonIt.Value();
           if (aPCurves.Size() == 2)
           {
+            // make sure to put forward polygon before reversed one
             BRepMesh_ShapeTool::UpdateEdge(
               aEdge,
               collectPolygon(aPCurves.First(), theDEdge->GetDeflection()),
