@@ -1,12 +1,10 @@
-puts "TODO OCC30286 Linux: Error : The length of result shape is 302.44, expected 301.999"
-
 puts "==========================================="
 puts "OCC25813: regression in Hidden Line Removal"
 puts "==========================================="
 puts ""
 
 set viewname ""
-set length 301.999
+set length 302.444
 
 ptorus a 30 10
 
