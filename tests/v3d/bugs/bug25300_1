@@ -14,22 +14,22 @@ pload VISUALIZATION
 
 restore [locate_data_file bug25300_pencil.brep] aPencil
 
-set aSimpleIsoImg $imagedir/${casename}_iso.png
-set aIsoOnTrgImg $imagedir/${casename}_iso_on_triang.png
-
 vinit View1
 vclear
 vaxo
-vdisplay aPencil
-vviewparams -scale 9787.997 -proj -0.0115 -0.9998 0.0145
-vviewparams -up -0.0155 0.0147 0.9998 -at 0.0503 0 0
-vsetdispmode 1
+vviewparams -scale 60531.5 -proj -0.0116003 -0.999828 0.0145004 -up -0.0172401 0.0146992 0.999743 -at 0.0907094 -0.000975753 0.00528749
+vdisplay aPencil -dispMode 1
+vaspects aPencil -isoontriang off
 
-# shows that default isoline builder has problemas with proper
+# shows that default isoline builder has problems with proper
 # construction of isolines on top of the pencil
 vmoveto 200 200
-vdump $aSimpleIsoImg
-checkcolor 337 162 0 1 1
+vpoint p 154 142 -2d -nosel
+vdump $imagedir/${casename}_surf1.png
+
+verase p
+checkcolor 154 142 0 1 1
+vdump $imagedir/${casename}_surf2.png
 
 vmoveto 0 0
 
@@ -39,5 +39,6 @@ vaspects aPencil -isoontriang on
 # shows that isoline-on-triangulation builder constructs isos that
 # do not extend beyond the boundaries of shape's triangulation
 vmoveto 200 200
-vdump $aIsoOnTrgImg
-checkcolor 337 162 0 0 0
+checkcolor 154 142 0 0 0
+
+vdump $imagedir/${casename}.png
