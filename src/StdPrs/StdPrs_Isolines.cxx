@@ -405,36 +405,53 @@ void StdPrs_Isolines::addOnSurface (const Handle(BRepAdaptor_Surface)& theSurfac
     // Determine edge points for trimming uv hatch region.
     TColgp_SequenceOfPnt2d aTrimPoints;
     StdPrs_ToolRFace anEdgeTool (theSurface);
+
+    TopLoc_Location aFaceLoc, anEdgeLoc;
+    const Handle(Poly_Triangulation)& aTris = BRep_Tool::Triangulation(theSurface->Face(), aFaceLoc);
     for (anEdgeTool.Init(); anEdgeTool.More(); anEdgeTool.Next())
     {
       TopAbs_Orientation anOrientation = anEdgeTool.Orientation();
       const Adaptor2d_Curve2d* anEdgeCurve = &anEdgeTool.Value();
+      if (anEdgeCurve->GetType() != GeomAbs_Line && !aTris.IsNull() && aTris->HasUVNodes())
+      {
+        const Handle(Poly_PolygonOnTriangulation)& aPolyOnTri =
+          BRep_Tool::PolygonOnTriangulation(anEdgeTool.Edge(), aTris, anEdgeLoc);
+        if (!aPolyOnTri.IsNull())
+        {
+          const Standard_Integer aNbPoints = aPolyOnTri->NbNodes();
+          for (Standard_Integer aSegIter = 1; aSegIter < aNbPoints; ++aSegIter)
+          {
+            const Standard_Integer anInd1 = aPolyOnTri->Node(anOrientation == TopAbs_FORWARD ? aSegIter : aNbPoints - aSegIter + 1);
+            const Standard_Integer anInd2 = aPolyOnTri->Node(anOrientation == TopAbs_FORWARD ? aSegIter + 1 : aNbPoints - aSegIter);
+            const gp_Pnt2d aP1 = aTris->UVNode(anInd1);
+            const gp_Pnt2d aP2 = aTris->UVNode(anInd2);
+            aHatchingTolerance = Min(aP1.SquareDistance(aP2), aHatchingTolerance);
+            aTrimPoints.Append(aP1);
+            aTrimPoints.Append(aP2);
+          }
+          continue;
+        }
+      }
+
       if (anEdgeCurve->GetType() != GeomAbs_Line)
       {
         GCPnts_QuasiUniformDeflection aSampler (*anEdgeCurve, aSamplerDeflection);
         if (!aSampler.IsDone())
-        {
-#ifdef OCCT_DEBUG
-          std::cout << "Cannot evaluate curve on surface" << std::endl;
-#endif
           continue;
-        }
 
-        Standard_Integer aNumberOfPoints = aSampler.NbPoints();
-        if (aNumberOfPoints < 2)
+        const Standard_Integer aNbPoints = aSampler.NbPoints();
+        for (Standard_Integer aSegIter = 1; aSegIter < aNbPoints; ++aSegIter)
         {
-          continue;
-        }
+          const gp_Pnt aPnt1 = aSampler.Value(anOrientation == TopAbs_FORWARD ? aSegIter : aNbPoints - aSegIter + 1);
+          const gp_Pnt aPnt2 = aSampler.Value(anOrientation == TopAbs_FORWARD ? aSegIter + 1 : aNbPoints - aSegIter);
 
-        for (Standard_Integer anI = 1; anI < aNumberOfPoints; ++anI)
-        {
-          gp_Pnt2d aP1 (aSampler.Value (anI    ).X(), aSampler.Value (anI    ).Y());
-          gp_Pnt2d aP2 (aSampler.Value (anI + 1).X(), aSampler.Value (anI + 1).Y());
+          const gp_Pnt2d aP1 (aPnt1.X(), aPnt1.Y());
+          const gp_Pnt2d aP2 (aPnt2.X(), aPnt2.Y());
 
           aHatchingTolerance = Min (aP1.SquareDistance (aP2), aHatchingTolerance);
 
-          aTrimPoints.Append (anOrientation == TopAbs_FORWARD ? aP1 : aP2);
-          aTrimPoints.Append (anOrientation == TopAbs_FORWARD ? aP2 : aP1);
+          aTrimPoints.Append (aP1);
+          aTrimPoints.Append (aP2);
         }
       }
       else
