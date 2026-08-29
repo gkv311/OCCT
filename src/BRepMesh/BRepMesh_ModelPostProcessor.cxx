@@ -65,15 +65,16 @@ namespace
     {
       const IMeshData::ICurveHandle& aCurve = theDEdge->GetCurve();
 
-      TColgp_Array1OfPnt   aNodes  (1, aCurve->ParametersNb());
-      TColStd_Array1OfReal aUVNodes(1, aCurve->ParametersNb());
+      Handle(Poly_Polygon3D) aPoly3D = new Poly_Polygon3D(aCurve->ParametersNb(), true);
+
+      TColgp_Array1OfPnt&   aNodes   = aPoly3D->ChangeNodes();
+      TColStd_Array1OfReal& aUVNodes = aPoly3D->ChangeParameters();
       for (Standard_Integer i = 1; i <= aCurve->ParametersNb(); ++i)
       {
         aNodes  (i) = aCurve->GetPoint    (i - 1);
         aUVNodes(i) = aCurve->GetParameter(i - 1);
       }
 
-      Handle(Poly_Polygon3D) aPoly3D = new Poly_Polygon3D(aNodes, aUVNodes);
       aPoly3D->Deflection(theDEdge->GetDeflection());
 
       BRepMesh_ShapeTool::UpdateEdge(theDEdge->GetEdge(), aPoly3D);
@@ -144,17 +145,13 @@ namespace
       const IMeshData::IPCurveHandle& thePCurve,
       const Standard_Real             theDeflection) const
     {
-      TColStd_Array1OfInteger aNodes (1, thePCurve->ParametersNb());
-      TColStd_Array1OfReal    aParams(1, thePCurve->ParametersNb());
+      Handle(Poly_PolygonOnTriangulation) aPolygon =
+        new Poly_PolygonOnTriangulation(thePCurve->ParametersNb(), true);
       for (Standard_Integer i = 1; i <= thePCurve->ParametersNb(); ++i)
       {
-        aNodes (i) = thePCurve->GetIndex    (i - 1);
-        aParams(i) = thePCurve->GetParameter(i - 1);
+        aPolygon->SetNode     (i, thePCurve->GetIndex(i - 1));
+        aPolygon->SetParameter(i, thePCurve->GetParameter(i - 1));
       }
-
-      Handle(Poly_PolygonOnTriangulation) aPolygon = 
-        new Poly_PolygonOnTriangulation(aNodes, aParams);
-
       aPolygon->Deflection(theDeflection);
       return aPolygon;
     }
