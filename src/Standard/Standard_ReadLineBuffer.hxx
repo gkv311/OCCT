@@ -53,7 +53,7 @@ public:
   }
 
   //! Read next line from the stream.
-  //! @return pointer to the line or NULL on error / end of reading buffer
+  //! @return pointer to the line (null-terminated C string) or NULL on error / end of reading buffer
   //!         (in case of NULL result theStream should be checked externally to identify the presence of errors).
   //!          Empty lines will be returned also with zero length.
   //! @param theStream [inout] - the stream to read from.
@@ -67,7 +67,7 @@ public:
   }
 
   //! Read next line from the stream.
-  //! @return pointer to the line or NULL on error / end of reading buffer
+  //! @return pointer to the line (null-terminated C string) or NULL on error / end of reading buffer
   //!         (in case of NULL result theStream should be checked externally to identify the presence of errors).
   //!          Empty lines will be returned also with zero length.
   //! @param theStream [inout] - the stream to read from.
@@ -107,6 +107,9 @@ public:
           if (myUseReadBufferLastStr)
           {
             theLineLength = myReadBufferLastStr.size();
+            if (myReadBufferLastStr.empty() || myReadBufferLastStr.back() != '\0')
+              myReadBufferLastStr.push_back('\0'); // ensure line is null-terminated
+
             aResultLine = &myReadBufferLastStr.front();
             myUseReadBufferLastStr = false;
           }
