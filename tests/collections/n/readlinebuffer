@@ -1,0 +1,3 @@
+puts "Check Standard_ReadLineBuffer functionality"
+
+QAReadLineBuffer

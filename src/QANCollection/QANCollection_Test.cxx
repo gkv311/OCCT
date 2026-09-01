@@ -24,10 +24,16 @@
 #include <OSD_Path.hxx>
 #include <Precision.hxx>
 #include <Standard_Overflow.hxx>
+#include <Standard_ReadLineBuffer.hxx>
 #include <TColStd_PackedMapOfInteger.hxx>
 
 #include <NCollection_Vector.hxx>
 #include <NCollection_IncAllocator.hxx>
+
+// Auxiliary macro to check and report status.
+#define QA_CHECK(di,ok,what) \
+  if (ok) di << "Checking " << what << ": OK\n";\
+  else    di << "Checking " << what << ": Error\n"
 
 #define ItemType gp_Pnt
 #define Key1Type Standard_Real
@@ -1464,6 +1470,27 @@ static Standard_Integer QAOsdPathType (Draw_Interpretor& theDI, Standard_Integer
   return 0;
 }
 
+// Unit tests for Standard_ReadLineBuffer.
+static int QAReadLineBuffer(Draw_Interpretor& theDI, int theNbArgs, const char** )
+{
+  if (theNbArgs != 1)
+    return 1;
+
+  // check returned line buffer is NULL-terminated in case of a very short initial buffer size
+  {
+    const std::string       aContent = "unterminated";
+    std::istringstream      anInput(aContent);
+    Standard_ReadLineBuffer aBuffer(4); // allocate too small line buffer
+
+    size_t      aLineLen = 0;
+    const char* aLine    = aBuffer.ReadLine(anInput, aLineLen);
+    QA_CHECK(theDI, aLineLen == aContent.size(), "expected line length");
+    QA_CHECK(theDI, aLine[aLineLen] == '\0', "line is null-terminated");
+    QA_CHECK(theDI, ::strncmp(aLine, aContent.c_str(), aLineLen) == 0, "line content is correct");
+  }
+  return 0;
+}
+
 //! Print file path part deduced from path string.
 static Standard_Integer QAOsdPathPart (Draw_Interpretor& theDI, Standard_Integer theNbArgs, const char** theArgVec)
 {
@@ -1589,6 +1616,9 @@ void QANCollection::CommandsTest(Draw_Interpretor& theCommands) {
   theCommands.Add("QANColTestVector",         "QANColTestVector",         __FILE__, QANColTestVector,         group);  
   theCommands.Add("QANColTestArrayMove",      "QANColTestArrayMove (is expected to give error)", __FILE__, QANColTestArrayMove, group);  
   theCommands.Add("QANColTestVec4",           "QANColTestVec4 test Vec4 implementation", __FILE__, QANColTestVec4, group);
+  theCommands.Add("QAReadLineBuffer",
+                  "QAReadLineBuffer test Standard_ReadLineBuffer implementation",
+                  __FILE__, QAReadLineBuffer, group);
   theCommands.Add("QATestAtof", "QATestAtof [nbvalues [nbdigits [min [max]]]]", __FILE__, QATestAtof, group);
   theCommands.Add("QAOsdPathType",  "QAOsdPathType path : Print file path flags deduced from path string", __FILE__, QAOsdPathType, group);
   theCommands.Add("QAOsdPathPart",
