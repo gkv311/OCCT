@@ -1,12 +1,7 @@
-puts "TODO OCC25206 ALL: ERROR: OCC25206 is reproduced."
-
 puts "========"
-puts "OCC25206"
+puts "OCC25206: Fillet creates edge with C0 continuity"
 puts "========"
 puts ""
-##########################################
-# Fillet creates edge with C0 continuity
-##########################################
 
 readbrep [locate_data_file bug25206_lampe-1-draw-Fusion.brep] Fusion
 
