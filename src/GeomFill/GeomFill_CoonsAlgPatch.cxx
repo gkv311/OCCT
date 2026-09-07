@@ -95,25 +95,24 @@ void GeomFill_CoonsAlgPatch::Func(Handle(Law_Function)& f1,
 //purpose  : 
 //=======================================================================
 
-//gp_Pnt GeomFill_CoonsAlgPatch::Value(const Standard_Real U, 
-gp_Pnt GeomFill_CoonsAlgPatch::Value(const Standard_Real , 
-				     const Standard_Real V) const 
+gp_Pnt GeomFill_CoonsAlgPatch::Value(const Standard_Real U, const Standard_Real V) const
 {
   Standard_Real a0,a1,a2,a3;
   a0 = a[0]->Value(V);
-  a1 = a[1]->Value(V);
+  a1 = a[1]->Value(U);
   a2 = 1. - a0;
   a3 = 1. - a1;
   gp_XYZ cor,cortemp;
 
-  cor = bound[0]->Value(V).XYZ();
+  // bound[0] and bound[2] run along U
+  cor = bound[0]->Value(U).XYZ();
   cor.Multiply(a0);
 
   cortemp = bound[1]->Value(V).XYZ();
   cortemp.Multiply(a1);
   cor.Add(cortemp);
 
-  cortemp = bound[2]->Value(V).XYZ();
+  cortemp = bound[2]->Value(U).XYZ();
   cortemp.Multiply(a2);
   cor.Add(cortemp);
 
