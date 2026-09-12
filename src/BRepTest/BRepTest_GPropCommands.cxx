@@ -65,6 +65,12 @@ Standard_Integer props(Draw_Interpretor& di, Standard_Integer n, const char** a)
     SkipShared = Standard_True;
     --n;
   }
+  Standard_Boolean isOnlyMass = Standard_False;
+  if (n >= 2 && strcmp(a[n-1], "-onlymass") == 0)
+  {
+    isOnlyMass = Standard_True;
+    --n;
+  }
 
   TopoDS_Shape S = DBRep::Get(a[1]);
   if (S.IsNull()) return 0;
@@ -108,6 +114,21 @@ Standard_Integer props(Draw_Interpretor& di, Standard_Integer n, const char** a)
   GProp_PrincipalProps Pr = G.PrincipalProperties();
   Standard_Real Ix,Iy,Iz;
   Pr.Moments(Ix,Iy,Iz);
+
+  if (isOnlyMass)
+  {
+    if (!isFullMode)
+    {
+      Standard_SStream aSStream1;
+      aSStream1 << std::setw(15) << G.Mass();
+      di << aSStream1;
+    }
+    else
+    {
+      di << G.Mass();
+    }
+    return 0;
+  }
 
   if (!isFullMode)
   {

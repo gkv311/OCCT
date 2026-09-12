@@ -1,0 +1,44 @@
+puts "================================"
+puts "lpropsdiff/spropsdiff/vpropsdiff - command comparing subshapes of two shapes by their surface area"
+puts "================================"
+
+pload XDE MODELING VISUALIZATION
+
+# create a test box
+box b1 100 200 300
+
+# make a test box with fillet
+copy b1 b2
+explode b2 E
+blend b2 b2 10 b2_10
+
+# compare a pair of boxes with and without fillets
+lpropsdiff l1 l2 b1 b2
+spropsdiff s1 s2 b1 b2
+vpropsdiff v1 v2 b1 b2
+bnddiff  bn1 bn2 b1 b2
+
+# check counters to match reference values
+checknbshapes l1 -edge 5
+checknbshapes l2 -edge 8
+checknbshapes s1 -face 4
+checknbshapes s2 -face 5
+
+# make screenshots
+vinit View1
+
+vclear
+vdisplay b1 -dispMode 1
+vaspects b1 -faceBoundaryDraw 0 -transparency 0.5
+vdisplay l1 -dispMode 0
+vaspects l1 -color RED
+vfit
+vdump $imagedir/${casename}_l1.png
+
+vclear
+vdisplay b2 -dispMode 1
+vaspects b2 -faceBoundaryDraw 0 -transparency 0.5
+vdisplay l2 -dispMode 0
+vaspects l2 -color RED
+vfit
+vdump $imagedir/${casename}_l2.png
