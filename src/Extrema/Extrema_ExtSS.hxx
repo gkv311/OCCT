@@ -68,6 +68,8 @@ public:
   Standard_EXPORT Standard_Real SquareDistance (const Standard_Integer N) const;
   
   //! Returns the point of the Nth resulting distance.
+  //! @throws StdFail_NotDone if IsDone() returns FALSE
+  //! @throws Standard_OutOfRange if @p N is not within [1, NbExt()] or if two surfaces are parallel.
   Standard_EXPORT void Points (const Standard_Integer N, Extrema_POnSurf& P1, Extrema_POnSurf& P2) const;
 
 private:
