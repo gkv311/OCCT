@@ -1204,3 +1204,292 @@ proc checkMultilineStrings {tS1 tS2} {
     puts "Error. Line counts are different: $aC1 != $aC2."
   }
 }
+
+# Creates a Tcl array where the key is a combination of mass property and centroid
+# and the value is a list of subshape numbers from the shape that have such props key.
+# The floating numbers are compared with precision given by theNDigit precision.
+proc _mapSubshapeProps {theMap theShape theFindType thePropsCmd theNDigit} {
+  upvar $theShape sh $theMap aMap
+  array unset aMap
+  array set   aMap {}
+
+  set aDLogBak  [dlog  status]
+  set aDEchoBak [decho status]
+  decho off
+  dlog  off
+  set wasAutoDisp [expr [autodisplay]==0]
+  autodisplay 0
+
+  set n [llength [explode sh $theFindType]]
+  for {set i 1} {$i <= $n} {incr i} {
+    set aMass 0
+    if {[string tolower $theFindType] == "v"} {
+      mkpoint p sh_$i
+      coord p gx gy gz
+    } else {
+      set aMass [$thePropsCmd sh_$i 1e-6 gx gy gz -onlymass -full]
+    }
+
+    set aKey [format "%.${theNDigit}g %.${theNDigit}g %.${theNDigit}g %.${theNDigit}g" [dval gx] [dval gy] [dval gz] $aMass]
+    if ![info exists aMap($aKey)] {
+      set aMap($aKey) $i
+    } else {
+      lappend aMap($aKey) $i
+    }
+  }
+
+  autodisplay $wasAutoDisp
+  decho $aDEchoBak
+  dlog  $aDLogBak
+}
+
+# Creates a Tcl array where the key is a bounding box
+# and the value is a list of subshape numbers from the shape that have such props key.
+# The floating numbers are compared with precision given by theNDigit precision.
+proc _mapSubshapeBox {theMap theShape theFindType theNDigit} {
+  upvar $theShape sh $theMap aMap
+  array unset aMap
+  array set   aMap {}
+
+  set aDLogBak  [dlog  status]
+  set aDEchoBak [decho status]
+  decho off
+  dlog  off
+  set wasAutoDisp [expr [autodisplay]==0]
+  autodisplay 0
+
+  set n [llength [explode sh $theFindType]]
+  for {set i 1} {$i <= $n} {incr i} {
+    set aBnd [bounding sh_$i -noDraw -noTriangulation -optimal]
+    set aKey [format "%.${theNDigit}g %.${theNDigit}g %.${theNDigit}g %.${theNDigit}g %.${theNDigit}g %.${theNDigit}g" \
+                     [lindex $aBnd 0] [lindex $aBnd 1] [lindex $aBnd 2] [lindex $aBnd 3] [lindex $aBnd 4] [lindex $aBnd 5]]
+    if ![info exists aMap($aKey)] {
+      set aMap($aKey) $i
+    } else {
+      lappend aMap($aKey) $i
+    }
+  }
+
+  autodisplay $wasAutoDisp
+  decho $aDEchoBak
+  dlog  $aDLogBak
+}
+
+proc _compareIntOrList {theA theB} {
+  set i1 [lindex $theA 0]
+  set i2 [lindex $theB 0]
+  return [expr {$i1 < $i2} ? -1 : {$i1 > $i2} ? 1 : 0]
+}
+
+# Compares two maps computed by _mapSubshapeProps and returns the list of subshape numbers
+# of the first map which keys are absent in the second map.
+proc _compareSubshapeMaps {theMap1 theMap2} {
+  upvar $theMap1 aMap1 $theMap2 aMap2
+  set aRes {}
+  foreach aKeyIter [array names aMap1] {
+    if ![info exists aMap2($aKeyIter)] {
+      lappend aRes $aMap1($aKeyIter)
+    }
+  }
+  return [lsort -command _compareIntOrList $aRes]
+}
+
+# Compares two maps computed by _mapSubshapeProps and returns the list of pairs of numbers of matched subshapes.
+proc _sameSubshapeMaps {theMap1 theMap2} {
+  upvar $theMap1 aMap1 $theMap2 aMap2
+  set aRes {}
+  foreach aKeyIter [array names aMap1] {
+    if [info exists aMap2($aKeyIter)] {
+      lappend aRes [list $aMap1($aKeyIter) $aMap2($aKeyIter)]
+    }
+  }
+  return [lsort -command _compareIntOrList $aRes]
+}
+
+proc _propsdiff {theRes1 theRes2 theShape1 theShape2 theFindType thePropsCmd theNDigit} {
+  upvar $theShape1 sh1 $theShape2 sh2
+  upvar $theRes1   r1  $theRes2   r2
+  if {$thePropsCmd == "bounding"} {
+    _mapSubshapeBox   aMap1 sh1 $theFindType $theNDigit
+    _mapSubshapeBox   aMap2 sh2 $theFindType $theNDigit
+  } else {
+    _mapSubshapeProps aMap1 sh1 $theFindType $thePropsCmd $theNDigit
+    _mapSubshapeProps aMap2 sh2 $theFindType $thePropsCmd $theNDigit
+  }
+
+  set wasAutoDisp [expr [autodisplay]==0]
+  autodisplay 0
+  explode sh1 $theFindType
+  shape r1 C
+  set   r1len 0
+  foreach i [_compareSubshapeMaps aMap1 aMap2] {
+    if {[llength $i] == 1} {
+      add sh1_${i} r1
+      incr r1len
+    } else {
+      shape rr1 C
+      foreach ii $i {
+        add sh1_${ii} rr1
+        incr r1len
+      }
+      add rr1 r1
+    }
+  }
+
+  explode sh2 $theFindType
+  shape r2 C
+  set   r2len 0
+  foreach i [_compareSubshapeMaps aMap2 aMap1] {
+    if {[llength $i] == 1} {
+      add sh2_${i} r2
+      incr r2len
+    } else {
+      shape rr2 C
+      foreach ii $i {
+        add sh2_${ii} rr2
+        incr r2len
+      }
+      add rr2 r2
+    }
+  }
+
+  autodisplay $wasAutoDisp
+  display r1 r2
+  return "Number of different subshapes: $r1len $r2len"
+}
+
+help lpropsdiff {
+  Compares two shapes and for each of them create a compound of subshapes
+  of the given findType absent in another shape.
+  Subshape is considered absent if another shape does not have a subshape
+  of this type having the same key string composed of its wire length and centroid.
+  The floating numbers are compared with precision given by ndigit precision.
+
+  Use: lpropsdiff res1 res2 shape1 shape2 [findType={So|Sh|F|W|E}]=E [ndigit]=7
+}
+proc lpropsdiff {res1 res2 shape1 shape2 {findType E} {ndigit 7}} {
+  upvar $shape1 sh1 $shape2 sh2
+  upvar $res1   r1  $res2   r2
+  _propsdiff r1 r2 sh1 sh2 $findType lprops $ndigit
+}
+
+help spropsdiff {
+  Compares two shapes and for each of them create a compound of subshape
+  of the given findType absent in another shape.
+  Subshape is considered absent if another shape does not have a subshape
+  of this type having the same key string composed of its surface area and centroid.
+  The floating numbers are compared with precision given by ndigit precision.
+
+  Use: spropsdiff res1 res2 shape1 shape2 [findType={So|Sh|F}]=F [ndigit]=7
+}
+proc spropsdiff {res1 res2 shape1 shape2 {findType F} {ndigit 7}} {
+  upvar $shape1 sh1 $shape2 sh2
+  upvar $res1   r1  $res2   r2
+  _propsdiff r1 r2 sh1 sh2 $findType sprops $ndigit
+}
+
+help vpropsdiff {
+  Compares two shapes and for each of them create a compound of subshapes
+  of the given findType absent in another shape.
+  Subshape is considered absent if another shape does not have a subshape
+  of this type having the same key string composed of its volume and centroid.
+  The floating numbers are compared with precision given by ndigit precision.
+
+  Use: vpropsdiff res1 res2 shape1 shape2 [findType={So|Sh}]=So [ndigit]=7
+}
+proc vpropsdiff {res1 res2 shape1 shape2 {findType So} {ndigit 7}} {
+    upvar $shape1 sh1 $shape2 sh2
+    upvar $res1   r1  $res2   r2
+    _propsdiff r1 r2 sh1 sh2 $findType vprops $ndigit
+}
+
+help bnddiff {
+  Compares two shapes and for each of them create a compound of subshapes
+  of the given findType absent in another shape.
+  Subshape is considered absent if another shape does not have a subshape
+  of this type having the same bounding box.
+  The floating numbers are compared with precision given by ndigit precision.
+
+  Use: bnddiff res1 res2 shape1 shape2 [findType={So|Sh|F|W|E|V}]=F [ndigit]=7
+}
+proc bnddiff {res1 res2 shape1 shape2 {findType F} {ndigit 7}} {
+  upvar $shape1 sh1 $shape2 sh2
+  upvar $res1   r1  $res2   r2
+  _propsdiff r1 r2 sh1 sh2 $findType bounding $ndigit
+}
+
+help toldiff {
+  Compares tolerances of each pair of matched subshapes of the given findType.
+  Two subshapes are considered matched if they have the same key string composed
+  of mass property and centroid.
+  The floating numbers are compared with precision given by ndigit precision.
+  The different by tolerance pairs of subshapes are put into the result compound.
+
+  Use: toldiff res shape1 shape2 [findType={So|Sh|F|W|E|V}]=F [ndigit]=7
+}
+proc toldiff {res shape1 shape2 {findType F} {ndigit 7}} {
+  upvar $shape1 sh1 $shape2 sh2
+  upvar $res r
+
+  set propsCmd ""
+  switch [string tolower $findType] \
+    so      {set propsCmd "vprops"} \
+    sh      {set propsCmd "sprops"} \
+    f       {set propsCmd "sprops"} \
+    w       {set propsCmd "lprops"} \
+    e       {set propsCmd "lprops"} \
+    default {set propsCmd ""}
+
+  _mapSubshapeProps map1 sh1 $findType $propsCmd $ndigit
+  _mapSubshapeProps map2 sh2 $findType $propsCmd $ndigit
+
+  set aDLogBak  [dlog  status]
+  set aDEchoBak [decho status]
+  decho off
+  dlog  off
+  set wasAutoDisp [expr [autodisplay]==0]
+  autodisplay 0
+
+  explode sh1 $findType
+  explode sh2 $findType
+  shape r C
+  set pairnum 0
+  foreach pair [_sameSubshapeMaps map1 map2] {
+    set num1 [lindex $pair 0]
+    set num2 [lindex $pair 1]
+    if {[llength $num1] == 1} {
+      copy sh1_$num1 ss1
+    } else {
+      shape ss1 C
+      foreach nn $num1 {
+        add sh1_$nn ss1
+      }
+    }
+    if {[llength $num2] == 1} {
+      copy sh2_$num2 ss2
+    } else {
+      shape ss2 C
+      foreach nn $num2 {
+        add sh2_$nn ss2
+      }
+    }
+    regexp {Tolerance MAX=([0-9e.+-]+)} [tolerance ss1] str tol1
+    regexp {Tolerance MAX=([0-9e.+-]+)} [tolerance ss2] str tol2
+    set tol1 [format "%.${ndigit}g" $tol1]
+    set tol2 [format "%.${ndigit}g" $tol2]
+    if {$tol1 != $tol2} {
+      shape shpair C
+      add ss1 shpair
+      add ss2 shpair
+      add shpair r
+      incr pairnum
+    }
+  }
+
+  autodisplay $wasAutoDisp
+  decho $aDEchoBak
+  dlog  $aDLogBak
+
+  display r
+  return "Number of pairs of subshapes with different tolerance: $pairnum"
+}

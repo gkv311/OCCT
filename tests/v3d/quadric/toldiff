@@ -1,0 +1,34 @@
+puts "================================"
+puts "toldiff - command comparing subshapes of two shapes by their tolerances"
+puts "================================"
+
+pload XDE MODELING VISUALIZATION
+
+# read test model
+testreadiges [locate_data_file bearing.iges] s1
+
+# create a sewn copy
+copy s1 s2
+sewing s2 1e-7 s2
+
+# compare tolerances of sewn model with original one
+toldiff tf s1 s2
+toldiff te s1 s2 E
+toldiff tv s1 s2 V
+
+# check counters to match reference values
+checknbshapes tf -face 220
+checknbshapes te -edge 519
+checknbshapes tv -vertex 70
+
+# make a screenshot
+vinit View1
+vdisplay s2 -dispMode 1
+vaspects s2 -color GRAY
+vfit
+vdisplay tf tv te -dispMode 1
+vaspects tf -color ORANGE
+vaspects te -color RED
+vaspects tv -color RED -markerSize 3
+
+vdump $imagedir/${casename}.png
