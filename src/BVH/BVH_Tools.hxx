@@ -248,67 +248,118 @@ public: //! @name Point-Triangle Square distance
 public: //! @name Ray-Box Intersection
 
   //! Computes hit time of ray-box intersection
-  static Standard_Boolean RayBoxIntersection (const BVH_Ray<T, N>& theRay,
-                                              const BVH_Box<T, N>& theBox,
-                                              T& theTimeEnter,
-                                              T& theTimeLeave)
+  static bool RayBoxIntersection (const BVH_Ray<T, N>& theRay,
+                                  const BVH_Box<T, N>& theBox,
+                                  T& theTimeEnter,
+                                  T& theTimeLeave)
   {
-    if (!theBox.IsValid())
-    {
-      return Standard_False;
-    }
-    return RayBoxIntersection (theRay, theBox.CornerMin(), theBox.CornerMax(), theTimeEnter, theTimeLeave);
+    return theBox.IsValid()
+        && RayBoxIntersection (theRay, theBox.CornerMin(), theBox.CornerMax(), theTimeEnter, theTimeLeave);
   }
 
   //! Computes hit time of ray-box intersection
-  static Standard_Boolean RayBoxIntersection (const BVH_Ray<T, N>& theRay,
-                                              const BVH_VecNt& theBoxCMin,
-                                              const BVH_VecNt& theBoxCMax,
-                                              T& theTimeEnter,
-                                              T& theTimeLeave)
+  static bool RayBoxIntersection (const BVH_Ray<T, N>& theRay,
+                                  const BVH_VecNt& theBoxCMin,
+                                  const BVH_VecNt& theBoxCMax,
+                                  T& theTimeEnter,
+                                  T& theTimeLeave)
   {
     return RayBoxIntersection (theRay.Origin, theRay.Direct,
                                theBoxCMin, theBoxCMax, theTimeEnter, theTimeLeave);
   }
 
   //! Computes hit time of ray-box intersection
-  static Standard_Boolean RayBoxIntersection (const BVH_VecNt& theRayOrigin,
-                                              const BVH_VecNt& theRayDirection,
-                                              const BVH_Box<T, N>& theBox,
-                                              T& theTimeEnter,
-                                              T& theTimeLeave)
+  static bool RayBoxIntersection (const BVH_VecNt& theRayOrigin,
+                                  const BVH_VecNt& theRayDirection,
+                                  const BVH_Box<T, N>& theBox,
+                                  T& theTimeEnter,
+                                  T& theTimeLeave)
   {
-    if (!theBox.IsValid())
-    {
-      return Standard_False;
-    }
-    return RayBoxIntersection (theRayOrigin, theRayDirection,
+    return theBox.IsValid()
+        && RayBoxIntersection (theRayOrigin, theRayDirection,
                                theBox.CornerMin(), theBox.CornerMax(),
                                theTimeEnter, theTimeLeave);
   }
 
   //! Computes hit time of ray-box intersection
-  static Standard_Boolean RayBoxIntersection (const BVH_VecNt& theRayOrigin,
-                                              const BVH_VecNt& theRayDirection,
-                                              const BVH_VecNt& theBoxCMin,
-                                              const BVH_VecNt& theBoxCMax,
-                                              T& theTimeEnter,
-                                              T& theTimeLeave)
+  static bool RayBoxIntersection (const BVH_VecNt& theRayOrigin,
+                                  const BVH_VecNt& theRayDirection,
+                                  const BVH_VecNt& theBoxCMin,
+                                  const BVH_VecNt& theBoxCMax,
+                                  T& theTimeEnter,
+                                  T& theTimeLeave)
+  {
+    T aTIn, aTOut;
+    if (LineBoxIntersection(theRayOrigin, theRayDirection,
+                            theBoxCMin, theBoxCMax,
+                            aTIn, aTOut)
+     && aTOut >= 0)
+    {
+      theTimeEnter = aTIn;
+      theTimeLeave = aTOut;
+      return true;
+    }
+    return false;
+  }
+
+public: //! @name Line-Box Intersection
+
+  //! Computes hit time of Line-box intersection
+  static bool LineBoxIntersection (const BVH_Ray<T, N>& theLine,
+                                   const BVH_Box<T, N>& theBox,
+                                   T& theTimeEnter,
+                                   T& theTimeLeave)
+  {
+    return theBox.IsValid()
+        && LineBoxIntersection (theLine, theBox.CornerMin(), theBox.CornerMax(), theTimeEnter, theTimeLeave);
+  }
+
+  //! Computes hit time of line-box intersection
+  static bool LineBoxIntersection (const BVH_Ray<T, N>& theLine,
+                                   const BVH_VecNt& theBoxCMin,
+                                   const BVH_VecNt& theBoxCMax,
+                                   T& theTimeEnter,
+                                   T& theTimeLeave)
+  {
+    return LineBoxIntersection (theLine.Origin, theLine.Direct,
+                                theBoxCMin, theBoxCMax, theTimeEnter, theTimeLeave);
+  }
+
+  //! Computes hit time of line-box intersection
+  static bool LineBoxIntersection (const BVH_VecNt& theLineOrigin,
+                                   const BVH_VecNt& theLineDirection,
+                                   const BVH_Box<T, N>& theBox,
+                                   T& theTimeEnter,
+                                   T& theTimeLeave)
+  {
+    return theBox.IsValid()
+        && LineBoxIntersection (theLineOrigin, theLineDirection,
+                                theBox.CornerMin(), theBox.CornerMax(),
+                                theTimeEnter, theTimeLeave);
+  }
+
+  //! Computes hit time of line-box intersection
+  static bool LineBoxIntersection (const BVH_VecNt& theLineOrigin,
+                                   const BVH_VecNt& theLineDirection,
+                                   const BVH_VecNt& theBoxCMin,
+                                   const BVH_VecNt& theBoxCMax,
+                                   T& theTimeEnter,
+                                   T& theTimeLeave)
   {
     BVH_VecNt aNodeMin, aNodeMax;
     for (int i = 0; i < N; ++i)
     {
-      if (theRayDirection[i] == 0)
+      if (theLineDirection[i] == 0)
       {
-        aNodeMin[i] = (theBoxCMin[i] - theRayOrigin[i]) <= 0 ?
-                       (std::numeric_limits<T>::min)() : (std::numeric_limits<T>::max)();
-        aNodeMax[i] = (theBoxCMax[i] - theRayOrigin[i]) < 0 ?
-                       (std::numeric_limits<T>::min)() : (std::numeric_limits<T>::max)();
+        aNodeMin[i] = (theBoxCMin[i] - theLineOrigin[i]) <= 0 ?
+                       -(std::numeric_limits<T>::max)() : (std::numeric_limits<T>::max)();
+        aNodeMax[i] = (theBoxCMax[i] - theLineOrigin[i]) < 0 ?
+                       -(std::numeric_limits<T>::max)() : (std::numeric_limits<T>::max)();
       }
       else
       {
-        aNodeMin[i] = (theBoxCMin[i] - theRayOrigin[i]) / theRayDirection[i];
-        aNodeMax[i] = (theBoxCMax[i] - theRayOrigin[i]) / theRayDirection[i];
+        aNodeMin[i] = (theBoxCMin[i] - theLineOrigin[i]) / theLineDirection[i];
+        aNodeMax[i] = (theBoxCMax[i] - theLineOrigin[i]) / theLineDirection[i];
       }
     }
 
@@ -321,15 +372,14 @@ public: //! @name Ray-Box Intersection
 
     const T aTimeEnter = aTimeMin.maxComp();
     const T aTimeLeave = aTimeMax.minComp();
-
-    Standard_Boolean hasIntersection = aTimeEnter <= aTimeLeave && aTimeLeave >= 0;
-    if (hasIntersection)
+    if (aTimeEnter <= aTimeLeave)
     {
       theTimeEnter = aTimeEnter;
       theTimeLeave = aTimeLeave;
+      return true;
     }
 
-    return hasIntersection;
+    return false;
   }
 };
 
