@@ -1458,11 +1458,14 @@ bool OpenGl_GlFunctions::debugPrintError (const char* theName)
 // =======================================================================
 void OpenGl_GlFunctions::readGlVersion (Standard_Integer& theGlVerMajor,
                                         Standard_Integer& theGlVerMinor,
+                                        TCollection_AsciiString& theVendor,
                                         Standard_Boolean theToCheckVer3)
 {
   // reset values
   theGlVerMajor = 0;
   theGlVerMinor = 0;
+  const char* aVendor = (const char* )::glGetString(GL_VENDOR);
+  theVendor = aVendor != nullptr ? aVendor : "";
 
   bool toCheckVer3 = theToCheckVer3;
 #if defined(__EMSCRIPTEN__)
