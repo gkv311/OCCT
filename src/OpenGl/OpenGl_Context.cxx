@@ -1095,7 +1095,8 @@ bool OpenGl_Context::ResetErrors (const bool theToPrintErrors)
 void OpenGl_Context::ReadGlVersion (Standard_Integer& theGlVerMajor,
                                     Standard_Integer& theGlVerMinor)
 {
-  OpenGl_GlFunctions::readGlVersion (theGlVerMajor, theGlVerMinor);
+  TCollection_AsciiString aVendor;
+  OpenGl_GlFunctions::readGlVersion (theGlVerMajor, theGlVerMinor, aVendor);
 }
 
 static Standard_CString THE_DBGMSG_UNKNOWN = "UNKNOWN";
@@ -1268,8 +1269,21 @@ void OpenGl_Context::init (const Standard_Boolean theIsCoreProfile)
   myMaxColorAttachments = 1;
   myMaxLineWidth = 1;
   myDefaultVao = 0;
-  OpenGl_GlFunctions::readGlVersion (myGlVerMajor, myGlVerMinor);
+
+  OpenGl_GlFunctions::readGlVersion (myGlVerMajor, myGlVerMinor, myVendor);
   mySupportedFormats->Clear();
+  myVendor.LowerCase();
+  if (myVendor.Search("nvidia") != -1)
+  {
+    // Buffer detailed info: Buffer object 1 (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW)
+    // will use VIDEO memory as the source for buffer object operations.
+    ExcludeMessage(GL_DEBUG_SOURCE_API, 131185);
+  }
+  else if (myVendor.Search("intel") != -1)
+  {
+    // API_ID_LINE_WIDTH deprecated ...
+    ExcludeMessage(GL_DEBUG_SOURCE_API, 7);
+  }
 
   if (caps->contextMajorVersionUpper != -1)
   {
@@ -1326,20 +1340,6 @@ void OpenGl_Context::init (const Standard_Boolean theIsCoreProfile)
                                + "  Visualization might work incorrectly.\n"
                                  "  Consider upgrading the graphics driver.";
     PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_PORTABILITY, 0, GL_DEBUG_SEVERITY_HIGH, aMsg);
-  }
-
-  myVendor = (const char* )core11fwd->glGetString (GL_VENDOR);
-  myVendor.LowerCase();
-  if (myVendor.Search ("nvidia") != -1)
-  {
-    // Buffer detailed info: Buffer object 1 (bound to GL_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW)
-    // will use VIDEO memory as the source for buffer object operations.
-    ExcludeMessage (GL_DEBUG_SOURCE_API, 131185);
-  }
-  else if (myVendor.Search ("intel") != -1)
-  {
-    // API_ID_LINE_WIDTH deprecated ...
-    ExcludeMessage (GL_DEBUG_SOURCE_API, 7);
   }
 
   // setup shader generator
@@ -1997,9 +1997,10 @@ void OpenGl_Context::DiagnosticInformation (TColStd_IndexedDataMapOfStringString
   if ((theFlags & Graphic3d_DiagnosticInfo_Device) != 0)
   {
     Standard_Integer aDriverVer[2] = {};
-    OpenGl_GlFunctions::readGlVersion (aDriverVer[0], aDriverVer[1], myGlVerMajor >= 3);
-    addInfo (theDict, "GLvendor",    (const char*)core11fwd->glGetString (GL_VENDOR));
-    addInfo (theDict, "GLdevice",    (const char*)core11fwd->glGetString (GL_RENDERER));
+    TCollection_AsciiString aVendor;
+    OpenGl_GlFunctions::readGlVersion(aDriverVer[0], aDriverVer[1], aVendor, myGlVerMajor >= 3);
+    addInfo(theDict, "GLvendor", aVendor);
+    addInfo(theDict, "GLdevice", (const char*)core11fwd->glGetString (GL_RENDERER));
   #ifdef __EMSCRIPTEN__
     if (CheckExtension ("GL_WEBGL_debug_renderer_info"))
     {
