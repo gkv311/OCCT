@@ -18,6 +18,7 @@
 
 #include <Standard_Macro.hxx>
 #include <Standard_TypeDef.hxx>
+#include <TCollection_AsciiString.hxx>
 
 #include <OpenGl_GlTypes.hxx>
 
@@ -73,6 +74,7 @@ struct OpenGl_GlFunctions
   //! Read OpenGL version.
   Standard_EXPORT static void readGlVersion (Standard_Integer& theGlVerMajor,
                                              Standard_Integer& theGlVerMinor,
+                                             TCollection_AsciiString& theVendor,
                                              Standard_Boolean theToCheckVer3 = true);
 
   //! Load functions.
