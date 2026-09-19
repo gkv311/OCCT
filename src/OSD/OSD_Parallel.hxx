@@ -294,8 +294,74 @@ public: //! @name public methods
   //! Has no effect if OCCT has been built with no auxiliary threads library.
   Standard_EXPORT static void SetUseOcctThreads (Standard_Boolean theToUseOcct);
 
-  //! Returns number of logical processors.
-  Standard_EXPORT static Standard_Integer NbLogicalProcessors();
+  //! Returns number of logical processors available to this process
+  //! (e.g. considers affinity mask) for multi-threading.
+  Standard_EXPORT static int NbLogicalProcessors();
+
+  //! Logical processor filter for CPU affinity mask.
+  //! Note that all filters apart from ALL and Pinned count only first logical processor
+  //! assigned to hyper-threaded physical core.
+  enum class LogicalProcessorFilter
+  {
+    //! All online logical processors.
+    All,
+    //! Logical processors pinned to this process.
+    Pinned,
+    //! Count Common and Boosted cores optimized for intensive multi-threaded tasks
+    //! (exclude low-performance cores within heterogeneous CPU).
+    Performant,
+
+    //! Count only boosted cores with topmost frequency for intensive single-threaded tasks
+    //! (within heterogeneous CPU this includes only 'overclocked' cores).
+    Topmost,
+    //! Count average-performance cores, usually optimized for intensive multi-threaded tasks.
+    //! (skip boosted/underclocked cores within heterogeneous CPU).
+    Common,
+    //! Count only 'slowest' cores within heterogeneous CPU
+    //! (usually energy-efficient cores for background tasks),
+    //! and nothing on other CPUs.
+    Lowest,
+  };
+
+  //! Count number of filtered logical processors.
+  //! @param[in] theFilter the logical processor category to count
+  //! @param[in] theIsOnePerCore count each physical core once (e.g. reject hyper-threaded siblings)
+  //! @return number of logical processors
+  Standard_EXPORT static int NbLogicalProcessors(const LogicalProcessorFilter theFilter,
+                                                 const bool theIsOnePerCore);
+
+  //! Sets CPU affinity mask to specified cores.
+  //!
+  //! Modern CPUs might combine logical processor with different properties:
+  //! - 2 logical processors per 1 physical core (hyper-threaded);
+  //! - mixed architectures:
+  //!    slow energy-efficient cores (no hyper-threading, different architecture; for background tasks)
+  //!    + performance cores (hyper-threaded; for multi-threaded tasks)
+  //!    + boosted performance cores (highest frequency; for intensive single-threaded tasks);
+  //! - same architecture but different TDP / power consumption:
+  //!    compact cores (lower TDP and frequency; to spare battery)
+  //!    + boosted cores (higher TDP and frequency; for top performance).
+  //!
+  //! Normally, system is responsible for optimal distribution of tasks between these logical processors
+  //! (to increase working time from battery or to improve overall performance).
+  //! However, the mixture of logical processors with different properties makes performance measurements
+  //! unreliable (with large fluctuations of elapsed and CPU times reported by OSD_Chronometer).
+  //!
+  //! This method allows to pin this process to the subset of logical processors
+  //! for preciser performance measurements (but potentially at the cost of overall execution time).
+  //!
+  //! Note that identification is non-exact (no any database of CPU model is used,
+  //! the detection is done by secondary aspects like amounts of cores running on different frequencies),
+  //! and subjective (if there are two blocks of slower and faster cores,
+  //! how to split them - as slow and normal or as normal and boosted?).
+  //! Therefore, use this filter with caution and check with documentation of your CPU model.
+  //!
+  //! @param[in] theFilter processor filter
+  //! @param[in] theIsOnePerCore count each physical core once (e.g. reject hyper-threaded siblings)
+  //! @return TRUE if CPU affinity has been set, or FALSE if specified filter results in no logical processors
+  //!         or if mechanism is not implemented / not provided by specific OS.
+  Standard_EXPORT static bool SetLogicalProcessorsAffinity(const LogicalProcessorFilter theFilter,
+                                                           const bool theIsOnePerCore);
 
   //! Simple primitive for parallelization of "foreach" loops, equivalent to:
   //! @code

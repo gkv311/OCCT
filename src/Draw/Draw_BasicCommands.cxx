@@ -1093,25 +1093,155 @@ static int dparallel (Draw_Interpretor& theDI,
                       Standard_Integer  theArgNb,
                       const char**      theArgVec)
 {
-  const Handle(OSD_ThreadPool)& aDefPool = OSD_ThreadPool::DefaultPool();
   if (theArgNb <= 1)
   {
-    theDI << "NbLogicalProcessors: " << OSD_Parallel::NbLogicalProcessors() << "\n"
-          << "NbThreads:           " << aDefPool->NbThreads() << "\n"
-          << "NbDefThreads:        " << aDefPool->NbDefaultThreadsToLaunch() << "\n"
-          << "UseOcct:             " << (OSD_Parallel::ToUseOcctThreads() ? 1 : 0);
+    const int aNbOnline = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::All, false);
+    theDI << "NbLogicalProcessors: " << aNbOnline << "\n";
+
+    const int aNbPinned = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::Pinned, false);
+    if (aNbPinned != 0 && aNbPinned != aNbOnline)
+      theDI << "NbPinnedProcessors:  " << aNbPinned << "\n";
+
+    const int aNbPhys = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::All, true);
+    if (aNbPhys != 0 && aNbPhys != aNbOnline)
+      theDI << "NbPhysicalCores:     " << aNbPhys << "\n";
+
+    const int aNbPerf = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::Performant, true);
+    if (aNbPerf != 0 && aNbPerf != aNbPhys)
+      theDI << "NbPerformantCores:   " << aNbPerf << "\n";
+
+    const int aNbTop  = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::Topmost, true);
+    const int aNbComm = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::Common, true);
+    const int aNbSlow = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::Lowest, true);
+    if (aNbSlow != 0 || aNbTop != 0)
+    {
+      theDI << "CoresConfiguration:  ";
+      if (aNbTop != 0)
+        theDI << aNbTop << "+";
+
+      if (aNbComm != 0)
+        theDI << aNbComm;
+
+      if (aNbSlow != 0)
+        theDI << "+" << aNbSlow;
+
+      const int aNbTop2  = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::Topmost, false);
+      const int aNbComm2 = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::Common, false);
+      const int aNbSlow2 = OSD_Parallel::NbLogicalProcessors(OSD_Parallel::LogicalProcessorFilter::Lowest, false);
+      if (aNbSlow2 != aNbSlow || aNbComm2 != aNbComm || aNbTop2 != aNbTop)
+      {
+        theDI << " (";
+        if (aNbTop2 != 0)
+          theDI << aNbTop2 << "+";
+
+        if (aNbComm2 != 0)
+          theDI << aNbComm2;
+
+        if (aNbSlow2 != 0)
+          theDI << "+" << aNbSlow2;
+
+        theDI << ")";
+      }
+
+      theDI << "\n";
+    }
+
+    const Handle(OSD_ThreadPool)& aDefPool = OSD_ThreadPool::DefaultPool();
+    theDI << "NbThreads:           " << aDefPool->NbThreads() << "\n";
+    theDI << "NbDefThreads:        " << aDefPool->NbDefaultThreadsToLaunch() << "\n";
+    theDI << "UseOcct:             " << (OSD_Parallel::ToUseOcctThreads() ? 1 : 0);
     return 0;
   }
 
+  using LogicalProcessorFilter = OSD_Parallel::LogicalProcessorFilter;
+  const auto parseCoreFilter = [](const char* theName, OSD_Parallel::LogicalProcessorFilter& theFilter) -> bool
+  {
+    TCollection_AsciiString aName(theName);
+    aName.LowerCase();
+    if (aName == "all")
+      theFilter = LogicalProcessorFilter::All;
+    else if (aName == "lowest" || aName == "low" || aName == "slow" || aName == "min" || aName == "back" || aName == "background")
+      theFilter = LogicalProcessorFilter::Lowest;
+    else if (aName == "topmost" || aName == "top" || aName == "boosted" || aName == "boost" || aName == "max" || aName == "single")
+      theFilter = LogicalProcessorFilter::Topmost;
+    else if (aName == "common" || aName == "main" || aName == "average" || aName == "aver")
+      theFilter = LogicalProcessorFilter::Common;
+    else if (aName == "perf" || aName == "performant" || aName == "performance")
+      theFilter = LogicalProcessorFilter::Performant;
+    else if (aName == "pinned" || aName == "pin")
+      theFilter = LogicalProcessorFilter::Pinned;
+    else
+      return false;
+
+    return true;
+  };
+
+  int aSetProcFilter = -1;
+  bool toSetProcOnePerCore = false;
   for (Standard_Integer anIter = 1; anIter < theArgNb; ++anIter)
   {
     TCollection_AsciiString anArg (theArgVec[anIter]);
     anArg.LowerCase();
-    if (anIter + 1 < theArgNb
-     && (anArg == "-nbthreads"
-      || anArg == "-threads"))
+    if (anArg == "-nbcores"  || anArg == "-nbprocessors" || anArg == "-nbproc"
+     || anArg == "-nbpinned" || anArg == "-nbperformant" || anArg == "-nbperf")
+    {
+      LogicalProcessorFilter aFilter = LogicalProcessorFilter::All;
+      bool isOnePerCore = anArg == "-nbcores";
+      if (anArg == "-nbpinned")
+      {
+        aFilter = LogicalProcessorFilter::Pinned;
+      }
+      else if (anArg == "-nbperformant" || anArg == "-nbperf")
+      {
+        aFilter = LogicalProcessorFilter::Performant;
+        isOnePerCore = true;
+      }
+      else if (anIter + 1 < theArgNb && parseCoreFilter(theArgVec[anIter + 1], aFilter))
+      {
+        if (aFilter == LogicalProcessorFilter::Pinned && isOnePerCore)
+        {
+          Message::SendFail() << "Syntax error at '" << theArgVec[anIter] << " " << theArgVec[anIter + 1] << "'";
+          return 1;
+        }
+        ++anIter;
+      }
+
+      const int aNbCores = OSD_Parallel::NbLogicalProcessors(aFilter, isOnePerCore);
+      theDI << aNbCores << " ";
+    }
+    else if (aSetProcFilter == -1
+          && (anArg == "-pincores" || anArg == "-pinprocessors" || anArg == "-pinproc"
+           || anArg == "-performantcores" || anArg == "-perfcores"))
+    {
+      LogicalProcessorFilter aFilter = LogicalProcessorFilter::All;
+      toSetProcOnePerCore = anArg == "-pincores";
+      if (anArg == "-performantcores" || anArg == "-perfcores")
+      {
+        const bool toSet = Draw::ParseOnOffIterator(theArgNb, theArgVec, anIter);
+        if (toSet)
+        {
+          aFilter = LogicalProcessorFilter::Performant;
+          toSetProcOnePerCore = true;
+        }
+      }
+      else if (anIter + 1 < theArgNb && parseCoreFilter(theArgVec[anIter + 1], aFilter))
+      {
+        if (aFilter == LogicalProcessorFilter::Pinned)
+        {
+          Message::SendFail() << "Syntax error at '" << theArgVec[anIter] << " " << theArgVec[anIter + 1] << "'";
+          return 1;
+        }
+        ++anIter;
+      }
+      aSetProcFilter = (int)aFilter;
+    }
+    else if (anIter + 1 < theArgNb
+          && (anArg == "-nbthreads"
+           || anArg == "-threads"))
     {
       const Standard_Integer aVal = Draw::Atoi (theArgVec[++anIter]);
+
+      const Handle(OSD_ThreadPool)& aDefPool = OSD_ThreadPool::DefaultPool();
       aDefPool->Init (aVal);
     }
     else if (anIter + 1 < theArgNb
@@ -1121,6 +1251,8 @@ static int dparallel (Draw_Interpretor& theDI,
            || anArg == "-maxdefthreads"))
     {
       const Standard_Integer aVal = Draw::Atoi (theArgVec[++anIter]);
+
+      const Handle(OSD_ThreadPool)& aDefPool = OSD_ThreadPool::DefaultPool();
       if (aVal <= 0 || aVal > aDefPool->NbThreads())
       {
         Message::SendFail() << "Syntax error: maximum number of threads to use should be <= of threads in the pool";
@@ -1158,6 +1290,21 @@ static int dparallel (Draw_Interpretor& theDI,
       return 1;
     }
   }
+
+  if (aSetProcFilter != -1)
+  {
+    if (!OSD_Parallel::SetLogicalProcessorsAffinity((LogicalProcessorFilter)aSetProcFilter, toSetProcOnePerCore))
+    {
+      theDI << "Affinity cannot be set";
+    }
+    else
+    {
+      const int aNbOnline = OSD_Parallel::NbLogicalProcessors(LogicalProcessorFilter::All, false);
+      const int aNbPinned = OSD_Parallel::NbLogicalProcessors(LogicalProcessorFilter::Pinned, false);
+      theDI << "Pinned to " << (aNbPinned != 0 ? aNbPinned : aNbOnline) << " logical processors out of " << aNbOnline;
+    }
+  }
+
   return 0;
 }
 
@@ -1528,6 +1675,11 @@ void Draw::BasicCommands(Draw_Interpretor& theCommands)
   std::ios::sync_with_stdio();
 
   const char* g = "DRAW General Commands";
+  const char* aFileName = __FILE__;
+  auto addCmd = [&](const char* theName, Draw_Interpretor::CommandFunction theFunc, const char* theHelp)
+  {
+    theCommands.Add(theName, theHelp, aFileName, theFunc, g);
+  };
 
   theCommands.Add("batch", "returns 1 in batch mode",
 		  __FILE__,ifbatch,g);
@@ -1587,15 +1739,35 @@ void Draw::BasicCommands(Draw_Interpretor& theCommands)
     "\n\t\t:  -stackTraceLength specifies length of stack trace to put into exceptions redirected from signals.",
 		  __FILE__,dsetsignal,g);
 
-  theCommands.Add("dparallel",
-    "dparallel [-occt {0|1}] [-nbThreads Count] [-nbDefThreads Count]"
-    "\n\t\t: Manages global parallelization parameters:"
-    "\n\t\t:   -occt         use OCCT implementation or external library (if available)"
-    "\n\t\t:   -nbThreads    specify the number of threads in default thread pool"
-    "\n\t\t:   -nbDefThreads specify the upper limit of threads to be used for default thread pool"
-    "\n\t\t:                 within single parallelization call (should be <= of overall number of threads),"
-    "\n\t\t:                 so that nested algorithm can also use this pool",
-      __FILE__,dparallel,g);
+  addCmd("dparallel", dparallel, /* [dparallel] */ R"(
+dparallel [-occt {0|1}] [-nbThreads Count] [-nbDefThreads Count]
+          [-nbProc   {all|perf|topmost|common|lowest|pinned}] [-nbPinned]
+          [-nbCores  {all|perf|topmost|common|lowest}] [-nbPerf]
+          [-pinProc  {all|perf|topmost|common|lowest}]
+          [-pinCores {all|perf|topmost|common|lowest}] [-perfCores {0|1}]
+Manages global parallelization parameters:
+ -occt         use OCCT implementation or external library (if available)
+ -nbThreads    specify the number of threads in default thread pool
+ -nbDefThreads specify the upper limit of threads to be used for default thread pool
+               within single parallelization call (should be <= of overall number of threads),
+               so that nested algorithm can also use this pool
+Queries logical processors:
+ -nbProc       prints the number of logical processors:
+    all        online processors available in the system (default output)
+    pinned     processors assigned to this process through CPU affinity mask
+    perf       processors for multi-threaded tasks (including boosted ones)
+    common     processors for multi-threaded tasks (excluding boosted ones)
+    topmost    special processors with topmost frequency (best for single-threaded tasks)
+    lowest     special processors with smallest frequency (best for background tasks)
+ -nbCores      prints the number of cores (count only one logical processor per physical core)
+ -pinProc      pin specified logical processors to this process (e.g. CPU affinity mask)
+ -pinCores     pin specified cores to this process (e.g. CPU affinity mask)
+ -nbPinned     alias to '-nbProc pinned'
+ -nbPerf       alias to '-nbCores perf'
+ -perfCores    alias to '-pinCores perf' (1) vs. '-pinProc all' (0)
+CoresConfiguration prints CPU cores in performance groups from topmost to lowest
+(and related logical processors in braces).
+)" /* [dparallel] */);
 
   // Logging commands; note that their names are hard-coded in the code
   // of Draw_Interpretor, thus should not be changed without update of that code!
