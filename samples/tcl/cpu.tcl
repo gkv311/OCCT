@@ -72,18 +72,19 @@ renamevar case_1 case
 # write text on top of the case
 # note that font is chosen by availability of Unicode symbols,
 # it is different from actual font found on processor
-set font "Arial Unicode MS"
+set font "FreeSans"
 set aFontList [vfont]
 vfont -verbose 1
 dtracelevel trace
-if {[string first "Arial Unicode MS" $aFontList] != -1} {
-  set font "Arial Unicode MS"
-} elseif {[string first "SimSun" $aFontList] != -1} {
+if {[string first "MS Gothic" $aFontList] != -1} {
   # Windows
-  set font "SimSun"
+  set font "MS Gothic"
 } elseif {[string first "FreeSans" $aFontList] != -1} {
   # Linux
   set font "FreeSans"
+} elseif {[string first "Arial Unicode MS" $aFontList] != -1} {
+  # macOS
+  set font "Arial Unicode MS"
 }
 
 set text {iⓂⒸ11
