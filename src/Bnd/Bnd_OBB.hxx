@@ -42,7 +42,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   //! Empty constructor
-  constexpr Bnd_OBB() noexcept
+  Bnd_OBB() noexcept
   : myHDims{-1.0, -1.0, -1.0},
     myIsAABox(Standard_False)
   {
