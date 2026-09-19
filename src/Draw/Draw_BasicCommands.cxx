@@ -1082,13 +1082,24 @@ static int dparallel (Draw_Interpretor& theDI,
                       Standard_Integer  theArgNb,
                       const char**      theArgVec)
 {
-  const Handle(OSD_ThreadPool)& aDefPool = OSD_ThreadPool::DefaultPool();
   if (theArgNb <= 1)
   {
-    theDI << "NbLogicalProcessors: " << OSD_Parallel::NbLogicalProcessors() << "\n"
-          << "NbThreads:           " << aDefPool->NbThreads() << "\n"
-          << "NbDefThreads:        " << aDefPool->NbDefaultThreadsToLaunch() << "\n"
-          << "UseOcct:             " << (OSD_Parallel::ToUseOcctThreads() ? 1 : 0);
+    int aNbOnline = 0;
+    int aNbPinned = 0;
+    int aNbPerf   = 0;
+    OSD_Parallel::NbLogicalProcessors(aNbOnline, &aNbPinned, &aNbPerf);
+
+    theDI << "NbLogicalProcessors: " << aNbOnline << "\n";
+    if (aNbPinned != 0 && aNbPinned != aNbOnline)
+      theDI << "NbPinnedProcessors:  " << aNbPinned << "\n";
+
+    if (aNbPerf != 0 && aNbPerf != aNbOnline)
+      theDI << "NbPerformantCores:   " << aNbPerf << "\n";
+
+    const Handle(OSD_ThreadPool)& aDefPool = OSD_ThreadPool::DefaultPool();
+    theDI << "NbThreads:           " << aDefPool->NbThreads() << "\n";
+    theDI << "NbDefThreads:        " << aDefPool->NbDefaultThreadsToLaunch() << "\n";
+    theDI << "UseOcct:             " << (OSD_Parallel::ToUseOcctThreads() ? 1 : 0);
     return 0;
   }
 
@@ -1096,11 +1107,47 @@ static int dparallel (Draw_Interpretor& theDI,
   {
     TCollection_AsciiString anArg (theArgVec[anIter]);
     anArg.LowerCase();
-    if (anIter + 1 < theArgNb
-     && (anArg == "-nbthreads"
-      || anArg == "-threads"))
+    if (anArg == "-nbprocessors" || anArg == "-nbproc")
+    {
+      int aNbOnline = 0;
+      OSD_Parallel::NbLogicalProcessors(aNbOnline, nullptr, nullptr);
+      theDI << aNbOnline;
+    }
+    else if (anArg == "-nbpinned")
+    {
+      int aNbOnline = 0;
+      int aNbPinned = 0;
+      OSD_Parallel::NbLogicalProcessors(aNbOnline, &aNbPinned, nullptr);
+      theDI << aNbPinned;
+    }
+    else if (anArg == "-nbperformant" || anArg == "-nbperf")
+    {
+      int aNbOnline = 0;
+      int aNbPerf = 0;
+      OSD_Parallel::NbLogicalProcessors(aNbOnline, nullptr, &aNbPerf);
+      theDI << aNbPerf;
+    }
+    else if (anArg == "-performantcores" || anArg == "-perfcores")
+    {
+      bool toSet = Draw::ParseOnOffNoIterator(theArgNb, theArgVec, anIter);
+      if (!OSD_Parallel::SetAffinityToPerformantCores(toSet))
+      {
+        theDI << "Affinity cannot be set";
+        continue;
+      }
+
+      int aNbOnline = 0;
+      int aNbPinned = 0;
+      OSD_Parallel::NbLogicalProcessors(aNbOnline, &aNbPinned, nullptr);
+      theDI << "Pinned to " << (aNbPinned != 0 ? aNbPinned : aNbOnline) << " logical processors out of " << aNbOnline;
+    }
+    else if (anIter + 1 < theArgNb
+          && (anArg == "-nbthreads"
+           || anArg == "-threads"))
     {
       const Standard_Integer aVal = Draw::Atoi (theArgVec[++anIter]);
+
+      const Handle(OSD_ThreadPool)& aDefPool = OSD_ThreadPool::DefaultPool();
       aDefPool->Init (aVal);
     }
     else if (anIter + 1 < theArgNb
@@ -1110,6 +1157,8 @@ static int dparallel (Draw_Interpretor& theDI,
            || anArg == "-maxdefthreads"))
     {
       const Standard_Integer aVal = Draw::Atoi (theArgVec[++anIter]);
+
+      const Handle(OSD_ThreadPool)& aDefPool = OSD_ThreadPool::DefaultPool();
       if (aVal <= 0 || aVal > aDefPool->NbThreads())
       {
         Message::SendFail() << "Syntax error: maximum number of threads to use should be <= of threads in the pool";
@@ -1573,12 +1622,19 @@ void Draw::BasicCommands(Draw_Interpretor& theCommands)
 
   theCommands.Add("dparallel",
     "dparallel [-occt {0|1}] [-nbThreads Count] [-nbDefThreads Count]"
+    "          [-nbProcessors] [-nbPinned] [-nbPerformant]  [-perfCores {0|1}]"
     "\n\t\t: Manages global parallelization parameters:"
     "\n\t\t:   -occt         use OCCT implementation or external library (if available)"
     "\n\t\t:   -nbThreads    specify the number of threads in default thread pool"
     "\n\t\t:   -nbDefThreads specify the upper limit of threads to be used for default thread pool"
     "\n\t\t:                 within single parallelization call (should be <= of overall number of threads),"
-    "\n\t\t:                 so that nested algorithm can also use this pool",
+    "\n\t\t:                 so that nested algorithm can also use this pool"
+    "\n\t\t: Queries:"
+    "\n\t\t:   -nbProcessors prints the number of logical processors available in the system"
+    "\n\t\t:   -nbPinned     prints the number of logical processors pinned to this process"
+    "\n\t\t:                 through CPU affinity mask"
+    "\n\t\t:   -nbPerformant prints the number of performant logical processors"
+    "\n\t\t:   -perfCores    sets or unsets process CPU affinity to performant cores",
       __FILE__,dparallel,g);
 
   // Logging commands; note that their names are hard-coded in the code
