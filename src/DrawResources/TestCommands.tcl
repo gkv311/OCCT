@@ -2807,6 +2807,11 @@ proc _log_html_diff {file log dir1 dir2 highlight_percent} {
 proc _get_nb_cpus {} {
     global tcl_platform env
 
+    set nbAff [dparallel -nbPinned]
+    if { $nbAff > 0 } {
+        return $nbAff
+    }
+
     if { "$tcl_platform(platform)" == "windows" } {
         # on Windows, take the value of the environment variable 
         if { [info exists env(NUMBER_OF_PROCESSORS)] &&

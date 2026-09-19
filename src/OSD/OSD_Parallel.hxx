@@ -294,8 +294,20 @@ public: //! @name public methods
   //! Has no effect if OCCT has been built with no auxiliary threads library.
   Standard_EXPORT static void SetUseOcctThreads (Standard_Boolean theToUseOcct);
 
-  //! Returns number of logical processors.
-  Standard_EXPORT static Standard_Integer NbLogicalProcessors();
+  //! Returns number of logical processors available to this process
+  //! (e.g. considers affinity mask) for multi-threading.
+  Standard_EXPORT static int NbLogicalProcessors();
+
+  //! Returns number of active logical processors.
+  //! @param[out] theOnline number of online logical processors
+  //! @param[out] thePinned number of logical processors assigned to this process through affinity mask
+  //! @param[out] thePerf   number of performant cores
+  Standard_EXPORT static void NbLogicalProcessors(int& theOnline,
+                                                  int* thePinned,
+                                                  int* thePerf);
+
+  //! Sets CPU affinity mask to performant core
+  Standard_EXPORT static bool SetAffinityToPerformantCores(bool theToSet = true);
 
   //! Simple primitive for parallelization of "foreach" loops, equivalent to:
   //! @code
