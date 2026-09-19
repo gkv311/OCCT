@@ -319,10 +319,11 @@ proc vsamples {} {
 
 #Fills the textbox in "Samples" window
 proc fillsampletext {fname} {
-  .samples.right.botframe.button configure -state normal -command "lower .samples;catch {vclose ALL};catch {vremove -all}; catch {vclear}; source {$fname}"
+  .samples.right.botframe.button configure -state normal -command "lower .samples;catch {vclose ALL};catch {vremove -all}; catch {vclear}; source -encoding utf-8 {$fname}"
   .samples.right.textframe.text configure -state normal
   .samples.right.textframe.text delete 0.0 end
   set chan [open "$fname"]
+  fconfigure $chan -encoding utf-8
     while {[gets $chan line] >= 0} {
     .samples.right.textframe.text insert end "$line\n"
     }
