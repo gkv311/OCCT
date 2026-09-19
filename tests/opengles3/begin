@@ -28,6 +28,8 @@ proc vinit {args} {
   set renderer [vglinfo GL_RENDERER]
   if { [string match "llvmpipe*" $renderer] } {
     set ::_vfpsMaxNbFrames 5
+  } elseif { [string match "Intel*" $renderer] } {
+    set ::_vfpsMaxNbFrames 20
   }
 }
 
