@@ -319,11 +319,10 @@ Standard_Boolean GeomFill_Sweep::BuildAll(const GeomAbs_Shape Continuity,
                                               degU, degV, nmax, thePrec);
       if (ConvertApprox.HasResult())
       {
-        mySurface = ConvertApprox.Surface();
+        Handle(Geom_BSplineSurface) BSplSurf = ConvertApprox.Surface();
+        mySurface = BSplSurf;
         myCurve2d = new  (TColGeom2d_HArray1OfCurve) (1, 2);
         CError = new (TColStd_HArray2OfReal) (1, 2, 1, 2);
-
-        Handle(Geom_BSplineSurface) BSplSurf(Handle(Geom_BSplineSurface)::DownCast(mySurface));
 
         gp_Dir2d D(0., 1.);
         gp_Pnt2d P(BSplSurf->UKnot(1), 0);
@@ -344,7 +343,7 @@ Standard_Boolean GeomFill_Sweep::BuildAll(const GeomAbs_Shape Continuity,
         CError->SetValue(1, myCurve2d->Length(), 0.);
         CError->SetValue(2, myCurve2d->Length(), 0.);
 
-        SError = theTol;
+        SError = ConvertApprox.MaxError();
       }
     } //if (!mySurface->IsCNv(1))
 
