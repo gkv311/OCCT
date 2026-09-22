@@ -144,7 +144,7 @@ public:
       StNbMax=0;
       for(Standard_Integer i=0; i<N; i++) { 
 	Standard_Integer nb=0;
-	for(Standard_Integer j=0; IndUV[i][j]!=-1 && j<nbUV[i]; j++,nb++);
+	for(Standard_Integer j=0; j<nbUV[i] && IndUV[i][j]!=-1; j++,nb++);
 	if(nb>StNbMax) StNbMax=nb;
 	StNbMoy+=nb;
 	if(nb) { StNbMoyNonNul+=nb; nnn++; } 
