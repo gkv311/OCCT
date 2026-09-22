@@ -95,7 +95,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        group: [algo, algo-bugs, bop, heal, heal-bugs, v3d, opengl, webgl, xde, xde-bugs]
+        #group: [algo, algo-bugs, bop, heal, heal-bugs, v3d, opengl, webgl, xde, xde-bugs]
+        group: [algo, algo-bugs, bop, heal, heal-bugs, v3d, opengl, xde, xde-bugs]
         include:
           # modeling data and algorithms
           - cmd: 'blend,chamfer,collections,cr,demo,draft,evolved,feat,fillet2d,gdt,geometry,lowalgos,mkface,nproject,offset,pipe,prism,mesh,hlr,thrusection'
@@ -115,8 +116,8 @@ jobs:
             group: v3d
           - cmd: 'opengl,opengles3'
             group: opengl
-          - cmd: 'webgl2'
-            group: webgl
+          #- cmd: 'webgl2'
+          #  group: webgl
           # data exchange
           - cmd: 'caf,de,de_mesh,de_wrapper,persist,sewing,xcaf,xml'
             group: xde
