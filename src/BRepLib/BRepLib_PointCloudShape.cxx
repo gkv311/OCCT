@@ -71,7 +71,7 @@ Standard_Integer BRepLib_PointCloudShape::NbPointsByDensity (const Standard_Real
   {
     Standard_Real anArea = faceArea(aExpF.Current());
 
-    Standard_Integer aNbPnts = Max ((Standard_Integer)std::ceil(anArea / theDensity), 1);
+    Standard_Integer aNbPnts = Max ((Standard_Integer)std::ceil(anArea / aDensity), 1);
     myFacePoints.Bind(aExpF.Current(), aNbPnts);
     aNbPoints+= aNbPnts;
   }
