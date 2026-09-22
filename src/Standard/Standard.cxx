@@ -279,7 +279,7 @@ Standard_Integer Standard::Purge()
 Standard_Address Standard::AllocateAligned (const Standard_Size theSize,
                                             const Standard_Size theAlign)
 {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW64__)
   return _aligned_malloc (theSize, theAlign);
 #elif defined(__ANDROID__) || defined(__QNX__)
   return memalign (theAlign, theSize);
@@ -302,7 +302,7 @@ Standard_Address Standard::AllocateAligned (const Standard_Size theSize,
 
 void Standard::FreeAligned (Standard_Address thePtrAligned)
 {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__MINGW64__)
   _aligned_free (thePtrAligned);
 #elif defined(__ANDROID__) || defined(__QNX__)
   free (thePtrAligned);
