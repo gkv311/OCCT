@@ -1576,7 +1576,8 @@ static TopoDS_Edge GlueEdgesWithPCurves(const TopTools_SequenceOfShape& aChain,
       Handle(Geom2d_Curve) aPCurve =
         BRep_Tool::CurveOnSurface(anEdge, SurfSeq(j), LocSeq(j), fpar, lpar);
       if (aPCurve.IsNull())
-        continue;
+        break;
+
       Handle(Geom2d_TrimmedCurve) aTrPCurve = new Geom2d_TrimmedCurve(aPCurve, fpar, lpar);
       tab_c2d(i-1) = Geom2dConvert::CurveToBSplineCurve(aTrPCurve);
       Geom2dConvert::C0BSplineToC1BSplineCurve(tab_c2d(i-1), Precision::Confusion());
@@ -1585,6 +1586,9 @@ static TopoDS_Edge GlueEdgesWithPCurves(const TopTools_SequenceOfShape& aChain,
       PrevVertex = (ToReverse)? VF : VL;
       PrevEdge = anEdge;
     }
+    if (i <= nb_curve)
+      continue;
+
     Handle(TColGeom2d_HArray1OfBSplineCurve)  concatc2d;     //array of the concatenated curves
     Handle(TColStd_HArray1OfInteger)        ArrayOfInd2d;  //array of the remaining Vertex
     closed_flag = Standard_False;
