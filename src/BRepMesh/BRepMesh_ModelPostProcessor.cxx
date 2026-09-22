@@ -100,10 +100,21 @@ namespace
 
         const Standard_Integer     anIndex  = aMapOfPCurves.Add(aDFacePtr, anEmptyList);
         IMeshData::ListOfIPCurves& aPCurves = aMapOfPCurves.ChangeFromIndex(anIndex);
-        if (aPCurve->GetOrientation() == TopAbs_REVERSED)
+        if (aPCurves.IsEmpty())
+        {
           aPCurves.Append(aPCurve);
+        }
+        else if (aPCurves.Size() == 1 && aPCurve->GetOrientation() != aPCurves.First()->GetOrientation())
+        {
+          if (aPCurve->GetOrientation() == TopAbs_REVERSED)
+            aPCurves.Append(aPCurve);
+          else
+            aPCurves.Prepend(aPCurve); // make sure to put forward polygon before reversed one
+        }
         else
-          aPCurves.Prepend(aPCurve); // make sure to put forward polygon before reversed one
+        {
+          // ignore broken PCurves (invalid topology)
+        }
       }
 
       // Commit polygons related to separate face.
@@ -125,15 +136,15 @@ namespace
             // make sure to put forward polygon before reversed one
             BRepMesh_ShapeTool::UpdateEdge(
               aEdge,
-              collectPolygon(aPCurves.First(), theDEdge->GetDeflection()),
-              collectPolygon(aPCurves.Last (), theDEdge->GetDeflection()),
+              collectPolygon(aPCurves.First(), aTriangulation, theDEdge->GetDeflection()),
+              collectPolygon(aPCurves.Last (), aTriangulation, theDEdge->GetDeflection()),
               aTriangulation, aLoc);
           }
           else
           {
             BRepMesh_ShapeTool::UpdateEdge(
               aEdge,
-              collectPolygon(aPCurves.First(), theDEdge->GetDeflection()),
+              collectPolygon(aPCurves.First(), aTriangulation, theDEdge->GetDeflection()),
               aTriangulation, aLoc);
           }
         }
@@ -143,6 +154,7 @@ namespace
     //! Collects polygonal data for the given pcurve
     Handle(Poly_PolygonOnTriangulation) collectPolygon(
       const IMeshData::IPCurveHandle& thePCurve,
+      const Handle(Poly_Triangulation)& theTris,
       const Standard_Real             theDeflection) const
     {
       Handle(Poly_PolygonOnTriangulation) aPolygon =
@@ -152,6 +164,14 @@ namespace
         aPolygon->SetNode     (i, thePCurve->GetIndex(i - 1));
         aPolygon->SetParameter(i, thePCurve->GetParameter(i - 1));
       }
+
+      // fast check that committed polygon has valid indexation
+      const int aTriNode1 = aPolygon->Node(1);
+      const int aTriNode2 = aPolygon->Node(aPolygon->NbNodes());
+      if (aTriNode1 < 1 || aTriNode1 > theTris->NbNodes()
+       || aTriNode2 < 1 || aTriNode2 > theTris->NbNodes())
+        throw Standard_OutOfRange("BRepMesh_ModelPostProcessor, invalid Poly_PolygonOnTriangulation");
+
       aPolygon->Deflection(theDeflection);
       return aPolygon;
     }

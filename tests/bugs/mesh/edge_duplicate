@@ -1,0 +1,21 @@
+puts "================"
+puts "Mesh - broken Poly_PolygonOnTriangulation is stored for invalid TopoDS_Wire with duplicated TopoDS_Edge"
+puts "================"
+puts ""
+
+pload MODELING VISUALIZATION
+box b 100 200 300
+explode b W
+explode b_1 E
+# create an invalid TopoDS_Wire with duplicated TopoDS_Edge
+wire w b_1_1 b_1_2 b_1_1 b_1_3 b_1_4
+plane p 0 0 0 -1 0 0
+mkface f p w
+incmesh f -prs
+vinit View1
+# check that algorithms accessing Poly_PolygonOnTriangulation do not crash due to broken indexes
+vdisplay f -dispMode 0
+vfit
+vcomputehlr f h
+
+vdump ${imagedir}/${casename}.png
