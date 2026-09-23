@@ -740,7 +740,7 @@ void  DBRep_DrawableShape::DrawOn(Draw_Display& dis) const
 //	gp_Vec tang;
 //	C.D1(l,P,tang);
 	
-	Draw_Bounds = Standard_False;
+	Draw_Bounds = Standard_True;
       }
     }
     
