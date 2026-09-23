@@ -22,6 +22,7 @@
 #include <Standard.hxx>
 #include <Standard_ThreadId.hxx>
 
+#include <memory>
 #include <list>
 
 class Draw_ProgressIndicator;

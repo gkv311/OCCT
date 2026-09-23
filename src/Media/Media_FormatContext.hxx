@@ -20,6 +20,8 @@
 #include <NCollection_Buffer.hxx>
 #include <TCollection_AsciiString.hxx>
 
+#include <memory>
+
 struct AVCodecContext;
 struct AVFormatContext;
 struct AVIOContext;

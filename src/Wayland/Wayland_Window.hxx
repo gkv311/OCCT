@@ -17,6 +17,7 @@
 #include <Aspect_VKey.hxx>
 #include <Aspect_Window.hxx>
 
+#include <memory>
 #include <set>
 
 class Wayland_DisplayConnection;

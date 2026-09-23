@@ -16,6 +16,7 @@
 
 #include <Aspect_DisplayConnection.hxx>
 
+#include <memory>
 #include <vector>
 
 struct wl_compositor;
