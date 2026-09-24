@@ -1,0 +1,23 @@
+# !!!! This file is generated automatically, do not edit manually! See end script
+puts "TODO CR23096 ALL: LABELS : Faulty" 
+puts "TODO CR23096 ALL: PROPS : Faulty" 
+puts "TODO CR23096 ALL: LAYERS : Faulty" 
+
+
+set filename s1_pe_214.stp
+
+set ref_data {
+DATA        : Faulties = 0  ( 0 )  Warnings = 0  ( 0 )  Summary  = 0  ( 0 )
+TPSTAT      : Faulties = 0  ( 0 )  Warnings = 0  ( 0 )  Summary  = 0  ( 0 )
+CHECKSHAPE  : Wires    = 0  ( 0 )  Faces    = 0  ( 0 )  Shells   = 0  ( 0 )   Solids   = 0 ( 0 )
+NBSHAPES    : Solid    = 8  ( 8 )  Shell    = 8  ( 8 )  Face     = 131  ( 131 ) 
+STATSHAPE   : Solid    = 11  ( 11 )  Shell    = 11  ( 11 )  Face     = 173  ( 173 )   FreeWire = 0  ( 0 ) 
+TOLERANCE   : MaxTol   =          1e-07  (          1e-07 )  AvgTol   =           1e-07  (           1e-07 )
+LABELS      : N0Labels = 29  ( 29 )  N1Labels = 37  ( 57 )  N2Labels = 0  ( 12 )   TotalLabels = 66  ( 98 )   NameLabels = 59  ( 71 )   ColorLabels = 21  ( 21 )   LayerLabels = 11  ( 13 )
+PROPS       : Centroid = 21  ( 35 )  Volume   = 21  ( 21 )  Area     = 21  ( 21 )
+NCOLORS     : NColors  = 8  ( 8 )
+COLORS      : Colors   = BLUE GREEN MAGENTA ORANGE RED RED4 SIENNA3 YELLOW  ( BLUE GREEN MAGENTA ORANGE RED RED4 SIENNA3 YELLOW )
+NLAYERS     : NLayers  = 8  ( 9 )
+LAYERS      : Layers   = 02___PRT_ALL_AXES 02___PRT_ALL_AXES_1 02___PRT_ALL_AXES_2 02___PRT_ALL_AXES_3 02___PRT_ALL_AXES_4 02___PRT_ALL_AXES_5 02___PRT_ALL_AXES_6 02___PRT_ALL_AXES_7  ( 02___PRT_ALL_AXES 02___PRT_ALL_AXES_1 02___PRT_ALL_AXES_2 02___PRT_ALL_AXES_3 02___PRT_ALL_AXES_4 02___PRT_ALL_AXES_5 02___PRT_ALL_AXES_6 02___PRT_ALL_AXES_7 04___PRT_ALL_DTM_PNT_11 )
+
+}
