@@ -1,0 +1,22 @@
+# !!!! This file is generated automatically, do not edit manually! See end script
+puts "TODO CR23096 ALL: TPSTAT : Faulty" 
+puts "TODO CR23096 ALL: LABELS : Faulty" 
+
+
+set filename s1-c5-214.stp
+
+set ref_data {
+DATA        : Faulties = 0  ( 0 )  Warnings = 0  ( 0 )  Summary  = 0  ( 0 )
+TPSTAT      : Faulties = 0  ( 0 )  Warnings = 22  ( 0 )  Summary  = 22  ( 0 )
+CHECKSHAPE  : Wires    = 0  ( 0 )  Faces    = 0  ( 0 )  Shells   = 0  ( 0 )   Solids   = 0 ( 0 )
+NBSHAPES    : Solid    = 8  ( 8 )  Shell    = 8  ( 8 )  Face     = 136  ( 136 ) 
+STATSHAPE   : Solid    = 11  ( 11 )  Shell    = 11  ( 11 )  Face     = 182  ( 182 )   FreeWire = 0  ( 0 ) 
+TOLERANCE   : MaxTol   =  0.06931062113  (  0.06931062114 )  AvgTol   =  0.000858101416  (  0.0009545857363 )
+LABELS      : N0Labels = 13  ( 13 )  N1Labels = 14  ( 26 )  N2Labels = 0  ( 12 )   TotalLabels = 27  ( 51 )   NameLabels = 27  ( 39 )   ColorLabels = 8  ( 8 )   LayerLabels = 8  ( 8 )
+PROPS       : Centroid = 0  ( 0 )  Volume   = 0  ( 0 )  Area     = 0  ( 0 )
+NCOLORS     : NColors  = 2  ( 2 )
+COLORS      : Colors   = RED YELLOW  ( RED YELLOW )
+NLAYERS     : NLayers  = 1  ( 1 )
+LAYERS      : Layers   = 0  ( 0 )
+
+}
