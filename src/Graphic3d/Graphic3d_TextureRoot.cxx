@@ -61,7 +61,7 @@ TCollection_AsciiString Graphic3d_TextureRoot::TexturesFolder()
 
     const OSD_Path aDirPath (aFolder);
     OSD_Directory aDir (aDirPath);
-    const TCollection_AsciiString aTexture = aFolder + "/2d_MatraDatavision.rgb";
+    const TCollection_AsciiString aTexture = aFolder + "/2d_MatraDatavision.png";
     OSD_File aTextureFile (aTexture);
     if (!aDir.Exists() || !aTextureFile.Exists())
     {
