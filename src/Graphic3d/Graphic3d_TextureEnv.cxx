@@ -27,14 +27,14 @@ IMPLEMENT_STANDARD_RTTIEXT(Graphic3d_TextureEnv,Graphic3d_TextureRoot)
 
 static const char *NameOfTextureEnv_to_FileName[] =
 {
-  "env_clouds.rgb",
-  "env_cv.rgb",
-  "env_medit.rgb",
-  "env_pearl.rgb",
-  "env_sky1.rgb",
-  "env_sky2.rgb",
-  "env_lines.rgb",
-  "env_road.rgb"
+  "env_clouds.png",
+  "env_cv.png",
+  "env_medit.png",
+  "env_pearl.png",
+  "env_sky1.png",
+  "env_sky2.png",
+  "env_lines.png",
+  "env_road.png"
 };
 
 // =======================================================================

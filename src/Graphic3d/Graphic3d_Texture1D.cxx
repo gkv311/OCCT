@@ -24,7 +24,7 @@ IMPLEMENT_STANDARD_RTTIEXT(Graphic3d_Texture1D,Graphic3d_TextureMap)
 
 static const char *NameOfTexture1d_to_FileName[] =
 {
-  "1d_elevation.rgb"
+  "1d_elevation.png"
 };
 
 // =======================================================================
