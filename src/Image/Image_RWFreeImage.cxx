@@ -519,6 +519,11 @@ bool Image_RWFreeImage::Read(Image_PixMap& thePixmap,
     // convert to 32bpp and create an alpha channel from the AND-mask when loading
     aLoadFlags = ICO_MAKEALPHA;
   }
+  else if (aFIF == FIF_PNG)
+  {
+    // ignore gAMA chunk in PNG file (as suggested by glTF specifications)
+    aLoadFlags = PNG_IGNOREGAMMA;
+  }
 
   FIBITMAP* anImage = nullptr;
   if (!theData.IsNull())
