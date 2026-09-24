@@ -271,6 +271,7 @@ bool Image_RWWinCodec::Read(Image_PixMap& thePixmap,
 
   Image_ComPtr<IWICBitmapDecoder> aWicDecoder;
   Image_ComPtr<IWICStream> aWicStream;
+  NCollection_Array1<Standard_Byte> aBuff;
   if (!theData.IsNull())
   {
     if (aWicImgFactory->CreateStream(&aWicStream.ChangePtr()) != S_OK
@@ -298,7 +299,7 @@ bool Image_RWWinCodec::Read(Image_PixMap& thePixmap,
       return false;
     }
 
-    NCollection_Array1<Standard_Byte> aBuff(1, aLen);
+    aBuff.Resize(1, aLen, false);
     if (!theStream->read((char*)&aBuff.ChangeFirst(), aBuff.Size()))
     {
       Message::SendFail() << "Error: unable to read stream";
