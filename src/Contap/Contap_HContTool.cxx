@@ -179,8 +179,9 @@ void Contap_HContTool::SamplePoint (const Handle(Adaptor3d_Surface)& S,
     Standard_Integer nbIntU = NbSamplesU(S,uinf,usup)/3;
     Standard_Integer nbIntV = NbSamplesV(S,vinf,vsup)/3;
     if(nbIntU * nbIntV >5) { 
-      Standard_Integer indU = (Index-1)/nbIntU;                  //----   0 --> nbIntV
-      Standard_Integer indV = (Index-1) - indU*nbIntU;           //----   0 --> nbIntU
+      // Index runs over an nbIntU x nbIntV grid, U fastest.
+      const Standard_Integer indV = (Index-1)/nbIntU;        //----   0 --> nbIntV-1
+      const Standard_Integer indU = (Index-1) - indV*nbIntU; //----   0 --> nbIntU-1
 
       U = uinf + ((usup-uinf)/((Standard_Real)(nbIntU+1)))*(Standard_Real)(indU+1);
       V = vinf + ((vsup-vinf)/((Standard_Real)(nbIntV+2)))*(Standard_Real)(indV+1);
