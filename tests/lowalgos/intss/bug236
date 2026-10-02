@@ -8,9 +8,9 @@ puts ""
 ##Result of intersection of two surfaces of linear extrusion is incorrect.
 #######################################################
 
-restore [locate_data_file OCC236a.rle] su1 
+restore [locate_data_file OCC236a.draw] su1 
 ############### checkshape su1 # is not a topological shape
-restore [locate_data_file OCC236b.rle] su2
+restore [locate_data_file OCC236b.draw] su2
 ############### checkshape su2 # is not a topological shape
 
 intersect result su1 su2

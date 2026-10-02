@@ -7,9 +7,9 @@ puts ""
 ## second is not (the distance between first and last points is 2e-5).
 #######################################################
 
-restore [locate_data_file OCC235a.rle] su1 
+restore [locate_data_file OCC235a.draw] su1 
 ############### checkshape su1 # is not a topological shape
-restore [locate_data_file OCC235b.rle] su2
+restore [locate_data_file OCC235b.draw] su2
 ############### checkshape su2 # is not a topological shape
 
 intersect result su1 su2
