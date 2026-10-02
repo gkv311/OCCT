@@ -8,8 +8,8 @@ set BugNumber OCC30272
 set tol_abs 1.0e-4
 set tol_rel 0.0001
 
-restore [locate_data_file bug30272_cur.brep] c
-restore [locate_data_file bug30272_sur.brep] s
+restore [locate_data_file bug30272_cur.draw] c
+restore [locate_data_file bug30272_sur.draw] s
 
 set result_C0 [gproject result_C0 c s 1.0e-3 -3d 1 -c C0]
 regexp {2d is ([-0-9.+eE]+);..([-0-9.+eE]+)} $result_C0 full 2dUError_C0 2dVError_C0

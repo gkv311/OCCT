@@ -6,8 +6,8 @@ puts ""
 # Wrong result obtained by projection algorithm.
 #######################################################################
 
-restore [locate_data_file bug25892_c013] c
-restore [locate_data_file bug25892_s013] s
+restore [locate_data_file bug25892_c013.draw] c
+restore [locate_data_file bug25892_s013.draw] s
 
 project cx c s
 
