@@ -4,8 +4,8 @@ puts " OCC271 "
 puts "========================"
 puts ""
 
-restore [locate_data_file OCC271a.rle] su1 
-restore [locate_data_file OCC271b.rle] su2
+restore [locate_data_file OCC271a.draw] su1 
+restore [locate_data_file OCC271b.draw] su2
 
 set U1 2.315721254379057e-16
 set U2 0.01131870392278708

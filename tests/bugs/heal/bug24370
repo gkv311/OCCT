@@ -9,8 +9,8 @@ puts ""
 pload QAcommands
 
 restore [locate_data_file bug24370_edge.brep] edge
-restore [locate_data_file bug24370_pcurve_draw] pcurve
-restore [locate_data_file bug24370_surface_draw] surface
+restore [locate_data_file bug24370_pcurve_draw.draw] pcurve
+restore [locate_data_file bug24370_surface_draw.draw] surface
 set precision 0.001
 
 set info [OCC24370 edge pcurve surface ${precision}]

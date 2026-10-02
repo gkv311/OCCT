@@ -4,8 +4,8 @@ puts "========="
 puts ""
 
 
-restore [locate_data_file bug32058_c] c
-restore [locate_data_file bug32058_s] s
+restore [locate_data_file bug32058_c.draw] c
+restore [locate_data_file bug32058_s.draw] s
 
 extrema c s
 checklength ext_1 -l 2.3437142008433856e-13

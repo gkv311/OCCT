@@ -5,9 +5,9 @@ puts ""
 
 pload ALL
 
-restore [locate_data_file bug31631_1.brep] path
-restore [locate_data_file bug31631_2.brep] sup1
-restore [locate_data_file bug31631_3.brep] sup2
+restore [locate_data_file bug31631_1.draw] path
+restore [locate_data_file bug31631_2.draw] sup1
+restore [locate_data_file bug31631_3.draw] sup2
 
 tuyau res1 path sup1 sup2 6.35001275
 

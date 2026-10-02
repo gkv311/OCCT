@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC23175
 
-restore [locate_data_file OCC23175-bspline-per-3_draw] result 
+restore [locate_data_file OCC23175-bspline-per-3_draw.draw] result 
 
 catch { segment result 1 2.5 } msg
 

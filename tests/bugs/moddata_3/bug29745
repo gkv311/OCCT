@@ -5,8 +5,8 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug29745_1] bc
-restore [locate_data_file bug29745_2] bc1
+restore [locate_data_file bug29745_1.draw] bc
+restore [locate_data_file bug29745_2.draw] bc1
 
 
 set ref1 {NbIntervals: 2; 0 0.5 1 }
