@@ -5,7 +5,7 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug23683_a_31_draw] result
+restore [locate_data_file bug23683_a_31_draw.draw] result
 set info [OCC23683 result]
 
 if { [regexp "iscnu: OK" $info] != 1 } {
