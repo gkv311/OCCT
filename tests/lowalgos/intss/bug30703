@@ -3,8 +3,8 @@ puts "0030703: Modeling Algorithms - Intersector returns overlapping curves"
 puts "============"
 puts ""
 
-restore [locate_data_file bug30703s1] s1
-restore [locate_data_file bug30703s2] s2
+restore [locate_data_file bug30703s1.draw] s1
+restore [locate_data_file bug30703s2.draw] s2
 
 set info [intersect res s1 s2]
 # Number of solutions check. 

@@ -3,8 +3,8 @@ puts "0032849: Modeling Algorithms - Intersection algorithm returns incomplete r
 puts "========"
 puts ""
 
-restore [locate_data_file bug32849_s1] s1
-restore [locate_data_file bug32849_s2] s2
+restore [locate_data_file bug32849_s1.draw] s1
+restore [locate_data_file bug32849_s2.draw] s2
 
 mkface f1 s1;
 mkface f2 s2;

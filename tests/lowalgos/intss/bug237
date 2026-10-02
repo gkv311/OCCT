@@ -6,9 +6,9 @@ puts ""
 ## Hang-ups during the intersection of attached surfaces
 #######################################################
 
-restore [locate_data_file OCC236b.rle] su1 
+restore [locate_data_file OCC236b.draw] su1 
 ############### checkshape su1 # is not a topological shape
-restore [locate_data_file OCC237b.rle] su2
+restore [locate_data_file OCC237b.draw] su2
 ############### checkshape su2 # is not a topological shape
 
 if [catch {intersect result su1 su2 }] {
