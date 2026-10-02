@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC22910
 
-restore [locate_data_file s.rle] s 
+restore [locate_data_file s.draw] s 
 mkface result s
 set exception_status [ catch { incmesh result 0.0038476968063336017 } ]
 
