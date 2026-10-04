@@ -1,4 +1,5 @@
 FAILED /\bFaulty\b/ error
+SKIPPED /Error: glTF reader is unavailable - OCCT has been built without RapidJSON support/ OCCT is built without RapidJSON, GLTF is not available
 SKIPPED /OCCT is built without Open GL ES/ OCCT is built without Open GL ES
 SKIPPED /OCCT is built without Direct3D/ OCCT is built without Direct3D
 SKIPPED /OCCT is built without RapidJSON/ OCCT is built without RapidJSON
