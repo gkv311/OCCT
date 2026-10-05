@@ -11,7 +11,7 @@
 #sewing s b1_1 b2_1 b3_6
 #########################
 
-restore [locate_data_file 7_B3.draw] s
+restore [locate_data_file 7_B3.brep] s
 tscale  s 0 0 0 SCALE
 explode s E
 mkevol P s

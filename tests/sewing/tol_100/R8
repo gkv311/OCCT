@@ -1,4 +1,4 @@
-restore [locate_data_file CTO900_pro6066b.rle] a
+restore [locate_data_file CTO900_pro6066b.brep] a
 
 sewing result $tol a
 

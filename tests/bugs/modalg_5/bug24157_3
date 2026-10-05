@@ -6,7 +6,7 @@ puts ""
 # Parallelization of assembly part of BO
 ############################################
 
-restore [locate_data_file bug24157_x_512_solids] b1
+restore [locate_data_file bug24157_x_512_solids.brep] b1
 bclearobjects
 bcleartools
 baddcompound b1

@@ -6,8 +6,8 @@ puts ""
 ## Boolean common does not produce expected result
 ##########################################
 
-restore [locate_data_file a350] a
-restore [locate_data_file b350] b
+restore [locate_data_file a350.brep] a
+restore [locate_data_file b350.brep] b
 
 bclearobjects
 bcleartools

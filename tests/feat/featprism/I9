@@ -1,5 +1,5 @@
-restore [locate_data_file cts20924a.rle] cyl
-restore [locate_data_file contour2.rle] cont
+restore [locate_data_file cts20924a.brep] cyl
+restore [locate_data_file contour2.brep] cont
 
 explode cyl face
 copy cyl_1 funtil

@@ -1,4 +1,4 @@
-set chamf_shape testKPart
+set chamf_shape testKPart.brep
 set chamf_edge_face  [list "  2   1"]
 set chamf_dist_angle [list ".08  20"]
 set chamf_dist_dist  [list " .1 .08"]

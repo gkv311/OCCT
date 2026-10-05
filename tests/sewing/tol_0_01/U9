@@ -1,4 +1,4 @@
-restore [locate_data_file CFE903_cts20ggq.rle] a
+restore [locate_data_file CFE903_cts20ggq.brep] a
 
 sewing result $tol a
 

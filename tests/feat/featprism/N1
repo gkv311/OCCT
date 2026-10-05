@@ -3,7 +3,7 @@
 
 puts "*"
 
-restore [locate_data_file CFE900_id160gdu.rle] base
+restore [locate_data_file CFE900_id160gdu.brep] base
 restore [locate_data_file id160074_face1.brep] cont
 
 explode base face
