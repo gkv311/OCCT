@@ -136,6 +136,7 @@ jobs:
           set(BUILD_RELEASE_DISABLE_EXCEPTIONS OFF CACHE BOOL "")
           set(BUILD_DOC_Overview OFF CACHE BOOL "")
           set(BUILD_MODULE_Draw  ON  CACHE BOOL "")
+          set(BUILD_SAMPLES_MFC  ON  CACHE BOOL "")
           set(USE_FREETYPE       OFF CACHE BOOL "")
           set(USE_FREEIMAGE      OFF CACHE BOOL "")
           set(USE_TK             OFF CACHE BOOL "")

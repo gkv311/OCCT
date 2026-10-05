@@ -1,0 +1,22 @@
+# This manually dispatched workflow runs regression tests for OCCT to upload as new reference.
+name: Test (Update reference)
+
+on: [workflow_dispatch]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ubuntu-gcc-x86_64:
+    with:
+      runs-on: ubuntu-24.04
+      config: ubuntu-gcc
+      ref-branch: ''
+    uses: ./.github/workflows/test_ubuntu.yml
+  #ubuntu-gcc-arm64:
+  #  with:
+  #    runs-on: ubuntu-24.04-arm
+  #    config: ubuntu-gcc-arm
+  #    ref-branch: ''
+  #  uses: ./.github/workflows/test_ubuntu.yml
