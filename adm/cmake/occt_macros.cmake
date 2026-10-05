@@ -228,12 +228,6 @@ endmacro()
 macro (COLLECT_AND_INSTALL_OCCT_HEADER_FILES ROOT_TARGET_OCCT_DIR OCCT_BUILD_TOOLKITS OCCT_COLLECT_SOURCE_DIR OCCT_INSTALL_DIR_PREFIX)
   set (OCCT_USED_PACKAGES)
 
-  # consider patched header.in template
-  set (TEMPLATE_HEADER_PATH "${CMAKE_SOURCE_DIR}/adm/templates/header.in")
-  if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/adm/templates/header.in")
-    set (TEMPLATE_HEADER_PATH "${BUILD_PATCH}/adm/templates/header.in")
-  endif()
-
   set (ROOT_OCCT_DIR ${CMAKE_SOURCE_DIR})
 
   foreach (OCCT_USED_TOOLKIT ${OCCT_BUILD_TOOLKITS})
@@ -336,13 +330,18 @@ macro (COLLECT_AND_INSTALL_OCCT_HEADER_FILES ROOT_TARGET_OCCT_DIR OCCT_BUILD_TOO
     get_filename_component (HEADER_FILE_NAME ${OCCT_HEADER_FILE} NAME)
     if ("${BUILD_SHORTCUT_HEADERS}" STREQUAL "shortcut")
       file (RELATIVE_PATH OCCT_HEADER_FILE_RELATIVE "${ROOT_TARGET_OCCT_DIR}/${OCCT_INSTALL_DIR_PREFIX}" "${OCCT_HEADER_FILE}")
-      set (OCCT_HEADER_FILE_CONTENT "#include \"${OCCT_HEADER_FILE_RELATIVE}\"")
+      set (OCCT_HEADER_FILE_CONTENT "#include \"${OCCT_HEADER_FILE_RELATIVE}\"\n")
     else()
-      set (OCCT_HEADER_FILE_CONTENT "#include \"${OCCT_HEADER_FILE}\"")
+      set (OCCT_HEADER_FILE_CONTENT "#include \"${OCCT_HEADER_FILE}\"\n")
     endif()
-    configure_file ("${TEMPLATE_HEADER_PATH}" "${ROOT_TARGET_OCCT_DIR}/${OCCT_INSTALL_DIR_PREFIX}/${HEADER_FILE_NAME}" @ONLY)
+    # Avoid using configure_file(), which is extremely slow on Windows.
+    # Only file existance is checked (manually modified files in build directory will NOT be re-generated,
+    # and changes of BUILD_SHORTCUT_HEADERS option will be ignored after first configure)
+    if (NOT EXISTS "${ROOT_TARGET_OCCT_DIR}/${OCCT_INSTALL_DIR_PREFIX}/${HEADER_FILE_NAME}")
+      file (WRITE "${ROOT_TARGET_OCCT_DIR}/${OCCT_INSTALL_DIR_PREFIX}/${HEADER_FILE_NAME}" "${OCCT_HEADER_FILE_CONTENT}")
+    endif()
   endforeach()
-  
+
   install (FILES ${OCCT_HEADER_FILES_COMPLETE} DESTINATION "${INSTALL_DIR}/${OCCT_INSTALL_DIR_PREFIX}")
   
   string(TIMESTAMP CURRENT_TIME "%H:%M:%S")
