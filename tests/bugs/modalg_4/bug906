@@ -10,7 +10,7 @@ puts ""
 ## c40 is not better than in dev 
 #########################################################
 
-restore [locate_data_file DXF906.rle] a 
+restore [locate_data_file DXF906.brep] a 
 
 mkplane result a
 

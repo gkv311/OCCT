@@ -18,7 +18,7 @@ set good_v2 7.6699722758333735
 
 set percent_max 0.1
 
-restore [locate_data_file OCC921.rle] a
+restore [locate_data_file OCC921.brep] a
 
 set BoundsList [OCC921 a]
 

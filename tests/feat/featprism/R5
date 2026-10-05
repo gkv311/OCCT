@@ -1,6 +1,6 @@
-restore [locate_data_file CTO900_cts18754-part.rle] s
+restore [locate_data_file CTO900_cts18754-part.brep] s
 explode s f
-restore [locate_data_file cts18754-tool.rle] w
+restore [locate_data_file cts18754-tool.brep] w
 mkplane w w
 
 featprism s w w 0 1 0 1 1

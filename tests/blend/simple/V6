@@ -9,9 +9,9 @@
 #mkedge c1 c1
 #wire d c1
 #pipe s d w
-#save s  8_I1.draw 
+#save s  8_I1.brep 
 
-restore [locate_data_file 8_I1.draw] s
+restore [locate_data_file 8_I1.brep] s
 tscale s 0 0 0 SCALE1
 fsameparameter s
 explode s E

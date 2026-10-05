@@ -1,4 +1,4 @@
-set chamf_shape propag
+set chamf_shape propag.brep
 set chamf_edge_face  [list "  1   2"]
 set chamf_dist_angle [list ".08  30"]
 set chamf_dist_dist  [list ".08 .06"]

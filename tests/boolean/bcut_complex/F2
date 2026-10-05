@@ -1,8 +1,8 @@
 # Original bug : buc60127
 # Date : 18mar98
 
-restore [locate_data_file buc60127-part.rle] part
-restore [locate_data_file buc60127-tool.rle] tool
+restore [locate_data_file buc60127-part.brep] part
+restore [locate_data_file buc60127-tool.brep] tool
 
 # fix the part shape
 

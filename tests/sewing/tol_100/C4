@@ -1,4 +1,4 @@
-restore [locate_data_file CFI_i1234fis.rle] a
+restore [locate_data_file CFI_i1234fis.brep] a
 
 sewing result $tol a
 

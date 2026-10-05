@@ -1,4 +1,4 @@
-restore [locate_data_file BUC60394.rle] a
+restore [locate_data_file BUC60394.brep] a
 
 sewing result $tol a
 

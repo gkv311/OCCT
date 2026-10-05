@@ -6,7 +6,7 @@ puts ""
 ####################################################################
 ## Checkshape founds number of errors on new face. It is not true.
 ####################################################################
-restore [locate_data_file OCC889.rle] result
+restore [locate_data_file OCC889.brep] result
 
 checkshape result
 
