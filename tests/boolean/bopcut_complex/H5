@@ -1,5 +1,5 @@
-restore [locate_data_file a106] a
-restore [locate_data_file b106] b
+restore [locate_data_file a106.brep] a
+restore [locate_data_file b106.brep] b
 
 bop a b
 bopcut result

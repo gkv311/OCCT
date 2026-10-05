@@ -4,12 +4,12 @@
 ## Comment : from pro6309
 ## ====================================
 
-restore [locate_data_file CFI_pro6309a.rle] a
+restore [locate_data_file CFI_pro6309a.brep] a
 tscale a 0 0 0 1000
-restore [locate_data_file pro6309b.rle] b
+restore [locate_data_file pro6309b.brep] b
 tscale b 0 0 0 1000
-#restore pro6309c.rle c
-#restore pro6309d.rle d
+#restore pro6309c.brep c
+#restore pro6309d.brep d
 invert b
 shape bb So
 add b bb

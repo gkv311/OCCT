@@ -1,4 +1,4 @@
-restore [locate_data_file 4_Q1(hlacg08).draw] a
+restore [locate_data_file 4_Q1(hlacg08).brep] a
 
 sewing result $tol a
 

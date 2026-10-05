@@ -7,7 +7,7 @@ puts ""
 #################################################
 
 
-binrestore [locate_data_file bug28385_de_iges_1_J9_faces.bin] a
+binrestore [locate_data_file bug28385_de_iges_1_J9_faces.bbrep] a
 
 smallview
 isos a 2

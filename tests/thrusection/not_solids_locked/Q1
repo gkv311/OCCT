@@ -1,5 +1,5 @@
-restore [locate_data_file C13] w1
-restore [locate_data_file C1] w2
+restore [locate_data_file C13.brep] w1
+restore [locate_data_file C1.brep] w2
 setflags w1 locked
 setflags w2 locked
 thrusections result 0 0 w1 w2 -safe

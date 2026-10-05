@@ -17,9 +17,9 @@ puts "TODO OCC22817 All:Faulty shapes in variables faulty_1 to faulty_2 "
 #explode c F
 #explode r F
 #glue s c r c_3 r_6 
-#save s 6_G56.draw
+#save s 6_G56.brep
 
-restore [locate_data_file 6_G56.draw] s
+restore [locate_data_file 6_G56.brep] s
 tscale s 0 0 0 SCALE2
 fsameparameter s
 explode  s E

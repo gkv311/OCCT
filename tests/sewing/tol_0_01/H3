@@ -1,4 +1,4 @@
-restore [locate_data_file CCH_testsheu.rle] a
+restore [locate_data_file CCH_testsheu.brep] a
 
 sewing result $tol a
 

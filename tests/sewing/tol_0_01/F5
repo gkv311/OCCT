@@ -1,4 +1,4 @@
-restore [locate_data_file CCH_indushen.rle] a
+restore [locate_data_file CCH_indushen.brep] a
 
 sewing result $tol a
 

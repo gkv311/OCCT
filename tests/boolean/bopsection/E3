@@ -1,7 +1,7 @@
 cpulimit 600
 
-restore [locate_data_file sh2] b1
-restore [locate_data_file sh3] b2
+restore [locate_data_file sh2.brep] b1
+restore [locate_data_file sh3.brep] b2
 
 bop b1 b2
 bopsection result

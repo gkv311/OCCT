@@ -5,10 +5,10 @@ puts "(case 2)"
 puts "========================"
 puts ""
 
-restore [locate_data_file f7] b1 
+restore [locate_data_file f7.brep] b1 
 checkshape b1
 
-restore [locate_data_file f3] b2
+restore [locate_data_file f3.brep] b2
 checkshape b2
 
 bfuse result b1 b2

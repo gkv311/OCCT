@@ -1,4 +1,4 @@
-restore [locate_data_file CCV_2_g1_gsz.rle] a
+restore [locate_data_file CCV_2_g1_gsz.brep] a
 
 sewing result $tol a
 

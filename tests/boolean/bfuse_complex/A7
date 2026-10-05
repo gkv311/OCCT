@@ -1,5 +1,5 @@
-restore [locate_data_file f4] b1
-restore [locate_data_file f5] b2
+restore [locate_data_file f4.brep] b1
+restore [locate_data_file f5.brep] b2
 
 bfuse result b1 b2
 

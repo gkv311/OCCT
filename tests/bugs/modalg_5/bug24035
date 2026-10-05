@@ -7,8 +7,8 @@ puts ""
 # Intersector is not symmetrical
 ######################################################
 
-restore [locate_data_file bug24035_face1] face1
-restore [locate_data_file bug24035_face2] face2
+restore [locate_data_file bug24035_face1.brep] face1
+restore [locate_data_file bug24035_face2.brep] face2
 
 checkshape face1
 checkshape face2

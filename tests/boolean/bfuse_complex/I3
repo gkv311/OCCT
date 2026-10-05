@@ -2,8 +2,8 @@
 # Date : 13Mai98
 # C5
 
-restore [locate_data_file CTO902_cts20494a.rle] a
-restore [locate_data_file cts20494b.rle] b
+restore [locate_data_file CTO902_cts20494a.brep] a
+restore [locate_data_file cts20494b.brep] b
 
 bfuse result a b
 

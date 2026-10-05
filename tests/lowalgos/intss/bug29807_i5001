@@ -5,8 +5,8 @@ puts ""
 
 foreach a [directory res*] {unset $a}
 
-binrestore [locate_data_file bug29807_f1.bin] f1
-binrestore [locate_data_file bug29807_f2.bin] f2
+binrestore [locate_data_file bug29807_f1.bbrep] f1
+binrestore [locate_data_file bug29807_f2.bbrep] f2
 
 mksurface s1 f1
 mksurface s2 f2

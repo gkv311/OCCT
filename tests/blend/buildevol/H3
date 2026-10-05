@@ -4,9 +4,9 @@
 #ttranslate s2 -2 -2 5
 #ttranslate s1 s2 5 5 0
 #cut s s1 s2
-#save s G1234.draw 
+#save s G1234.brep 
 
-restore [locate_data_file G1234.draw] s
+restore [locate_data_file G1234.brep] s
 tscale s 0 0 0 SCALE1
 explode s e
 mkevol result s

@@ -1,5 +1,5 @@
-restore [locate_data_file so2] b1
-restore [locate_data_file so6] b2
+restore [locate_data_file so2.brep] b1
+restore [locate_data_file so6.brep] b2
 
 bcommon result b1 b2
 

@@ -1,4 +1,4 @@
-restore [locate_data_file CTO904_fra60977-part.rle] a
+restore [locate_data_file CTO904_fra60977-part.brep] a
 
 sewing result $tol a
 

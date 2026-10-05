@@ -1,5 +1,5 @@
-restore [locate_data_file a106] a
-restore [locate_data_file a157] b
+restore [locate_data_file a106.brep] a
+restore [locate_data_file a157.brep] b
 
 bop a b
 bopcommon result

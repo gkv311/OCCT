@@ -1,1 +1,1 @@
-restore [locate_data_file shljapa.rle] a
+restore [locate_data_file shljapa.brep] a

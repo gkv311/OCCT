@@ -1,8 +1,8 @@
 # Original bug : cts20358
 # Date : 17Juillet98
 
-restore [locate_data_file CFE900_cts20gap.rle] base
-restore [locate_data_file cts20358b.rle] cont
+restore [locate_data_file CFE900_cts20gap.brep] base
+restore [locate_data_file cts20358b.brep] cont
 
 explode base face
 copy base_15 ffrom

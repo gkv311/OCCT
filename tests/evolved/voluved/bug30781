@@ -2,7 +2,7 @@ puts "##################################################"
 puts "0030781: Sweep algorithm creates non-planar edges (orig. BOPAlgo_MakerVolume fails to build a solid)"
 puts "##################################################"
 
-binrestore [locate_data_file bug30781.bin] s
+binrestore [locate_data_file bug30781.bbrep] s
 explode s
 evolved result -s s_1 -p s_2 -solid -a -v -t 1.e-6
 

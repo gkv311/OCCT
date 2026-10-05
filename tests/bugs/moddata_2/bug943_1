@@ -6,7 +6,7 @@ puts "========="
 puts ""
 #####################################################
 ## The regression is intersecting pcurves of face, They are added by fixshape.
-## (To see this you can try fixshape dF.rle from attachment. But please note, that
+## (To see this you can try fixshape dF.brep from attachment. But please note, that
 ## checkshape on result of fixshape sometimes fails and sometimes not. It is
 ## instability!)
 ######################################################

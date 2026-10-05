@@ -1,6 +1,6 @@
 puts "TODO OCC23674 ALL: Error : Number of faults is"
 
-restore [locate_data_file CIN901_intcqhmi.rle] a
+restore [locate_data_file CIN901_intcqhmi.brep] a
 
 sewing result $tol a
 

@@ -9,7 +9,7 @@ puts ""
 #######################################################################
 
 restore [locate_data_file bug25892_c002.draw] c
-restore [locate_data_file bug25892_f002] f
+restore [locate_data_file bug25892_f002.brep] f
 
 mksurface s f
 
