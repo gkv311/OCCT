@@ -80,7 +80,7 @@ namespace {
   //! (Hyper-thread siblings and, on hybrid CPUs, efficiency cores are skipped).
   //!
   //! Selection rules, in priority order:
-  //! 1. if EfficiencyClass varies, keep the cores with the maximum EfficiencyClass;
+  //! 1. if EfficiencyClass varies, discard the cores with the lowest EfficiencyClass;
   //! 2. else the CPU is homogeneous - keep every distinct physical core.
   //!
   //! Returns the number of detected performant cores.
@@ -160,7 +160,7 @@ namespace {
 
       bool isPerf = true;
       if (toUseEff)
-        isPerf = (anEff == aMaxEff);
+        isPerf = (anEff != aMinEff);
       else if (toUseSched)
         isPerf = (aSched > aMinSched);
 
@@ -312,7 +312,7 @@ namespace {
   //! Fills @p theCpuSet with one logical CPU per distinct performance core:
   //! online CPUs are grouped by physical core (physical_package_id:core_id).
   //!
-  //! Only the cores running at the global maximum frequency (cpufreq/cpuinfo_max_freq) are kept,
+  //! The logic discards the cores with low frequency (cpufreq/cpuinfo_max_freq),
   //! so efficiency cores of hybrid CPUs are dropped - and the lowest-indexed sibling of each surviving core is selected.
   //! When frequency data is unavailable every core is kept (siblings are still deduplicated).
   //!
@@ -346,7 +346,7 @@ namespace {
       int CpuId = 0;
     };
     std::map<PackageAndCore, CoreInfo> aMapOfCores;
-    int aMaxFreq = 0;
+    std::map<int, int> aMapOfFreq;
 
     const TCollection_AsciiString aCpuRootPath(THE_SYSTEM_CPU_DIR);
     const OSD_Path aCpuRootPathOsd(aCpuRootPath);
@@ -380,7 +380,6 @@ namespace {
       readIntFromFile(aPkgId,    aCpuRootPath + "/" + aCpuName + "/topology/physical_package_id");
       readIntFromFile(aCoreId,   aCpuRootPath + "/" + aCpuName + "/topology/core_id");
       readIntFromFile(aCoreFreq, aCpuRootPath + "/" + aCpuName + "/cpufreq/cpuinfo_max_freq");
-      aMaxFreq = std::max(aMaxFreq, aCoreFreq);
 
       const PackageAndCore aKey(aPkgId, aCoreId);
       auto aCoreIter = aMapOfCores.find(aKey);
@@ -390,9 +389,13 @@ namespace {
         anInfo.CpuId = aCpuId;
         anInfo.MaxFreq = aCoreFreq;
         aMapOfCores[aKey] = anInfo;
+
+        // count hyper-threaded core only once
+        ++aMapOfFreq[aCoreFreq];
       }
       else
       {
+        // hyper-threaded core - keep only first logical CPU
         if (aCoreFreq > aCoreIter->second.MaxFreq)
           aCoreIter->second.MaxFreq = aCoreFreq;
 
@@ -404,14 +407,33 @@ namespace {
     if (aMapOfCores.empty())
       return 0;
 
+    // Usual grades in heterogeneous CPU configuration:
+    // - Many energy-efficient E-cores (lowest frequency, no hyper-threading);
+    // - Many normal performance P-cores (average frequency, hyper-threading);
+    // - A couple of accelerated P-cores (highest frequency, optimized for single-threaded tasks - small amount).
+    // Example: 12 E-cores + 8 P-cores (including 2 accelerated cores; hyper-threaded), 12+8x2=28 logical CPUs.
+    //
+    // Possible strategies:
+    // 1. Discard energy-efficient cores;
+    // 2. Select all cores within the same category (either slow cores, average cores, or accelerated cores).
+    // Currently, follow the 1st option.
+    const bool toUseEff = aMapOfFreq.size() >= 2;
+    const int  aMinEff  = !aMapOfFreq.empty() ? aMapOfFreq.begin()->first : 0;
+    const int  aMaxEff  = !aMapOfFreq.empty() ? aMapOfFreq.end()->first : 0;
+    (void)aMaxEff;
+
     int aNbPerf = 0;
     for (const std::pair<const PackageAndCore, CoreInfo>& aCoreIter : aMapOfCores)
     {
-      if (aCoreIter.second.MaxFreq == aMaxFreq)
-      {
-        CPU_SET(aCoreIter.second.CpuId, &theCpuSet);
-        ++aNbPerf;
-      }
+      bool isPerf = true;
+      if (toUseEff)
+        isPerf = (aCoreIter.second.MaxFreq != aMinEff);
+
+      if (!isPerf)
+        continue;
+
+      CPU_SET(aCoreIter.second.CpuId, &theCpuSet);
+      ++aNbPerf;
     }
     return aNbPerf;
   }
