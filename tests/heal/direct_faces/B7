@@ -1,1 +1,1 @@
-restore [locate_data_file revface.rle] a
+restore [locate_data_file revface.brep] a

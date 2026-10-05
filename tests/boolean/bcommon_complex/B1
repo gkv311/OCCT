@@ -1,5 +1,5 @@
-restore [locate_data_file f1] b1
-restore [locate_data_file f41] b2
+restore [locate_data_file f1_01.brep] b1
+restore [locate_data_file f41.brep] b2
 
 bcommon result b1 b2
 

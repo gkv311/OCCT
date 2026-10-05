@@ -1,4 +1,4 @@
-restore [locate_data_file CCH_001_qhff.rle] a
+restore [locate_data_file CCH_001_qhff.brep] a
 
 sewing result $tol a
 

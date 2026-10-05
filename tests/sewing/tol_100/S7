@@ -1,4 +1,4 @@
-restore [locate_data_file CTO900_pro7637_prism_oblong.rle] a
+restore [locate_data_file CTO900_pro7637_prism_oblong.brep] a
 
 sewing result $tol a
 

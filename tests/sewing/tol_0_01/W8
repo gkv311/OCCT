@@ -1,4 +1,4 @@
-restore [locate_data_file CFI901_congefjw.rle] a
+restore [locate_data_file CFI901_congefjw.brep] a
 
 sewing result $tol a
 

@@ -10,9 +10,9 @@
 #explode b F
 #explode p F
 #glue s p b p_2 b_2
-#save s 6_G1234.draw
+#save s 6_G1234.brep
 
-restore [locate_data_file CFI_6_g12fhd.rle] s
+restore [locate_data_file CFI_6_g12fhd.brep] s
 tscale s 0 0 0 SCALE2
 explode  s E
 blend result s 6*SCALE2 s_13
