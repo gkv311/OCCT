@@ -1,8 +1,8 @@
 # Original bug : cfe002C5
 # Date : 09 Nov 98
 
-restore [locate_data_file pro16389a.rle] base
-restore [locate_data_file pro16389b.rle] prism
+restore [locate_data_file pro16389a.brep] base
+restore [locate_data_file pro16389b.brep] prism
 
 bcut result base prism
 checkprops result -s 312467

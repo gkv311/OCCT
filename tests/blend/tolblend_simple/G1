@@ -1,4 +1,4 @@
-restore [locate_data_file CFI_13_e1ffm.rle] s
+restore [locate_data_file CFI_13_e1ffm.brep] s
 tscale s 0 0 0 SCALE1
 explode s E
 blend result s 7*SCALE1 s_2 7*SCALE1 s_12  7*SCALE1 s_1

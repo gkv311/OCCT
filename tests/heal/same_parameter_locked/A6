@@ -1,1 +1,1 @@
-restore [locate_data_file self-int.rle] s
+restore [locate_data_file self-int.brep] s

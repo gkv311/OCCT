@@ -3,9 +3,9 @@
 #ttranslate s2 5 0 3
 #ttranslate s1 s2 5 5 0
 #fuse s s1 s2
-#save s I5678.draw 
+#save s I5678.brep 
 
-restore [locate_data_file I5678.draw] s
+restore [locate_data_file I5678.brep] s
 tscale s 0 0 0 SCALE1
 explode s e
 blend result s 0.5*SCALE1 s_4

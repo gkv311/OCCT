@@ -1,5 +1,5 @@
-restore [locate_data_file g1] b1
-restore [locate_data_file g2] b2
+restore [locate_data_file g1.brep] b1
+restore [locate_data_file g2.brep] b2
 
 bop b1 b2
 bopfuse result

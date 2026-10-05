@@ -1,6 +1,6 @@
 ## FRA61291
 
-restore [locate_data_file CTO904_cts21347a.rle] a
+restore [locate_data_file CTO904_cts21347a.brep] a
 restore [locate_data_file CTO909_tool.brep] b
 
 bcut result a b

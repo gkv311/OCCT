@@ -2,7 +2,7 @@
 # Date : 21August98
 
 restore [locate_data_file cts21126_base.brep] base
-restore [locate_data_file cts21128b.rle] cont
+restore [locate_data_file cts21128b.brep] cont
 
 explode base face
 copy base_3 funtil

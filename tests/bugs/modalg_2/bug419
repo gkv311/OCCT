@@ -6,10 +6,10 @@ puts "FRA50047"
 puts "========================"
 puts ""
 
-restore [locate_data_file CTO904_fra50047a.rle] a 
+restore [locate_data_file CTO904_fra50047a.brep] a 
 checkshape a
 
-restore [locate_data_file fra50047b.rle] b 
+restore [locate_data_file fra50047b.brep] b 
 checkshape b
 
 bsection sec a b
