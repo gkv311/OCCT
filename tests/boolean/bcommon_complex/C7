@@ -1,6 +1,6 @@
 
-restore [locate_data_file buc60290a.rle] sol1
-restore [locate_data_file buc60290b.rle] sol2
+restore [locate_data_file buc60290a.brep] sol1
+restore [locate_data_file buc60290b.brep] sol2
 
 bcommon result sol2 sol1
 

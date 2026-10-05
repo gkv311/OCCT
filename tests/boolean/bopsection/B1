@@ -2,8 +2,8 @@
 # Date : 25Mai98
 
 
-restore [locate_data_file pro11615a.rle] a
-restore [locate_data_file CTO904_pro11615b.rle] b
+restore [locate_data_file pro11615a.brep] a
+restore [locate_data_file CTO904_pro11615b.brep] b
 
 bop a b
 bopsection result

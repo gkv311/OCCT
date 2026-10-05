@@ -1,4 +1,4 @@
-restore [locate_data_file CCH_001_ihdj.rle] a
+restore [locate_data_file CCH_001_ihdj.brep] a
 
 sewing result $tol a
 

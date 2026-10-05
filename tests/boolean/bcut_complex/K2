@@ -2,8 +2,8 @@
 # Date : 11June98
 # D9
 
-restore [locate_data_file CTO902_pro14235c.rle] c
-restore [locate_data_file CTO902_pro14235d.rle] d
+restore [locate_data_file CTO902_pro14235c.brep] c
+restore [locate_data_file CTO902_pro14235d.brep] d
 
 bcut result c d
 checkprops result -s 1.55789e+06

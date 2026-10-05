@@ -1,4 +1,4 @@
-restore [locate_data_file CIN900_cts20hll.rle] a
+restore [locate_data_file CIN900_cts20hll.brep] a
 
 sewing result $tol a
 

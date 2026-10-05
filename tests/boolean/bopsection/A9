@@ -1,8 +1,8 @@
 # Original bug : buc60172
 # Date : 25Mai98
 
-restore [locate_data_file buc60172a.rle] a
-restore [locate_data_file buc60172b.rle] b
+restore [locate_data_file buc60172a.brep] a
+restore [locate_data_file buc60172b.brep] b
 
 bop a b
 bopsection result
