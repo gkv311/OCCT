@@ -139,6 +139,7 @@ jobs:
       with:
         path: occt.git/data/opencascade-dataset.git
         repository: gkv311/opencascade-dataset
+        ref: v7_7_x
         fetch-depth: 1
     # Extra packages: xwayland-run weston
     - name: Install Dependencies
