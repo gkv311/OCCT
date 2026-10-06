@@ -42,7 +42,7 @@ math_Uzawa::math_Uzawa(const math_Matrix& Cont, const math_Vector& Secont,
 		       const Standard_Integer NbIterations) :
                        Resul(1, Cont.ColNumber()),
                        Erruza(1, Cont.ColNumber()),
-                       Errinit(1, Cont.ColNumber()),
+                       Errinit(1, Cont.RowNumber()),
                        Vardua(1, Cont.RowNumber()),
                        CTCinv(1, Cont.RowNumber(),
 			      1, Cont.RowNumber()){
@@ -58,7 +58,7 @@ math_Uzawa::math_Uzawa(const math_Matrix& Cont, const math_Vector& Secont,
 		       const Standard_Integer NbIterations) :
                        Resul(1, Cont.ColNumber()),
                        Erruza(1, Cont.ColNumber()),
-                       Errinit(1, Cont.ColNumber()),
+                       Errinit(1, Cont.RowNumber()),
                        Vardua(1, Cont.RowNumber()),
                        CTCinv(1, Cont.RowNumber(),
 			      1, Cont.RowNumber())  {
