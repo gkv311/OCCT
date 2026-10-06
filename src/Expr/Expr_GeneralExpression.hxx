@@ -35,6 +35,16 @@ DEFINE_STANDARD_HANDLE(Expr_GeneralExpression, Standard_Transient)
 //! Defines the general purposes of any expression.
 class Expr_GeneralExpression : public Standard_Transient
 {
+public:
+
+  //! Replace predefined named constants like 'pi' with Expr_NumericValue.
+  Standard_EXPORT static Handle(Expr_GeneralExpression) ReplaceConstants(const Handle(Expr_GeneralExpression)& theExpr);
+
+  //! Replace named constant with Expr_NumericValue.
+  Standard_EXPORT static Handle(Expr_GeneralExpression) ReplaceConstant(const Handle(Expr_GeneralExpression)& theExpr,
+                                                                        const TCollection_AsciiString& theName,
+                                                                        const Standard_Real theValue,
+                                                                        const bool theIsCaseSensitive = true);
 
 public:
 

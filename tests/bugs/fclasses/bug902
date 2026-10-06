@@ -1,31 +1,16 @@
 puts "======="
-puts "OCC902"
+puts "OCC902: Expr returns bad derivative of math expression with Exp"
 puts "======="
 puts ""
-###############
-## bad derivative
-###############
 
-pload QAcommands
+set test_expr "Exp(5*x)"
+set ref_der1  "Exp(5*x)*5"
+dexpr "$test_expr"    x=1
+dexpr "$test_expr" f' x=1
+if { [dexpr "$test_expr" f' -string] != "$ref_der1" } { puts "Error: wrong first derivative" }
 
-set arg 5
-set list [OCC902 $arg]
-
-set we_have [lindex $list 8]
-puts "we_have = $we_have"
-
-set must_be_1 "Exp($arg*x)*$arg"
-puts "must_be_1 = $must_be_1"
-set must_be_2 "$arg*Exp($arg*x)"
-puts "must_be_2 = $must_be_2"
-
-if  {[string compare $we_have $must_be_1] == 0} {
-  puts "OCC902 OK"
-} else {      
-  if { [string compare $we_have $must_be_2] == 0} { 
-    puts "OCC902 OK"
-  } else {
-    puts "OCC902 Faulty"
-  }	 
-}
-
+v2d
+2dzoom 100
+2dplot p0 "$test_expr"
+2dplot p1 "$test_expr" f' -color RED
+xwd ${imagedir}/${casename}.png

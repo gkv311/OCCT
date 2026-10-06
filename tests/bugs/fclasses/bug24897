@@ -1,11 +1,14 @@
 puts "============"
-puts "OCC24897"
+puts "OCC24897: Possibility of uncontrolled exit if scanner fails in ExprIntrp"
 puts "============"
 puts ""
-#######################################################################
-# Possibility of uncontrolled exit if scanner fails in ExprIntrp
-#######################################################################
 
-pload QAcommands
+set test_expr "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+dexpr "$test_expr" -value "${test_expr}=2"
+if { [dexpr "$test_expr" -value "${test_expr}=2" ] != "2" } { puts "Error: invalid parsing results" }
 
-CR23403 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+v2d
+2dzoom 10
+2dplot p0 "$test_expr"
+2dplot p1 "$test_expr" f' -color RED
+xwd ${imagedir}/${casename}.png

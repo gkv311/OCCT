@@ -14,10 +14,13 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-// **************************************************************
-// Modif : DFO 05/11/96
-
 #include <Draw.hxx>
+
+#include <Expr_GeneralExpression.hxx>
+#include <Expr_NamedUnknown.hxx>
+#include <Expr_NotEvaluable.hxx>
+#include <Expr_UnknownIterator.hxx>
+#include <ExprIntrp_GenExp.hxx>
 #include <Draw_Appli.hxx>
 #include <Draw_Display.hxx>
 #include <Draw_Drawable3D.hxx>
@@ -26,16 +29,17 @@
 #include <Draw_Text2D.hxx>
 #include <Draw_Text3D.hxx>
 #include <Message.hxx>
+#include <Standard_NumericError.hxx>
 #include <Standard_Stream.hxx>
 
+#include <limits>
+
 #include <stdio.h>
-#ifdef _WIN32
+
 extern Draw_Viewer dout;
 extern Standard_Boolean Draw_Batch;
-#endif
-
+extern Standard_Boolean Draw_Bounds;
 extern Standard_Boolean Draw_BlackBackGround;
-
 
 #define DEFROTATE (5 * M_PI/ 180.)
 #define DEFMAGNIFY 1.1
@@ -947,6 +951,402 @@ static Standard_Integer dtext(Draw_Interpretor& di, Standard_Integer n, const ch
   return 0;
 }
 
+
+//! 2D Drawable for math expression with single unknown.
+class Draw_PlotExpr2D : public Draw_Drawable2D
+{
+  DEFINE_STANDARD_RTTI_INLINE(Draw_PlotExpr2D, Draw_Drawable2D)
+public:
+
+  //! Main constructor.
+  Draw_PlotExpr2D(const Handle(Expr_GeneralExpression)& theExpr)
+  : myExpr(theExpr)
+  {
+    SetValues(Expr_Array1OfNamedUnknown(), TColStd_Array1OfReal());
+  }
+
+  //! Draws expression.
+  void DrawOn(Draw_Display& theDisp) const override;
+
+  //! Set predefined variables.
+  void SetValues(const Expr_Array1OfNamedUnknown& theVars, const TColStd_Array1OfReal& theVals);
+
+  //! Set color.
+  void SetColor(Draw_Color theColor) { myColor = theColor; }
+
+private:
+
+  Handle(Expr_GeneralExpression) myExpr;
+  Expr_Array1OfNamedUnknown myVarArr;
+  TColStd_Array1OfReal myValArr;
+  Standard_Integer myNbUnknowns = 0;
+  Draw_Color myColor = Draw_blanc;
+
+};
+
+//=======================================================================
+//function : Draw_PlotExpr2D::SetValues
+//=======================================================================
+void Draw_PlotExpr2D::SetValues(const Expr_Array1OfNamedUnknown& theVars, const TColStd_Array1OfReal& theVals)
+{
+  Expr_Array1OfNamedUnknown aCopyVars(theVars);
+  TColStd_Array1OfReal aCopyVals(theVals);
+  myVarArr.Move(aCopyVars);
+  myValArr.Move(aCopyVals);
+
+  NCollection_List<Handle(Expr_NamedUnknown)> aPlotVars;
+  for (Expr_UnknownIterator anUnknownIter(myExpr); anUnknownIter.More(); anUnknownIter.Next())
+  {
+    const Handle(Expr_NamedUnknown) anUnknown = anUnknownIter.Value();
+
+    bool isUnknown = true;
+    for (const Handle(Expr_NamedUnknown)& aKnownIter : theVars)
+    {
+      if (anUnknown->GetName() == aKnownIter->GetName())
+      {
+        isUnknown = false;
+        break;
+      }
+    }
+
+    if (isUnknown)
+      aPlotVars.Append(anUnknown);
+  }
+
+  myNbUnknowns = aPlotVars.Size();
+  if (myNbUnknowns == 0)
+    return;
+
+  myVarArr.Resize(1, theVars.Size() + myNbUnknowns, true);
+  myValArr.Resize(1, theVals.Size() + myNbUnknowns, true);
+  int aVarIter = myVarArr.Upper() - myNbUnknowns + 1;
+  for (const Handle(Expr_NamedUnknown)& aKnownIter : aPlotVars)
+  {
+    myVarArr.SetValue(theVals.Upper() + aVarIter, aKnownIter);
+    myValArr.SetValue(theVals.Upper() + aVarIter, 0.0);
+    ++aVarIter;
+  }
+}
+
+//=======================================================================
+//function : Draw_PlotExpr2D::DrawOn
+//=======================================================================
+void Draw_PlotExpr2D::DrawOn(Draw_Display& theDisp) const
+{
+  if (myNbUnknowns > 1)
+  {
+    theDisp.DrawString(gp::Origin2d(), myExpr->String().ToCString());
+    return;
+  }
+
+  Expr_Array1OfNamedUnknown aVars(myVarArr);
+  TColStd_Array1OfReal aVals(myValArr);
+
+  NCollection_Vec2<int> aFrameMin, aFrameMax;
+  dout.GetFrame(theDisp.ViewId(), aFrameMin.x(), aFrameMin.y(), aFrameMax.x(), aFrameMax.y());
+  const int aDxPixels = Abs(aFrameMax.x() - aFrameMin.x());
+  if (aDxPixels < 2 || theDisp.Zoom() <= 0.0)
+    return;
+
+  const double aParamFrom = double(aFrameMin.x()) / theDisp.Zoom();
+  const double aParamRange = double(aDxPixels) / theDisp.Zoom();
+
+  // consider function as infinite one and not affected by fit operation
+  Draw_Bounds = false;
+
+  bool toRestart = true;
+  theDisp.SetColor(myColor);
+  for (int aStep = 0; aStep <= aDxPixels; ++aStep)
+  {
+    const double aParam = aParamFrom + (double(aStep) / double(aDxPixels)) * aParamRange;
+    if (myNbUnknowns == 1)
+      aVals.ChangeLast() = aParam;
+
+    double aVal = std::numeric_limits<double>::quiet_NaN();
+    try
+    {
+      if (!aVars.IsEmpty())
+        aVal = myExpr->Evaluate(aVars, aVals);
+      else
+        aVal = myExpr->EvaluateNumeric();
+    }
+    catch (const Expr_NotEvaluable&)
+    {
+    }
+    catch (const Standard_NumericError&)
+    {
+    }
+    if (std::isnan(aVal) || Precision::IsInfinite(aVal))
+    {
+      toRestart = true;
+      continue;
+    }
+
+    gp_Pnt2d aPnt(aParam, aVal);
+    if (toRestart)
+      theDisp.MoveTo(aPnt);
+    else
+      theDisp.DrawTo(aPnt);
+
+    toRestart = false;
+  }
+
+  Draw_Bounds = true;
+}
+
+
+//=======================================================================
+//function : math expression evaluator based on ExprIntrp
+//=======================================================================
+static int dexpr(Draw_Interpretor& theDI, int theNbArgs, const char** theArgVec)
+{
+  const bool isPlotCmd = TCollection_AsciiString::IsSameString(theArgVec[0], "2dplot", false);
+  TCollection_AsciiString aDrawName;
+  Draw_Color aDrawColor(Draw_blanc);
+
+  TCollection_AsciiString        anExprStr;
+  Handle(Expr_GeneralExpression) anExpr;
+  Expr_Array1OfNamedUnknown      aVarArr;
+  TColStd_Array1OfReal           aValArr;
+
+  enum class ExprQuery { NONE, FULL, String, NbSubExpressions, ContainsUnknowns, IsLinear, Value, Unknowns };
+  ExprQuery aQuery = isPlotCmd ? ExprQuery::NONE : ExprQuery::FULL;
+
+  int aTmpInt = 0;
+  for (int anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArgCase(theArgVec[anArgIter]);
+    anArgCase.LowerCase();
+    if (isPlotCmd && aDrawName.IsEmpty())
+    {
+      aDrawName = theArgVec[anArgIter];
+    }
+    else if (anExprStr.IsEmpty())
+    {
+      anExprStr = theArgVec[anArgIter];
+
+      Handle(ExprIntrp_GenExp) anExprIntrp = ExprIntrp_GenExp::Create();
+      anExprIntrp->Process(anExprStr);
+      if (!anExprIntrp->IsDone())
+      {
+        theDI << "Error: invalid expression '" << anExprStr << "'";
+        return 1;
+      }
+
+      anExpr = anExprIntrp->Expression();
+      if (anExpr.IsNull())
+      {
+        theDI << "Error: invalid expression '" << anExprStr << "' (NULL)";
+        return 1;
+      }
+
+      // handle predefined named constants like 'pi'
+      anExpr = Expr_GeneralExpression::ReplaceConstants(anExpr);
+    }
+    else if (anArgCase == "f'" || anArgCase == "f''" || anArgCase == "f'''")
+    {
+      Expr_UnknownIterator anUnknownIter(anExpr);
+      if (!anUnknownIter.More())
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+
+      Handle(Expr_NamedUnknown) anUnknown = anUnknownIter.Value();
+      if (anArgCase == "f'''")
+        anExpr = anExpr->NDerivative(anUnknown, 3);
+      else if (anArgCase == "f''")
+        anExpr = anExpr->NDerivative(anUnknown, 2);
+      else
+        anExpr = anExpr->Derivative(anUnknown);
+    }
+    else if (anArgCase.StartsWith("f'(") || anArgCase.StartsWith("f''(") || anArgCase.StartsWith("f'''("))
+    {
+      const TCollection_AsciiString aVarName = TCollection_AsciiString(theArgVec[anArgIter]).Token("(", 2).Token(")", 1);
+      Handle(Expr_NamedUnknown) anUnknown = new Expr_NamedUnknown(aVarName);
+      if (anArgCase.StartsWith("f'''("))
+        anExpr = anExpr->NDerivative(anUnknown, 3);
+      else if (anArgCase.StartsWith("f''("))
+        anExpr = anExpr->NDerivative(anUnknown, 2);
+      else
+        anExpr = anExpr->Derivative(anUnknown);
+    }
+    else if (anArgCase == "-simplified")
+    {
+      anExpr = anExpr->Simplified();
+    }
+    else if (anArgCase == "-shallowsimplified")
+    {
+      anExpr = anExpr->ShallowSimplified();
+    }
+    else if (anArgIter + 1 < theNbArgs
+          && (anArgCase == "-subexpression" || anArgCase == "-subexpr" || anArgCase == "-sub")
+          && Draw::ParseInteger(theArgVec[anArgIter + 1], aTmpInt))
+    {
+      ++anArgIter;
+      anExpr = anExpr->SubExpression(aTmpInt);
+    }
+    else if (anArgCase.Search("=") > 1)
+    {
+      const TCollection_AsciiString aVarExpr(theArgVec[anArgIter]);
+      const TCollection_AsciiString aName   = aVarExpr.Token("=", 1);
+      const TCollection_AsciiString aValStr = aVarExpr.Token("=", 2);
+
+      double aValReal = 0.0;
+      if (aName.IsEmpty() || !aVarExpr.Token("=", 3).IsEmpty() || !Draw::ParseReal(aValStr.ToCString(), aValReal))
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+
+      Handle(Expr_NamedUnknown) anUnknown = new Expr_NamedUnknown(aName);
+      if (!anExpr->Contains(anUnknown))
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "', '" << aName << "' not found in expression";
+        return 1;
+      }
+
+      aVarArr.Resize(1, aVarArr.Length() + 1, true);
+      aValArr.Resize(1, aValArr.Length() + 1, true);
+      aVarArr.ChangeLast() = anUnknown;
+      aValArr.ChangeLast() = aValReal;
+    }
+    else if (aQuery == ExprQuery::FULL && anArgCase == "-string")
+    {
+      aQuery = ExprQuery::String;
+    }
+    else if (aQuery == ExprQuery::FULL && anArgCase == "-value")
+    {
+      aQuery = ExprQuery::Value;
+    }
+    else if (aQuery == ExprQuery::FULL && anArgCase == "-nbsubexpressions")
+    {
+      aQuery = ExprQuery::NbSubExpressions;
+    }
+    else if (aQuery == ExprQuery::FULL && anArgCase == "-containsunknowns")
+    {
+      aQuery = ExprQuery::ContainsUnknowns;
+    }
+    else if (aQuery == ExprQuery::FULL && anArgCase == "-islinear")
+    {
+      aQuery = ExprQuery::IsLinear;
+    }
+    else if (aQuery == ExprQuery::FULL && anArgCase == "-unknowns")
+    {
+      aQuery = ExprQuery::Unknowns;
+    }
+    else if (aDrawName.IsEmpty()
+          && (anArgIter + 1 < theNbArgs)
+          && (anArgCase == "-draw" || anArgCase == "-plot"))
+    {
+      aDrawName = theArgVec[++anArgIter];
+    }
+    else if ((anArgIter + 1 < theNbArgs)
+             && anArgCase == "-color")
+    {
+      const Standard_Integer aNbParsed = Draw::ParseColor(theNbArgs - anArgIter - 1, theArgVec + anArgIter + 1, aDrawColor);
+      if (aNbParsed == 0)
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+      anArgIter += aNbParsed;
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
+  }
+
+  if (anExpr.IsNull())
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
+
+  const auto printUnknowns = [&theDI, &anExpr]()
+  {
+    int aNbUnknowns = 0;
+    for (Expr_UnknownIterator anUnknownIter(anExpr); anUnknownIter.More(); anUnknownIter.Next())
+    {
+      if (++aNbUnknowns > 1)
+        theDI << " ";
+
+      theDI << anUnknownIter.Value()->GetName();
+    }
+    if (aNbUnknowns == 0)
+      theDI << "N/A";
+  };
+
+  const auto printValue = [&theDI, &anExpr, &aVarArr, &aValArr]()
+  {
+    try
+    {
+      if (!aVarArr.IsEmpty())
+        theDI << anExpr->Evaluate(aVarArr, aValArr);
+      else if (!anExpr->ContainsUnknowns())
+        theDI << anExpr->EvaluateNumeric();
+      else
+        theDI << "N/A";
+    }
+    catch (const Expr_NotEvaluable&)
+    {
+      theDI << "NotEvaluable";
+    }
+    catch (const Standard_NumericError&)
+    {
+      theDI << "NumericError";
+    }
+  };
+
+  switch (aQuery)
+  {
+    case ExprQuery::NONE:
+      break;
+    case ExprQuery::String:
+      theDI << anExpr->String();
+      break;
+    case ExprQuery::NbSubExpressions:
+      theDI << anExpr->NbSubExpressions();
+      break;
+    case ExprQuery::ContainsUnknowns:
+      theDI << anExpr->ContainsUnknowns();
+      break;
+    case ExprQuery::IsLinear:
+      theDI << anExpr->IsLinear();
+      break;
+    case ExprQuery::Unknowns:
+      printUnknowns();
+      break;
+    case ExprQuery::Value:
+      printValue();
+      break;
+    case ExprQuery::FULL:
+      theDI << "String:           " << anExpr->String() << "\n";
+      theDI << "IsLinear:         " << anExpr->IsLinear() << "\n";
+      theDI << "NbSubExpressions: " << anExpr->NbSubExpressions() << "\n";
+      theDI << "ContainsUnknowns: " << anExpr->ContainsUnknowns() << "\n";
+      theDI << "Unknowns:         ";
+      printUnknowns();
+      theDI << "\n";
+      theDI << "Value:            ";
+      printValue();
+      theDI << "\n";
+      break;
+  }
+
+  if (!aDrawName.IsEmpty())
+  {
+    Handle(Draw_PlotExpr2D) aDraw = new Draw_PlotExpr2D(anExpr);
+    aDraw->SetValues(aVarArr, aValArr);
+    aDraw->SetColor(aDrawColor);
+    Draw::Set(aDrawName.ToCString(), aDraw);
+  }
+
+  return 0;
+}
+
 void Draw::GraphicCommands(Draw_Interpretor& theCommands)
 {
   static Standard_Boolean Done = Standard_False;
@@ -1020,5 +1420,49 @@ void Draw::GraphicCommands(Draw_Interpretor& theCommands)
   		  __FILE__,dtext,g);
   theCommands.Add("dfont","dfont [name size] : set name and size of Draw font, or reset to default",
   		  __FILE__,dfont,g);
-}
 
+  theCommands.Add("dexpr", /* [dexpr] */ R"(
+dexpr expression [x=value_of_x] ... [y=value_of_y]
+                 [-simplified] [-shallowSimplified] [-subExpression 1..N]
+                 [f'(x)] [f''(x)] [f'''(x)]
+                 [-string|-value|-nbSubExpressions|-unknowns|-containsUnknowns|-isLinear]
+                 [-draw name]
+                   [-color {WHITE|RED|GREEN|BLUE|CYAN|GOLD|MAGENTA|MAROON|ORANGE
+                   |MISTYROSE|SALMON|VIOLET|YELLOW|KHAKI|CORAL}]=WHITE
+Parses math expression and return it properties. See also command '2dplot'.
+ expression         math expression to parse
+ -simplified        get simplified expression
+ -shallowSimplified get simplified shallow expression
+ -subExpression i   get sub-expression with the given index
+ f'(x)              get first  derivative of input function for unknown 'x'
+ f''(x)             get second derivative
+ f'''(x)            get third  derivative
+ x=value_of_x       the value of unknown variable 'name=value' for evaluating expression
+ -string            return expression as a string
+ -value             return evaluated expression value
+ -nbSubExpressions  return number of sub-expressions
+ -unknowns          return the list of unknowns
+ -containsUnknowns  return 1 if expression contains unknowns
+ -isLinear          return 1 if expression is linear on every unknown it has
+ -draw drawable name to plot expression with a single unknown in 2D viewer
+ -color color to plot expression in 2D viewer
+Example:
+ dexpr Ln(2*x)*3^y -value x=1 y=2
+)" /* [dexpr] */, __FILE__, dexpr, g);
+
+  theCommands.Add("2dplot", /* [2dplot] */ R"(
+2dplot name expression
+       [-color {WHITE|RED|GREEN|BLUE|CYAN|GOLD|MAGENTA|MAROON|ORANGE
+       |MISTYROSE|SALMON|VIOLET|YELLOW|KHAKI|CORAL}]=WHITE
+       [f'] [f''] [f''']
+Plots the given math expression with a single unknown in 2D viewer.
+See also command 'dexpr'.
+ name   drawable name to plot expression with a single unknown in 2D viewer
+ -color color to plot expression in 2D viewer
+ f'     get first derivative of input function
+ f''    get second derivative
+ f'''   get third derivative
+Example:
+ v2d; 2dplot p Sin(2*x)*3; 2dzoom 100
+)" /* [2dplot] */, __FILE__, dexpr, g);
+}
