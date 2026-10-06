@@ -1,11 +1,13 @@
 puts "============"
-puts "OCC25329"
+puts "OCC25329: ExprIntrp_GenExp can not parse unary plus"
 puts "============"
 puts ""
-#######################################################################
-# ExprIntrp_GenExp can not parse unary plus
-#######################################################################
 
-pload QAcommands
+set test_expr "+1"
+dexpr "$test_expr"
+if { [dexpr "$test_expr" -value] != "1" } { puts "Error: invalid evaluation result" }
 
-OCC22611 "+1" 1
+v2d
+2dzoom 10
+2dplot p0 "$test_expr"
+xwd ${imagedir}/${casename}.png

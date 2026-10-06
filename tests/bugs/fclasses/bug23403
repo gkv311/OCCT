@@ -1,12 +1,7 @@
-#######################################################################
-# Crash when parsing an expression with lexical error
-#######################################################################
-pload QAcommands
+puts "============"
+puts "Crash when parsing an expression with lexical e r r o r"
+puts "============"
 
-set result [CR23403 \t]
-set ll [llength ${result}]
+puts "REQUIRED ALL: Error: invalid expression"
 
-puts ""
-if { ${ll} != 0 } {
-  puts "Error : parsing is incorrect"
-}
+catch { dexpr "\t" }
