@@ -491,7 +491,7 @@ void BRepGProp_Gauss::convert(const BRepGProp_Gauss::Inertia& theInertia,
                               Standard_Real&                  theOutMass)
 {
   convert(theInertia, theOutGravityCenter, theOutMatrixOfInertia, theOutMass);
-  if (Abs(theInertia.Mass) >= EPS_DIM && theIsByPoint)
+  if (Abs(theInertia.Mass) >= EPS_DIM)
   {
     const Standard_Real anInvMass = 1.0 / theInertia.Mass;
     if (theIsByPoint == Standard_True)
