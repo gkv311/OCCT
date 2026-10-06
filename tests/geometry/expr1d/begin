@@ -1,0 +1,20 @@
+pload MODELING VISUALIZATION
+
+proc test_expr1d { {theExpr ""} {theD0 p0} {theD1 p1} {theZoom 50} } {
+  upvar #0 pi pi
+  upvar $theD0 p0
+  upvar $theD1 p1
+
+  set anExpr $theExpr
+  if { $theExpr == "" } { set anExpr "${::casename}(t)" }
+
+  2dclear
+  v2d
+  2dzoom $theZoom
+  2dplot p0 $anExpr
+  2dplot p1 $anExpr f' -color RED
+  xwd ${::imagedir}/${::casename}.png
+  
+  dexpr $anExpr
+  dexpr $anExpr f'
+}
