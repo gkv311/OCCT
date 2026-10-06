@@ -204,7 +204,7 @@ void Geom_BezierCurve::InsertPoleAfter
 {
   Standard_Integer nbpoles = NbPoles();
 
-  if(nbpoles >= Geom_BezierCurve::MaxDegree() ||
+  if (nbpoles > Geom_BezierCurve::MaxDegree() ||
      Weight <= gp::Resolution())
     throw Standard_ConstructionError("Geom_BezierCurve::InsertPoleAfter");
 

@@ -196,7 +196,7 @@ void Geom2d_BezierCurve::InsertPoleAfter
   Standard_Integer nbpoles = NbPoles();
   
   Standard_ConstructionError_Raise_if
-    (nbpoles >= Geom2d_BezierCurve::MaxDegree() ||
+    (nbpoles > Geom2d_BezierCurve::MaxDegree() ||
      Weight <= gp::Resolution(), 
      "Geom2d_BezierCurve::InsertPoleAfter" );
   
