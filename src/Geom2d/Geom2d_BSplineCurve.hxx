@@ -17,13 +17,10 @@
 #ifndef _Geom2d_BSplineCurve_HeaderFile
 #define _Geom2d_BSplineCurve_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_Type.hxx>
-
+#include <BSplCLib.hxx>
 #include <Precision.hxx>
 #include <GeomAbs_BSplKnotDistribution.hxx>
 #include <GeomAbs_Shape.hxx>
-#include <Standard_Integer.hxx>
 #include <TColgp_HArray1OfPnt2d.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
@@ -794,8 +791,8 @@ public:
 
   //! Returns the value of the maximum degree of the normalized
   //! B-spline basis functions in this package.
-  Standard_EXPORT static Standard_Integer MaxDegree();
-  
+  static constexpr Standard_Integer MaxDegree() { return BSplCLib::MaxDegree(); }
+
   //! Computes for this BSpline curve the parametric
   //! tolerance UTolerance for a given tolerance
   //! Tolerance3D (relative to dimensions in the plane).

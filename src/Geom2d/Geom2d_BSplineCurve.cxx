@@ -30,7 +30,6 @@
 
 #include <Geom2d_BSplineCurve.hxx>
 
-#include <BSplCLib.hxx>
 #include <Geom2d_Geometry.hxx>
 #include <Geom2d_UndefinedDerivative.hxx>
 #include <gp.hxx>
@@ -204,16 +203,6 @@ Geom2d_BSplineCurve::Geom2d_BSplineCurve
   mults->ChangeArray1() = Mults;
 
   UpdateKnots();
-}
-
-//=======================================================================
-//function : MaxDegree
-//purpose  : 
-//=======================================================================
-
-Standard_Integer Geom2d_BSplineCurve::MaxDegree () 
-{ 
-  return BSplCLib::MaxDegree(); 
 }
 
 //=======================================================================

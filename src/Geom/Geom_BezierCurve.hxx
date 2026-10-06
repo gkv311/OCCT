@@ -313,8 +313,8 @@ public:
 
   //! Returns the value of the maximum polynomial degree
   //! of any Geom_BezierCurve curve. This value is 25.
-  Standard_EXPORT static Standard_Integer MaxDegree();
-  
+  static constexpr Standard_Integer MaxDegree() { return BSplCLib::MaxDegree(); }
+
   //! Computes for this Bezier curve the parametric
   //! tolerance UTolerance for a given 3D tolerance Tolerance3D.
   //! If f(t) is the equation of this Bezier curve,

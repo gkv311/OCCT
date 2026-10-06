@@ -293,10 +293,10 @@ public:
   //! comparing  weights. If Epsilon  is 0. the  Epsilon of the
   //! first weight is used.
   Standard_EXPORT static Standard_Boolean IsRational (const TColStd_Array1OfReal& Weights, const Standard_Integer I1, const Standard_Integer I2, const Standard_Real Epsilon = 0.0);
-  
+
   //! returns the degree maxima for a BSplineCurve.
-    static Standard_Integer MaxDegree();
-  
+  static constexpr Standard_Integer MaxDegree() { return 25; }
+
   //! Perform the Boor  algorithm  to  evaluate a point at
   //! parameter <U>, with <Degree> and <Dimension>.
   //!
@@ -374,13 +374,13 @@ public:
   //! derivatives.  Poles[0] is  the value,  Poles[Degree]
   //! is the last  derivative.
   Standard_EXPORT static void Bohm (const Standard_Real U, const Standard_Integer Degree, const Standard_Integer N, Standard_Real& Knots, const Standard_Integer Dimension, Standard_Real& Poles);
-  
+
   //! Used as argument for a non rational curve.
-    static TColStd_Array1OfReal* NoWeights();
-  
+  static constexpr TColStd_Array1OfReal* NoWeights() { return nullptr; }
+
   //! Used as argument for a flatknots evaluation.
-    static TColStd_Array1OfInteger* NoMults();
-  
+  static constexpr TColStd_Array1OfInteger* NoMults() { return nullptr; }
+
   //! Stores in LK the useful knots for the BoorSchem
   //! on the span Knots(Index) - Knots(Index+1)
   Standard_EXPORT static void BuildKnots (const Standard_Integer Degree, const Standard_Integer Index, const Standard_Boolean Periodic, const TColStd_Array1OfReal& Knots, const TColStd_Array1OfInteger* Mults, Standard_Real& LK);
