@@ -14,15 +14,45 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
 #include <Expr_GeneralExpression.hxx>
+
+#include <Expr_NumericValue.hxx>
 #include <Expr_NamedUnknown.hxx>
 #include <Expr_NotEvaluable.hxx>
+#include <Expr_UnknownIterator.hxx>
 #include <Standard_OutOfRange.hxx>
 #include <Standard_Type.hxx>
 #include <TCollection_AsciiString.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(Expr_GeneralExpression,Standard_Transient)
+
+Handle(Expr_GeneralExpression) Expr_GeneralExpression::ReplaceConstants(const Handle(Expr_GeneralExpression)& theExpr)
+{
+  Handle(Expr_GeneralExpression) aRes = theExpr;
+  aRes = ReplaceConstant(aRes, "pi", M_PI, false);
+  return aRes;
+}
+
+Handle(Expr_GeneralExpression) Expr_GeneralExpression::ReplaceConstant(const Handle(Expr_GeneralExpression)& theExpr,
+                                                                       const TCollection_AsciiString& theName,
+                                                                       const Standard_Real theValue,
+                                                                       const bool theIsCaseSensitive)
+{
+  for (Expr_UnknownIterator anUnknownIter(theExpr); anUnknownIter.More(); anUnknownIter.Next())
+  {
+    Handle(Expr_NamedUnknown) anUnknown = anUnknownIter.Value();
+    if (!TCollection_AsciiString::IsSameString(anUnknown->GetName(), theName, theIsCaseSensitive))
+      continue;
+
+    Handle(Expr_NumericValue) aNumConstant = new Expr_NumericValue(theValue);
+    if (theExpr == anUnknown)
+      return aNumConstant;
+
+    theExpr->Replace(anUnknown, aNumConstant);
+    return theExpr;
+  }
+  return theExpr;
+}
 
 Standard_Boolean Expr_GeneralExpression::IsShareable() const
  {
@@ -47,7 +77,7 @@ Standard_Boolean Expr_GeneralExpression::IsShareable() const
    if (ContainsUnknowns()) {
      throw Expr_NotEvaluable();
    }
-   Expr_Array1OfNamedUnknown tabvr(1,1);
-   TColStd_Array1OfReal tabvl(1,1);
+   Expr_Array1OfNamedUnknown tabvr;
+   TColStd_Array1OfReal tabvl;
    return Evaluate(tabvr,tabvl);
  }
