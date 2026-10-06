@@ -935,6 +935,75 @@ Standard_Integer Draw::parseColor (const Standard_Integer   theArgNb,
 }
 
 //=======================================================================
+//function : ParseColor
+//purpose  :
+//=======================================================================
+Standard_Integer Draw::ParseColor (const Standard_Integer   theArgNb,
+                                   const char* const* const theArgVec,
+                                   Draw_Color&              theColor)
+{
+  Quantity_Color aQColor;
+  const Standard_Integer aNbParsed = Draw::ParseColor(theArgNb, theArgVec, aQColor);
+  if (aNbParsed == 0)
+    return 0;
+
+  const Quantity_NameOfColor aQColorName = aQColor.Name();
+  switch (aQColorName)
+  {
+    case Quantity_NOC_WHITE:
+      theColor = Draw_blanc;
+      break;
+    case Quantity_NOC_RED:
+      theColor = Draw_rouge;
+      break;
+    case Quantity_NOC_GREEN:
+      theColor = Draw_vert;
+      break;
+    case Quantity_NOC_BLUE:
+      theColor = Draw_bleu;
+      break;
+    case Quantity_NOC_CYAN:
+      theColor = Draw_cyan;
+      break;
+    case Quantity_NOC_GOLD:
+      theColor = Draw_or;
+      break;
+    case Quantity_NOC_MAGENTA:
+      theColor = Draw_magenta;
+      break;
+    case Quantity_NOC_MAROON1:
+    case Quantity_NOC_MAROON:
+      theColor = Draw_marron;
+      break;
+    case Quantity_NOC_ORANGE:
+      theColor = Draw_orange;
+      break;
+    case Quantity_NOC_MISTYROSE:
+      theColor = Draw_rose;
+      break;
+    case Quantity_NOC_LIGHTSALMON1:
+    case Quantity_NOC_SALMON:
+      theColor = Draw_saumon;
+      break;
+    case Quantity_NOC_VIOLET:
+      theColor = Draw_violet;
+      break;
+    case Quantity_NOC_YELLOW:
+      theColor = Draw_jaune;
+      break;
+    case Quantity_NOC_KHAKI:
+      theColor = Draw_kaki;
+      break;
+    case Quantity_NOC_CORAL:
+      theColor = Draw_corail;
+      break;
+    default:
+      return 0;
+  }
+  return aNbParsed;
+}
+
+//=======================================================================
 //function : ParseOnOff
 //purpose  :
 //=======================================================================

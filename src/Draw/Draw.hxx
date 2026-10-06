@@ -22,6 +22,7 @@
 #include <Quantity_ColorRGBA.hxx>
 #include <Standard_Handle.hxx>
 
+class Draw_Color;
 class Draw_Drawable3D;
 class Draw_ProgressIndicator;
 
@@ -156,6 +157,15 @@ public: //! @name argument parsing tools
     }
     return aNbParsed;
   }
+
+  //! Parses RGB color argument(s).
+  //! @param[in] theArgNb   number of available arguments in theArgVec (array limits)
+  //! @param[in] theArgVec  argument list
+  //! @param[out] theColor  retrieved color
+  //! @return number of handled arguments (1 or 3) or 0 on syntax error.
+  Standard_EXPORT static Standard_Integer ParseColor (const Standard_Integer   theArgNb,
+                                                      const char* const* const theArgVec,
+                                                      Draw_Color&              theColor);
 
   //! Parses boolean argument. Handles either flag specified by 0|1 or on|off.
   //!
