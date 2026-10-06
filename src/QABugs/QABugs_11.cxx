@@ -1517,56 +1517,6 @@ static Standard_Integer OCC921 (Draw_Interpretor& di, Standard_Integer argc, con
   return 0;
 }
 
-#include <Expr_NamedUnknown.hxx>
-#include <Expr_GeneralExpression.hxx>
-//=======================================================================
-//function :  OCC902
-//purpose  : 
-//=======================================================================
-static Standard_Integer OCC902(Draw_Interpretor& di, Standard_Integer argc, const char ** argv)
-{
-  if (argc != 2)
-  {
-    di <<"Usage : " << argv[0] << " expression\n";
-    return 1;
-  }
-
-  TCollection_AsciiString  anExpStr(argv[1]);
-  anExpStr.AssignCat("*x");
-  anExpStr.Prepend("Exp(");
-  anExpStr.AssignCat(")");
-
-  Handle(ExprIntrp_GenExp) exprIntrp = ExprIntrp_GenExp::Create();
-
-  //
-  // Create the expression
-  exprIntrp->Process(anExpStr);
-
-  if (!exprIntrp->IsDone())
-  {
-    di << "Interpretation of expression " << argv[1] << " failed\n";
-    return 1;
-  }
-
-
-  Handle(Expr_GeneralExpression) anExpr = exprIntrp->Expression();
-  Handle(Expr_NamedUnknown) aVar = new Expr_NamedUnknown("x");
-  Handle (Expr_GeneralExpression) newExpr = anExpr->Derivative(aVar);
-
- 
- TCollection_AsciiString  res        = newExpr->String();
- Standard_CString         resStr     = res.ToCString();
- TCollection_AsciiString  res_old    = anExpr->String();
- Standard_CString         res_oldStr = res_old.ToCString();
- 
-
- di << "X = " << argv[1] << "\n";
- di << "Y = " << res_oldStr << "\n";
- di << "Y' = " << resStr  << "\n";
-
- return 0;
-}
-
 #include <DDF.hxx>
 #include <TPrsStd_AISViewer.hxx>
 #include <TPrsStd_AISPresentation.hxx>
@@ -4666,28 +4616,6 @@ Standard_Integer OCC23429(Draw_Interpretor& /*di*/,
   return 0;
 }
 
-#include <ExprIntrp_GenExp.hxx>
-Standard_Integer CR23403 (Draw_Interpretor& di, Standard_Integer argc, const char ** argv)
-{
-	
-  if (argc != 2) {
-    di << "Usage : " << argv[0] << " string\n";
-    return 1;
-  }
-
-  Standard_CString aString = argv[1];
-  Handle(ExprIntrp_GenExp) myExpr = ExprIntrp_GenExp::Create();
-  try {
-    OCC_CATCH_SIGNALS
-    myExpr->Process( aString );
-  }
-  catch(Standard_Failure const& anException) {
-    di << "Exception : " << anException.GetMessageString() << "\n";
-  }
-
-  return 0;
-}
-
 Standard_Integer OCC28478 (Draw_Interpretor& di, Standard_Integer argc, const char ** argv)
 {	
   Standard_Integer nbOuter = (argc > 1 ? Draw::Atoi(argv[1]) : 3);
@@ -4887,7 +4815,6 @@ void QABugs::Commands_11(Draw_Interpretor& theCommands) {
   theCommands.Add("OCC867", "OCC867 Point Surface Umin Usup Vmin Vsup", __FILE__, OCC867, group);
   theCommands.Add("OCC909", "OCC909 wire face", __FILE__, OCC909, group);
   theCommands.Add("OCC921", "OCC921 face", __FILE__, OCC921, group);
-  theCommands.Add("OCC902", "OCC902 expression", __FILE__, OCC902, group);
 
   theCommands.Add ("OCC1029_AISTransparency","OCC1029_AISTransparency (DOC, entry, [real])",__FILE__, OCC1029_AISTransparency, group);
   theCommands.Add ("OCC1031_AISMaterial", "OCC1031_AISMaterial (DOC, entry, [material])", __FILE__, OCC1031_AISMaterial, group); 
@@ -4926,7 +4853,6 @@ void QABugs::Commands_11(Draw_Interpretor& theCommands) {
   theCommands.Add("OCC22736", "OCC22736 X_mirrorFirstPoint Y_mirrorFirstPoint X_mirrorSecondPoint Y_mirrorSecondPoint X_p1 Y_p1 X_p2 Y_p2", __FILE__, OCC22736, group);
   theCommands.Add("OCC22744", "OCC22744", __FILE__, OCC22744, group);
   theCommands.Add("OCC22558", "OCC22558 x_vec y_vec z_vec x_dir y_dir z_dit x_pnt y_pnt z_pnt", __FILE__, OCC22558, group);
-  theCommands.Add("CR23403", "CR23403 string", __FILE__, CR23403, group);
   theCommands.Add("OCC23429", "OCC23429 res shape tool [appr]", __FILE__, OCC23429, group);
   theCommands.Add("OCC28478", "OCC28478 [nb_outer=3 [nb_inner=2] [-inf]: test progress indicator on nested cycles", __FILE__, OCC28478, group);
   theCommands.Add("OCC31189", "OCC31189: check stream buffer interface of Message_Messenger", __FILE__, OCC31189, group);
