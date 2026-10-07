@@ -2,8 +2,8 @@
 # Date : 13Mai98
 # C6
 
-restore [locate_data_file cts20495a.brep] a
-restore [locate_data_file CTO902_cts20495b.brep] b
+readbrep [locate_data_file cts20495a.brep] a
+readbrep [locate_data_file CTO902_cts20495b.brep] b
 
 bfuse result a b
 

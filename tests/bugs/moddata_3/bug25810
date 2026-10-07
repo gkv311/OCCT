@@ -6,8 +6,8 @@ puts ""
 # Exception in extrema operation.
 #######################################################################
 
-restore [locate_data_file bug25810_e1.brep] b1
-restore [locate_data_file bug25810_f1.brep] b2
+readbrep [locate_data_file bug25810_e1.brep] b1
+readbrep [locate_data_file bug25810_f1.brep] b2
 
 mkcurve c1 b1
 mksurface s2 b2

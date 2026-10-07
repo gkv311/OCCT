@@ -7,7 +7,7 @@ puts ""
 ###############################################################################################
 
 pload ALL
-restore [locate_data_file bug32934.brep] edges
+readbrep [locate_data_file bug32934.brep] edges
 explode edges E
 
 distmini di edges_1 edges_2

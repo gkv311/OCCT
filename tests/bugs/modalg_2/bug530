@@ -7,10 +7,10 @@ puts ""
 
 cpulimit 1000
 
-restore [locate_data_file OCC530_1.brep] c1 
+readbrep [locate_data_file OCC530_1.brep] c1 
 checkshape c1
 
-restore [locate_data_file OCC530_2.brep] c2 
+readbrep [locate_data_file OCC530_2.brep] c2 
 checkshape c2
 
 if { [catch { bfuse result c1 c2 } catch_result] } {

@@ -3,7 +3,7 @@ puts "OCC28026: Modeling Data - BRepTools::Clean() does not clean all triangulat
 puts "========================================================================================="
 puts ""
 
-restore [locate_data_file bug28026_Ball.brep] b
+readbrep [locate_data_file bug28026_Ball.brep] b
 
 set expected {"0 triangles" "0 nodes"
               "0 polygons on triangulation"

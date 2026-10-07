@@ -3,7 +3,7 @@ puts "30760: Modeling Algorithms - Intersection fails in Occt 7.3.0"
 puts "========"
 puts ""
 
-restore [locate_data_file bug30760_shapes.brep] a12
+readbrep [locate_data_file bug30760_shapes.brep] a12
 # copy the shape to use in other operation
 # with different order of arguments
 tcopy a12 a21

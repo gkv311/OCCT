@@ -5,9 +5,9 @@ puts "OCC160"
 puts "(CUT: A and B)"
 puts "========================"
 
-restore [locate_data_file buc60775a.brep] a 
+readbrep [locate_data_file buc60775a.brep] a 
 checkshape a
-restore [locate_data_file buc60775b.brep] b
+readbrep [locate_data_file buc60775b.brep] b
 checkshape b
 
 bcut result a b

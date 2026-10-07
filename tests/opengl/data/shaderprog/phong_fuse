@@ -5,7 +5,7 @@ puts "========"
 pload MODELING VISUALIZATION
 
 # import model
-restore [locate_data_file occ/fuse.brep] f
+readbrep [locate_data_file occ/fuse.brep] f
 tclean f
 
 # draw box

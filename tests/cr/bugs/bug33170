@@ -4,7 +4,7 @@ puts "============"
 puts ""               
 
 set ExpectGap 0.0051495320504590563
-brestore [locate_data_file bug33170.brep] f
+readbrep [locate_data_file bug33170.brep] f
 set log1 [getanasurf asurf1 f pln  0.006]
 regexp {Gap = +([-0-9.+eE]+)} $log1 full gap1
 if {[isdraw asurf1]} {

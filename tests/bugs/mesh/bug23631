@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber 23631
 
-restore [locate_data_file OCC396_f2903.brep] result
+readbrep [locate_data_file OCC396_f2903.brep] result
 
 incmesh result 0.01
 triangles result 

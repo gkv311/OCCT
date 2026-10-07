@@ -1,1 +1,1 @@
-restore [locate_data_file boxFG.brep] a
+readbrep [locate_data_file boxFG.brep] a

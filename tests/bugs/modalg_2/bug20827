@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC20827
 
-restore [locate_data_file OCC20827-ran24s_a-d_1_f107.brep] result
+readbrep [locate_data_file OCC20827-ran24s_a-d_1_f107.brep] result
 
 checkprops result -s 9707.82 
 checkshape result

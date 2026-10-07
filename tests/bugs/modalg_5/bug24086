@@ -8,8 +8,8 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug24086_face.brep] face
-restore [locate_data_file bug24086_wire.brep] wire
+readbrep [locate_data_file bug24086_face.brep] face
+readbrep [locate_data_file bug24086_wire.brep] wire
 
 vinit
 set info [OCC24086 face wire]

@@ -7,7 +7,7 @@ puts ""
 puts " Solid_14 will be the face which is unvisible during displaying entire solid."
 #####################################################
 
-restore [locate_data_file OCC17.brep] sh 
+readbrep [locate_data_file OCC17.brep] sh 
 
 checkshape sh
 

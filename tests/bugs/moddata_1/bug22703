@@ -9,10 +9,10 @@ puts ""
 set BugNumber OCC22703
 
 puts "Load first shape ..."
-restore [locate_data_file OCC22703-faceAC.brep] b1 
+readbrep [locate_data_file OCC22703-faceAC.brep] b1 
 
 puts "Load second shape ..."
-restore [locate_data_file OCC22703-pln.brep] b2 
+readbrep [locate_data_file OCC22703-pln.brep] b2 
 
 puts "Prepare boolean operation ..."
 

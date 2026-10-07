@@ -1,4 +1,4 @@
-restore [locate_data_file CFI_4_h1_ffu.brep] s
+readbrep [locate_data_file CFI_4_h1_ffu.brep] s
 tscale s 0 0 0 SCALE
 explode s E
 blend result s SCALE*2 s_5

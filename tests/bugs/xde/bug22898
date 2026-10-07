@@ -14,7 +14,7 @@ pload MODELING
 pload XSTEP
 
 # original shape
-restore [locate_data_file hammer.brep] hammer
+readbrep [locate_data_file hammer.brep] hammer
 checkshape hammer
 tolerance hammer
 checkarea hammer 3.978e8 1e6 0.001

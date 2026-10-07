@@ -5,7 +5,7 @@ puts "OCC538"
 puts "================"
 puts ""
 
-restore [locate_data_file OCC538.brep] Face 
+readbrep [locate_data_file OCC538.brep] Face 
 checkshape Face
 
 point p 0.2453959532714904 -1.246869357124329

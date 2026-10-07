@@ -3,7 +3,7 @@ puts "OCC32721: BOP wrong results on a cone and an extrusion"
 puts "======================================================"
 puts ""
 
-restore [locate_data_file bug32721.brep] prism
+readbrep [locate_data_file bug32721.brep] prism
 pcone cone 6 0 10
 
 bop cone prism

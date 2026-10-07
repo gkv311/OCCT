@@ -6,7 +6,7 @@ puts ""
 # Wrong result done by 2d intersection algorithm
 ##################################################
 
-restore [locate_data_file OCC26099-f.brep] f
+readbrep [locate_data_file OCC26099-f.brep] f
 explode f e
 pcurve c4 f_4 f
 pcurve c5 f_5 f

@@ -1,6 +1,6 @@
 pload VISUALIZATION MODELING
 
-restore [locate_data_file occ/fuse.brep] f
+readbrep [locate_data_file occ/fuse.brep] f
 
 vcaps -ffp 1
 vclear

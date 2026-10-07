@@ -7,7 +7,7 @@ puts ""
 #################################################
 
 restore [locate_data_file bug25981_cb1_4.draw] c
-restore [locate_data_file bug25981_b2f.brep] f
+readbrep [locate_data_file bug25981_b2f.brep] f
 mksurface s f
 project x c s
 

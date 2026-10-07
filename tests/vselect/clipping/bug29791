@@ -4,7 +4,7 @@ puts "============"
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file occ/bottle.brep] b
+readbrep [locate_data_file occ/bottle.brep] b
 vclear
 vinit View1
 vdisplay -dispMode 1 -highMode 1 b

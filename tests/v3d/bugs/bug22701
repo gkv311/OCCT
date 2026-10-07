@@ -32,7 +32,7 @@ set Hole2_B 0.078431002795696259
 
 # Start
 
-restore [locate_data_file PFS04041r1.brep] result
+readbrep [locate_data_file PFS04041r1.brep] result
 vinit View1
 vdisplay result
 vfit

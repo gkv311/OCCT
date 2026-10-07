@@ -9,7 +9,7 @@ puts ""
 # Exception thrown: Standard_ConstructionError: Offset wire is not closed.
 ##################################################
 
-restore [locate_data_file OCC745_nb3.brep] w 
+readbrep [locate_data_file OCC745_nb3.brep] w 
 checkshape w
 
 if { [catch { mkoffset result w 1 10 } status] } {

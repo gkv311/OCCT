@@ -9,7 +9,7 @@ puts ""
 set BugNumber OCC6502
 
 
-restore [locate_data_file OCC6502.brep] a 
+readbrep [locate_data_file OCC6502.brep] a 
 plane pl 100 0 0 1 0 0
 mkface f pl
 

@@ -4,7 +4,7 @@ puts "OCC109: Visualization of the attached shape is wrong in the shading mode."
 puts "================"
 puts ""
 
-restore [locate_data_file OCC109.brep] result
+readbrep [locate_data_file OCC109.brep] result
 
 checkshape result
 

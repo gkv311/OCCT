@@ -1,4 +1,4 @@
-restore [locate_data_file bug29481_boxes.brep] s
+readbrep [locate_data_file bug29481_boxes.brep] s
 explode s f
 
 # remove the hole inside compsolid

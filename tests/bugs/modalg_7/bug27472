@@ -6,8 +6,8 @@ puts ""
 # Wrong result of cut
 #######################
 
-restore [locate_data_file bug27472_o.brep] o
-restore [locate_data_file bug27472_t.brep] t
+readbrep [locate_data_file bug27472_o.brep] o
+readbrep [locate_data_file bug27472_t.brep] t
 
 bcut result o t
 checkshape result

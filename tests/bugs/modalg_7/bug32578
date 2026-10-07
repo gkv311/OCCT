@@ -3,8 +3,8 @@ puts "OCC32578: Modeling Algorithms - Splitting face by set of edges fails"
 puts "================================================="
 puts ""
 
-restore [locate_data_file bug32578_face.brep] f
-restore [locate_data_file bug32578_edges.brep] ce
+readbrep [locate_data_file bug32578_face.brep] f
+readbrep [locate_data_file bug32578_edges.brep] ce
 
 bfuzzyvalue 0.01
 

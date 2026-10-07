@@ -6,8 +6,8 @@ puts ""
 # Computed surface properties differ substantially depending on NaturalRestriction flag
 #########################################################################################
 
-restore [locate_data_file bug24490_face_naturalrestriction_flag.brep] ff
-restore [locate_data_file bug24490_face_naturalrestriction_noflag.brep] fn
+readbrep [locate_data_file bug24490_face_naturalrestriction_flag.brep] ff
+readbrep [locate_data_file bug24490_face_naturalrestriction_noflag.brep] fn
 
 # Get information from model ff
 set bug_info [sprops ff]

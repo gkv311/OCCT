@@ -10,7 +10,7 @@ puts ""
 # Fusion of sweep and its mirror invalid
 ##########################################
 
-restore [locate_data_file bug25983_deform-fusion1-tcl-BSpline.brep] BSpline
+readbrep [locate_data_file bug25983_deform-fusion1-tcl-BSpline.brep] BSpline
 wire Knurling-0-spine BSpline
 mksweep Knurling-0-spine
 setsweep -FR

@@ -6,7 +6,7 @@ puts ""
 # ShapeUpgrade_UnifySameDomain does not unify cylindrical faces
 ###########################################################################################################
 
-restore [locate_data_file bug30174_cylinder.brep] a
+readbrep [locate_data_file bug30174_cylinder.brep] a
 unifysamedom result a
 
 checkshape result

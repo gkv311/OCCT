@@ -7,7 +7,7 @@ puts ""
 ## BRepTools::AddUVBounds for the planar face bounded by a circle returns too small bounding box.
 #####################################################################
 
-restore [locate_data_file bug61037.brep] sh1
+readbrep [locate_data_file bug61037.brep] sh1
 checkshape sh1
 
 bounding sh1 -dump -shape result

@@ -8,8 +8,8 @@ puts ""
 
 set BugNumber OCC20404
 
-restore [locate_data_file OCC20404-line1.brep] e1 
-restore [locate_data_file OCC20404-line2.brep] e2 
+readbrep [locate_data_file OCC20404-line1.brep] e1 
+readbrep [locate_data_file OCC20404-line2.brep] e2 
 
 distmini d e1 e2
 puts "Distance=[dval d_val]"

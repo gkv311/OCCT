@@ -6,7 +6,7 @@ puts ""
 # Meshing of surface of revolution fails in debug mode
 #########################################################
 
-restore [locate_data_file bug26372_RP.brep] result
+readbrep [locate_data_file bug26372_RP.brep] result
 
 incmesh result 0.1
 

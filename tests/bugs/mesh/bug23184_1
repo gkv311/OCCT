@@ -6,7 +6,7 @@ puts ""
 # Bad face tessellation result
 #######################################################################
 
-brestore [locate_data_file bug23184_tessface2.brep] result
+readbrep [locate_data_file bug23184_tessface2.brep] result
 
 checkshape result
 

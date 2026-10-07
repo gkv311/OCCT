@@ -6,8 +6,8 @@ puts ""
 # Boolean Operation Algorithm failed
 #######################################################################
 
-restore [locate_data_file OCC14777-s1.brep] s1
-restore [locate_data_file OCC14777-s2.brep] s2
+readbrep [locate_data_file OCC14777-s1.brep] s1
+readbrep [locate_data_file OCC14777-s2.brep] s2
 
 bop s1 s2
 bopcut result

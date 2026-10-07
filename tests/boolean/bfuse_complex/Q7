@@ -2,8 +2,8 @@ puts "GER60806"
 puts "Fuse doesn't give the waiting result."
 puts ""
 
-restore [locate_data_file CFE900_ger60gdc.brep] base
-restore [locate_data_file ger60806b.brep] tool
+readbrep [locate_data_file CFE900_ger60gdc.brep] base
+readbrep [locate_data_file ger60806b.brep] tool
 
 # ope. top. -> KO
 bcut res1 tool base

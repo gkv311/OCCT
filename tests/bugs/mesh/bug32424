@@ -4,7 +4,7 @@ puts "======="
 puts ""
 cpulimit 3
 
-restore [locate_data_file bug32424.brep] result
+readbrep [locate_data_file bug32424.brep] result
 
 incmesh result 0.17 -a 20
 

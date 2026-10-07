@@ -8,7 +8,7 @@ puts ""
 ##possible regression in KAS:dev on checkshape. Fails on valid shape
 ###############################################
 
-restore [locate_data_file OCC956_2.brep] result
+readbrep [locate_data_file OCC956_2.brep] result
 
 checkshape result
 

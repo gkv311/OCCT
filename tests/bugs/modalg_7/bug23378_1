@@ -7,7 +7,7 @@ puts ""
 ########################################
 
 # Restore the initial shape
-restore [locate_data_file bug23378_blower1.brep] b
+readbrep [locate_data_file bug23378_blower1.brep] b
 
 # Test case body
 explode b

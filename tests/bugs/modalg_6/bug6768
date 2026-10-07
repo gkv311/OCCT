@@ -6,7 +6,7 @@ puts ""
 # Problems making offset wires
 #######################################################
 
-restore [locate_data_file bug6768.brep] co
+readbrep [locate_data_file bug6768.brep] co
 explode co
 foreach s {co_1 co_2 co_3 co_4} {
 

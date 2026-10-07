@@ -50,7 +50,7 @@ set B_check 1
 set x_refresh 10
 set y_refresh 10
 
-restore [locate_data_file OCC12121-CrankArm.brep] obj 
+readbrep [locate_data_file OCC12121-CrankArm.brep] obj 
 vinit View1
 vdisplay obj -dispMode 0
 vconnect new 50 50 50 obj

@@ -9,7 +9,7 @@ puts ""
 
 pload XDE
 
-restore [locate_data_file OCC398.brep] a 
+readbrep [locate_data_file OCC398.brep] a 
 #statsh a
 #nbshapes a
 #Statshape should give 3 solids

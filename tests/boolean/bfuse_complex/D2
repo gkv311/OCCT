@@ -1,9 +1,9 @@
 # Original bug : ger60039
 # Date : 11mar98
 
-restore [locate_data_file ger60039a.brep] a
+readbrep [locate_data_file ger60039a.brep] a
 fsameparameter a
-restore [locate_data_file CTO900_ger60039b.brep] b 
+readbrep [locate_data_file CTO900_ger60039b.brep] b 
 
 bfuse result a b
 

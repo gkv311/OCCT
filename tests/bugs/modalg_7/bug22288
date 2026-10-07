@@ -8,6 +8,6 @@ puts ""
 # checkshape works wrong with attached shape.
 ########################################
 
-restore [locate_data_file bug22288_b1_m.brep] result
+readbrep [locate_data_file bug22288_b1_m.brep] result
 
 checkshape result

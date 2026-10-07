@@ -3,7 +3,7 @@ puts "OCC26419: Export of a reversed face leads to c r a s h in 6.9.0 although p
 puts "========"
 puts ""
 
-restore [locate_data_file bug26419_a-rev.brep] ar
+readbrep [locate_data_file bug26419_a-rev.brep] ar
 
 set aTmpFile ${imagedir}/${casename}.igs
 brepiges ar $aTmpFile

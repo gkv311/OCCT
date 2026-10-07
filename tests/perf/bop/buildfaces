@@ -12,7 +12,7 @@ puts ""
 # HAVE_TBB must be set
 # It is better using MMGT_OPT=2 (tbb memory allocator)
 
-restore [locate_data_file bug24292_x_256_stars.brep] b1
+readbrep [locate_data_file bug24292_x_256_stars.brep] b1
 
 tcopy b1 b2
 trotate b2 0 0 0 0 0 1 10

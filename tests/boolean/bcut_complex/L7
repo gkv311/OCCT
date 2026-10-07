@@ -1,8 +1,8 @@
 # Original bug : buc60220 
 # Date : 24June98
 
-restore [locate_data_file buc60092a.brep] a 
-restore [locate_data_file CTO904_buc60220b.brep] b
+readbrep [locate_data_file buc60092a.brep] a 
+readbrep [locate_data_file CTO904_buc60220b.brep] b
 
 bcut result a b
 checkprops result -s 90179.6

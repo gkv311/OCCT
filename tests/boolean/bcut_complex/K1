@@ -2,8 +2,8 @@
 # Date : 13Mai98
 # D8
 
-restore [locate_data_file CTO902_cts20496c.brep] part
-restore [locate_data_file cts20496d.brep] tool
+readbrep [locate_data_file CTO902_cts20496c.brep] part
+readbrep [locate_data_file cts20496d.brep] tool
 
 bcut result part tool
 checkprops result -s 229719

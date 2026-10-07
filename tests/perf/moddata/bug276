@@ -6,7 +6,7 @@ puts ""
 ##Bad performance of checkshape on faces with multiple wires 
 #########################################################
 
-restore [locate_data_file OCC276.brep] result
+readbrep [locate_data_file OCC276.brep] result
 
 dchrono h2 restart
 

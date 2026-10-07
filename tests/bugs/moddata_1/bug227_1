@@ -8,12 +8,12 @@ puts "========"
 ##Incorrect result with missing faces after a fuse operation between the box and the wedge.
 ###############################################################
 
-restore [locate_data_file OCC227a.brep] a 
+readbrep [locate_data_file OCC227a.brep] a 
 fsameparameter a
 updatetolerance a
 checkshape a
 
-restore [locate_data_file OCC227b.brep] b
+readbrep [locate_data_file OCC227b.brep] b
 fsameparameter b
 updatetolerance b
 checkshape b

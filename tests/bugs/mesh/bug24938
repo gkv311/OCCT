@@ -5,7 +5,7 @@ puts ""
 
 cpulimit 100
 
-restore [locate_data_file bug24938_27773.brep] result
+readbrep [locate_data_file bug24938_27773.brep] result
 
 tclean result
 incmesh result 1.5 -relative

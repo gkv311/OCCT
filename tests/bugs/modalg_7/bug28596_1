@@ -8,7 +8,7 @@ puts ""
 # Erroneous fillet
 ##################
 
-restore [locate_data_file bug28596_fil.brep] f
+readbrep [locate_data_file bug28596_fil.brep] f
 
 explode f e
 fillet result f 0.05 f_4

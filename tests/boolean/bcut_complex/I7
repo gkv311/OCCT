@@ -2,8 +2,8 @@
 # Date : 13Mai98
 # A7.gif
 
-restore [locate_data_file CTO902_cts20459-part.brep] part
-restore [locate_data_file CTO902_cts20459-tool.brep] tool
+readbrep [locate_data_file CTO902_cts20459-part.brep] part
+readbrep [locate_data_file CTO902_cts20459-tool.brep] tool
 
 bcut result part tool
 checkprops result -s 26347.6

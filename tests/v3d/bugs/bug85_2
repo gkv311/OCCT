@@ -6,9 +6,9 @@ puts ""
 
 pload OCAF MODELING VISUALIZATION
 
-restore [locate_data_file buc60918-psm1.brep] psm1
-restore [locate_data_file buc60918-psm2.brep] psm2
-restore [locate_data_file buc60918-shl.brep] shl
+readbrep [locate_data_file buc60918-psm1.brep] psm1
+readbrep [locate_data_file buc60918-psm2.brep] psm2
+readbrep [locate_data_file buc60918-shl.brep] shl
 
 NewDocument D
 SetShape D 0:1:1 shl

@@ -6,7 +6,7 @@ puts ""
 # Parallelization of assembly part of BO
 ############################################
 
-restore [locate_data_file bug24157_x_512_solids_glued.brep] b1
+readbrep [locate_data_file bug24157_x_512_solids_glued.brep] b1
 tcopy b1 b2
 ttranslate b2 2. 2. 2.
 tcopy b1 b3

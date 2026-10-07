@@ -4,10 +4,10 @@ puts " OCC412 "
 puts "========================"
 puts ""
 
-restore [locate_data_file f2.brep] b1 
+readbrep [locate_data_file f2.brep] b1 
 checkshape b1
 
-restore [locate_data_file f3.brep] b2
+readbrep [locate_data_file f3.brep] b2
 checkshape b2
 
 bcut result b1 b2

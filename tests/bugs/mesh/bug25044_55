@@ -6,7 +6,7 @@ puts ""
 # the meshing is expected to fail due to self-intersected wire
 puts "REQUIRED ALL: Meshing statuses: Failure"
 
-restore [locate_data_file bug25044_face55.brep] result
+readbrep [locate_data_file bug25044_face55.brep] result
 tclean result
 
 incmesh result 0.1 -a 5

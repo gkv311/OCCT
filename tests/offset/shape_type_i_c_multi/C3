@@ -5,7 +5,7 @@ puts ""
 
 pload MODELING
 
-restore [locate_data_file bug31148_box_iso_face_top.brep] s
+readbrep [locate_data_file bug31148_box_iso_face_top.brep] s
 
 perform_offset_multi_with_ref r1 s 0 {7} {2} {416 508 12 11} 1
 perform_offset_multi_with_ref res1 r1_unif 1 {} {} {656 1040 12 11} 1

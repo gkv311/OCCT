@@ -8,8 +8,8 @@ puts ""
 # Wrong result of pipe
 ########################
 
-restore [locate_data_file bug27471_s.brep] s
-restore [locate_data_file bug27471_p.brep] p
+readbrep [locate_data_file bug27471_s.brep] s
+readbrep [locate_data_file bug27471_p.brep] p
 
 pipe result s p
 

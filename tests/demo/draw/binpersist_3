@@ -4,7 +4,7 @@ pload TOPTEST
 
 set file $imagedir/${casename}.bin
 
-restore [locate_data_file OCC615.brep] b
+readbrep [locate_data_file OCC615.brep] b
 
 if [regexp "Cannot write to the file $file" [binsave b $file]] {
   puts "Error: binsave"

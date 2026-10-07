@@ -3,7 +3,7 @@ puts "0024657: 2dintersect returns different number of intersect points"
 puts "==========="
 puts ""
 
-restore [locate_data_file bug24657.brep] a
+readbrep [locate_data_file bug24657.brep] a
 
 explode a e
 

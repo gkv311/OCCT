@@ -9,7 +9,7 @@ puts ""
 
 point  p 14.99999878745701 5.52319672860377e-07 7.78393041
 vertex v 14.99999878745701 5.52319672860377e-07 7.78393041
-restore [locate_data_file OCC516.brep] result
+readbrep [locate_data_file OCC516.brep] result
 
 set cls [bclassify result p]
 

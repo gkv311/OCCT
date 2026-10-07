@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC22805
 
-restore [locate_data_file OCC22805-spiral_solid.brep] s 
+readbrep [locate_data_file OCC22805-spiral_solid.brep] s 
 stepwrite 0 s $imagedir/${test_image}.stp
 stepread $imagedir/${test_image}.stp result *
 set info [checkshape result_1]

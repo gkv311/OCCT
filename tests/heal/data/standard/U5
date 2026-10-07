@@ -1,2 +1,2 @@
-restore [locate_data_file pro8320-tool.brep] a
+readbrep [locate_data_file pro8320-tool.brep] a
 

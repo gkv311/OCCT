@@ -5,10 +5,10 @@ puts "CTS19305"
 puts "========================"
 puts ""
 
-restore [locate_data_file CTO900_cts19305-part.brep] part 
+readbrep [locate_data_file CTO900_cts19305-part.brep] part 
 checkshape part
 
-restore [locate_data_file CTO900_cts19305-tool.brep] tool
+readbrep [locate_data_file CTO900_cts19305-tool.brep] tool
 checkshape tool
 
 bcut result part tool
