@@ -1,2 +1,2 @@
-restore [locate_data_file cts21296b.brep] a
+readbrep [locate_data_file cts21296b.brep] a
 

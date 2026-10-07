@@ -1,4 +1,4 @@
-restore [locate_data_file bug29368_1.brep] a
+readbrep [locate_data_file bug29368_1.brep] a
 explode a
 mk2dcurve c1 a_1 1
 mk2dcurve c2 a_2 1

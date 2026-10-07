@@ -6,7 +6,7 @@ puts ""
 # checkoverlapedges doesn't have the check for degenerated edges
 ##########################################################################################################
 
-restore [locate_data_file bug25020_b.brep] b
+readbrep [locate_data_file bug25020_b.brep] b
 explode b e
 
 catch {checkoverlapedges b_1 b_2} info

@@ -7,7 +7,7 @@ puts ""
 ## The Draw command "wexplo" gives one edge instead of 6 for the face. 
 #######################################################
 
-restore [locate_data_file OCC356.brep] result
+readbrep [locate_data_file OCC356.brep] result
 checkshape result
 
 explode result w

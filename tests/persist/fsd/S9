@@ -1,4 +1,4 @@
-restore [locate_data_file case_3_shell.brep] base
+readbrep [locate_data_file case_3_shell.brep] base
 
 check_fsd base bin
 check_fsd base cmp

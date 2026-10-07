@@ -1,4 +1,4 @@
-restore [locate_data_file CFE_osa_sgad.brep] a
+readbrep [locate_data_file CFE_osa_sgad.brep] a
 
 sewing result $tol a
 

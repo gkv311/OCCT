@@ -1,8 +1,8 @@
 # Original bug : pro12559
 # Date : 19mar98
 
-restore [locate_data_file CTO900_pro12559a.brep] a
-restore [locate_data_file CTO900_pro12559b.brep] b
+readbrep [locate_data_file CTO900_pro12559a.brep] a
+readbrep [locate_data_file CTO900_pro12559b.brep] b
 
 bfuse result a b
 

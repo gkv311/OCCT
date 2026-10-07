@@ -8,8 +8,8 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug26525_a.brep] b1
-restore [locate_data_file bug26525_b.brep] b2
+readbrep [locate_data_file bug26525_a.brep] b1
+readbrep [locate_data_file bug26525_b.brep] b2
 
 mksurface sb1 b1
 trimv sb1t sb1 -30000 30000

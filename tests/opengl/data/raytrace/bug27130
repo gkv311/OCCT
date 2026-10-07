@@ -6,7 +6,7 @@ puts ""
 pload VISUALIZATION MODELING
 vinit View1
 vsetdispmode 1
-restore [locate_data_file face1.brep] f
+readbrep [locate_data_file face1.brep] f
 vdisplay f
 box b1 25 25 25
 vdisplay b1 -trsfPers zoom -trsfPersPos 0 0 0

@@ -8,7 +8,7 @@ puts ""
 
 smallview
 
-restore [locate_data_file OCC25558_faulty.brep] a1
+readbrep [locate_data_file OCC25558_faulty.brep] a1
 
 fit
 checkview -screenshot -2d -path ${imagedir}/${test_image}.png

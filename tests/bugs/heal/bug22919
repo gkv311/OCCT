@@ -6,7 +6,7 @@ puts ""
 # Shape Healing fails to correct a face with missing seam
 #############################################
 
-restore [locate_data_file bug22919_ss.brep] ss
+readbrep [locate_data_file bug22919_ss.brep] ss
 explode ss
 
 fixshape ok1 ss_1

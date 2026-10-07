@@ -6,7 +6,7 @@ puts ""
 # Extrema_ExtPS crashes on face without geometric surface
 #################################################
 
-restore [locate_data_file bug27821_nullsurf.brep] a
+readbrep [locate_data_file bug27821_nullsurf.brep] a
 
 # check for exceptions for vertex-face
 vertex v 0 0 0

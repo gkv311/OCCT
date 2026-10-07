@@ -1,5 +1,5 @@
-restore [locate_data_file CIN001_a61.brep] a
-restore [locate_data_file b61.brep] b
+readbrep [locate_data_file CIN001_a61.brep] a
+readbrep [locate_data_file b61.brep] b
 bsection result a b
 
 checkprops result -l 773.793

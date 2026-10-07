@@ -5,10 +5,10 @@ puts "(case 4)"
 puts "========================"
 puts ""
 
-restore [locate_data_file so1.brep] b1 
+readbrep [locate_data_file so1.brep] b1 
 checkshape b1
 
-restore [locate_data_file so2.brep] b2
+readbrep [locate_data_file so2.brep] b2
 checkshape b2
 
 bcommon result b1 b2

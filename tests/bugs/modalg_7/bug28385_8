@@ -7,6 +7,6 @@ puts ""
 #################################################
 
 
-restore [locate_data_file bug28385_bug763_faces.brep] faces
+readbrep [locate_data_file bug28385_bug763_faces.brep] faces
 
 checkview -display faces -2d -path ${imagedir}/${test_image}-2d.png

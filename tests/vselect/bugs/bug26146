@@ -5,7 +5,7 @@ puts "=================================="
 puts "Select3D_ISensitivePointSet: Crash when clearing selections (only with TBB)"
 puts "=================================="
 
-restore [locate_data_file bug26146_crash_compound.brep] crash_compound
+readbrep [locate_data_file bug26146_crash_compound.brep] crash_compound
 
 vinit
 vdisplay crash_compound

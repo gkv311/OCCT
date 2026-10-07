@@ -3,7 +3,7 @@ puts "OCC30958: BRepOffsetAPI_ThruSections operation raises an except-ion while 
 puts "=========================================================================================="
 puts ""
 
-restore [locate_data_file bug30958_CompWires.brep] ww
+readbrep [locate_data_file bug30958_CompWires.brep] ww
 explode ww
 
 thrusections res 0 1 ww_1 ww_2

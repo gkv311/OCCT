@@ -1,4 +1,4 @@
-restore [locate_data_file CCV_1_h1_gsk.brep] a
+readbrep [locate_data_file CCV_1_h1_gsk.brep] a
 
 sewing result $tol a
 

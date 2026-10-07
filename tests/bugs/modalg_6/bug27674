@@ -7,7 +7,7 @@ puts ""
 # shape if sections are connected at ends
 ############################################################################
 
-restore [locate_data_file bug27674_CircleLineWires.brep] a
+readbrep [locate_data_file bug27674_CircleLineWires.brep] a
 
 explode a
 wire w a_1 a_2

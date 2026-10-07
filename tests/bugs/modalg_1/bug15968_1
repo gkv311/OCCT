@@ -6,7 +6,7 @@ puts ""
 # Result of checkshape command depends on order of subshapes in a shape 
 #######################################################################
 
-restore [locate_data_file OCC15968.brep] s
+readbrep [locate_data_file OCC15968.brep] s
 
 explode s f
 

@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC27434
 
-restore [locate_data_file bug27434_ff.brep] ff
+readbrep [locate_data_file bug27434_ff.brep] ff
 point pp 3.5104958975622309 1.4497931574922160e+031
 
 set info [b2dclassify ff pp]

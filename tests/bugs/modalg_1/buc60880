@@ -7,7 +7,7 @@ puts ""
 ## We have overlapping edges when section a shell by plane. 
 ##########################################
 
-restore [locate_data_file BUC60880_sec_error2.brep] sh 
+readbrep [locate_data_file BUC60880_sec_error2.brep] sh 
 checkshape sh
 
 plane pl 65000 19000 2600 1 0 0

@@ -4,7 +4,7 @@ puts "============"
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file bug23400_thinring.brep] a
+readbrep [locate_data_file bug23400_thinring.brep] a
 vinit View1
 vsetdispmode 1
 vdisplay a

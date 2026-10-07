@@ -6,7 +6,7 @@ puts ""
 ## Wire of BSplines fails bopcheck
 ###############################
 
-restore [locate_data_file bug25693_path3035.brep] result
+readbrep [locate_data_file bug25693_path3035.brep] result
 
 set bug_info [string trim [bopcheck result]]
 if {$bug_info != "This shape seems to be OK."} {

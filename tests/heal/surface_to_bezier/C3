@@ -1,1 +1,1 @@
-restore [locate_data_file CFI_5_d12fgi.brep] a
+readbrep [locate_data_file CFI_5_d12fgi.brep] a

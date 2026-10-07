@@ -3,7 +3,7 @@ puts "OCC31845: BRepOffsetAPI_MakeThickSolid fails"
 puts "============================================"
 puts ""
 
-restore [locate_data_file bug31845_1.brep] a
+readbrep [locate_data_file bug31845_1.brep] a
 explode a f
 
 offsetparameter 1e-7 p i

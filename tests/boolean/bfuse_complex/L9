@@ -1,8 +1,8 @@
 # Original bug : cts21199
 # Date : 16July98
 
-restore [locate_data_file cts21199_base.brep] a 
-restore [locate_data_file cts21199_face.brep] skface
+readbrep [locate_data_file cts21199_base.brep] a 
+readbrep [locate_data_file cts21199_face.brep] skface
 
 prism b skface 0 0 -50
 

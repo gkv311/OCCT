@@ -1,4 +1,4 @@
-restore [locate_data_file bug26243_anc101.brep] model
+readbrep [locate_data_file bug26243_anc101.brep] model
 
 #-----------------------------------------------------------------------------#
 # Prepare feature faces

@@ -8,7 +8,7 @@ puts ""
 
 pload XSDRAW
 
-restore [locate_data_file bug23375_Volute1.brep] v
+readbrep [locate_data_file bug23375_Volute1.brep] v
 
 explode v
 sewing result 0.01 v_1 v_2

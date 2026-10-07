@@ -3,13 +3,13 @@ puts "0032444: BRepOffsetAPI_MakePipeShell crash when using -DT mode and DT_Shap
 puts "============================================"
 puts ""
 
-restore [locate_data_file bug32444.brep] s
-restore [locate_data_file bug32444_1.brep] p1
-restore [locate_data_file bug32444_2.brep] p2
-restore [locate_data_file bug32444_3.brep] p3
-restore [locate_data_file bug32444_4.brep] p4
-restore [locate_data_file bug32444_5.brep] p5
-restore [locate_data_file bug32444_6.brep] p6
+readbrep [locate_data_file bug32444.brep] s
+readbrep [locate_data_file bug32444_1.brep] p1
+readbrep [locate_data_file bug32444_2.brep] p2
+readbrep [locate_data_file bug32444_3.brep] p3
+readbrep [locate_data_file bug32444_4.brep] p4
+readbrep [locate_data_file bug32444_5.brep] p5
+readbrep [locate_data_file bug32444_6.brep] p6
 
 DT_ShapeDivide s s 0.001
 

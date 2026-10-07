@@ -1,5 +1,5 @@
-restore [locate_data_file fra61083a.brep] a
-restore [locate_data_file CIN900_fra61hlt.brep] b
+readbrep [locate_data_file fra61083a.brep] a
+readbrep [locate_data_file CIN900_fra61hlt.brep] b
 
 bfuse result a b
 

@@ -6,7 +6,7 @@ puts ""
 # Wrong result of projection of a circle on a sphere.
 #####################################################
 
-restore [locate_data_file bug5145_f1.brep] f1
+readbrep [locate_data_file bug5145_f1.brep] f1
 restore [locate_data_file bug5145_c.draw] c
 
 mksurface s f1

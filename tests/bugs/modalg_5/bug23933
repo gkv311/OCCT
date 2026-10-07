@@ -6,8 +6,8 @@ puts ""
 # Self intersection reported after Fuse operation
 ######################################################
 
-restore [locate_data_file bug23933_a.brep] a
-restore [locate_data_file bug23933_b.brep] b
+readbrep [locate_data_file bug23933_a.brep] a
+readbrep [locate_data_file bug23933_b.brep] b
 
 checkshape a
 checkshape b

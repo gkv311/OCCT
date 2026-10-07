@@ -6,7 +6,7 @@ puts ""
 ##  Section algorithm produces micro edge
 ##########################################
 
-restore [locate_data_file bug28690_m8_faces_1.brep] a
+readbrep [locate_data_file bug28690_m8_faces_1.brep] a
 ttranslate a -20000 -2597.4029071873542 -8.9312813979176155
 plane f 0 0 0 1 0 0
 mkface f f

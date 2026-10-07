@@ -7,7 +7,7 @@ puts ""
 # versa. Result of the offset represent an edge instead of wire.
 #############################################
 
-restore [locate_data_file OCC745_nb1.brep] w 
+readbrep [locate_data_file OCC745_nb1.brep] w 
 mkoffset result w 1 -1
 
 set list [whatis result_1]

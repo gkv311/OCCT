@@ -8,7 +8,7 @@ puts ""
 ## Projection of a 3D point on surface using GeomAPI_ProjectPointOnSurf works incorrect 
 #############################################################
 
-restore [locate_data_file OCC593.brep] ff48 
+readbrep [locate_data_file OCC593.brep] ff48 
 
 set tolerance [maxtolerance ff48]
 regexp { +Face +: +Min +[-0-9.+eE]+ +Max +([-0-9.+eE]+)} $tolerance full MaxFaceTolerance

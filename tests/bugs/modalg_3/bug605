@@ -8,10 +8,10 @@ puts ""
 ##############################
 pload ALL
 
-restore [locate_data_file OCC605a.brep] w1 
+readbrep [locate_data_file OCC605a.brep] w1 
 settolerance w1 1.e-7
 checkshape w1
-restore [locate_data_file OCC605b.brep] w2 
+readbrep [locate_data_file OCC605b.brep] w2 
 checkshape w2
 
 if { [catch {pipe result w2 w1 } catch_result] } {

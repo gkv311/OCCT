@@ -6,7 +6,7 @@ puts ""
 # Mesh very slow for Revol shape
 ######################################################################################
 
-restore [locate_data_file bug25264_wire.brep] w
+readbrep [locate_data_file bug25264_wire.brep] w
 
 # right revol position, mesh is very fast.
 revol result1 w 20583.283203125 14039.0208237378 28443.2585934755 0 0 1 360

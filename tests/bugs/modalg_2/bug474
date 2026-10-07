@@ -6,7 +6,7 @@ puts ""
 ## impossible to put a fillet to none of 5 edges sharing one vertrex
 ##################################################
 
-restore [locate_data_file OCC474.brep] s 
+readbrep [locate_data_file OCC474.brep] s 
 
 explode s e
 

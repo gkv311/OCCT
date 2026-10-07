@@ -2,8 +2,8 @@ puts "BUC60092"
 puts "section"
 puts ""
 
-restore [locate_data_file buc60092a.brep] a
-restore [locate_data_file buc60092b.brep] b
+readbrep [locate_data_file buc60092a.brep] a
+readbrep [locate_data_file buc60092b.brep] b
 
 bsection result a b
 

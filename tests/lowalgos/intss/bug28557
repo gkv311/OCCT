@@ -9,7 +9,7 @@ puts ""
 set MaxTolReached 5.0e-6
 set GoodNbCurv 1
 
-brestore [locate_data_file bug27615.brep] b
+readbrep [locate_data_file bug27615.brep] b
 explode b f
 copy b_1 f1; copy b_19 f2;
 don f1 f2

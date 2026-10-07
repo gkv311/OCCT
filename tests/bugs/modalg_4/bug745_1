@@ -8,7 +8,7 @@ puts ""
 ## for wires containing only linear segments and arcs of circle.
 #######################################################
 
-restore [locate_data_file OCC745_1.brep] a 
+readbrep [locate_data_file OCC745_1.brep] a 
 checkshape a
 
 if { [catch { mkoffset result a 1 -10 } status] } {

@@ -2,8 +2,8 @@
 # Date : 13Mai98
 # C2
 
-restore [locate_data_file CTO902_cts20506a.brep] a
-restore [locate_data_file cts20506b.brep] b
+readbrep [locate_data_file CTO902_cts20506a.brep] a
+readbrep [locate_data_file cts20506b.brep] b
 
 bfuse result a b
 

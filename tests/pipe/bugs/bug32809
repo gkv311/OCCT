@@ -3,8 +3,8 @@ puts "bug32809: Sweep algorithm with Round Corner does not work"
 puts "========"
 puts ""
 
-restore [locate_data_file bug32809_path.brep] p
-restore [locate_data_file bug32809_profile.brep] pr
+readbrep [locate_data_file bug32809_path.brep] p
+readbrep [locate_data_file bug32809_profile.brep] pr
 
 mksweep p
 setsweep -CF

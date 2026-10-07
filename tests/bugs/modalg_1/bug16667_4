@@ -7,7 +7,7 @@ puts ""
 # 2D Offset algorithm fails
 #######################################################################
 
-restore [locate_data_file OCC16667-wire.brep] a
+readbrep [locate_data_file OCC16667-wire.brep] a
 
 mkoffset resoffset a 1 -20
 renamevar resoffset_1 result

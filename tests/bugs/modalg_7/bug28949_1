@@ -7,8 +7,8 @@ puts ""
 ##############################################################################
 
 
-restore [locate_data_file OCC1477-1.brep] sp
-restore [locate_data_file OCC1477-2.brep] pr
+readbrep [locate_data_file OCC1477-1.brep] sp
+readbrep [locate_data_file OCC1477-2.brep] pr
 
 mksweep sp
 addsweep pr

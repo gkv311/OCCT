@@ -8,7 +8,7 @@ puts ""
 # checkshape command does not return faulty shapes.
 ######################################################
 
-restore [locate_data_file bug21134_r.brep] res
+readbrep [locate_data_file bug21134_r.brep] res
 
 checkshape res
 

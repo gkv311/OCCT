@@ -8,7 +8,7 @@ puts ""
 ## HLR returns intersecting edges in OutLineV of helical sweep
 ##############################################################
 
-restore [locate_data_file bug25776_shape2dhelix1-draw-Shape.brep] Shape
+readbrep [locate_data_file bug25776_shape2dhelix1-draw-Shape.brep] Shape
 
 hprj Shape2DView_proj 0 0 0 1 0 0 0 1 0
 houtl Shape2DView_outl Shape

@@ -6,7 +6,7 @@ puts ""
 ## Checkshape gives wrong result for valid face 
 #########################################
 
-restore [locate_data_file OCC399.brep] result
+readbrep [locate_data_file OCC399.brep] result
 
 set che [checkshape result]
 if { [regexp {Faulty} $che ] == 1 } {

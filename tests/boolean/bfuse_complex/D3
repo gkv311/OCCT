@@ -1,9 +1,9 @@
 # Original bug : ger60041
 # Date : 11mar98 
 
-restore [locate_data_file ger60041a.brep] a
+readbrep [locate_data_file ger60041a.brep] a
 fsameparameter a
-restore [locate_data_file ger60041b.brep] b
+readbrep [locate_data_file ger60041b.brep] b
 
 bfuse result a b 
 

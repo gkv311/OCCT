@@ -2,8 +2,8 @@ puts "=================="
 puts "BUC60682"
 puts "=================="
 
-restore [locate_data_file buc60682a.brep] shell1 
-restore [locate_data_file buc60682b.brep] shell2
+readbrep [locate_data_file buc60682a.brep] shell1 
+readbrep [locate_data_file buc60682b.brep] shell2
 
 bsection result shell1 shell2
 

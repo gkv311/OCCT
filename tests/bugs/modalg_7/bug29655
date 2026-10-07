@@ -6,7 +6,7 @@ puts ""
 # 0029655: [Regression to 6.9.1] Distance between cylinder and straight line
 #################################################
 
-restore [locate_data_file bug29655.brep] s
+readbrep [locate_data_file bug29655.brep] s
 explode s
 distmini res s_1 s_2
 

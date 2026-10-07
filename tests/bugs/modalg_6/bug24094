@@ -7,7 +7,7 @@ puts ""
 ##########################################
 
 
-restore [locate_data_file bug24094_face.brep] a
+readbrep [locate_data_file bug24094_face.brep] a
 plane p 183.6 0 0 1 0 0 0 1 0
 mkface f p
 

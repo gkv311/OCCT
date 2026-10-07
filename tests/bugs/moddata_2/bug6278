@@ -8,8 +8,8 @@ puts ""
 
 set BugNumber OCC6278
 
-restore [locate_data_file OCC6278-A.brep] a 
-restore [locate_data_file OCC6278-B.brep] b 
+readbrep [locate_data_file OCC6278-A.brep] a 
+readbrep [locate_data_file OCC6278-B.brep] b 
 
 bfuse result a b
 explode result v

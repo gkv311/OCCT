@@ -6,7 +6,7 @@ puts ""
 # BRepAlgoAPI_Section fails depending on order of arguments
 #############################################################
 
-restore [locate_data_file bug25792_Turbine_VTG.brep] t
+readbrep [locate_data_file bug25792_Turbine_VTG.brep] t
 explode t
 bop t_1 t_2
 bopsection res

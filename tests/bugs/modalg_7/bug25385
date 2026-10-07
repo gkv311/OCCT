@@ -6,7 +6,7 @@ puts ""
 # steep increase in tolerance by intersection
 #######################################################################
 
-restore [locate_data_file bug25385_shell2.brep] s
+readbrep [locate_data_file bug25385_shell2.brep] s
 
 regexp {Tolerance +MAX=([-0-9.+eE]+)} [tolerance s] full MaxTol_s_1
 

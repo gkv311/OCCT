@@ -3,7 +3,7 @@ puts "OCC30158: Shape Healing - Incorrect result produced by ShapeUpgrade_UnifyS
 puts "==================================================================================="
 puts ""
 
-restore [locate_data_file bug30158_2.brep] s
+readbrep [locate_data_file bug30158_2.brep] s
 unifysamedom result s
 
 checkshape result

@@ -6,8 +6,8 @@ puts ""
 # Bad result of section algorithm
 ##################################################
 
-restore [locate_data_file bug26580-plate-2.brep] a2
-restore [locate_data_file bug26776_b2.brep] b2
+readbrep [locate_data_file bug26580-plate-2.brep] a2
+readbrep [locate_data_file bug26776_b2.brep] b2
 
 bsection result a2 b2
 

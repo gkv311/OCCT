@@ -1,4 +1,4 @@
-restore [locate_data_file bug29481_ex4.brep] s
+readbrep [locate_data_file bug29481_ex4.brep] s
 explode s f
 
 # remove the chamfer

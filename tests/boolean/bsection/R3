@@ -1,7 +1,7 @@
 ## buc60289
 
-restore [locate_data_file heal-Face1.brep] a
-restore [locate_data_file Plan.brep] b
+readbrep [locate_data_file heal-Face1.brep] a
+readbrep [locate_data_file Plan.brep] b
 
 bsection result a b
 

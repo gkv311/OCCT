@@ -1,5 +1,5 @@
-restore [locate_data_file pro15515_base.brep] base
-restore [locate_data_file pro15515_face.brep] cont
+readbrep [locate_data_file pro15515_base.brep] base
+readbrep [locate_data_file pro15515_face.brep] cont
 
 explode base face
 copy base_3 ffrom

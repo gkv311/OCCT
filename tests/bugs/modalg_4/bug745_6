@@ -10,7 +10,7 @@ puts ""
 # There are discontinuities in offset contours:
 ################################
 
-restore [locate_data_file BUC60878-wire3.brep] a 
+readbrep [locate_data_file BUC60878-wire3.brep] a 
 checkshape a
 
 if { [catch { mkoffset result a 1 -10 } status] } {

@@ -6,7 +6,7 @@ puts ""
 # Draft angle algorithm modifies input argument + the result of the operation have very large tolerance values
 ################################################################################################################
 
-restore [locate_data_file OCC26426-prism_shape.brep] b
+readbrep [locate_data_file OCC26426-prism_shape.brep] b
 
 set bug_info_0 [tolerance b]
 set bug_info_0 [lindex $bug_info_0 1]

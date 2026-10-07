@@ -4,7 +4,7 @@ puts "         of triangulation-only shapes (without geometry surface) "
 puts "================================================================="
 puts ""
 
-restore [locate_data_file bug31479_P-51-Mustang-2.brep] s
+readbrep [locate_data_file bug31479_P-51-Mustang-2.brep] s
 
 # reference data
 regexp {([0-9+-.eE]*) faces.* ([0-9+-.eE]*) triangles.* ([0-9+-.eE]*) nodes} [trinfo s] full nbFaces nbTri nbNodes

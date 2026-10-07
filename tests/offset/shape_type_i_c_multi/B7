@@ -17,7 +17,7 @@ foreach val {0 1} {
   }
 }
 
-restore [locate_data_file bug31148_plate_split.brep] s
+readbrep [locate_data_file bug31148_plate_split.brep] s
 
 perform_offset_multi_with_ref r0_01 s 0 {6 10 14} {1 5 1} {464 244 26 26} 1; # BAD (null shape)
 perform_offset_multi_with_ref r0_02 s 0 {9 11} {5 5} {448 244 24 23} 1; # BAD (filled part)

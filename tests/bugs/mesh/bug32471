@@ -3,7 +3,7 @@ puts "0032471: Mesh - Deflection of the triangulation is not recomputed for plan
 puts "======="
 puts ""
 
-restore [locate_data_file bug32471.brep] result
+readbrep [locate_data_file bug32471.brep] result
 
 incmesh result 0.01
 

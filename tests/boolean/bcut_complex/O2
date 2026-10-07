@@ -2,7 +2,7 @@
 # Date : 26Aout98
 # pkv f
 
-restore [locate_data_file pro15042.brep] a 
+readbrep [locate_data_file pro15042.brep] a 
 explode a
 
 bcut result a_1 a_2

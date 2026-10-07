@@ -5,7 +5,7 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug30391_face3.brep] a
+readbrep [locate_data_file bug30391_face3.brep] a
 
 OCC30391 result a 1. 1. 1. 1.
 

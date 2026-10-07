@@ -6,9 +6,9 @@ puts "0026295: Sweep fails with BRepFill_ContactOnBorder"
 puts "========"
 puts ""
 
-restore [locate_data_file bug26295_section.brep] section
-restore [locate_data_file bug26295_profile1.brep] profile1
-restore [locate_data_file bug26295_profile3.brep] profile3
+readbrep [locate_data_file bug26295_section.brep] section
+readbrep [locate_data_file bug26295_profile1.brep] profile1
+readbrep [locate_data_file bug26295_profile3.brep] profile3
 
 explode section
 explode profile1

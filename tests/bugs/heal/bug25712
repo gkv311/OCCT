@@ -9,7 +9,7 @@ set OK_shapes_1 177
 set OK_shapes_2 9
 
 for {set i 1} {$i <= 5} {incr i} {
-  restore [locate_data_file OCC25712_comp16.brep] c
+  readbrep [locate_data_file OCC25712_comp16.brep] c
   fixshape rc c
   explode rc
   explode rc_2

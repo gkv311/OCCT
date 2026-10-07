@@ -1,8 +1,8 @@
 # Original bug : pro14630
 # Date : 16July98
 
-restore [locate_data_file pro14630a.brep] a 
-restore [locate_data_file pro14630b.brep] b
+readbrep [locate_data_file pro14630a.brep] a 
+readbrep [locate_data_file pro14630b.brep] b
 
 bcut result a b
 checkprops result -s 198000

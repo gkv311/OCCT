@@ -8,7 +8,7 @@ puts ""
 # Poor mesh quality, or failure of meshing for closed extruded surfaces with holes
 #########################################################
 
-restore [locate_data_file bug25586_quasi_closed.brep] result
+readbrep [locate_data_file bug25586_quasi_closed.brep] result
 
 checkprops result -s 1.
 

@@ -3,7 +3,7 @@ puts "OCC169"
 puts "========"
 puts ""
 
-restore [locate_data_file OCC169.brep] a
+readbrep [locate_data_file OCC169.brep] a
 
 fixshape result a 1e-7
 checkshape result

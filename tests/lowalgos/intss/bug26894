@@ -18,8 +18,8 @@ puts ""
 # any section curve (see comments to the issue #26894).
 set GoodNbCurv 0
 
-restore [locate_data_file bug26884-f1.brep] f1
-restore [locate_data_file bug26884-f2.brep] f2
+readbrep [locate_data_file bug26884-f1.brep] f1
+readbrep [locate_data_file bug26884-f2.brep] f2
 
 mksurface ss1 f1
 mksurface ss2 f2

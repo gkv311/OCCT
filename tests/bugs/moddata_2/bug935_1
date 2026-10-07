@@ -8,13 +8,13 @@ puts ""
 ## instability in checkshape in KAS:dev version.
 ###############################
 
-restore [locate_data_file OCC935_1.brep] result
+readbrep [locate_data_file OCC935_1.brep] result
 
 set err [checkshape result]
 
 set j 1
 repeat 25 {
-    restore [locate_data_file OCC935_1.brep] result
+    readbrep [locate_data_file OCC935_1.brep] result
     set err1 [checkshape result]
     if { $err != $err1 } {
       puts [format " Faulty OCC935 (case 1): function CHECKSHAPE works wrongly on %s time" $j]

@@ -5,7 +5,7 @@ puts "OCC454"
 puts "================"
 puts ""
 
-restore [locate_data_file OCC454_b1.brep] b1 
+readbrep [locate_data_file OCC454_b1.brep] b1 
 checkshape b1
 
 restore [locate_data_file OCC454_p1.draw] p1 

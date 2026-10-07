@@ -10,7 +10,7 @@ puts ""
 
 set BugNumber OCC14643
 
-restore [locate_data_file OCC14643.brep] result
+readbrep [locate_data_file OCC14643.brep] result
 
 checkprops result -s 8.63143e+07 
 checkshape result

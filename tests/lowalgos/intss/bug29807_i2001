@@ -3,8 +3,8 @@ puts "0029807: Impossible to cut cone from prism"
 puts "========"
 puts ""
 
-restore [locate_data_file bug29807-obj.brep] b1
-restore [locate_data_file bug29807-tool.brep] b2
+readbrep [locate_data_file bug29807-obj.brep] b1
+readbrep [locate_data_file bug29807-tool.brep] b2
 
 explode b1 f
 explode b2 f

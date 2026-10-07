@@ -6,7 +6,7 @@ puts ""
 # The class ShapeUpgrade_UnifySameDomain provides the results that are wrong or difficult to explain.
 ######################################################
 
-restore [locate_data_file bug26489_p01usd.brep] poly
+readbrep [locate_data_file bug26489_p01usd.brep] poly
 
 unifysamedom result poly
 

@@ -2,14 +2,14 @@ puts " BUC60068 "
 puts "If scales by 1000, time to compute is 10 times greater "
 ##
 ## mod pkv from
-restore [locate_data_file buc60068a.brep] a
-restore [locate_data_file buc60068b.brep] b
-restore [locate_data_file buc60068a.brep] c
-restore [locate_data_file buc60068b.brep] d
-restore [locate_data_file buc60068a.brep] e
-restore [locate_data_file buc60068b.brep] f
-restore [locate_data_file buc60068a.brep] g
-restore [locate_data_file buc60068b.brep] h
+readbrep [locate_data_file buc60068a.brep] a
+readbrep [locate_data_file buc60068b.brep] b
+readbrep [locate_data_file buc60068a.brep] c
+readbrep [locate_data_file buc60068b.brep] d
+readbrep [locate_data_file buc60068a.brep] e
+readbrep [locate_data_file buc60068b.brep] f
+readbrep [locate_data_file buc60068a.brep] g
+readbrep [locate_data_file buc60068b.brep] h
 ## mod pkv from
 ##
 

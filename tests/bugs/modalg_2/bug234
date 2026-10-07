@@ -6,7 +6,7 @@ puts "========"
 ##I believe that attached shape is OK but checkshape finds out some problems (Bad Orientation of Subshape).
 ######################################################################
 
-restore [locate_data_file OCC234.brep] result
+readbrep [locate_data_file OCC234.brep] result
 
 set che [checkshape result r]
 if { [regexp {OK} $che] != 1 } {

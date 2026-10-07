@@ -6,7 +6,7 @@ puts ""
 # Incorrect history support in ShapeUpgrade_UnifySameDomain algorithm
 #####################################################################
 
-restore [locate_data_file bug28228_face.brep] a
+readbrep [locate_data_file bug28228_face.brep] a
 
 explode a f
 explode a_1 v

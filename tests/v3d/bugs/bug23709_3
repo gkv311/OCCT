@@ -4,7 +4,7 @@ puts "==========="
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file bug23709_solidcone.brep] result
+readbrep [locate_data_file bug23709_solidcone.brep] result
 vinit View1
 vdisplay result
 vrotate 35 0 0

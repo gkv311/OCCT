@@ -6,7 +6,7 @@ puts ""
 ## Exception while copying offset on C0 surface
 #######################################################
 
-restore [locate_data_file bug26522_s.brep] s
+readbrep [locate_data_file bug26522_s.brep] s
 
 set info [checkshape s]
 

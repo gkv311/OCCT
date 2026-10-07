@@ -1,8 +1,8 @@
 # Original bug : pro12953
 # Date :  4mai98
 
-restore [locate_data_file CTO900_pro12953-part.brep] part
-restore [locate_data_file CTO900_pro12953-tool.brep] tool
+readbrep [locate_data_file CTO900_pro12953-part.brep] part
+readbrep [locate_data_file CTO900_pro12953-tool.brep] tool
 
 bcut result part tool
 checkprops result -s 78.7758

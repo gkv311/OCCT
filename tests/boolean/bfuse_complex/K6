@@ -1,8 +1,8 @@
 # Original bug : cts20973
 # Date : 12June98
 
-restore [locate_data_file cts20973a.brep] a 
-restore [locate_data_file cts20973b.brep] b
+readbrep [locate_data_file cts20973a.brep] a 
+readbrep [locate_data_file cts20973b.brep] b
 
 bfuse result a b
 

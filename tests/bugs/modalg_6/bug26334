@@ -6,9 +6,9 @@ puts ""
 # BRepOffsetAPI_MakePipeShell returns the wrong shape
 #######################################################################
 
-restore [locate_data_file bug26334_pw1.brep] pw1
-restore [locate_data_file bug26334_pw2.brep] pw2
-restore [locate_data_file bug26334_pw3.brep] pw3
+readbrep [locate_data_file bug26334_pw1.brep] pw1
+readbrep [locate_data_file bug26334_pw2.brep] pw2
+readbrep [locate_data_file bug26334_pw3.brep] pw3
 
 mksweep pw1
 addsweep pw2

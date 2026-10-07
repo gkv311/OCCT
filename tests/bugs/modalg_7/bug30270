@@ -4,7 +4,7 @@ puts "========"
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file bug27448_b1255.brep] s
+readbrep [locate_data_file bug27448_b1255.brep] s
 bounding s -print
 bounding s -finite -shape b
 smallview

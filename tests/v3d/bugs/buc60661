@@ -7,7 +7,7 @@ puts ""
 
 pload MODELING XDE VISUALIZATION
 
-restore [locate_data_file buc60661a.brep] buc60661
+readbrep [locate_data_file buc60661a.brep] buc60661
 checkshape buc60661
 
 ######################################################################

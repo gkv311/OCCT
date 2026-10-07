@@ -1,6 +1,6 @@
 set ExpectDeviation 0.36597801294402493
 
-restore [locate_data_file OCC538.brep] r
+readbrep [locate_data_file OCC538.brep] r
 smallview -2D-
 pcurve r
 

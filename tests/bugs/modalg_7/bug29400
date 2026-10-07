@@ -6,7 +6,7 @@ puts ""
 # Fuse of two edges creates self-interfered shape
 #################################################
 
-restore [locate_data_file bug29400_edges.brep] le
+readbrep [locate_data_file bug29400_edges.brep] le
 bclearobjects
 bcleartools
 baddcompound le

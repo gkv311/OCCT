@@ -6,8 +6,8 @@ puts ""
 # Boolean fuse result in invalid result
 #########################################
 
-restore [locate_data_file bug25994_body.brep] body
-restore [locate_data_file bug25994_wing.brep] wing
+readbrep [locate_data_file bug25994_body.brep] body
+readbrep [locate_data_file bug25994_wing.brep] wing
 
 bclearobjects
 bcleartools

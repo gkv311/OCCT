@@ -5,6 +5,6 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug_gh466.brep] result
+readbrep [locate_data_file bug_gh466.brep] result
 
 bounding result -close

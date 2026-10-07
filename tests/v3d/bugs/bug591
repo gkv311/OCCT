@@ -4,7 +4,7 @@ puts "========"
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file OCC591.brep] result
+readbrep [locate_data_file OCC591.brep] result
 tclean result
 vinit View1
 vdisplay result

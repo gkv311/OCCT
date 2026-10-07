@@ -8,8 +8,8 @@ puts ""
 # BUC60866. The BRepFill_Pipe fails.
 ####################################
 
-restore [locate_data_file buc60866a.brep] Section
-restore [locate_data_file buc60866b.brep] PathBad
+readbrep [locate_data_file buc60866a.brep] Section
+readbrep [locate_data_file buc60866b.brep] PathBad
 
 reverse PathBad
 

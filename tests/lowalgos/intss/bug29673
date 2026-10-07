@@ -3,8 +3,8 @@ puts "0029673: Ex-ception while Face-Face intersection"
 puts "========"
 puts ""
 
-restore [locate_data_file bug29673_f1.brep] f1
-restore [locate_data_file bug29673_f2.brep] f2
+readbrep [locate_data_file bug29673_f1.brep] f1
+readbrep [locate_data_file bug29673_f2.brep] f2
 
 regexp {Tolerance Reached=+([-0-9.+eE]+)\n+([-0-9.+eE]+)} [bopcurves f1 f2 -2d] full Toler NbCurv
 

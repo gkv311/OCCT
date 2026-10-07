@@ -7,7 +7,7 @@ puts ""
 ## Exception ConstructionError in LocOpe_SplitShape. 
 ######################################
 
-restore [locate_data_file BUC60930_splitshape.brep] c 
+readbrep [locate_data_file BUC60930_splitshape.brep] c 
 explode c
 checkshape c_1
 checkshape c_2

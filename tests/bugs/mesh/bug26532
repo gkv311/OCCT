@@ -22,7 +22,7 @@ proc xyzList {List N A B} {
    return $ResultList
 }
 
-restore [locate_data_file bug26533_aal2.brep] a
+readbrep [locate_data_file bug26533_aal2.brep] a
 
 vinit
 vdisplay a
@@ -51,7 +51,7 @@ set Length1 [llength $RL1]
 # 2
 # without min size
 # => nice curve
-restore [locate_data_file bug26533_aal2.brep] a2
+readbrep [locate_data_file bug26533_aal2.brep] a2
 vdisplay a2
 vclear
 incmesh a2 0.3

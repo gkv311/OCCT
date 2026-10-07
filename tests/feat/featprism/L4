@@ -1,8 +1,8 @@
 # Original bug : cts20072
 # Date : 24mar98
 
-restore [locate_data_file CFE900_cts20gbj.brep] base
-restore [locate_data_file cts20072_face.brep] cont
+readbrep [locate_data_file CFE900_cts20gbj.brep] base
+readbrep [locate_data_file cts20072_face.brep] cont
 
 featprism base cont cont 0 0 1 1 1
 featperformval prism result 100

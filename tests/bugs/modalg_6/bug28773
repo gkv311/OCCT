@@ -6,8 +6,8 @@ puts ""
 # BRepAlgoAPI_Cut invalid result
 #################################################
 
-restore [locate_data_file bug28773_1.brep] b1
-restore [locate_data_file bug28773_2.brep] b2
+readbrep [locate_data_file bug28773_1.brep] b1
+readbrep [locate_data_file bug28773_2.brep] b2
 
 bop b1 b2
 bopcut res

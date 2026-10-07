@@ -7,7 +7,7 @@ puts "========================"
 ## Fillets are created on OCC4.0
 #######################################################
 
-restore [locate_data_file CFI_pro15441.brep] m 
+readbrep [locate_data_file CFI_pro15441.brep] m 
 explode m e
 
 if [catch {blend result  m 2 m_36 2 m_21 } res] {

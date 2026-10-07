@@ -1,9 +1,9 @@
 # Original bug : cts21306
 # Date : 16July98
 
-restore [locate_data_file cts21306a.brep] a 
-restore [locate_data_file cts21306b.brep] b
-restore [locate_data_file cts21306c.brep] c
+readbrep [locate_data_file cts21306a.brep] a 
+readbrep [locate_data_file cts21306b.brep] b
+readbrep [locate_data_file cts21306c.brep] c
 
 bfuse rab a b
 

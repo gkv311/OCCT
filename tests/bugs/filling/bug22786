@@ -9,7 +9,7 @@ set g1_ref 0.0
 set g2_ref 0.0
 set area_ref 2.92409
 
-restore [locate_data_file OCC22786-c.brep] c 
+readbrep [locate_data_file OCC22786-c.brep] c 
 
 explode c
 

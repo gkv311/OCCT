@@ -8,7 +8,7 @@ puts ""
 # Sweep fails in "Right Corner" mode
 ######################################
 
-restore [locate_data_file bug28108_sweep.brep] sweep
+readbrep [locate_data_file bug28108_sweep.brep] sweep
 
 explode sweep w
 mksweep sweep_2

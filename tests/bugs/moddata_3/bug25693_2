@@ -6,7 +6,7 @@ puts ""
 ## Wire of BSplines fails bopcheck
 ###############################
 
-restore [locate_data_file bug25693_path3039.brep] path3039
+readbrep [locate_data_file bug25693_path3039.brep] path3039
 
 prism Extrude_path3039 path3039 0 0 50
 

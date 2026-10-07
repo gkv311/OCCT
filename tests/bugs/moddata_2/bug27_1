@@ -4,7 +4,7 @@ puts "OCC27"
 puts "================"
 puts ""
 
-restore [locate_data_file shading_128.brep] a 
+readbrep [locate_data_file shading_128.brep] a 
 checkshape a
 
 explode a e

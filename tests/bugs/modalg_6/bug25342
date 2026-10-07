@@ -6,7 +6,7 @@ puts ""
 ## [Regression] BRepAlgoAPI_Section returns wrong number of edges
 ###############################
 
-restore [locate_data_file bug25342_pump2.brep] p
+readbrep [locate_data_file bug25342_pump2.brep] p
 
 explode p
 bop p_1 p_2

@@ -5,7 +5,7 @@ puts ""
 
 cpulimit 10
 
-restore [locate_data_file bug31144.brep] a
+readbrep [locate_data_file bug31144.brep] a
 
 checkshape a
 tolerance a

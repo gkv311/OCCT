@@ -6,7 +6,7 @@ puts ""
 # BOPAlgo_MakerVolume fails to create solid
 ######################################################
 
-restore [locate_data_file bug28274_tmp.brep] a
+readbrep [locate_data_file bug28274_tmp.brep] a
 
 bnondestructive 1
 

@@ -10,7 +10,7 @@ puts ""
 
 pload XDE
 
-restore [locate_data_file OCC1360.brep] sh 
+readbrep [locate_data_file OCC1360.brep] sh 
 
 fixshape result sh 1e-7
 

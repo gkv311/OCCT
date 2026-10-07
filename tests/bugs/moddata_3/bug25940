@@ -8,7 +8,7 @@ puts ""
 # MakeThickSolid creates C0 continuous edges
 #######################################################################
 
-restore [locate_data_file bug25940_thickness-extrude1-tcl-Face.brep] Face
+readbrep [locate_data_file bug25940_thickness-extrude1-tcl-Face.brep] Face
 
 prism Extrude Face -102 0 0
 explode Extrude F

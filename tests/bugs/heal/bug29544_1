@@ -6,7 +6,7 @@ puts ""
 # Regression vs 7.2.0: ShapeUpgrade_UnifySameDomain fails to merge linear edges
 #################################################
 
-restore [locate_data_file bug29544_edges.brep] ce
+readbrep [locate_data_file bug29544_edges.brep] ce
 unifysamedom result ce
 
 checkshape result

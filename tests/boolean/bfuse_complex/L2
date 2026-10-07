@@ -1,8 +1,8 @@
 # Original bug : cts21044
 # Date : 24June98
 
-restore [locate_data_file CTO900_cts21453a.brep] a 
-restore [locate_data_file CTO900_cts21453b.brep] b
+readbrep [locate_data_file CTO900_cts21453a.brep] a 
+readbrep [locate_data_file CTO900_cts21453b.brep] b
 
 bfuse result a b
 

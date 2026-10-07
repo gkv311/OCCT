@@ -4,7 +4,7 @@ puts "ShapeFix_Wireframe does not process separate wires"
 puts "================"
 puts ""
 
-restore [locate_data_file OCC1430-1.brep] a
+readbrep [locate_data_file OCC1430-1.brep] a
 checkshape a
 
 set message [fixsmall result a 10.]

@@ -1,1 +1,1 @@
-restore [locate_data_file CCH_testkhes.brep] a
+readbrep [locate_data_file CCH_testkhes.brep] a

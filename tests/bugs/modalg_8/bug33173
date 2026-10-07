@@ -4,7 +4,7 @@ puts "========"
 puts ""
 
 set MinDistExpected 7.049107166484117e-07
-restore [locate_data_file bug33173.brep] s
+readbrep [locate_data_file bug33173.brep] s
 explode s
 distmini dm s_1 s_2
 if {[isdraw dm]} {

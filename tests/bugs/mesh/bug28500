@@ -3,7 +3,7 @@ puts "CR28500: Artifact in shaded view of the shape"
 puts "======="
 puts ""
 
-restore [locate_data_file bug28500_shape_mesh_artifact.brep] result
+readbrep [locate_data_file bug28500_shape_mesh_artifact.brep] result
 
 tclean result
 incmesh result 0.01

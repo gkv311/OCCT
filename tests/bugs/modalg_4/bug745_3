@@ -12,7 +12,7 @@ puts "Non stable test case on Linux. MKV. 04.02.2011"
 puts " ( Gif )"
 puts "#"
 
-restore [locate_data_file OCC745_ellipse.brep] w 
+readbrep [locate_data_file OCC745_ellipse.brep] w 
 checkshape w
 mkplane result w
 topoload result

@@ -6,8 +6,8 @@ puts ""
 # Face-face intersection produces 2D curve that has reversed derivative at its end
 ######################################################
 
-restore [locate_data_file buc60532a.brep] p 
-restore [locate_data_file buc60532b.brep] t1
+readbrep [locate_data_file buc60532a.brep] p 
+readbrep [locate_data_file buc60532b.brep] t1
 explode t1 f
 
 bopcurves p t1_2 -2d -p 6.2406621764215551 0.23999999463558200 0.00034444887595448459 -5.0019657458625186

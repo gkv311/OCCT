@@ -8,7 +8,7 @@ puts ""
 
 pload XDE
 
-restore [locate_data_file BUC60882_samepar.brep] result
+readbrep [locate_data_file BUC60882_samepar.brep] result
 
 set che [checkshape result]
 

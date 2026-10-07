@@ -3,7 +3,7 @@ puts "0026627: Shape Healing hangs as of OCC 6.8.0"
 puts "##################################################"
 
 # load and check shape
-restore [locate_data_file bug26627_fixed.brep] a
+readbrep [locate_data_file bug26627_fixed.brep] a
 tolerance a
 checkshape a
 

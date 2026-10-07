@@ -1,8 +1,8 @@
 # Original bug : cts20374
 # Date : 24mar98
 
-restore [locate_data_file CTO900_cts20374-part.brep] part
-restore [locate_data_file cts20374-tool.brep] tool
+readbrep [locate_data_file CTO900_cts20374-part.brep] part
+readbrep [locate_data_file cts20374-tool.brep] tool
 
 bcut result part tool
 checkprops result -s 472107

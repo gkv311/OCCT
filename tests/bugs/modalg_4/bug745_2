@@ -7,7 +7,7 @@ puts ""
 ## This test does not terminate due to infinite loop in bissector calculation
 ##################################################
 
-restore [locate_data_file OCC745_2.brep] a 
+readbrep [locate_data_file OCC745_2.brep] a 
 checkshape a
 mkplane pl a
 topoload pl

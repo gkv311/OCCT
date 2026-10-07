@@ -6,7 +6,7 @@ puts ""
 ## Bounding box is too big for the face.
 #####################################################################
 
-restore [locate_data_file bug25631_fbx.brep] result
+readbrep [locate_data_file bug25631_fbx.brep] result
 
 bounding result -save Xmin Ymin Zmin Xmax Ymax Zmax
 

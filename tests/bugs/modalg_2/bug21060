@@ -12,7 +12,7 @@ puts ""
 
 set BugNumber OCC21060
 
-restore [locate_data_file OCC21060-A9_205.brep] result
+readbrep [locate_data_file OCC21060-A9_205.brep] result
 vinit
 vsetdispmode 1
 vdisplay result

@@ -1,8 +1,8 @@
 # Original bug : pro14957
 # Date : 26Aout98
 
-restore [locate_data_file pro14957a.brep] a 
-restore [locate_data_file pro14957b.brep] b
+readbrep [locate_data_file pro14957a.brep] a 
+readbrep [locate_data_file pro14957b.brep] b
 
 explode a so
 

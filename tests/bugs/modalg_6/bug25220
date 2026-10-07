@@ -6,7 +6,7 @@ puts ""
 # Using BRepFill_OffsetWire with wires containing arc edges throws exception "Standard_NullValue"
 ######################################################
 
-restore [locate_data_file bug25220.brep] a
+readbrep [locate_data_file bug25220.brep] a
 
 mkoffset r a 1 -5
 

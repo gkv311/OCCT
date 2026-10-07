@@ -8,8 +8,8 @@ puts ""
 
 smallview
 
-restore [locate_data_file bug26923-resultCutted_9_Edge.brep] a
-restore [locate_data_file bug26923-toolToCut_10.brep] b
+readbrep [locate_data_file bug26923-resultCutted_9_Edge.brep] a
+readbrep [locate_data_file bug26923-toolToCut_10.brep] b
 
 bcut result a b
 

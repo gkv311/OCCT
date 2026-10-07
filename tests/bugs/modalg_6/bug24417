@@ -6,8 +6,8 @@ puts ""
 # BRepAlgoAPI_Section fails on attached shapes
 #######################################################################
 
-restore [locate_data_file bug24417_circle.brep] a
-restore [locate_data_file bug24417_face.brep] b
+readbrep [locate_data_file bug24417_circle.brep] a
+readbrep [locate_data_file bug24417_face.brep] b
 
 checkshape a
 checkshape b

@@ -10,7 +10,7 @@ set BugNumber OCC22587
 
 catch {pload XDE}
 
-restore [locate_data_file OCC22587-face.brep] f 
+readbrep [locate_data_file OCC22587-face.brep] f 
 fixshape result f -l -o -h +m -d -s -i -n
 set info [checkshape result]
 

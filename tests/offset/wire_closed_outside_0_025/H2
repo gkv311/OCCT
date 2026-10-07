@@ -1,4 +1,4 @@
-restore [locate_data_file offset_wire_088.brep] s
+readbrep [locate_data_file offset_wire_088.brep] s
 
 set length 78.848
 set nbsh_v 23

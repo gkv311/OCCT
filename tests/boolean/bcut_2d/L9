@@ -1,5 +1,5 @@
-restore [locate_data_file case_7_solid.brep] a
-restore [locate_data_file case_7_wire3.brep] b
+readbrep [locate_data_file case_7_solid.brep] a
+readbrep [locate_data_file case_7_wire3.brep] b
 
 bcut result b a
 

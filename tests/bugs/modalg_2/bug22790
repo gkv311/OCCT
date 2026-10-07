@@ -9,7 +9,7 @@ puts ""
 set BugNumber OCC22790
 
 puts "Load shape ..."
-restore [locate_data_file OCC22790-cx.brep] b 
+readbrep [locate_data_file OCC22790-cx.brep] b 
 
 explode b
 copy b_1 b1

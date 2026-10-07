@@ -8,7 +8,7 @@ puts "============="
 #tpcompound res
 #checkshape res
 
-restore [locate_data_file BUC60878-wire5.brep] a 
+readbrep [locate_data_file BUC60878-wire5.brep] a 
 checkshape a
 
 set che [checkshape a rr]

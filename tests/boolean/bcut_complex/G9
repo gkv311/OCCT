@@ -1,8 +1,8 @@
 # Original bug : cts21128
 # Date : 21 Sept 98
 
-restore [locate_data_file cts21128c.brep] c
-restore [locate_data_file cts21128d.brep] d
+readbrep [locate_data_file cts21128c.brep] c
+readbrep [locate_data_file cts21128d.brep] d
 
 bcut result c d
 checkprops result -s 2814.01

@@ -9,7 +9,7 @@ puts ""
 set MaxTol 2.5e-6
 set GoodNbCurv 1
 
-restore [locate_data_file bug31602.brep] f
+readbrep [locate_data_file bug31602.brep] f
 explode f f
 
 set log [bopcurves f_1 f_2 -2d]

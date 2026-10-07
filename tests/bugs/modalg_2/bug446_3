@@ -9,7 +9,7 @@ puts ""
 ## As result I have fail on shape that it is not closed.
 ######################################
 
-restore [locate_data_file OCC446c.brep] result
+readbrep [locate_data_file OCC446c.brep] result
 
 set che [checkshape result]
 if { [regexp {Faulty} $che ] == 1} {

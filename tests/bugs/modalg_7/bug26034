@@ -6,7 +6,7 @@ puts ""
 # Result of revolution aborts the bopcheck if translated
 ##########################################################
 
-restore [locate_data_file bug26034_revolve-seg1-tcl-Revolve002.brep] Revolve002
+readbrep [locate_data_file bug26034_revolve-seg1-tcl-Revolve002.brep] Revolve002
 
 set bug_info [ string trim [bopcheck Revolve002]]
 if {$bug_info != "This shape seems to be OK."} {

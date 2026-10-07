@@ -6,7 +6,7 @@ puts ""
 ## Wrong result obtained by General Fuse operator.
 ###############################
 
-restore [locate_data_file bug25982_human_head_3.brep] b1
+readbrep [locate_data_file bug25982_human_head_3.brep] b1
 
 tcopy b1 b2
 tmirror b2 0 0 0 1 0 0

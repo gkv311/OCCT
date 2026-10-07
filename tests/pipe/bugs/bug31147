@@ -5,7 +5,7 @@ puts ""
 
 pload VISUALIZATION
 
-restore [locate_data_file bug31147.brep] s
+readbrep [locate_data_file bug31147.brep] s
 explode s e
 wire spine s_1
 wire profile s_2

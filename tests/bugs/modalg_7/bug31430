@@ -3,7 +3,7 @@ puts "0031430: Modeling Data - Offset surfaces on C1 surfaces (with multiplicity
 puts "========"
 puts ""
 
-restore [locate_data_file bug31430.brep] s
+readbrep [locate_data_file bug31430.brep] s
 fixshape r s
 
 checkshape r

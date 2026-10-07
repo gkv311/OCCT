@@ -1,4 +1,4 @@
-restore [locate_data_file CIN901_intcqhmj.brep] m
+readbrep [locate_data_file CIN901_intcqhmj.brep] m
 explode m
 # m_1 : Sr Revolution
 # m_2 : Sr Reglee

@@ -9,7 +9,7 @@ puts ""
 
 cpulimit 1000
 
-restore [locate_data_file OCC547.brep] a
+readbrep [locate_data_file OCC547.brep] a
 
 set tol1 [maxtolerance a]
 regexp { +Face +: +Min +[-0-9.+eE]+ +Max +([-0-9.+eE]+)} $tol1 full face1

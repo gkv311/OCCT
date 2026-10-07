@@ -6,8 +6,8 @@ puts ""
 # Crash on BRepAlgoAPI_Section
 #################################
 
-restore [locate_data_file bug24496_face1.brep] f1
-restore [locate_data_file bug24496_face2.brep] f2
+readbrep [locate_data_file bug24496_face1.brep] f1
+readbrep [locate_data_file bug24496_face2.brep] f2
 
 bsection result f1 f2
 

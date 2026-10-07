@@ -1,4 +1,4 @@
-restore [locate_data_file CTO900_cts18140-part.brep] a
+readbrep [locate_data_file CTO900_cts18140-part.brep] a
 
 sewing result $tol a
 

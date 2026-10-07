@@ -6,8 +6,8 @@ puts ""
 # Make Extrema_GenExtCC return IsParallel flag in case of parallel curves
 ###########################################################################
 
-restore [locate_data_file dist1-s1.brep] s1
-restore [locate_data_file dist1-s2.brep] s2
+readbrep [locate_data_file dist1-s1.brep] s1
+readbrep [locate_data_file dist1-s2.brep] s2
 mkcurve c1 s1
 mkcurve c2 s2
 set bug_info [extrema c1 c2]

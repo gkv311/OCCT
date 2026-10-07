@@ -6,7 +6,7 @@ puts ""
 # SameParameter algorithm throws an exception
 #################################################
 
-restore [locate_data_file bug26837_e.brep] result
+readbrep [locate_data_file bug26837_e.brep] result
 
 if [catch {sameparameter result} catch_result] {
     puts "Faulty : SameParameter algorithm throws an exception"

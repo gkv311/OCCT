@@ -3,8 +3,8 @@ puts "BUC60744"
 puts "========================"
 puts ""
 
-restore [locate_data_file buc60744a.brep] a 
-restore [locate_data_file buc60744b.brep] b
+readbrep [locate_data_file buc60744a.brep] a 
+readbrep [locate_data_file buc60744b.brep] b
 
 bsection result a b
 

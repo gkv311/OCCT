@@ -14,7 +14,7 @@ if { [file exists ${filedir}/${TheFileName}.stp] } {
 }
 
 xnorm STEP
-restore [locate_data_file ${TheFileName}.brep] f
+readbrep [locate_data_file ${TheFileName}.brep] f
 param write.step.unit FT
 newmodel
 stepwrite a f ${filedir}/${TheFileName}.stp

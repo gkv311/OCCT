@@ -3,8 +3,8 @@ puts "Fuse"
 puts ""
 
 
-restore [locate_data_file pro15203b.brep] c1
-restore [locate_data_file pro15203c.brep] c2
+readbrep [locate_data_file pro15203b.brep] c1
+readbrep [locate_data_file pro15203c.brep] c2
 ########################mod by pkv f
 explode c1 f
 copy c1_1 c1

@@ -9,7 +9,7 @@ puts ""
 ## BndLib_Add3dCurve raised an exception on edges which range is out of the domain of the curve.
 #################################################################
 
-restore [locate_data_file OCC369.brep] result 
+readbrep [locate_data_file OCC369.brep] result 
 OCC369 result
 
 checkprops result -s 0.077223 

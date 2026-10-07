@@ -4,9 +4,9 @@ puts "============="
 puts "Section"
 puts ""
 cpulimit 1000
-restore [locate_data_file buc60463a.brep] a 
+readbrep [locate_data_file buc60463a.brep] a 
 checkshape a
-restore [locate_data_file buc60463b.brep] b
+readbrep [locate_data_file buc60463b.brep] b
 checkshape b
 bsection result a b
 

@@ -6,7 +6,7 @@ puts ""
 # [regression] BRepAlgoAPI_Common returns empty result for a solid and a face
 ###############################################################################
 
-restore [locate_data_file bug27936_rsi.brep] s
+readbrep [locate_data_file bug27936_rsi.brep] s
 
 explode s
 brunparallel 1

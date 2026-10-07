@@ -3,7 +3,7 @@ puts "0030795: BRepOffsetAPI_MakePipeShell: hangs on the attached model and prod
 puts "========"
 puts ""
 
-restore [locate_data_file bug30795.brep] a
+readbrep [locate_data_file bug30795.brep] a
 explode a
 
 mksweep a_1 

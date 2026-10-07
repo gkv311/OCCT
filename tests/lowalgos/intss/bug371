@@ -8,8 +8,8 @@ puts ""
 ##Intersection between two BSplineSurfaces, using IntPatch_Intersection, lead to infinite cycle.
 #################################################################
 
-restore [locate_data_file OCC371a.brep] a 
-restore [locate_data_file OCC371b.brep] b
+readbrep [locate_data_file OCC371a.brep] a 
+readbrep [locate_data_file OCC371b.brep] b
 
 mksurface gs1 a
 mksurface gs2 b

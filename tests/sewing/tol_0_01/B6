@@ -1,4 +1,4 @@
-restore [locate_data_file CCH_001_dhdd.brep] a
+readbrep [locate_data_file CCH_001_dhdd.brep] a
 
 sewing result $tol a
 

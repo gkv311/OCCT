@@ -3,8 +3,8 @@
 # A3.gif
 
 
-restore [locate_data_file CTO902_cts20454a.brep] a
-restore [locate_data_file cts20454b.brep] b
+readbrep [locate_data_file CTO902_cts20454a.brep] a
+readbrep [locate_data_file cts20454b.brep] b
 
 bfuse result a b
 

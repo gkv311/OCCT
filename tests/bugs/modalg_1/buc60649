@@ -4,7 +4,7 @@ puts "BUC60657"
 puts "=========="
 puts ""
 
-restore [locate_data_file buc60649a.brep] a 
+readbrep [locate_data_file buc60649a.brep] a 
 checkshape a
 
 set che [checkshape a rr]

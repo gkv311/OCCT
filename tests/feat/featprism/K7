@@ -1,9 +1,9 @@
 # Original bug : cts20722
 # Date : 21August98
 
-restore [locate_data_file CTO900_cts20722c.brep] base
-restore [locate_data_file cts20722b.brep] cont
-restore [locate_data_file cts20722c.brep] funtil
+readbrep [locate_data_file CTO900_cts20722c.brep] base
+readbrep [locate_data_file cts20722b.brep] cont
+readbrep [locate_data_file cts20722c.brep] funtil
 
 explode cont face
 #explode base face

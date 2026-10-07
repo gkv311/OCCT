@@ -4,7 +4,7 @@ puts "========"
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file terrain.brep] t1
+readbrep [locate_data_file terrain.brep] t1
 tclean t1
 #tscale t1 0 0 0 0.01
 tcopy t1 t2

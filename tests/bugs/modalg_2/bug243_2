@@ -7,8 +7,8 @@ puts "========================"
 ## puts "  BOPTUC      case_4_shell.brep and case_4_wire3.brep"
 #################################################
  puts " " 
-restore [locate_data_file case_4_shell.brep] a
-restore [locate_data_file case_4_wire3.brep] b
+readbrep [locate_data_file case_4_shell.brep] a
+readbrep [locate_data_file case_4_wire3.brep] b
 puts [bop a b]
 puts [boptuc result]
 

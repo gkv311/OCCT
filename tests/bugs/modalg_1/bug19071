@@ -9,9 +9,9 @@ puts ""
 set BugNumber OCC19071
 
 puts "Load first shape ..."
-restore [locate_data_file OCC19071_Rotation_2.brep] b1 
+readbrep [locate_data_file OCC19071_Rotation_2.brep] b1 
 puts "Load second shape ..."
-restore [locate_data_file OCC19071_Torus_2.brep] b2 
+readbrep [locate_data_file OCC19071_Torus_2.brep] b2 
 
 puts "Prepare boolean operation ..."
 bop b1 b2

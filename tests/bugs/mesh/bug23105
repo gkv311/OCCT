@@ -6,7 +6,7 @@ puts ""
 ## Exception during Meshing / Missing triangles
 ###############################################
 
-restore [locate_data_file bug23105_f372.brep] result
+readbrep [locate_data_file bug23105_f372.brep] result
 checkshape result
 
 incmesh result 0.1

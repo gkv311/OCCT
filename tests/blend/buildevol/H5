@@ -5,7 +5,7 @@
 #cut s s1 s2
 #save s CFI_h1234fiq.brep 
 
-restore [locate_data_file CFI_h1234fiq.brep] s
+readbrep [locate_data_file CFI_h1234fiq.brep] s
 tscale s 0 0 0 SCALE1
 explode s e
 mkevol result s

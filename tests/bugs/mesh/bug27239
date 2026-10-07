@@ -6,7 +6,7 @@ puts ""
 # Meshing algorithm creates wrong triangulation
 #################################
 pload ALL
-restore [locate_data_file bug27239_f1.brep] result
+readbrep [locate_data_file bug27239_f1.brep] result
 
 set bug_info [incmesh result 0.1]
 if {[regexp "NoError" $bug_info] != 1} {

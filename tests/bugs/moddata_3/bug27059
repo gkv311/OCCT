@@ -13,7 +13,7 @@ set exp_x 12.700000
 set exp_y 16.8949999999593
 set exp_z  0.534684851975074
 
-restore [locate_data_file bug27059.brep] aC
+readbrep [locate_data_file bug27059.brep] aC
 explode aC
 mkcurve curve aC_2
 

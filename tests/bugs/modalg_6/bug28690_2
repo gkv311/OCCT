@@ -6,7 +6,7 @@ puts ""
 ##  Section algorithm produces micro edge
 ##########################################
 
-restore [locate_data_file bug28690_m9_faces.brep] a
+readbrep [locate_data_file bug28690_m9_faces.brep] a
 plane f 0 0 0 0 1 0
 mkface f f
 bsection r a f

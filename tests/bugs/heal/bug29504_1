@@ -3,7 +3,7 @@ puts "OCC29504: ShapeUpgrade_UnifySameDomain produces invalid shape and ShapeFix
 puts "===================================================================================================="
 puts ""
 
-restore [locate_data_file bug29504_cyl.brep] s
+readbrep [locate_data_file bug29504_cyl.brep] s
 unifysamedom result s
 
 checkshape result

@@ -3,11 +3,11 @@ puts "0024097: BRepAlgoAPI_Section returns wrong result"
 puts "##################################################"
 
 # load and check faces
-restore [locate_data_file bug24097_face1.brep] a
+readbrep [locate_data_file bug24097_face1.brep] a
 tolerance a
 checkshape a
 
-restore [locate_data_file bug24097_face2.brep] b
+readbrep [locate_data_file bug24097_face2.brep] b
 tolerance b
 checkshape b
 

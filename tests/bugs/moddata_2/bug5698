@@ -12,7 +12,7 @@ puts ""
 
 set BugNumber OCC5698
 
-restore [locate_data_file OCC5698.brep] s1 
+readbrep [locate_data_file OCC5698.brep] s1 
 
 set info_result [OCC5698 s1]
 

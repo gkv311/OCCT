@@ -6,7 +6,7 @@ puts ""
 ## different checkshape result under ros and rosdeb in KAS:dev.
 ##########################################
 
-restore [locate_data_file OCC437.brep] result
+readbrep [locate_data_file OCC437.brep] result
 
 set che [checkshape result r]
 

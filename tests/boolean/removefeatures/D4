@@ -1,4 +1,4 @@
-restore [locate_data_file bug29481_ANC101.brep] s
+readbrep [locate_data_file bug29481_ANC101.brep] s
 explode s f
 
 compound s_86 s_25 s_72 s_55 bottom

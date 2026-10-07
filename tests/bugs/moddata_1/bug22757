@@ -12,7 +12,7 @@ set BugNumber OCC22757
 catch {pload XDE}
 
 set status 0
-restore [locate_data_file BUC60887.brep] res
+readbrep [locate_data_file BUC60887.brep] res
 set TestVar [ catch {fixshape result res 0.01} ]
 
 if { ${TestVar} != 0 } {

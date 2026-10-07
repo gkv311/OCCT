@@ -9,7 +9,7 @@ puts ""
 pload XDE
 
 # 1. retriesve shape
-restore [locate_data_file OCC42.brep] sh 
+readbrep [locate_data_file OCC42.brep] sh 
 checkshape sh
 
 # 2. perform sewing

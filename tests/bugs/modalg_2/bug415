@@ -5,9 +5,9 @@ puts "PRO5557"
 puts "========================"
 puts ""
 
-restore [locate_data_file pro5557_revol.brep] revol1 
+readbrep [locate_data_file pro5557_revol.brep] revol1 
 checkshape revol1
-restore [locate_data_file pro5557_bsurf.brep] bsurf2
+readbrep [locate_data_file pro5557_bsurf.brep] bsurf2
 checkshape bsurf2
 
 zoom 660

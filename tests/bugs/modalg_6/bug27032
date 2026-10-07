@@ -6,7 +6,7 @@ puts ""
 # Result of bcut has the same volume as the object
 ##########################################################################################
 
-restore [locate_data_file OCC27032_sh.brep] a
+readbrep [locate_data_file OCC27032_sh.brep] a
 
 explode a
 bcut result a_1 a_2

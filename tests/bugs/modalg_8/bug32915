@@ -3,7 +3,7 @@ puts "0032915: Geom2dAPI_InterCurveCurve, The algorithm lost an intersection poi
 puts "================================================="
 puts ""
 
-restore [locate_data_file bug32915.brep] e
+readbrep [locate_data_file bug32915.brep] e
 mkcurve c3d e
 plane p 0 0 1
 project c2d c3d p

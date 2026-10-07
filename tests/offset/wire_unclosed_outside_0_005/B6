@@ -1,4 +1,4 @@
-restore [locate_data_file offset_wire_058.brep] s
+readbrep [locate_data_file offset_wire_058.brep] s
 
 set off_param -$off_param
 

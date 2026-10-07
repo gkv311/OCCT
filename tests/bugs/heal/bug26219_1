@@ -6,7 +6,7 @@ puts ""
 ## ShapeUpgrade_UnifySameDomain fails with StdFail_NotDone exception
 ###########################################################
 
-restore [locate_data_file bug26219_unifysamedomain.valid_input.brep] p
+readbrep [locate_data_file bug26219_unifysamedomain.valid_input.brep] p
 
 # -----------------------------------------------------------------------------
 # Attempt to simplify the model

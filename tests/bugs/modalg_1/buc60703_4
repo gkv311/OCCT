@@ -6,8 +6,8 @@ puts ""
 ## Crash during a fuse whilst two plans are tangent. 
 ####################################
 
-restore [locate_data_file buc60703d.brep] a 
-restore [locate_data_file buc60703f.brep] b
+readbrep [locate_data_file buc60703d.brep] a 
+readbrep [locate_data_file buc60703f.brep] b
 
 bfuse result a b
 

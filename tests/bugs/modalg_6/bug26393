@@ -6,9 +6,9 @@ puts ""
 # Add draw commands to evaluate history of modifications of BOP
 #################################################################
 
-restore [locate_data_file OCC26393-w.brep] w
-restore [locate_data_file OCC26393-v1.brep] v0
-restore [locate_data_file OCC26393-v2.brep] v1
+readbrep [locate_data_file OCC26393-w.brep] w
+readbrep [locate_data_file OCC26393-v1.brep] v0
+readbrep [locate_data_file OCC26393-v2.brep] v1
 
 bclearobjects
 bcleartools

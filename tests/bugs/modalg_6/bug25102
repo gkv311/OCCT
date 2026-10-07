@@ -6,7 +6,7 @@ puts ""
 # A part of intersection cannot be found
 #################################################
 
-restore [locate_data_file bug25102.brep] c
+readbrep [locate_data_file bug25102.brep] c
 
 explode c
 

@@ -3,7 +3,7 @@ puts "0025113: Progress indicator in mesh"
 puts "========="
 puts ""
 
-restore [locate_data_file bug21134_r.brep] a
+readbrep [locate_data_file bug21134_r.brep] a
 tclean a
 XProgress +t
 set output [incmesh a 0.005 -parallel]

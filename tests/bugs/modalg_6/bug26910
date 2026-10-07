@@ -6,7 +6,7 @@ puts ""
 # General fuse does not find intersection between line and circle
 ######################################################
 
-restore [locate_data_file bug26910.brep] a
+readbrep [locate_data_file bug26910.brep] a
 
 explode a
 bclearobjects

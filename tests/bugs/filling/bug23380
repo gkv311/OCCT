@@ -3,7 +3,7 @@ puts "OCC23380: BRepOffsetAPI_MakeFilling fails and leaves boundary faces with h
 puts "======================================================================================="
 puts ""
 
-brestore [locate_data_file bug23380.brep] b
+readbrep [locate_data_file bug23380.brep] b
 
 explode b
 renamevar b_5 d

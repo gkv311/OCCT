@@ -6,7 +6,7 @@ puts ""
 ## Improve performance of the ShapeUpgrade_UnifySameDomain::UnifyEdges() method
 ###############################
 
-restore [locate_data_file bug29502_split_faces.brep] cf
+readbrep [locate_data_file bug29502_split_faces.brep] cf
 
 dchrono h restart
 

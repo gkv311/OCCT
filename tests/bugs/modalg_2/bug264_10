@@ -3,7 +3,7 @@ puts "OCC264"
 puts " (case 10)"
 puts "========"
 
-restore [locate_data_file OCC264_10.brep] result
+readbrep [locate_data_file OCC264_10.brep] result
 checkshape result
 
 tclean result

@@ -10,7 +10,7 @@ puts ""
 
 set BugNumber OCC22039
 
-restore [locate_data_file OCC12121-CrankArm.brep] result
+readbrep [locate_data_file OCC12121-CrankArm.brep] result
 
 vinit
 vsetdispmode 1

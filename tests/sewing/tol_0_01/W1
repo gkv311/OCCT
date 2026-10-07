@@ -1,4 +1,4 @@
-restore [locate_data_file CFE903_pro16ggz.brep] a
+readbrep [locate_data_file CFE903_pro16ggz.brep] a
 
 sewing result $tol a
 

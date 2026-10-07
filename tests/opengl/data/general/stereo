@@ -4,7 +4,7 @@ puts "========"
 
 pload MODELING VISUALIZATION
 
-restore [locate_data_file occ/fuse.brep] f
+readbrep [locate_data_file occ/fuse.brep] f
 vclear
 vclose ALL
 vinit View1

@@ -8,7 +8,7 @@ puts ""
 # 0024909: SIGSEGV in buildsweep
 ##################################
 
-restore [locate_data_file bug24909_minihyd-draw-BezCurve.brep] BezCurve
+readbrep [locate_data_file bug24909_minihyd-draw-BezCurve.brep] BezCurve
 
 ttranslate BezCurve 0 -8 0
 explode BezCurve E

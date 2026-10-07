@@ -1,5 +1,5 @@
-restore [locate_data_file case_3_shell.brep] a
-restore [locate_data_file case_3_wire3.brep] b
+readbrep [locate_data_file case_3_shell.brep] a
+readbrep [locate_data_file case_3_wire3.brep] b
 
 bop a b
 boptuc result

@@ -8,7 +8,7 @@ puts ""
 ## In spite of that, mesh for shading is not being created on this face.
 #################################################################
 
-restore [locate_data_file OCC292.brep] result
+readbrep [locate_data_file OCC292.brep] result
 checkshape result
 
 tclean result

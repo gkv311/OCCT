@@ -1,4 +1,4 @@
-restore [locate_data_file bug29481_ANC101.brep] s
+readbrep [locate_data_file bug29481_ANC101.brep] s
 explode s f
 
 removefeatures result s s_49

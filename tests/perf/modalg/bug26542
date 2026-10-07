@@ -3,7 +3,7 @@ puts "0026452: Infinite loop in Edge/Edge intersection"
 puts "============"
 puts ""
 
-restore [locate_data_file bug26452_edges.brep] e
+readbrep [locate_data_file bug26452_edges.brep] e
 explode e
 
 dchrono h restart

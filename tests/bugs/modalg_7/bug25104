@@ -6,7 +6,7 @@ puts ""
 # 0025104: Prism from BSpline curve can not be chamfered
 ##########################################################
 
-restore [locate_data_file bug25104_whale2-draw-path.brep] path
+readbrep [locate_data_file bug25104_whale2-draw-path.brep] path
 
 prism Extrude001 path 0. 0. 5.
 

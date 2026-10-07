@@ -7,7 +7,7 @@ puts "========"
 ## Improve FixShape to correct case of touching wires 
 ##########################################
 
-restore [locate_data_file OCC210b.brep] a 
+readbrep [locate_data_file OCC210b.brep] a 
 
 fixshape result a 0.01 0.01
 

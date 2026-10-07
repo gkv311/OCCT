@@ -6,7 +6,7 @@ puts ""
 # OCC exception is raised when making an extrusion with draft angle from a simple line
 #######################################################################
 
-restore [locate_data_file bug23025_u.brep] u
+readbrep [locate_data_file bug23025_u.brep] u
 
 explode u e
 wire w u_1 u_2 u_3

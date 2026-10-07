@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC6725
 
-restore [locate_data_file OCC6725.brep] result
+readbrep [locate_data_file OCC6725.brep] result
 
 set text [incmesh result 0.01]
 set last [lindex $text end]

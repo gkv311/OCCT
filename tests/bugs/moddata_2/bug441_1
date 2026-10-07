@@ -7,13 +7,13 @@ puts ""
 ## Instability of BRepCheck check status. 
 ###############################
 
-restore [locate_data_file OCC441a.brep] result
+readbrep [locate_data_file OCC441a.brep] result
 
 set err [checkshape result r]
 
 set j 1
 repeat 25 {
-    restore [locate_data_file OCC441a.brep] result
+    readbrep [locate_data_file OCC441a.brep] result
     set err1 [checkshape result r]
     if { $err != $err1 } {
 	puts [format " Faulty OCC441: function CHECKSHAPE works wrongly on %s time" $j]

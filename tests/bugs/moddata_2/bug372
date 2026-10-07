@@ -9,7 +9,7 @@ puts ""
 ##BRepClass3d_SolidClassifier classify point to solid as OUT, but the point is inside the solid.
 ###############################################################
 
-restore [locate_data_file OCC372.brep] b1 
+readbrep [locate_data_file OCC372.brep] b1 
 checkshape b1
 
 point p1 6311.4862583184 -2841.3092756034 16.461053497188

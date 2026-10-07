@@ -1,7 +1,7 @@
 #cts21527
 
-restore [locate_data_file CTO909_bad_cut_outil.brep] a
-restore [locate_data_file CTO909_bad_cut_part.brep] b
+readbrep [locate_data_file CTO909_bad_cut_outil.brep] a
+readbrep [locate_data_file CTO909_bad_cut_part.brep] b
 
 bop b a
 bopsection result

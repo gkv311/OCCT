@@ -4,8 +4,8 @@ puts "PRO16389"
 puts "Cut"
 puts ""
 
-restore [locate_data_file pro16389a.brep] base
-restore [locate_data_file pro16389b.brep] prism
+readbrep [locate_data_file pro16389a.brep] base
+readbrep [locate_data_file pro16389b.brep] prism
 
 bcut result base prism
 checkprops result -s 312467

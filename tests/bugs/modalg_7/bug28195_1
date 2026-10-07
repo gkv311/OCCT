@@ -6,7 +6,7 @@ puts ""
 # Boolean common returns empty result for a solid where some surfaces of revolution touch the axis
 ##################################################################################################
 
-restore [locate_data_file bug28195_solidsOK.brep] s
+readbrep [locate_data_file bug28195_solidsOK.brep] s
 
 whatis s
 

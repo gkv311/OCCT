@@ -6,7 +6,7 @@ puts ""
 ##  Section algorithm produces micro edge
 ##########################################
 
-restore [locate_data_file bug28690_gdml_G1_tore_sphere.brep] c
+readbrep [locate_data_file bug28690_gdml_G1_tore_sphere.brep] c
 explode c
 bclearobjects
 bcleartools

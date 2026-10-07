@@ -6,7 +6,7 @@ puts ""
 # ShapeFix slightly corrupts the source face
 #############################################
 
-binrestore [locate_data_file bug28768_f12g.brep] f12g
+readbrep [locate_data_file bug28768_f12g.bbrep] f12g
 fixshape r12g f12g
 
 explode r12g E

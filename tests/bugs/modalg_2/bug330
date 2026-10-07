@@ -10,7 +10,7 @@ puts ""
 ## checkshape command consider the shape with incorrect order of tolerance as valid.
 ##################################################
 
-restore [locate_data_file OCC330.brep] result
+readbrep [locate_data_file OCC330.brep] result
 
 set che [checkshape result]
 

@@ -1,8 +1,8 @@
 # Original bug : cts20170
 # Date : 8April98
 
-restore [locate_data_file cts20170_base.brep] base
-restore [locate_data_file cts20170_face.brep] cont
+readbrep [locate_data_file cts20170_base.brep] base
+readbrep [locate_data_file cts20170_face.brep] cont
 
 explode base face
 

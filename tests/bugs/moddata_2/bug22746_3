@@ -12,7 +12,7 @@ set Min_ListLength 11
 
 catch { pload XSDRAW }
 
-restore [locate_data_file OCC22761-TransmissionTestModel5-notfixed.brep] a 
+readbrep [locate_data_file OCC22761-TransmissionTestModel5-notfixed.brep] a 
 vinit
 XProgress -t
 set List1 [fixshape result a]

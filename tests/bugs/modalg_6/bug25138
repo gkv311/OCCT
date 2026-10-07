@@ -6,10 +6,10 @@ puts ""
 # Incorrect result of Boolean Union by BRepAlgoAPI_Fuse
 #######################################################
 
-restore [locate_data_file bug25138a.brep] s
+readbrep [locate_data_file bug25138a.brep] s
 mksweep s
 setsweep -CF
-restore [locate_data_file bug25138b.brep] p
+readbrep [locate_data_file bug25138b.brep] p
 addsweep p
 buildsweep result -C
 

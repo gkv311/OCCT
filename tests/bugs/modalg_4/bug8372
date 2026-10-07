@@ -8,8 +8,8 @@ puts ""
 
 set BugNumber OCC8372
 
-restore [locate_data_file OCC8372_1.brep] w1 
-restore [locate_data_file OCC8372_2.brep] w2 
+readbrep [locate_data_file OCC8372_1.brep] w1 
+readbrep [locate_data_file OCC8372_2.brep] w2 
 
 thrusections result 1 1 w1 w2
 

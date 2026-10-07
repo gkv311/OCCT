@@ -6,8 +6,8 @@ puts ""
 # Incorrect result of boolean operation in boolean bcut_complex Q1 test case
 ############################################################################
 
-restore [locate_data_file buc60290a.brep] sol1
-restore [locate_data_file buc60290b.brep] sol2
+readbrep [locate_data_file buc60290a.brep] sol1
+readbrep [locate_data_file buc60290b.brep] sol2
 
 explode sol1 f
 explode sol2 f

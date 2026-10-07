@@ -3,7 +3,7 @@ puts "REQUIRED ALL: Error : The offset cannot be built."
 puts "REQUIRED ALL: Error: The command cannot be built"
 puts "REQUIRED ALL: Error: Offset is not done."
 
-restore [locate_data_file offset_wire_092.brep] s
+readbrep [locate_data_file offset_wire_092.brep] s
 
 set length 0
 set nbsh_v 0

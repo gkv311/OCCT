@@ -6,7 +6,7 @@ puts ""
 # Hidden Line Removal algorithm fails to handle filleted edges
 ######################################################
 
-restore [locate_data_file bug27782_hlr.brep] result
+readbrep [locate_data_file bug27782_hlr.brep] result
 
 vinit
 vdisplay result

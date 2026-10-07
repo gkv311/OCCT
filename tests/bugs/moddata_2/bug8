@@ -7,7 +7,7 @@ puts ""
 ###################################################
 
 pload XDE
-restore [locate_data_file OCC8.brep] result
+readbrep [locate_data_file OCC8.brep] result
 
 checkshape result
 

@@ -8,13 +8,13 @@ puts ""
 
 brunparallel 1
 
-restore [locate_data_file bug28157_init.brep] n
+readbrep [locate_data_file bug28157_init.brep] n
 whatis n
 tolerance n
 checkshape n
 bopcheck n
 
-restore [locate_data_file bug28157_solid.brep] s
+readbrep [locate_data_file bug28157_solid.brep] s
 whatis s
 tolerance s
 checkshape s

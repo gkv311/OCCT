@@ -8,7 +8,7 @@ puts ""
 
 isos 2
 smallview
-set info [restore [locate_data_file CR23416-ProblemFace.brep] result]
+set info [readbrep [locate_data_file CR23416-ProblemFace.brep] result]
 set check_error [lsearch $info exception]
 if { $check_error != -1 } {
     puts "Error : crashes during visualization"

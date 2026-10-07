@@ -8,7 +8,7 @@ puts ""
 ## can a sweep be used to create 1-fold tori (using a closed wire as path)
 ###########################################################################
 
-restore [locate_data_file bug25458_sweep-torus1-draw-Wire.brep] Wire
+readbrep [locate_data_file bug25458_sweep-torus1-draw-Wire.brep] Wire
 
 explode Wire E
 wire Sweep-0-spine Wire_1

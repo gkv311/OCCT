@@ -6,7 +6,7 @@ puts ""
 ## BRepAlgo::ConcatenateWire raises an exception
 ###############################
 
-restore [locate_data_file bug25028_profile.brep] s
+readbrep [locate_data_file bug25028_profile.brep] s
 checkshape s
 whatis s
 concatwire r s

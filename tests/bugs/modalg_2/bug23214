@@ -6,8 +6,8 @@ puts ""
 # BOP section operation produces incorrect result.
 #######################################################################
 
-restore [locate_data_file OCC23214-face_1188.brep] b1
-restore [locate_data_file OCC23214-shell_for_line_1188.brep] b2
+readbrep [locate_data_file OCC23214-face_1188.brep] b1
+readbrep [locate_data_file OCC23214-shell_for_line_1188.brep] b2
 
 bop b1 b2
 bopsection result

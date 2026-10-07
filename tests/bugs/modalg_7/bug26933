@@ -6,7 +6,7 @@ puts ""
 # Section works unstably due to incorrect work of the method IsExistingPaveBlock
 #################################################################################
 
-restore [locate_data_file bug26933.brep] a
+readbrep [locate_data_file bug26933.brep] a
 
 explode a
 

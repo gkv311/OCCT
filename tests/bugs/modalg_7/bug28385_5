@@ -7,7 +7,7 @@ puts ""
 #################################################
 
 
-restore [locate_data_file bug28385_circ_face_hole.brep] face
+readbrep [locate_data_file bug28385_circ_face_hole.brep] face
 
 smallview
 isos face 50

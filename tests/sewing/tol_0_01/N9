@@ -1,4 +1,4 @@
-restore [locate_data_file CFE900_cts20gef.brep] a
+readbrep [locate_data_file CFE900_cts20gef.brep] a
 
 sewing result $tol a
 

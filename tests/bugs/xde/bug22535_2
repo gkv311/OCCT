@@ -7,7 +7,7 @@ puts "==========="
 
 set BugNumber OCC22535
 
-restore [locate_data_file OCC22535-cut_comp.brep] a 
+readbrep [locate_data_file OCC22535-cut_comp.brep] a 
 testwritestep $imagedir/${test_image}.stp a
 stepread $imagedir/${test_image}.stp b *
 renamevar b_1 result

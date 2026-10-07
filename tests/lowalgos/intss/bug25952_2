@@ -7,7 +7,7 @@ puts "TODO OCC25952 ALL: Error: The curve res_1 is possible to have a bend at pa
 
 set aGoodNbCurves 1
 
-restore [locate_data_file bug25952_shape.brep] q
+readbrep [locate_data_file bug25952_shape.brep] q
 explode q 
 copy q_1 b1
 copy q_2 b2

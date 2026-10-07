@@ -7,7 +7,7 @@ puts "========"
 ##Error of fillet prolongation. 
 ##########################################
 
-restore [locate_data_file OCC211.brep] a 
+readbrep [locate_data_file OCC211.brep] a 
 
 explode a e
 

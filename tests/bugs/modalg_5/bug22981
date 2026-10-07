@@ -6,7 +6,7 @@ puts ""
 # BRepOffsetAPI_ThruSections fails to build a surface from closed wires
 #########################################################################
 
-restore [locate_data_file bug22981_Turb1.brep] t
+readbrep [locate_data_file bug22981_Turb1.brep] t
 explode t
 
 thrusections result 0 0 t_1 t_2

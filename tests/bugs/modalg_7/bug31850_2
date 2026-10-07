@@ -3,7 +3,7 @@ puts "0031850: Modeling Algorithms - boolean cut and common generate unexpected 
 puts "======================================================="
 puts ""
 
-restore [locate_data_file bug31850.brep] s
+readbrep [locate_data_file bug31850.brep] s
 explode s
 
 bfuzzyvalue 1.e-6

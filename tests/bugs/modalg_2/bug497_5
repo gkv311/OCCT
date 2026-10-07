@@ -7,10 +7,10 @@ puts ""
 ## Result of cut and fuse operation are faulty shapes although arguments are valid.
 ########################################################
 
-restore [locate_data_file OCC497i.brep] a_1 
+readbrep [locate_data_file OCC497i.brep] a_1 
 checkshape a_1
 
-restore [locate_data_file OCC497j.brep] a_2
+readbrep [locate_data_file OCC497j.brep] a_2
 checkshape a_2
 
 if [catch {bfuse result a_1 a_2 } catch_result] {

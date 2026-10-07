@@ -6,8 +6,8 @@ puts ""
 # Regression on reading e3i files with respect of OCC30 and OCC40
 ######################################################
 
-restore [locate_data_file OCC485b.brep] s1 
-restore [locate_data_file OCC485a.brep] s2 
+readbrep [locate_data_file OCC485b.brep] s1 
+readbrep [locate_data_file OCC485a.brep] s2 
 
 checkshape s1
 checkshape s2

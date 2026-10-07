@@ -2,9 +2,9 @@ puts "========================"
 puts "BUC60623"
 puts "========================"
 
-restore [locate_data_file buc60623a.brep] a
+readbrep [locate_data_file buc60623a.brep] a
 checkshape a
-restore [locate_data_file buc60623b.brep] b
+readbrep [locate_data_file buc60623b.brep] b
 checkshape b
 
 mksurface S1 a

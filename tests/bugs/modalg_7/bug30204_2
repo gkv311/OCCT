@@ -6,8 +6,8 @@ puts ""
 # BRepOffsetAPI_MakePipeShell crash
 ###################################
 
-restore [locate_data_file bug30204_path.brep] path
-restore [locate_data_file bug30204_base.brep] base
+readbrep [locate_data_file bug30204_path.brep] path
+readbrep [locate_data_file bug30204_base.brep] base
 
 mksweep path
 addsweep base

@@ -17,7 +17,7 @@ vlight dirlight1 -type DIRECTIONAL -dir  1 0 0 -color GREEN -headlight 1
 vlight dirlight2 -type DIRECTIONAL -dir -1 0 0 -color RED1  -headlight 1
 
 # display shape
-restore [locate_data_file occ/fuse.brep] f
+readbrep [locate_data_file occ/fuse.brep] f
 vaxo
 vdisplay f -dispmode 1
 vfit

@@ -1,9 +1,9 @@
 # Original bug : cts21180
 # Date : 17 Sept 98
 
-restore [locate_data_file CTO900_cts21180c.brep] base
-restore [locate_data_file cts21180_face.brep] cont
-restore [locate_data_file cts21180_until.brep] funtil
+readbrep [locate_data_file CTO900_cts21180c.brep] base
+readbrep [locate_data_file cts21180_face.brep] cont
+readbrep [locate_data_file cts21180_until.brep] funtil
 
 featprism base cont cont 0 0 -1 1 1
 featperform prism result funtil

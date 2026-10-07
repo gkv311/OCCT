@@ -6,7 +6,7 @@ puts ""
 # Wrong result of common operation for faces.
 ###############################################################################################
 
-restore [locate_data_file bug25163_qf_25_39.brep] b
+readbrep [locate_data_file bug25163_qf_25_39.brep] b
 
 explode b f
 copy b_1 b1
