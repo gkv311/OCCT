@@ -537,21 +537,25 @@ public:
   Standard_EXPORT Standard_Boolean IsVPeriodic() const Standard_OVERRIDE;
   
 
-  //! Returns False if the weights are identical in the U direction,
-  //! The tolerance criterion is Resolution from package gp.
-  //! Example :
-  //! |1.0, 1.0, 1.0|
+  //! Returns False if for each row of weights all the weights are identical.
+  //! The tolerance criterion is gp::Resolution().
+  //! Example:
+  //! @code
+  //!               |1.0, 1.0, 1.0|
   //! if Weights =  |0.5, 0.5, 0.5|   returns False
-  //! |2.0, 2.0, 2.0|
+  //!               |2.0, 2.0, 2.0|
+  //! @endcode
   Standard_EXPORT Standard_Boolean IsURational() const;
   
 
-  //! Returns False if the weights are identical in the V direction,
-  //! The tolerance criterion is Resolution from package gp.
-  //! Example :
-  //! |1.0, 2.0, 0.5|
+  //! Returns False if for each column of weights all the weights are identical.
+  //! The tolerance criterion is gp::Resolution().
+  //! Example:
+  //! @code
+  //!               |1.0, 2.0, 0.5|
   //! if Weights =  |1.0, 2.0, 0.5|   returns False
-  //! |1.0, 2.0, 0.5|
+  //!               |1.0, 2.0, 0.5|
+  //! @endcode
   Standard_EXPORT Standard_Boolean IsVRational() const;
   
   //! Applies the transformation T to this Bezier surface.
