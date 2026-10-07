@@ -8,7 +8,7 @@ puts ""
 
 smallview
 
-restore [locate_data_file bug27711.brep] s
+readbrep [locate_data_file bug27711.brep] s
 
 clear
 display s

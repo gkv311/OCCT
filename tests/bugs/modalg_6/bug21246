@@ -10,7 +10,7 @@ puts "========"
 ## Command "checkshape" "gives" exception during attempt to check attached shape.
 #########################################################
 
-restore [locate_data_file bug21246.brep] result
+readbrep [locate_data_file bug21246.brep] result
 
 set info [checkshape result]
 

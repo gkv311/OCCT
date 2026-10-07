@@ -6,7 +6,7 @@ puts ""
 ## Fillet is created incorrectly on attached shape.
 #########################################################
 
-restore [locate_data_file shading_137.brep] s 
+readbrep [locate_data_file shading_137.brep] s 
 checkshape s
 
 dset SCALE1 5

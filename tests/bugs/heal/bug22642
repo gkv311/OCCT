@@ -8,7 +8,7 @@ puts ""
 # Refactoring of ShapeFix_Wire::FixIntersectingEdges
 ######################################################
 
-restore [locate_data_file bug22642_ss_47.brep] f
+readbrep [locate_data_file bug22642_ss_47.brep] f
 fixshape result f -l -o -h -m -d -s +i -n
 
 checkshape result

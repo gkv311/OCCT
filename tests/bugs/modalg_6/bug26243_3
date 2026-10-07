@@ -6,7 +6,7 @@ puts ""
 # Boolean operations failed on shapes with fillets
 ######################################################
 
-restore [locate_data_file bug26243_anc101.brep] _model
+readbrep [locate_data_file bug26243_anc101.brep] _model
 
 tcopy _model _copy
 trotate _copy 155. 100.75 0 0 0 1 90

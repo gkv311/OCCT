@@ -3,7 +3,7 @@ puts "0030176: Modeling Algorithms - Infinite loop in IntWalk_PWalking::Perform(
 puts "========"
 puts ""
 
-restore [locate_data_file bug30176_shape.brep] sshh
+readbrep [locate_data_file bug30176_shape.brep] sshh
 explode sshh e
 
 dchrono h1 restart

@@ -3,7 +3,7 @@ puts "0031974: Modeling Algorithms - Strange behavior of boolean operations on t
 puts "======================================================="
 puts ""
 
-restore [locate_data_file bug31974.brep] s
+readbrep [locate_data_file bug31974.brep] s
 explode s
 
 bclearobjects

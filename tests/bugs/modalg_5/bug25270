@@ -6,8 +6,8 @@ puts ""
 # OCCT fails to calculate extrema between extruded surface and line
 #####################################################################
 
-restore [locate_data_file bug25270_face.brep] f
-restore [locate_data_file bug25270_edge.brep] e
+readbrep [locate_data_file bug25270_face.brep] f
+readbrep [locate_data_file bug25270_edge.brep] e
 
 distmini result f e
 regexp {([-0-9.+eE]+)} [dval result_val] full ddist

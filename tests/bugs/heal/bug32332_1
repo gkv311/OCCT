@@ -3,7 +3,7 @@ puts "OCC32332: Incorrect result of ShapeUpgrade_UnifySameDomain"
 puts "=========================================================="
 puts ""
 
-restore [locate_data_file bug32332_1.brep] a
+readbrep [locate_data_file bug32332_1.brep] a
 
 unifysamedom result a
 

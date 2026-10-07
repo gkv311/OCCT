@@ -1,4 +1,4 @@
-restore [locate_data_file bug32264.brep] s
+readbrep [locate_data_file bug32264.brep] s
 set aTmpFile "$imagedir/${casename}.brep"
 testwritestep "$aTmpFile" s
 testreadstep  "$aTmpFile" s1

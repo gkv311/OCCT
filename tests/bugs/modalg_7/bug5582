@@ -8,7 +8,7 @@ puts ""
 # Impossible to make offset on the shape with degenerated edge
 ################################################################
 
-restore [locate_data_file bug5582_shape1.brep] comp
+readbrep [locate_data_file bug5582_shape1.brep] comp
 
 checkshape comp
 explode comp so

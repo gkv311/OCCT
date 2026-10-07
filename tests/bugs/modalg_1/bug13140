@@ -6,8 +6,8 @@ puts ""
 # Exception during creation pipe on from attached spine and profile
 #######################################################################
 
-restore [locate_data_file OCC13140_Spine.brep] Spine
-restore [locate_data_file OCC13140_Profile.brep] Profile
+readbrep [locate_data_file OCC13140_Spine.brep] Spine
+readbrep [locate_data_file OCC13140_Profile.brep] Profile
 
 pipe result Spine Profile
 

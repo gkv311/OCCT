@@ -6,7 +6,7 @@ puts ""
 #  GccAna_Circ2d3Tan does not find a circle
 ########################################
 
-restore [locate_data_file bug23866_3curves.brep] 3curves
+readbrep [locate_data_file bug23866_3curves.brep] 3curves
 
 explode 3curves
 

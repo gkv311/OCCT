@@ -6,5 +6,5 @@ puts ""
 set viewname ""
 set length 167.756
 
-restore [locate_data_file bug28242.brep] a
+readbrep [locate_data_file bug28242.brep] a
 COMPUTE_HLR $viewname $algotype

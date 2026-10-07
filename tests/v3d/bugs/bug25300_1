@@ -12,7 +12,7 @@ puts "Visualization - Build wireframe representation consistent with the shape's
 
 pload VISUALIZATION
 
-restore [locate_data_file bug25300_pencil.brep] aPencil
+readbrep [locate_data_file bug25300_pencil.brep] aPencil
 
 vinit View1
 vclear

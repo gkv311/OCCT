@@ -6,7 +6,7 @@ puts ""
 # Boolean common of simple face and solid results in empty compound
 ####################################################################
 
-restore [locate_data_file bug28388_extOK.brep] e
+readbrep [locate_data_file bug28388_extOK.brep] e
 
 explode e
 whatis e_1

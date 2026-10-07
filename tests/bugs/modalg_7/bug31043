@@ -2,7 +2,7 @@ puts "============="
 puts "0031043: GCPnts_TangentialDeflection generates points which number is inconsistent with MinimumOfPoints parameter"
 puts "============="
 
-restore [locate_data_file bug28500_shape_mesh_artifact.brep] result
+readbrep [locate_data_file bug28500_shape_mesh_artifact.brep] result
 
 tclean result
 explode result f

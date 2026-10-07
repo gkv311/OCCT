@@ -2,8 +2,8 @@ puts "=============================================================="
 puts "OCC27928: BOP common produces empty compound"
 puts "=============================================================="
 
-restore [locate_data_file bug27928_b1.brep] b1
-restore [locate_data_file bug27928_b2.brep] b2
+readbrep [locate_data_file bug27928_b1.brep] b1
+readbrep [locate_data_file bug27928_b2.brep] b2
 
 bclearobjects
 bcleartools

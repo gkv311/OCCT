@@ -1,8 +1,8 @@
 # Original bug : hkg60159
 # Date : 16 Sept 98
 
-restore [locate_data_file CFE900_hkg60gcr.brep] base
-restore [locate_data_file hkg60159_face.brep] cont
+readbrep [locate_data_file CFE900_hkg60gcr.brep] base
+readbrep [locate_data_file hkg60159_face.brep] cont
 
 explode base face
 copy base_5 funtil

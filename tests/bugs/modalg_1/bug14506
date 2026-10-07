@@ -8,8 +8,8 @@ puts ""
 # Wrong section of faces with bspline geometry
 #######################################################################
 
-restore [locate_data_file bug14506_face1.brep] face1
-restore [locate_data_file bug14506_face2.brep] face2
+readbrep [locate_data_file bug14506_face1.brep] face1
+readbrep [locate_data_file bug14506_face2.brep] face2
 
 bop face1 face2
 bopsection result

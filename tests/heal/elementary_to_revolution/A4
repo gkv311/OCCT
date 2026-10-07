@@ -1,2 +1,2 @@
-restore [locate_data_file cylinderETR.brep] a
+readbrep [locate_data_file cylinderETR.brep] a
 set nb_revol 1

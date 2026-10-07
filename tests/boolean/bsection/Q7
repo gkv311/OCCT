@@ -1,8 +1,8 @@
 # Original bug : cts20484
 # Date : 19Mai98
 
-restore [locate_data_file CTO902_cts20484a.brep] part
-restore [locate_data_file cts20484-tool1.brep] tool1
+readbrep [locate_data_file CTO902_cts20484a.brep] part
+readbrep [locate_data_file cts20484-tool1.brep] tool1
 
 bsection result part tool1
 

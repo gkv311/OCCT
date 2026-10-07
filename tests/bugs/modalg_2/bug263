@@ -2,7 +2,7 @@ puts "========"
 puts "OCC263: Invalid mesh"
 puts "========"
 
-restore [locate_data_file OCC263.brep] result
+readbrep [locate_data_file OCC263.brep] result
 
 isos result 0
 tclean result

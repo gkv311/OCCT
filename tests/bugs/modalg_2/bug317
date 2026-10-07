@@ -6,7 +6,7 @@ puts ""
 ## A Solid "so" is valid, whereas wire "so_5" from the solid is not valid.
 ##################################################
 
-restore [locate_data_file OCC317.brep] result
+readbrep [locate_data_file OCC317.brep] result
 
 set che [checkshape result]
 if { [regexp {Faulty} $che] == 1} {

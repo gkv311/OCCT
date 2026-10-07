@@ -5,7 +5,7 @@ puts ""
 
 pload MODELING
 
-restore [locate_data_file bug31148_plate_offset_parallel.brep] s
+readbrep [locate_data_file bug31148_plate_offset_parallel.brep] s
 
 perform_offset_multi_with_ref result s 0 {22 24} {3 3} {472 260 34 34} 1
 

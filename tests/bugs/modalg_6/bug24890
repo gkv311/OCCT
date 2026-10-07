@@ -6,7 +6,7 @@ puts ""
 ## Result of uniform scaling is invalid
 ##############################################################
 
-restore [locate_data_file bug24890_f0.brep] f0
+readbrep [locate_data_file bug24890_f0.brep] f0
 
 setflags f0 locked
 nurbsconvert result f0

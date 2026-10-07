@@ -1,8 +1,8 @@
 # Original bug : pro9481
 # Date : 19Mai98
 
-restore [locate_data_file pro9481a.brep] a
-restore [locate_data_file pro9481b.brep] b
+readbrep [locate_data_file pro9481a.brep] a
+readbrep [locate_data_file pro9481b.brep] b
 
 bop a b
 bopsection result

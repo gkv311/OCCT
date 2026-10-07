@@ -6,7 +6,7 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file buc60868.brep] sh 
+readbrep [locate_data_file buc60868.brep] sh 
 checkshape sh
 
 BUC60868 result sh

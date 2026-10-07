@@ -4,7 +4,7 @@ puts "================"
 puts ""
 
 # Analyze triangulation after mirroring shape 
-restore [locate_data_file bug28640_origin_copy.brep] a
+readbrep [locate_data_file bug28640_origin_copy.brep] a
 tmirror a 0 0 0 1 0 0
 
 vinit
@@ -19,7 +19,7 @@ if {[tricheck a] != ""} {
 }
 
 # Fix the shape and check its validity after mirroring
-restore [locate_data_file bug28640_origin_copy.brep] a
+readbrep [locate_data_file bug28640_origin_copy.brep] a
 fixshape a a
 checkshape a
 tmirror a 0 0 0 1 0 0

@@ -6,7 +6,7 @@ puts "=================================="
 puts "It takes visual check for this BUG"
 puts "=================================="
 
-restore [locate_data_file buc60587a.brep] result
+readbrep [locate_data_file buc60587a.brep] result
 checkshape result
 tclean result
 vinit

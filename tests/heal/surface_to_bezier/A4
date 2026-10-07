@@ -1,1 +1,1 @@
-restore [locate_data_file CCH_propag.brep] a
+readbrep [locate_data_file CCH_propag.brep] a

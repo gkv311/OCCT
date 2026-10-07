@@ -3,7 +3,7 @@ puts "0025588: BRepMesh_ShapeTool::FindUV check for 2d points to be the same is 
 puts "======="
 puts ""
 
-restore [locate_data_file 1.stp_face1204.brep] result
+readbrep [locate_data_file 1.stp_face1204.brep] result
 tclean result
 
 incmesh result 0.1 -a 5

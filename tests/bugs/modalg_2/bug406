@@ -9,7 +9,7 @@ puts ""
 ## Checkshape says face is Ok, but it looks invalid
 #########################################
 
-restore [locate_data_file OCC406.brep] result
+readbrep [locate_data_file OCC406.brep] result
 
 set che [checkshape result]
 

@@ -4,7 +4,7 @@ puts "# ===================================================================="
 puts ""
 
 puts "# Load shape"
-restore [locate_data_file bug25730_thickness8-draw-fillet001.brep] Fillet001
+readbrep [locate_data_file bug25730_thickness8-draw-fillet001.brep] Fillet001
 
 explode Fillet001 F
 

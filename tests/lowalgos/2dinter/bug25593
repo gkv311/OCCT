@@ -6,7 +6,7 @@ puts ""
 # Number of intersection points for 2d curves depends on the order of arguments in command "2dintersect"
 #########################################################################
 
-restore [locate_data_file bug25593_face1.brep] b
+readbrep [locate_data_file bug25593_face1.brep] b
 pcurve b
 
 puts "Intersection 1"

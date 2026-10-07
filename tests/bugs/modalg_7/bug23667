@@ -6,7 +6,7 @@ puts ""
 # checkshape command does not detect problems in the attached shape
 #######################################################################
 
-restore [locate_data_file bug23667_f_ref.brep] f
+readbrep [locate_data_file bug23667_f_ref.brep] f
 
 checkshape f
 

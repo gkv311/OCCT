@@ -1,13 +1,13 @@
 # Original bug : cts21322
 # Date : 16 Sept 98
 
-restore [locate_data_file contour.brep] cont
+readbrep [locate_data_file contour.brep] cont
 mkplane cont cont
 
 puts "*"
 
-restore [locate_data_file CFE900_cts21gbs.brep] base
-restore [locate_data_file cts21322_face.brep] wire
+readbrep [locate_data_file CFE900_cts21gbs.brep] base
+readbrep [locate_data_file cts21322_face.brep] wire
 
 explode base face
 copy base_6 fsketch

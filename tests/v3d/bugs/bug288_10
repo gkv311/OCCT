@@ -4,7 +4,7 @@ puts "================"
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file shading_151.brep] result
+readbrep [locate_data_file shading_151.brep] result
 
 checkprops result -s 52620.1
 checkshape result

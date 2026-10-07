@@ -6,7 +6,7 @@ puts "========"
 ## FixMissingSeam leads to lost pcurve on neighbouring face
 ##########################################
 
-restore [locate_data_file OCC209.brep] a 
+readbrep [locate_data_file OCC209.brep] a 
 explode a f
 checkshape a_4
 

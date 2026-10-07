@@ -6,7 +6,7 @@ puts ""
 ## BOPAlgo_Builder::Perform crash.
 ###############################
 
-restore [locate_data_file bug26701_crash_tbb.brep] d
+readbrep [locate_data_file bug26701_crash_tbb.brep] d
 
 brunparallel 1
 

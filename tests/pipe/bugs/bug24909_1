@@ -7,16 +7,16 @@ puts "0024909: S I G S E G V in buildsweep"
 puts "========"
 puts ""
 
-restore [locate_data_file bug24909_sweep3-draw-Sweep-0-spine.brep] Sweep-0-spine
+readbrep [locate_data_file bug24909_sweep3-draw-Sweep-0-spine.brep] Sweep-0-spine
 
 mksweep Sweep-0-spine
 setsweep -CF
 
-restore [locate_data_file bug24909_sweep3-draw-Sweep-0-section-00-Sketch.brep] Sweep-0-section-00-Sketch
+readbrep [locate_data_file bug24909_sweep3-draw-Sweep-0-section-00-Sketch.brep] Sweep-0-section-00-Sketch
 
 addsweep Sweep-0-section-00-Sketch
 
-restore [locate_data_file bug24909_sweep3-draw-Sweep-0-section-01-Sketch001.brep] Sweep-0-section-01-Sketch001
+readbrep [locate_data_file bug24909_sweep3-draw-Sweep-0-section-01-Sketch001.brep] Sweep-0-section-01-Sketch001
 addsweep Sweep-0-section-01-Sketch001
 
 buildsweep Sweep

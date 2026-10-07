@@ -6,8 +6,8 @@ puts ""
 # Boolean cut operation in new API multi-tool mode performs fuse instead of cut
 #################################################################################
 
-restore [locate_data_file bug26563_BodyShape.brep] bodyshape
-restore [locate_data_file bug26563_CutShape.brep] cutshape
+readbrep [locate_data_file bug26563_BodyShape.brep] bodyshape
+readbrep [locate_data_file bug26563_CutShape.brep] cutshape
 
 bclearobjects
 bcleartools

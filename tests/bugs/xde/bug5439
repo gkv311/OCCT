@@ -6,7 +6,7 @@ puts ""
 # Problems in work of fixshape
 ######################################################
 
-restore [locate_data_file OCC5439-1.brep] a
+readbrep [locate_data_file OCC5439-1.brep] a
 
 catch { fixshape result a 1.e-7 }
 

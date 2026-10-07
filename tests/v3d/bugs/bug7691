@@ -5,7 +5,7 @@ puts ""
 
 # load shape
 pload MODELING VISUALIZATION
-restore [locate_data_file OCC7691-bottle.brep] shape
+readbrep [locate_data_file OCC7691-bottle.brep] shape
 trotate shape 0 0 0 1 0 0 -90
 
 # init viewer and compute hlr shape

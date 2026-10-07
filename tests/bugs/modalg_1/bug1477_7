@@ -7,8 +7,8 @@ puts ""
 # (case 7)
 ######################################################
 
-restore [locate_data_file OCC1477-1.brep] s1 
-restore [locate_data_file OCC1477-2.brep] s2 
+readbrep [locate_data_file OCC1477-1.brep] s1 
+readbrep [locate_data_file OCC1477-2.brep] s2 
 
 checkshape s1
 checkshape s2

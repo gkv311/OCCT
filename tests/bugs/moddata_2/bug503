@@ -8,7 +8,7 @@ puts ""
 
 cpulimit 1000
 
-restore [locate_data_file OCC503.brep] result
+readbrep [locate_data_file OCC503.brep] result
 
 if [catch {sprops result 0.001 } catch_result] {
     set mistake 1

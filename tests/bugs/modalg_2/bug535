@@ -10,7 +10,7 @@ puts ""
 
 pload XDE
 
-restore [locate_data_file OCC535.brep] a 
+readbrep [locate_data_file OCC535.brep] a 
 
 set nb_info_a [nbshapes a]
 regexp {SHAPE +: +([-0-9.+eE]+)} $nb_info_a full r1

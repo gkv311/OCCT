@@ -9,7 +9,7 @@ puts ""
 ## Sewing faces results in a shell with very big tolerance
 ##########################################################
 
-restore [locate_data_file bug28151_surfs.brep] s
+readbrep [locate_data_file bug28151_surfs.brep] s
 
 puts "\nBefore sewing"
 whatis s

@@ -6,7 +6,7 @@ puts ""
 # Regression vs. 6.7.0: bcut fails without notice
 #######################################################################
 
-restore [locate_data_file bug27221.brep] a
+readbrep [locate_data_file bug27221.brep] a
 explode a
 mkplane f a_2
 prism p f -25 0 0 

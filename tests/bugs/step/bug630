@@ -6,7 +6,7 @@ puts ""
 ## DRAW hangs up at the  attempt to restore solid previously saved in STEP format
 ########################################################
 
-restore [locate_data_file OCC630.brep] a1
+readbrep [locate_data_file OCC630.brep] a1
 checkshape a1
 
 ######################################################################

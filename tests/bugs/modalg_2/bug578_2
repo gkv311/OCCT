@@ -5,10 +5,10 @@ puts "OCC583"
 puts "================"
 puts ""
 
-restore [locate_data_file OCC578_w1.brep] w1 
+readbrep [locate_data_file OCC578_w1.brep] w1 
 checkshape w1
 
-restore [locate_data_file OCC578_w2.brep] w2 
+readbrep [locate_data_file OCC578_w2.brep] w2 
 checkshape w2
 
 set x 1

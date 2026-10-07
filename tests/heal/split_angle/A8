@@ -1,1 +1,1 @@
-restore [locate_data_file CFI_8_i1_fia.brep] a
+readbrep [locate_data_file CFI_8_i1_fia.brep] a

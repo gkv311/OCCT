@@ -1,5 +1,5 @@
-restore [locate_data_file a25.brep] a
-restore [locate_data_file b25.brep] b
+readbrep [locate_data_file a25.brep] a
+readbrep [locate_data_file b25.brep] b
 bsection result a b
 
 checkprops result -l 1.51691

@@ -5,7 +5,7 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug30990.brep] face
+readbrep [locate_data_file bug30990.brep] face
 mksurface surf face
 
 puts "Check consistency of evaluation of BSpline surface at knots"

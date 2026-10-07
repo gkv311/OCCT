@@ -8,7 +8,7 @@ puts "TODO OCC26510 ALL: Error: 1 curve is expected but 0 ones are found"
 
 set aGoodNbCurves 1
 
-restore [locate_data_file bug25952_shape.brep] q
+readbrep [locate_data_file bug25952_shape.brep] q
 explode q 
 copy q_1 b1
 copy q_2 b2

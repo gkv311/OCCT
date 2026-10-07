@@ -5,9 +5,9 @@ puts "OCC107"
 puts "================"
 puts ""
 
-restore [locate_data_file OCC107-1.brep] ee 
+readbrep [locate_data_file OCC107-1.brep] ee 
 checkshape ee
-restore [locate_data_file OCC107-2.brep] ff
+readbrep [locate_data_file OCC107-2.brep] ff
 checkshape ff
 
 distmini dd1 ee ff

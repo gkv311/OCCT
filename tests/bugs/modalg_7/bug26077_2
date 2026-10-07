@@ -16,8 +16,8 @@ trotate Ellipse002 0 0 0 0 0 1 90
 ttranslate Ellipse002 0 0 15
 prism Extrude_Ellipse Ellipse002 0 0 6
 ttranslate Extrude_Ellipse 0 0 -4
-restore [locate_data_file bug26077_ellipsoid1-tcl-Loft-00-section.brep] Loft-00-section
-restore [locate_data_file bug26077_ellipsoid1-tcl-Loft-01-section.brep] Loft-01-section
+readbrep [locate_data_file bug26077_ellipsoid1-tcl-Loft-00-section.brep] Loft-00-section
+readbrep [locate_data_file bug26077_ellipsoid1-tcl-Loft-01-section.brep] Loft-01-section
 thrusections Loft 1 0 Loft-00-section Loft-01-section
 psphere Ellipsoid-sphere 12.5
 deform Ellipsoid Ellipsoid-sphere 1 1.04 1.2

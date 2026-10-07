@@ -3,8 +3,8 @@ puts "0030395: DRAW bop: Some sub-shapes of some of the argument become connecte
 puts "========"
 puts ""
 
-restore [locate_data_file bug30395_s1.brep] s1
-restore [locate_data_file bug30395_fds.brep] fds
+readbrep [locate_data_file bug30395_s1.brep] s1
+readbrep [locate_data_file bug30395_fds.brep] fds
 
 bclearobjects
 bcleartools

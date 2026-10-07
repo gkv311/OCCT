@@ -8,8 +8,8 @@ puts ""
 
 set BugNumber OCC22720
 
-restore [locate_data_file OCC22720-f1.brep] f1 
-restore [locate_data_file OCC22720-f2.brep] f2 
+readbrep [locate_data_file OCC22720-f1.brep] f1 
+readbrep [locate_data_file OCC22720-f2.brep] f2 
 
 mksurface s1 f1
 mksurface s2 f2

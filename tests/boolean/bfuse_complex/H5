@@ -2,9 +2,9 @@
 # Date : 13Mai98
 # B3
 
-restore [locate_data_file CTO902_cts20482a.brep] a
-restore [locate_data_file CTO902_cts20482b.brep] b
-restore [locate_data_file CTO902_cts20482c.brep] c
+readbrep [locate_data_file CTO902_cts20482a.brep] a
+readbrep [locate_data_file CTO902_cts20482b.brep] b
+readbrep [locate_data_file CTO902_cts20482c.brep] c
 
 bfuse result a b
 bfuse result result c

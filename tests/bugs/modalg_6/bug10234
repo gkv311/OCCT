@@ -6,8 +6,8 @@ puts ""
 # BRepOffsetAPI_MakePipeShell fails on spine built from two segments and profile built from arc
 ############################################################################
 
-restore [locate_data_file bug10234a.brep] pr
-restore [locate_data_file bug10234b.brep] sp
+readbrep [locate_data_file bug10234a.brep] pr
+readbrep [locate_data_file bug10234b.brep] sp
 
 mksweep sp
 addsweep pr

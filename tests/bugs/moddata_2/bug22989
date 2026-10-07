@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC22989
 
-restore [locate_data_file OCC22989-edge-nosameparameter.brep] result
+readbrep [locate_data_file OCC22989-edge-nosameparameter.brep] result
 
 sameparameter result
 

@@ -1,4 +1,4 @@
-restore [locate_data_file bug29481_ex3.brep] s
+readbrep [locate_data_file bug29481_ex3.brep] s
 explode s f
 
 # remove the gap in both solids

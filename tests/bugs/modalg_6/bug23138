@@ -6,8 +6,8 @@ puts ""
 # BRepAlgoAPI_Fuse produce invalid result
 ###########################################
 
-restore [locate_data_file bug23138_body.brep] b
-restore [locate_data_file bug23138_thread.brep] t
+readbrep [locate_data_file bug23138_body.brep] b
+readbrep [locate_data_file bug23138_thread.brep] t
 
 bop b t
 bopfuse result

@@ -1,5 +1,5 @@
-restore [locate_data_file f1_01.brep] b1
-restore [locate_data_file f4.brep] b2
+readbrep [locate_data_file f1_01.brep] b1
+readbrep [locate_data_file f4.brep] b2
 
 bcut result b1 b2
 checkprops result -s 314.159

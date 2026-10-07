@@ -8,6 +8,6 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug7570_small.brep] a
+readbrep [locate_data_file bug7570_small.brep] a
 
 OCC7570 a

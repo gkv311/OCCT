@@ -8,6 +8,6 @@ puts ""
 
 cpulimit 1000
 
-restore [locate_data_file bug24575_cx1.brep] b
+readbrep [locate_data_file bug24575_cx1.brep] b
 
 checkshape b

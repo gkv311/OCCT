@@ -1,6 +1,6 @@
 
-restore [locate_data_file buc60290a.brep] sol1
-restore [locate_data_file buc60290b.brep] sol2
+readbrep [locate_data_file buc60290a.brep] sol1
+readbrep [locate_data_file buc60290b.brep] sol2
 
 bcut result sol2 sol1
 checkprops result -s 1.06741e+06

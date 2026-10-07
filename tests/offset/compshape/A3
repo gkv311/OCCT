@@ -6,7 +6,7 @@
 
 puts "TODO ?OCC23068 ALL:Error\\s*:\\s*.*The volume"
 puts "TODO ?OCC23068 ALL:Faulty shapes in variables faulty_1 to faulty_"
-restore [locate_data_file CCV_2_c1_gsv.brep] s
+readbrep [locate_data_file CCV_2_c1_gsv.brep] s
 explode s F
 catch {offsetcompshape result s -10 s_8 s_10}
 

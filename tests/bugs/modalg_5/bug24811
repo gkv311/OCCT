@@ -14,8 +14,8 @@ set p2_1 0.0202691578002498
 set p2_2 0.999794559518151
 set p2_3 0
 
-restore [locate_data_file bug24811_e1.brep] curve
-restore [locate_data_file bug24811_e2.brep] circle
+readbrep [locate_data_file bug24811_e1.brep] curve
+readbrep [locate_data_file bug24811_e2.brep] circle
 
 bop curve circle
 bopcut result

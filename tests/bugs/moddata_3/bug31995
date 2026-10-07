@@ -4,7 +4,7 @@ puts "========="
 puts ""
 
 
-restore [locate_data_file bug31995.brep] result
+readbrep [locate_data_file bug31995.brep] result
 
 bounding result -save Xmin Ymin Zmin Xmax Ymax Zmax
 

@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC23106
 
-restore [locate_data_file bug23106_face_0triangles.brep] result
+readbrep [locate_data_file bug23106_face_0triangles.brep] result
 
 incmesh result 0.01
 triangles result 

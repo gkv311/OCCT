@@ -4,9 +4,9 @@ puts "CUT Case 1"
 puts "==========="
 #cpulim add aki 070704
 cpulimit 1000
-restore [locate_data_file buc60555a.brep] part 
+readbrep [locate_data_file buc60555a.brep] part 
 checkshape part
-restore [locate_data_file buc60555b.brep] trTool1
+readbrep [locate_data_file buc60555b.brep] trTool1
 checkshape trTool1
 halfspace hs1 trTool1 20000 10000 0
 bcut cut1 part hs1

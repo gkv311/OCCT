@@ -6,9 +6,9 @@
 
 puts "TODO OCC22741 All: Faulty shapes in variables faulty_1 to faulty_2"
 
-restore [locate_data_file 3_base.brep] base
+readbrep [locate_data_file 3_base.brep] base
 mkplane fbase base
-restore [locate_data_file 3_B1.brep] profile
+readbrep [locate_data_file 3_B1.brep] profile
 
 pipe result profile fbase
 

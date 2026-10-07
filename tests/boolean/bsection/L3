@@ -1,4 +1,4 @@
-restore [locate_data_file GEN745.brep] a
+readbrep [locate_data_file GEN745.brep] a
 explode a
 bsection result a_1 a_2
 

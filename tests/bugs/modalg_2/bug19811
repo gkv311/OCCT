@@ -9,7 +9,7 @@ puts ""
 set BugNumber OCC19811
 
 puts "Load shape ..."
-restore [locate_data_file bug19811_VanneMP_supports_tiges_V3.brep] result
+readbrep [locate_data_file bug19811_VanneMP_supports_tiges_V3.brep] result
 
 puts "Scaling operation ..."
 if [catch { tscale result 0 0 0 0.5 } catch_result] {

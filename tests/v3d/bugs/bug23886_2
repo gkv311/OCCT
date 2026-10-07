@@ -4,7 +4,7 @@ puts "============"
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file bug23886_face_02.brep] s
+readbrep [locate_data_file bug23886_face_02.brep] s
 
 vinit View1
 vdisplay s

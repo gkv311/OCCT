@@ -8,8 +8,8 @@ puts ""
 # Bug is reprodused on Linux platform only
 #######################################################################
 
-restore [locate_data_file OCC13186_cutcyl11.brep] b1
-restore [locate_data_file OCC13186_sphere.brep] b2
+readbrep [locate_data_file OCC13186_cutcyl11.brep] b1
+readbrep [locate_data_file OCC13186_sphere.brep] b2
 
 bop b1 b2
 bopfuse result

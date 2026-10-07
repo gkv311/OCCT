@@ -7,9 +7,9 @@ puts ""
 ## No possibility to cut the shapes. 
 ############################
 
-restore [locate_data_file OCC620a.brep] a 
+readbrep [locate_data_file OCC620a.brep] a 
 checkshape a
-restore [locate_data_file OCC620b.brep] b 
+readbrep [locate_data_file OCC620b.brep] b 
 checkshape b
 
 bop a b

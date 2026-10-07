@@ -4,9 +4,9 @@
 ## Comment : from pro6309
 ## ====================================
 
-restore [locate_data_file CFI_pro6309a.brep] a
+readbrep [locate_data_file CFI_pro6309a.brep] a
 tscale a 0 0 0 1000
-restore [locate_data_file pro6309b.brep] b
+readbrep [locate_data_file pro6309b.brep] b
 tscale b 0 0 0 1000
 #restore pro6309c.brep c
 #restore pro6309d.brep d
