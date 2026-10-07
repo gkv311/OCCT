@@ -10,7 +10,7 @@ set BugNumber OCC21317
 
 catch {pload XDE}
 
-restore [locate_data_file bug21317_faulty.brep] a 
+readbrep [locate_data_file bug21317_faulty.brep] a 
 fixshape result a
 set info [checkshape result]
 

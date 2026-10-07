@@ -6,7 +6,7 @@ puts ""
 # Projection of closed curve onto cylinder is wrong
 #################################################
 
-restore [locate_data_file bug28223_face.brep] ff
+readbrep [locate_data_file bug28223_face.brep] ff
 explode ff e
 mkcurve cc ff_1
 mksurface ss ff

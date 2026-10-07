@@ -2,13 +2,13 @@ puts "==========="
 puts "BUC60532"
 puts "==========="
 
-restore [locate_data_file buc60532a.brep] p 
+readbrep [locate_data_file buc60532a.brep] p 
 checkshape p
 
-restore [locate_data_file buc60532b.brep] t1
+readbrep [locate_data_file buc60532b.brep] t1
 checkshape t1
 
-restore [locate_data_file buc60532c.brep] t2
+readbrep [locate_data_file buc60532c.brep] t2
 checkshape t2
 
 # create halfspace

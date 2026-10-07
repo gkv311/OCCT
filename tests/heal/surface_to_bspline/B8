@@ -1,2 +1,2 @@
 
-restore [locate_data_file CFI_g5678fip.brep] a
+readbrep [locate_data_file CFI_g5678fip.brep] a

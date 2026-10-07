@@ -3,8 +3,8 @@ puts "0029968: Modeling Algorithms - BRepAlgoAPI_Cut produces an empty result wi
 puts "========"
 puts ""
 
-restore [locate_data_file bug29968_h.brep] h
-restore [locate_data_file bug29968_s.brep] s
+readbrep [locate_data_file bug29968_h.brep] h
+readbrep [locate_data_file bug29968_s.brep] s
 
 bop s h
 

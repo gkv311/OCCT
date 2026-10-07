@@ -2,7 +2,7 @@ puts "================"
 puts "BUC60609"
 puts "================"
 
-restore [locate_data_file buc60609a.brep] a
+readbrep [locate_data_file buc60609a.brep] a
 
 # two points will be classified
 point p1 0.14 5.1

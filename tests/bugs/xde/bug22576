@@ -9,7 +9,7 @@ puts ""
 set BugNumber OCC22576
 
 puts "Load shape ..."
-restore [locate_data_file test-fix280-face.brep] res
+readbrep [locate_data_file test-fix280-face.brep] res
 
 fixshape result res
 

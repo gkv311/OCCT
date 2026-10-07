@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC6766
 
-restore [locate_data_file OCC6766.brep] a 
+readbrep [locate_data_file OCC6766.brep] a 
 
 checkshape a
         

@@ -8,8 +8,8 @@ puts ""
 
 foreach a [directory c_*] {unset $a}
 
-restore [locate_data_file bug22766_f1.brep] f1
-restore [locate_data_file bug22766_f2.brep] f2
+readbrep [locate_data_file bug22766_f1.brep] f1
+readbrep [locate_data_file bug22766_f2.brep] f2
 
 mksurface s1 f1
 mksurface s2 f2

@@ -1,8 +1,8 @@
 # Original bug : cts18140
 # Date : 18mar98
 
-restore [locate_data_file CTO900_cts18140-part.brep] part
-restore [locate_data_file CTO900_cts18140-tool.brep] tool
+readbrep [locate_data_file CTO900_cts18140-part.brep] part
+readbrep [locate_data_file CTO900_cts18140-tool.brep] tool
 
 bcut result part tool
 checkprops result -s 92062.6

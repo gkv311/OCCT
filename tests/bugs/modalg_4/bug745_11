@@ -7,7 +7,7 @@ puts ""
 # Not correct creation of bisector loci.
 #########################
 
-restore [locate_data_file OCC745_nb2.brep] w 
+readbrep [locate_data_file OCC745_nb2.brep] w 
 mkplane f w
 topoload f
 drawcont

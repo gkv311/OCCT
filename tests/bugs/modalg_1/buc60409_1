@@ -3,8 +3,8 @@ puts "   BUC60409   "
 puts "     FUSE     "
 puts "=============="
 
-restore [locate_data_file buc60409a.brep] c 
-restore [locate_data_file buc60409b.brep] s
+readbrep [locate_data_file buc60409a.brep] c 
+readbrep [locate_data_file buc60409b.brep] s
 
 set che [checkshape c]
 if { [regexp {Faulty} $che ] == 1 } {

@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC22727
 
-restore [locate_data_file OCC22727-toFillet.brep] t
+readbrep [locate_data_file OCC22727-toFillet.brep] t
 
 tscale t 0.0507219 -0.0399294 -0.00324254 1000
 explode t e

@@ -3,7 +3,7 @@ puts "0026647: BRepTools::UVBounds() computes zero range by V"
 puts "##################################################"
 
 # load and check faces
-restore [locate_data_file bug26627_face1.brep] f
+readbrep [locate_data_file bug26627_face1.brep] f
 tolerance f
 checkshape f
 

@@ -10,7 +10,7 @@ puts ""
 
 set BugNumber OCC5805
 
-restore [locate_data_file OCC5805.brep] a 
+readbrep [locate_data_file OCC5805.brep] a 
 
 checkshape a
 

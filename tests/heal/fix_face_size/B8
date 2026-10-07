@@ -1,1 +1,1 @@
-restore [locate_data_file aaa.brep] a
+readbrep [locate_data_file aaa.brep] a

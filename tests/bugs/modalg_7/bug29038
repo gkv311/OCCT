@@ -6,6 +6,6 @@ puts ""
 # IntTools_EdgeEdge::FindParameters() hangs on bad curve
 ##################################################
 
-restore [locate_data_file bug29038_bfuse_hang.brep] a
+readbrep [locate_data_file bug29038_bfuse_hang.brep] a
 explode a
 bfuse r a_1 a_2

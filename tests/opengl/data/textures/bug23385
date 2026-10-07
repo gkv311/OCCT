@@ -5,7 +5,7 @@ puts ""
 
 pload MODELING VISUALIZATION
 vinit View1
-restore [locate_data_file OCC23115-bottle.brep] b
+readbrep [locate_data_file OCC23115-bottle.brep] b
 explode b F
 vdisplay b_16
 vtexture b_16 [locate_data_file OCC23385-carrelage1.gif]

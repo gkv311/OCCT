@@ -6,8 +6,8 @@ puts ""
 # GeomAPI_ExtremaCurveCurve hangs on parallel b-spline curves
 #######################################################################
 
-restore [locate_data_file bug26184_Curve_Extrema_1_12971.brep] a1
-restore [locate_data_file bug26184_Curve_Extrema_2_12971.brep] a2
+readbrep [locate_data_file bug26184_Curve_Extrema_1_12971.brep] a1
+readbrep [locate_data_file bug26184_Curve_Extrema_2_12971.brep] a2
 
 mkcurve c1 a1
 mkcurve c2 a2

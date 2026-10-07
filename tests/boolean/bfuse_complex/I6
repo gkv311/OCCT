@@ -2,8 +2,8 @@
 # Date : 13Mai98
 # D2
 
-restore [locate_data_file cts20551-tool.brep] a
-restore [locate_data_file CTO902_cts20551b.brep] b
+readbrep [locate_data_file cts20551-tool.brep] a
+readbrep [locate_data_file CTO902_cts20551b.brep] b
 
 bfuse result a b
 

@@ -7,8 +7,8 @@ puts ""
 #############################################################################################
 cpulimit 100
 
-restore [locate_data_file OCC26629-face.brep] aF
-restore [locate_data_file OCC26629-edge.brep] aE
+readbrep [locate_data_file OCC26629-face.brep] aF
+readbrep [locate_data_file OCC26629-edge.brep] aE
 
 pload MODELING
 

@@ -7,7 +7,7 @@ pload MODELING
 
 setfillhistory 1
 
-restore [locate_data_file bug31148_box_iso_face_top.brep] s
+readbrep [locate_data_file bug31148_box_iso_face_top.brep] s
 explode s f
 offsetparameter 1.e-7 c i r
 offsetload s 0

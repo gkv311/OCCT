@@ -6,7 +6,7 @@ puts ""
 # Wire containing degenerated edge is not written to IGES / STEP
 #######################################################################
 
-restore [locate_data_file bug25843_onewire.brep] w
+readbrep [locate_data_file bug25843_onewire.brep] w
 
 set aFile ${imagedir}/bug25843_onewire.stp
 

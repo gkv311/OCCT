@@ -6,7 +6,7 @@ puts ""
 # [regression] BRepAlgoAPI_Common returns empty result
 ########################################################
 
-restore [locate_data_file bug27760_leid.brep] l
+readbrep [locate_data_file bug27760_leid.brep] l
 
 explode l
 brunparallel 1

@@ -1,8 +1,8 @@
 # Original bug : cts21143
 # Date : 16July98
 
-restore [locate_data_file CTO904_cts21143a.brep] a 
-restore [locate_data_file cts21143b.brep] b
+readbrep [locate_data_file CTO904_cts21143a.brep] a 
+readbrep [locate_data_file cts21143b.brep] b
 
 bop a b
 bopsection result

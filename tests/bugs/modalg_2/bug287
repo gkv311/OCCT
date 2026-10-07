@@ -2,7 +2,7 @@ puts "========================"
 puts " OCC287 "
 puts "========================"
 
-restore [locate_data_file shading_170.brep] result
+readbrep [locate_data_file shading_170.brep] result
 checkshape result
 
 tclean result

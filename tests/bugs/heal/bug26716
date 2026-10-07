@@ -3,7 +3,7 @@ puts "OCC26716: Mesher cannot create a mesh of brep model due to ShapeFix_Wire::
 puts "============"
 puts ""
 
-restore [locate_data_file bug26716_rev.brep] result
+readbrep [locate_data_file bug26716_rev.brep] result
 
 checkshape result
 

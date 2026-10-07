@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC6805
 
-restore [locate_data_file OCC6805.brep] s1
+readbrep [locate_data_file OCC6805.brep] s1
 checkshape s1
 
 DT_ApplySeq result s1 ${imagedir}/OCC6805.res

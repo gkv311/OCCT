@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC20465
 
-restore [locate_data_file OCC20465.brep] r 
+readbrep [locate_data_file OCC20465.brep] r 
 
 checkshape r
 explode r f

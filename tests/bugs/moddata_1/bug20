@@ -4,7 +4,7 @@ puts "================"
 puts ""
 
 pload QAcommands
-restore [locate_data_file OCC20.brep] result
+readbrep [locate_data_file OCC20.brep] result
 
 checkshape result
 

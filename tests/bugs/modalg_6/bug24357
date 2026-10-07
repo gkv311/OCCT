@@ -6,7 +6,7 @@ puts ""
 # BRepBuilderAPI_Sewing returns result with too high tolerance
 ###########################################################
 
-restore [locate_data_file bug24357_faces.brep] f
+readbrep [locate_data_file bug24357_faces.brep] f
 whatis f
 tolerance f
 sewing r 0.2 f

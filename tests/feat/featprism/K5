@@ -1,9 +1,9 @@
 # Original bug : cts20369
 # Date : 17Juillet98
 
-restore [locate_data_file CFE900_cts20gat.brep] base0
-restore [locate_data_file cts20369b.brep] cont0
-restore [locate_data_file cts20369c.brep] cont
+readbrep [locate_data_file CFE900_cts20gat.brep] base0
+readbrep [locate_data_file cts20369b.brep] cont0
+readbrep [locate_data_file cts20369c.brep] cont
 
 # OK
 featprism base0 cont0 cont0 0 1 0 0 1

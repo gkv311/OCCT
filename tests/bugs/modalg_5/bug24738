@@ -6,8 +6,8 @@ puts ""
 # BRepOffsetAPI_MakePipe algorithm fails on circular path and section (the case where result is part of sphere)
 #######################################################################
 
-restore [locate_data_file bug24738_path.brep] sp
-restore [locate_data_file bug24738_profile.brep] pr
+readbrep [locate_data_file bug24738_path.brep] sp
+readbrep [locate_data_file bug24738_profile.brep] pr
 
 pipe result sp pr
 

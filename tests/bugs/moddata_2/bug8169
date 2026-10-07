@@ -10,8 +10,8 @@ puts ""
 
 set BugNumber OCC6768
 
-restore [locate_data_file OCC8169_1.brep] e1 
-restore [locate_data_file OCC8169_2.brep] e2 
+readbrep [locate_data_file OCC8169_1.brep] e1 
+readbrep [locate_data_file OCC8169_2.brep] e2 
 
 plane p 0 0 500 0 0 1 1 0 0
 dump p

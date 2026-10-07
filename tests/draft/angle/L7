@@ -1,7 +1,7 @@
 # Original bug : pro16447
 # Date : 26 Nov 98
 
-restore [locate_data_file CFE903_pro16ggz.brep] base
+readbrep [locate_data_file CFE903_pro16ggz.brep] base
 
 explode base face
 

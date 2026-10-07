@@ -6,7 +6,7 @@ puts ""
 # Display issue for special model
 ###################################
 
-restore [locate_data_file bug28719_display_issue.brep] result
+readbrep [locate_data_file bug28719_display_issue.brep] result
 tclean result
 
 vinit

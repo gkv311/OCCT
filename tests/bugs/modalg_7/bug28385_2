@@ -7,6 +7,6 @@ puts ""
 #################################################
 
 
-restore [locate_data_file bug28385_planar_face.brep] face
+readbrep [locate_data_file bug28385_planar_face.brep] face
 
 checkview -display face -2d -path ${imagedir}/${test_image}-2d.png

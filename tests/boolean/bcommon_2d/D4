@@ -1,5 +1,5 @@
-restore [locate_data_file case_3_solid.brep] a
-restore [locate_data_file offset_wire_034.brep] b
+readbrep [locate_data_file case_3_solid.brep] a
+readbrep [locate_data_file offset_wire_034.brep] b
 
 bcommon result b a
 

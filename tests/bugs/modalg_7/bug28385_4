@@ -7,7 +7,7 @@ puts ""
 #################################################
 
 
-restore [locate_data_file bug28385_circ_face.brep] face
+readbrep [locate_data_file bug28385_circ_face.brep] face
 
 smallview
 don face; fit

@@ -1,1 +1,1 @@
-restore [locate_data_file self-int.brep] result
+readbrep [locate_data_file self-int.brep] result

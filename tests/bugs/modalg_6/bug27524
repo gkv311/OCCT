@@ -10,7 +10,7 @@ puts ""
 set aTol 1.0e-7
 set aShapeToler 0.0069791772900578497
 
-restore [locate_data_file bug27524.brep] aS
+readbrep [locate_data_file bug27524.brep] aS
 
 checkshape aS
 

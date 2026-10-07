@@ -6,8 +6,8 @@ puts ""
 # BRepOffsetAPI_ThruSections creates invalid shape
 ############################################################
 
-restore [locate_data_file bug26330_s1.brep] s1
-restore [locate_data_file bug26330_s2.brep] s2
+readbrep [locate_data_file bug26330_s1.brep] s1
+readbrep [locate_data_file bug26330_s2.brep] s2
 
 # both wires seem okay
 checkshape s1

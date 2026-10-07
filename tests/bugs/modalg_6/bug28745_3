@@ -6,7 +6,7 @@ puts ""
 # Wrong results of Boolean operations on hemisphere solids
 ####################################################################
 
-restore [locate_data_file bug28745_case3_common.brep] b
+readbrep [locate_data_file bug28745_case3_common.brep] b
 explode b
 bclearobjects
 bcleartools

@@ -3,7 +3,7 @@ puts "OCC32864: Normal projection of a wire on a cylinder produces wrong result"
 puts "========================================================================="
 puts ""
 
-restore [locate_data_file bug32864.brep] a
+readbrep [locate_data_file bug32864.brep] a
 explode a
 
 nproject result a_2 a_1

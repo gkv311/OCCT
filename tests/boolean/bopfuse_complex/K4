@@ -1,8 +1,8 @@
 # Original bug : fra50047
 # Date : 25Mai98
 
-restore [locate_data_file CTO904_fra50047a.brep] a
-restore [locate_data_file fra50047b.brep] b
+readbrep [locate_data_file CTO904_fra50047a.brep] a
+readbrep [locate_data_file fra50047b.brep] b
 
 bop a b
 bopfuse result

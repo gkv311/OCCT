@@ -4,7 +4,7 @@ puts "TODO OCC23748 ALL: Error: The command cannot be built"
 puts "TODO OCC23748 ALL: Error: Offset is not done."
 #puts "TODO OCC24255 ALL: An exception was caught"
 
-restore [locate_data_file offset_wire_041.brep] s
+readbrep [locate_data_file offset_wire_041.brep] s
 
 set length 0
 set nbsh_v 0

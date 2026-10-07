@@ -6,7 +6,7 @@ puts ""
 # Parallelization of assembly part of BO
 ############################################
 
-restore [locate_data_file bug24157_fstar.brep] b1
+readbrep [locate_data_file bug24157_fstar.brep] b1
 set qs {}
 
 set N 24

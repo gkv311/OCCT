@@ -9,8 +9,8 @@ puts ""
 set ExpToler 1.5361108163989659e-007
 set ExpLen 5.036361740755879
 
-restore [locate_data_file bug25890_f1.brep] f1
-restore [locate_data_file bug25890_f2.brep] f2
+readbrep [locate_data_file bug25890_f1.brep] f1
+readbrep [locate_data_file bug25890_f2.brep] f2
 
 set log [ bopcurves f1 f2 -2d ]
 regexp {Tolerance Reached=+([-0-9.+eE]+)\n+([-0-9.+eE]+)} ${log} full Toler NbCurv

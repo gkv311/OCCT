@@ -6,10 +6,10 @@ puts ""
 # Incorrect result of boolean Fuse operation
 ###############################################
 
-restore [locate_data_file bug22829_Solid_3.brep] a
+readbrep [locate_data_file bug22829_Solid_3.brep] a
 checkshape a
 
-restore [locate_data_file bug22829_Solid_7.brep] b
+readbrep [locate_data_file bug22829_Solid_7.brep] b
 checkshape b
 
 bop a b

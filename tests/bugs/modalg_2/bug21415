@@ -26,7 +26,7 @@ set at_Z     -1.29683163874688
 
 # Start
 
-restore [locate_data_file OCC21415-face_bad_meshed.brep] result
+readbrep [locate_data_file OCC21415-face_bad_meshed.brep] result
 vinit
 vdisplay result
 vfit

@@ -12,7 +12,7 @@ foreach val {0 1} {
   }
 }
 
-restore [locate_data_file bug31148_box_iso_face_top.brep] s
+readbrep [locate_data_file bug31148_box_iso_face_top.brep] s
 
 perform_offset_multi_with_ref r0_01 s 0 {7} {2} {416 508 12 11} 1
 perform_offset_multi_with_ref r0_02 s 0 {6 7} {1 2} {448 604 12 11} 1

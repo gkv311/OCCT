@@ -1,8 +1,8 @@
 # Original bug : ger50084
 # Date : 21 Sept 98
 
-restore [locate_data_file CTO900_ger50084c.brep] prism
-restore [locate_data_file CTO900_ger50084d.brep] base
+readbrep [locate_data_file CTO900_ger50084c.brep] prism
+readbrep [locate_data_file CTO900_ger50084d.brep] base
 
 bcut result prism base
 checkprops result -s 1290.02

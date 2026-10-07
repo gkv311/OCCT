@@ -3,8 +3,8 @@
 
 # part 3 of 4
 
-restore [locate_data_file pro15203b.brep] b 
-restore [locate_data_file pro15203c.brep] c 
+readbrep [locate_data_file pro15203b.brep] b 
+readbrep [locate_data_file pro15203c.brep] c 
 
 #pkv f
 explode b f

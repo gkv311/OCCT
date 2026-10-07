@@ -3,8 +3,8 @@ puts "OCC25542: Boolean operation fai-lure for Cylinder and Cone in critical loc
 puts "============"
 puts ""
 
-restore [locate_data_file bug25542_cylinder.brep] b1
-restore [locate_data_file bug25542_cone.brep] b2
+readbrep [locate_data_file bug25542_cylinder.brep] b1
+readbrep [locate_data_file bug25542_cone.brep] b2
 
 smallview
 

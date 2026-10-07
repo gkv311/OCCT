@@ -1,1 +1,1 @@
-restore [locate_data_file CFI_o12__fix.brep] a
+readbrep [locate_data_file CFI_o12__fix.brep] a

@@ -5,7 +5,7 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug31172.brep] face
+readbrep [locate_data_file bug31172.brep] face
 BUC60652 face
 
 explode face W

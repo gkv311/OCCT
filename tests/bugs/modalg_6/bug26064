@@ -7,6 +7,6 @@ puts ""
 ###########################################################
 
 pload MODELING
-restore [locate_data_file dist1-s1.brep] s1
-restore [locate_data_file dist1-s2.brep] s2
+readbrep [locate_data_file dist1-s1.brep] s1
+readbrep [locate_data_file dist1-s2.brep] s2
 distmini d s1 s2

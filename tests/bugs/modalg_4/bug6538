@@ -8,8 +8,8 @@ puts ""
 
 set BugNumber OCC6538
 
-restore [locate_data_file OCC6538-f1.brep] s1 
-restore [locate_data_file OCC6538-f2.brep] s2 
+readbrep [locate_data_file OCC6538-f1.brep] s1 
+readbrep [locate_data_file OCC6538-f2.brep] s2 
 
 checkshape s1
 checkshape s2

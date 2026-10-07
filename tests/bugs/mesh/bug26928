@@ -3,7 +3,7 @@ puts "0026928: Edges are meshed too coarsly"
 puts "========="
 puts ""
 
-restore [locate_data_file bug27356_comp.brep] c
+readbrep [locate_data_file bug27356_comp.brep] c
 tclean c
 
 vinit

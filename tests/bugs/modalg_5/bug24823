@@ -6,5 +6,5 @@ puts ""
 ## Hang up in "bopcheck" command
 ###############################
 
-restore [locate_data_file buc60555d.brep] b
+readbrep [locate_data_file buc60555d.brep] b
 bopcheck b

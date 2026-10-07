@@ -3,7 +3,7 @@ puts "0027845: BRepMesh produces invalid result on spline cavity"
 puts "=========="
 puts ""
 
-restore [locate_data_file bug27845_shape.brep] result
+readbrep [locate_data_file bug27845_shape.brep] result
 tclean result
 incmesh result 10 -a 180
 

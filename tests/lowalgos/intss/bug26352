@@ -6,8 +6,8 @@ puts ""
 # Wrong intersection points found
 #############################################################################
 
-restore [locate_data_file bug26316_shape1.brep] b1
-restore [locate_data_file bug26316_shape2.brep] b2
+readbrep [locate_data_file bug26316_shape1.brep] b1
+readbrep [locate_data_file bug26316_shape2.brep] b2
 
 explode b1 f
 explode b2 f

@@ -5,7 +5,7 @@ puts ""
 
 cpulimit 30
 
-restore [locate_data_file cone_bad_tri.brep] a
+readbrep [locate_data_file cone_bad_tri.brep] a
 vinit Viewer1/View1
 vdefaults -autotriang 0
 vdisplay a

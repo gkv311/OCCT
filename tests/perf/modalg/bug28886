@@ -8,7 +8,7 @@ puts ""
 
 cpulimit 60
 
-restore [locate_data_file bug28886_Faces.brep] ff
+readbrep [locate_data_file bug28886_Faces.brep] ff
 explode ff f
 mksurface ss1 ff_1
 mksurface ss2 ff_2

@@ -7,8 +7,8 @@ puts ""
 #################################################
 
 # Read input
-restore [locate_data_file bug29858_01_e1.brep] e1
-restore [locate_data_file bug29858_01_e2.brep] e2
+readbrep [locate_data_file bug29858_01_e1.brep] e1
+readbrep [locate_data_file bug29858_01_e2.brep] e2
 
 # Extract geometry from topology
 mkcurve c1 e1

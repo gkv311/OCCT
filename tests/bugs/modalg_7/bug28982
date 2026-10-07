@@ -6,7 +6,7 @@ puts ""
 # 2D offset creates faulty result from wire
 ########################################
 
-restore [locate_data_file bug28982_ellipse.brep] e
+readbrep [locate_data_file bug28982_ellipse.brep] e
 mkoffset result e 1 1
 
 checkshape result_1

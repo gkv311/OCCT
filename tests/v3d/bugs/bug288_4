@@ -4,7 +4,7 @@ puts "(case 4)"
 puts "========================"
 
 pload MODELING VISUALIZATION
-restore [locate_data_file shading_151.brep] result 
+readbrep [locate_data_file shading_151.brep] result 
 checkshape result
 
 tclean result

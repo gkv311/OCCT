@@ -6,7 +6,7 @@ puts "========"
 pload VISUALIZATION XDE OCAF MODELING
 Close D -silent
 
-restore [locate_data_file Ball.brep] b
+readbrep [locate_data_file Ball.brep] b
 incmesh b 0.1
 
 set aTmpObjBase "${imagedir}/${casename}_tmp"

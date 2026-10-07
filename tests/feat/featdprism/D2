@@ -1,4 +1,4 @@
-restore [locate_data_file CFE_e_lonfzx.brep] E
+readbrep [locate_data_file CFE_e_lonfzx.brep] E
 nexplode E f
 
 profile cont S E_10 F 0 -100 X 50 Y -100 X -50

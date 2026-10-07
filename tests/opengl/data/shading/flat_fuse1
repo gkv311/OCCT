@@ -7,7 +7,7 @@ vclose ALL
 vinit View1
 vviewparams -scale 551.55 -proj 0.85 -0.16 0.51 -up -0.41 0.41 0.82 -at 0.55 0.55 0.55
 
-restore [locate_data_file occ/fuse.brep] f
+readbrep [locate_data_file occ/fuse.brep] f
 tclean f
 vdefaults -absDefl 0.5
 vdisplay -dispMode 1 f

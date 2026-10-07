@@ -6,10 +6,10 @@ puts "PRO12473"
 puts "========================"
 puts ""
 
-restore [locate_data_file CTO909_objects.brep] a 
+readbrep [locate_data_file CTO909_objects.brep] a 
 checkshape a
 
-restore [locate_data_file CTO909_tool_4.brep] b 
+readbrep [locate_data_file CTO909_tool_4.brep] b 
 checkshape b
 
 bsection sec a b

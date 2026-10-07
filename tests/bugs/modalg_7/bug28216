@@ -6,8 +6,8 @@ puts ""
 # Intersection of a face and a solid is broken up leading to empty result of Boolean common operation
 #####################################################################################################
 
-restore [locate_data_file bug28216_initSurf.brep] s
-restore [locate_data_file bug28216_solid.brep] o
+readbrep [locate_data_file bug28216_initSurf.brep] s
+readbrep [locate_data_file bug28216_solid.brep] o
 
 bop s o
 

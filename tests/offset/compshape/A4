@@ -5,7 +5,7 @@
 ## ======================================
 
 puts "TODO OCC26556 ALL: ERROR. offsetperform operation not done."
-restore [locate_data_file CCV_2_d1_gsw.brep] s
+readbrep [locate_data_file CCV_2_d1_gsw.brep] s
 explode s F
 catch {offsetcompshape result s -2 s_17}
 

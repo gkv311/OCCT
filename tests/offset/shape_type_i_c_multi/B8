@@ -12,7 +12,7 @@ foreach val {0} {
   }
 }
 
-restore [locate_data_file bug31148_U_shape_split1.brep] s
+readbrep [locate_data_file bug31148_U_shape_split1.brep] s
 
 perform_offset_multi_with_ref r0_01 s 0 {6} {3} {708 340 14 14} 1
 perform_offset_multi_with_ref r0_02 s 0 {6 10} {3 3} {798 418 16 16} 1

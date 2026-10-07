@@ -1,8 +1,8 @@
 # Original bug : pro8320
 # Date : 24mar98
 
-restore [locate_data_file CTO900_pro8320-part.brep] part
-restore [locate_data_file pro8320-tool.brep] tool
+readbrep [locate_data_file CTO900_pro8320-part.brep] part
+readbrep [locate_data_file pro8320-tool.brep] tool
 
 bcut result part tool
 checkprops result -s 13770

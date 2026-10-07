@@ -1,5 +1,5 @@
-restore [locate_data_file so3.brep] b1
-restore [locate_data_file so7.brep] b2
+readbrep [locate_data_file so3.brep] b1
+readbrep [locate_data_file so7.brep] b2
 
 bcut result b2 b1
 checkprops result -s 209.44

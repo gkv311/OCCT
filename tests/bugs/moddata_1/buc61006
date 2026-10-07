@@ -7,7 +7,7 @@ puts ""
 ## Checkshape says that face is valid but it includes selfintersecting wire. 
 #########################################################
 
-restore [locate_data_file buc61006.brep] result 
+readbrep [locate_data_file buc61006.brep] result 
 
 checkshape result
 

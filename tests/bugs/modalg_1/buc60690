@@ -6,8 +6,8 @@ puts "BUC60690"
 puts "========================"
 puts ""
 
-restore [locate_data_file buc60690a.brep] a 
-restore [locate_data_file buc60690b.brep] b
+readbrep [locate_data_file buc60690a.brep] a 
+readbrep [locate_data_file buc60690b.brep] b
 
 set che [checkshape a]
 if { [regexp {Faulty} $che ] == 1 } {

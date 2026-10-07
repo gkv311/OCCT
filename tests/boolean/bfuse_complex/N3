@@ -1,9 +1,9 @@
 # Original bug : pro14785
 # Date : 21July98
 
-restore [locate_data_file CTO904_pro14785a.brep] a 
-restore [locate_data_file CTO904_pro14785b.brep] b
-restore [locate_data_file CTO904_pro14785c.brep] c
+readbrep [locate_data_file CTO904_pro14785a.brep] a 
+readbrep [locate_data_file CTO904_pro14785b.brep] b
+readbrep [locate_data_file CTO904_pro14785c.brep] c
 
 bfuse res a b
 bfuse result res c

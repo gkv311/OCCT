@@ -1,4 +1,4 @@
-restore [locate_data_file CCH_blendhdu.brep] a
+readbrep [locate_data_file CCH_blendhdu.brep] a
 
 sewing result $tol a
 

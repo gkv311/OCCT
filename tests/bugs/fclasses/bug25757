@@ -6,7 +6,7 @@ puts ""
 # distmini returns wrong solution for ellipse/vertex
 ##############################################
 
-restore [locate_data_file bug25757_ellipse.brep] ellipse
+readbrep [locate_data_file bug25757_ellipse.brep] ellipse
 
 vertex vertex1 7.32050807568877 3.999999999999999 10.0
 vertex vertex2 7.32050807568877 3.99999999999999 10.0

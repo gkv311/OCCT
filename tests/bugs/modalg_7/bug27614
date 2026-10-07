@@ -10,7 +10,7 @@ puts ""
 
 set sew_Tol 0.2
 
-restore [locate_data_file bug27614_CC.brep] c
+readbrep [locate_data_file bug27614_CC.brep] c
 
 explode c
 sewing result $sew_Tol c_1 c_2

@@ -6,7 +6,7 @@ puts "(case 4)"
 puts "========"
 puts ""
 
-restore [locate_data_file CTO900_pro7934a.brep] a 
+readbrep [locate_data_file CTO900_pro7934a.brep] a 
 set che [checkshape a]
 if { [regexp {Faulty} $che ] == 1 } {
     puts "Faulty OCC452 (shape 7): Source shape is invalid. It was detected by Checkshape command"
@@ -14,7 +14,7 @@ if { [regexp {Faulty} $che ] == 1 } {
     puts "OCC452 OK (shape 7): Source shape is valid"
 }
 
-restore [locate_data_file CTO900_pro7934b.brep] b
+readbrep [locate_data_file CTO900_pro7934b.brep] b
 set che [checkshape b]
 if { [regexp {Faulty} $che ] == 1 } {
     puts "Faulty OCC452 (shape 8): Source shape is invalid. It was detected by Checkshape command"

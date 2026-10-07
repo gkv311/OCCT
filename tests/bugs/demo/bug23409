@@ -6,7 +6,7 @@ puts ""
 # Tricheck command doesn't report problem when triangulation has unexpected holes
 ###################################################################################
 
-restore [locate_data_file bug23167_f397.brep] result
+readbrep [locate_data_file bug23167_f397.brep] result
 vinit
 vsetdispmode 1
 vdisplay result

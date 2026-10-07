@@ -5,7 +5,7 @@ puts "OCC338"
 puts "========"                                                                 
 puts ""                                                                         
 
-restore [locate_data_file buc60996.brep] b 
+readbrep [locate_data_file buc60996.brep] b 
 explode b
 checkshape b_1
 checkshape b_2

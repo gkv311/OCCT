@@ -6,7 +6,7 @@ puts ""
 # Boolean Bug in OCC5.0 with the shape having a ellipse curve
 ######################################################
 
-restore [locate_data_file OCC2755.brep] a 
+readbrep [locate_data_file OCC2755.brep] a 
 
 checkshape a
 

@@ -11,7 +11,7 @@ puts "========"
 ## NOTE akm: bug after putting it on plane checkshape found the pb.
 #######################################################################
 
-restore [locate_data_file OCC278a.brep] a 
+readbrep [locate_data_file OCC278a.brep] a 
 
 mkplane result a
 checkshape result

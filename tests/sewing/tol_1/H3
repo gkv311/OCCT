@@ -1,4 +1,4 @@
-restore [locate_data_file CFI_6_d56fgy.brep] a
+readbrep [locate_data_file CFI_6_d56fgy.brep] a
 
 sewing result $tol a
 

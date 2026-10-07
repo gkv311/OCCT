@@ -3,7 +3,7 @@ puts "OCC26931: Exporting a face throws an e x c e p t i o n"
 #######################################################################
 
 # restore initial face
-restore [locate_data_file bug26931.brep] face
+readbrep [locate_data_file bug26931.brep] face
 set square 6416.6
 # export face to IGES 
 set aTmpFile ${imagedir}/${casename}.igs

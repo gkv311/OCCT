@@ -3,7 +3,7 @@ puts "TODO OCC23068 All: Error : The volume of result shape is"
 # Original bug : hkg60144
 # Date : 17Juillet98
 
-restore [locate_data_file CHE900_hkg60iob.brep] s
+readbrep [locate_data_file CHE900_hkg60iob.brep] s
 explode s f
 
 offsetshape result s -5 s_1

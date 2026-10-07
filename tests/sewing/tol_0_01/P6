@@ -1,4 +1,4 @@
-restore [locate_data_file CIN001_b5.brep] a
+readbrep [locate_data_file CIN001_b5.brep] a
 
 sewing result $tol a
 

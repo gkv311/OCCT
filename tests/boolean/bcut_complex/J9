@@ -2,8 +2,8 @@
 # Date : 25sept98
 # D7
 
-restore [locate_data_file cts20456c.brep] c
-restore [locate_data_file CTO902_cts20456d.brep] d
+readbrep [locate_data_file cts20456c.brep] c
+readbrep [locate_data_file CTO902_cts20456d.brep] d
 
 bcut result c d
 checkprops result -s 344545

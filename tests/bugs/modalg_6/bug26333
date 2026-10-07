@@ -6,7 +6,7 @@ puts ""
 ## Fails on a shape with BSpline boundaries
 ############################################
 
-restore [locate_data_file bug26333.brep] s
+readbrep [locate_data_file bug26333.brep] s
 mkoffset result s 1 10.
 
 renamevar result_1 result

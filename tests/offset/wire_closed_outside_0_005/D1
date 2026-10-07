@@ -5,7 +5,7 @@ puts "TODO OCC31005 ALL: Error: Offset is not done"
 puts "TODO OCC31005 ALL: Error: The command cannot be built"
 puts "TODO OCC31005 ALL: Error : The offset cannot be built"
 
-restore [locate_data_file offset_wire_041.brep] s
+readbrep [locate_data_file offset_wire_041.brep] s
 
 set length 3536.16
 set nbsh_v 621
