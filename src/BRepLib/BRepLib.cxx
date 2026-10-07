@@ -79,7 +79,12 @@
 
 // TODO - not thread-safe static variables
 static Standard_Real thePrecision = Precision::Confusion();     
-static Handle(Geom_Plane) thePlane;
+
+static Handle(Geom_Plane)& ChangeGlobalPlane()
+{
+  static Handle(Geom_Plane) thePlane = new Geom_Plane(gp::XOY());
+  return thePlane;
+}
 
 static void InternalUpdateTolerances(const TopoDS_Shape& theOldShape,
   const Standard_Boolean IsVerifyTolerance, const Standard_Boolean IsMutableInput, BRepTools_ReShape& theReshaper);
@@ -126,14 +131,15 @@ Standard_Real  BRepLib::Precision()
 
 //=======================================================================
 //function : Plane
-//purpose  : 
+//purpose  :
 //=======================================================================
-
-void  BRepLib::Plane(const Handle(Geom_Plane)& P)
+void BRepLib::Plane(const Handle(Geom_Plane)& theP)
 {
-  thePlane = P;
-}
+  if (theP.IsNull())
+    throw Standard_NullObject("BRepLib::Plane(), NULL argument");
 
+  ChangeGlobalPlane() = theP;
+}
 
 //=======================================================================
 //function : Plane
@@ -142,8 +148,7 @@ void  BRepLib::Plane(const Handle(Geom_Plane)& P)
 
 const Handle(Geom_Plane)&  BRepLib::Plane()
 {
-  if (thePlane.IsNull()) thePlane = new Geom_Plane(gp::XOY());
-  return thePlane;
+  return ChangeGlobalPlane();
 }
 //=======================================================================
 //function : CheckSameRange
