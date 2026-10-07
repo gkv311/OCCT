@@ -3,8 +3,8 @@ puts "0032701: Modeling Algorithms - 2d curve has bending near the degenerated e
 puts "========"
 puts ""
 
-restore [locate_data_file bug32701s.brep] s
-restore [locate_data_file bug32701t.brep] t
+readbrep [locate_data_file bug32701s.brep] s
+readbrep [locate_data_file bug32701t.brep] t
 
 explode t f
 

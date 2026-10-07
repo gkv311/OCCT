@@ -16,7 +16,7 @@ edge e3 v3 v4
 edge e4 v4 v1
 wire w e1 e2 e3 e4
 
-restore [locate_data_file bug23820_non_planar.brep] shell
+readbrep [locate_data_file bug23820_non_planar.brep] shell
 
 nproject result w shell -d 2.0
 

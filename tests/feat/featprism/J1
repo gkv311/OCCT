@@ -2,8 +2,8 @@
 # Date : 12 Oct 98
 # Feature distance
 
-restore [locate_data_file cts21199_base.brep] base
-restore [locate_data_file cts21199_face.brep] cont
+readbrep [locate_data_file cts21199_base.brep] base
+readbrep [locate_data_file cts21199_face.brep] cont
 
 featprism base cont cont 0 0 -1 1 1
 featperformval prism result 50

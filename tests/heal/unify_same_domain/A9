@@ -6,7 +6,7 @@ puts ""
 # UnifySameDomain crashes with error: "a shape is modified and removed simultaneously"
 ##################################################
 
-brestore [locate_data_file bug28913_26219_model.brep] a
+readbrep [locate_data_file bug28913_26219_model.brep] a
 
 unifysamedom result a
 

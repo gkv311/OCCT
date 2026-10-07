@@ -7,7 +7,7 @@ puts ""
 ## Exception during "tcopy" command
 #################################################################
 
-restore [locate_data_file OCC298.brep] result
+readbrep [locate_data_file OCC298.brep] result
 checkshape result
 
 if [catch {tcopy result a } res] {

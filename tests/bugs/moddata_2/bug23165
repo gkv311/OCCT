@@ -15,7 +15,7 @@ smallview
 # 1 step
 set exception_status 0
 
-restore [locate_data_file OCC23165-edge1.brep] e1 
+readbrep [locate_data_file OCC23165-edge1.brep] e1 
 
 donly e1
 catch { bounding e1 } msg

@@ -6,7 +6,7 @@ puts ""
 # crescent face is not meshed
 #############################
 
-restore [locate_data_file bug25817_mesh-missing-cresent.brep] c
+readbrep [locate_data_file bug25817_mesh-missing-cresent.brep] c
 
 tclean c
 

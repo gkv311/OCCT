@@ -4,7 +4,7 @@ puts "============"
 puts "0030055: BRepOffset_MakeOffset throws TopoDS_Vertex hasn't gp_Pnt in intersection mode"
 puts "============"
 
-restore [locate_data_file bug30055.brep] a
+readbrep [locate_data_file bug30055.brep] a
 
 thickshell result a 1 i
 

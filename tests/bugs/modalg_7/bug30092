@@ -4,7 +4,7 @@ puts "========"
 puts ""
 
 
-restore [locate_data_file bug26795_c.brep] c
+readbrep [locate_data_file bug26795_c.brep] c
 explode c f
 
 # modify c_2 face

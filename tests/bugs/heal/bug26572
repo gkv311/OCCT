@@ -6,7 +6,7 @@ puts ""
 # Error in ShapeUpgrade_UnifySameDomain algorithm: can not merge two edges in customer's shape
 #######################################################################
 
-restore [locate_data_file bug26572_issue_12_new_input.brep] s
+readbrep [locate_data_file bug26572_issue_12_new_input.brep] s
 
 smallview
 donly s

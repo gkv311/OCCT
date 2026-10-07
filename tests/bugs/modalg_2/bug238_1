@@ -8,8 +8,8 @@ puts "========================"
 ## puts "  BOPCOMMON   case_2_solid.brep and case_2_edge1.brep"
 #################################################
 puts " " 
-puts [restore [locate_data_file OCC238a.brep] a] 
-puts [restore [locate_data_file case_2_edge1.brep] b]
+puts [readbrep [locate_data_file OCC238a.brep] a] 
+puts [readbrep [locate_data_file case_2_edge1.brep] b]
 puts [bop a b]
 puts [bopcommon result b a]
 

@@ -6,8 +6,8 @@ puts "0023343: Crash (A C C E S S  V I O L A T I O N) in GeomPlate_BuildPlateSur
 puts "============"
 puts ""
 
-restore [locate_data_file bug23343_initFace.brep] initFace
-restore [locate_data_file bug23343_edge_constraint.brep] edge_constraint
+readbrep [locate_data_file bug23343_initFace.brep] initFace
+readbrep [locate_data_file bug23343_edge_constraint.brep] edge_constraint
 
 point p1 30 -33.4729635533385 49.7661550602442
 point p2 30 -49.6961550602442 33.3929635533386

@@ -1,8 +1,8 @@
 # Original bug : cts20124
 # Date : 13Mai98
 
-restore [locate_data_file CTO900_cts20124a.brep]  a
-restore [locate_data_file CTO900_cts20124b.brep]  b
+readbrep [locate_data_file CTO900_cts20124a.brep]  a
+readbrep [locate_data_file CTO900_cts20124b.brep]  b
 
 bfuse result a b
 

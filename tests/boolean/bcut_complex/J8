@@ -2,8 +2,8 @@
 # Date : 11June98
 # D6
 
-restore [locate_data_file CTO902_pro14235a.brep] a
-restore [locate_data_file CTO902_pro14235b.brep] b
+readbrep [locate_data_file CTO902_pro14235a.brep] a
+readbrep [locate_data_file CTO902_pro14235b.brep] b
 
 bcut result a b
 checkprops result -s 426392

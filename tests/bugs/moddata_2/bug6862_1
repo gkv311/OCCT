@@ -9,8 +9,8 @@ puts ""
 set BugNumber OCC6862
 
 # self-intersection test
-restore [locate_data_file OCC497a.brep] a_1 
-restore [locate_data_file OCC497b.brep] a_2 
+readbrep [locate_data_file OCC497a.brep] a_1 
+readbrep [locate_data_file OCC497b.brep] a_2 
 
 set resstr [bopargcheck a_2]
 

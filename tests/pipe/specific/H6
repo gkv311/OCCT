@@ -7,8 +7,8 @@ puts ""
 # (case 13)
 ######################################################
 
-restore [locate_data_file OCC1477_3dPolyline_c0.brep] s1 
-restore [locate_data_file OCC1477_profile1_rectangle.brep] e1 
+readbrep [locate_data_file OCC1477_3dPolyline_c0.brep] s1 
+readbrep [locate_data_file OCC1477_profile1_rectangle.brep] e1 
 wire s2 e1
 
 puts "###############################################################################"

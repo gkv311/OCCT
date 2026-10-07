@@ -10,8 +10,8 @@ pload ALL
 
 set GoodNbCurv 4
 
-restore [locate_data_file OCC13116_sh1.brep] b1
-restore [locate_data_file OCC13116_sh2.brep] b2
+readbrep [locate_data_file OCC13116_sh1.brep] b1
+readbrep [locate_data_file OCC13116_sh2.brep] b2
 
 explode b1 f
 explode b2 f

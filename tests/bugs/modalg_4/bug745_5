@@ -7,7 +7,7 @@ puts ""
 # Not correct creation of bisector loci:
 ############################
 
-restore [locate_data_file OCC745_pocket4.brep] w 
+readbrep [locate_data_file OCC745_pocket4.brep] w 
 checkshape w
 plane p
 mkface result p w

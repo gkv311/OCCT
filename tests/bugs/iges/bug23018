@@ -6,7 +6,7 @@ puts ""
 ## Open CASCADE incorrectly writes/reads IGES Tabulated Cylinders (Type 122)
 #######################################
 
-restore [locate_data_file bug23018_f-ext.brep] f
+readbrep [locate_data_file bug23018_f-ext.brep] f
 brepiges f ${imagedir}/bug23018_f-ext.igs
 set info [entity 6]
 regexp {Starting +Point +: +\x28([-0-9.+eE]+),([-0-9.+eE]+),([-0-9.+eE]+)\x29} ${info} full x1 y1 z1

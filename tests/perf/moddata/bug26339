@@ -20,7 +20,7 @@ if { [regexp {Debug mode} [dversion]] } {
   }
 }
 
-restore [locate_data_file bug26339_a_1886.brep] f
+readbrep [locate_data_file bug26339_a_1886.brep] f
 
 dchrono h restart
 

@@ -5,7 +5,7 @@ puts "========================"
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file OCC364.brep] result 
+readbrep [locate_data_file OCC364.brep] result 
 checkshape result
 
 tclean result

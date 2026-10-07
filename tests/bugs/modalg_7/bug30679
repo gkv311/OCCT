@@ -4,7 +4,7 @@ puts "========"
 puts ""
 
 puts "REQUIRED ALL: Evaluation of infinite parameters"
-restore [locate_data_file bug30679_face.brep] a
+readbrep [locate_data_file bug30679_face.brep] a
 
 pcurve a
 2dcvalue a_4 1 u v

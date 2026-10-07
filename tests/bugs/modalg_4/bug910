@@ -9,7 +9,7 @@ puts ""
 
 pload XDE
 
-restore [locate_data_file OCC910.brep] a 
+readbrep [locate_data_file OCC910.brep] a 
 
 checkshape a
 explode a w

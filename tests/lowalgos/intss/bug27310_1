@@ -12,8 +12,8 @@ puts ""
 
 set ExpTol 1.0e-7
 
-restore [locate_data_file OCC496a.brep] a 
-restore [locate_data_file OCC496b.brep] b
+readbrep [locate_data_file OCC496a.brep] a 
+readbrep [locate_data_file OCC496b.brep] b
 
 explode a f
 explode b f

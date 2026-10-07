@@ -1,1 +1,1 @@
-restore [locate_data_file CFI_6_g12fhd.brep] a
+readbrep [locate_data_file CFI_6_g12fhd.brep] a

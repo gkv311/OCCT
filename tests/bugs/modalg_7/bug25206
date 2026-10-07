@@ -8,7 +8,7 @@ puts ""
 # Fillet creates edge with C0 continuity
 ##########################################
 
-restore [locate_data_file bug25206_lampe-1-draw-Fusion.brep] Fusion
+readbrep [locate_data_file bug25206_lampe-1-draw-Fusion.brep] Fusion
 
 explode Fusion E
 set edges [explode Fusion E]

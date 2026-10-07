@@ -6,7 +6,7 @@ puts ""
 ##fixshape command does not fix incorrect tolerance order. 
 ###########################################################
 
-restore [locate_data_file OCC329.brep] a 
+readbrep [locate_data_file OCC329.brep] a 
 
 checkshape a
 set tol1 [maxtolerance a]

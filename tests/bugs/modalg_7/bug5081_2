@@ -6,7 +6,7 @@ puts ""
 # BRepOffset_MakeOffsetShape algorithm does not return valid result.
 ####################################################################
 
-restore [locate_data_file bug5081_shape2.brep] comp
+readbrep [locate_data_file bug5081_shape2.brep] comp
 
 explode comp so
 

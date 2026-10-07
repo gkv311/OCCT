@@ -5,5 +5,5 @@ puts ""
 
 pload QAcommands
 # test execution time must be within the cpulimit
-restore [locate_data_file bug32744.brep] s
+readbrep [locate_data_file bug32744.brep] s
 OCC32744 s

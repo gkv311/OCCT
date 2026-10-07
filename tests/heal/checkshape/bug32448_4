@@ -3,5 +3,5 @@ puts "0032448: Provide exact validating (as option) using GeomLib_CheckCurveOnSu
 puts "=========="
 puts ""
 
-restore [locate_data_file bug24525_License.brep] b
+readbrep [locate_data_file bug24525_License.brep] b
 checkshape b -exact -parallel

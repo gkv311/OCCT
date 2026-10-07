@@ -7,7 +7,7 @@ puts ""
 ## Exception while segment operation. 
 #################################################################
 
-restore [locate_data_file OCC303b.brep] sh1
+readbrep [locate_data_file OCC303b.brep] sh1
 
 explode sh1 e
 

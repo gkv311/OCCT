@@ -5,7 +5,7 @@ puts "========"
 puts ""
 
 
-restore [locate_data_file bug27015.brep] aS
+readbrep [locate_data_file bug27015.brep] aS
 sewing result 0.2 aS
 
 # check result shape for validity.

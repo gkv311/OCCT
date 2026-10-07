@@ -7,7 +7,7 @@ puts ""
 ## ABug of a symmetry on this specific attached BREP shape.
 ###########################################
 
-restore [locate_data_file OCC175.brep] result 
+readbrep [locate_data_file OCC175.brep] result 
 checkshape result
 
 regexp {SHAPE +: +([-0-9.+eE]+)} [nbshapes result] full col1

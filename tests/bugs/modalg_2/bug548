@@ -10,7 +10,7 @@ puts ""
 
 pload XDE
 
-restore [locate_data_file CTO908_topo103-t.brep] a 
+readbrep [locate_data_file CTO908_topo103-t.brep] a 
 
 fixshape result a 0.001
 

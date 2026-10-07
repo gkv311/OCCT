@@ -6,8 +6,8 @@ puts ""
 # Wrong intersection point
 #######################################################################
 
-restore [locate_data_file bug24065_f.brep] f
-restore [locate_data_file bug24065_e.brep] e
+readbrep [locate_data_file bug24065_f.brep] f
+readbrep [locate_data_file bug24065_e.brep] e
 
 # 1
 set CMP_TOL 1.e-7

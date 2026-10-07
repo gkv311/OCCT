@@ -6,8 +6,8 @@ puts ""
 # BRepFeat_SplitShape produces invalid shape
 #######################################################################
 
-restore [locate_data_file bug23925_E.brep] e
-restore [locate_data_file bug23925_F.brep] f
+readbrep [locate_data_file bug23925_E.brep] e
+readbrep [locate_data_file bug23925_F.brep] f
 
 splitshape result f f e
 

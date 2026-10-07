@@ -6,7 +6,7 @@ puts ""
 ## Wrong resultat of BLEND operation
 #############################
 
-restore [locate_data_file OCC615.brep] a 
+readbrep [locate_data_file OCC615.brep] a 
 checkshape a
 explode a e
 

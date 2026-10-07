@@ -3,8 +3,8 @@ puts "bug32807: Sweep algorithm deal with EE more than one intersect points"
 puts "========"
 puts ""
 
-restore [locate_data_file bug32807_path.brep] p
-restore [locate_data_file bug32807_profile.brep] pr
+readbrep [locate_data_file bug32807_path.brep] p
+readbrep [locate_data_file bug32807_profile.brep] pr
 
 mksweep p
 setsweep -CF

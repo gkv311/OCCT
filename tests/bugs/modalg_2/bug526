@@ -9,7 +9,7 @@ puts ""
 
 pload XDE
 
-restore [locate_data_file OCC592.brep] a 
+readbrep [locate_data_file OCC592.brep] a 
 
 set Z 67.599311020481764
 plane p 0 0 $Z

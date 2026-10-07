@@ -1,8 +1,8 @@
 # Original bug : cts21244
 # Date : 16July98
 
-restore [locate_data_file cts21244a.brep] a 
-restore [locate_data_file cts21244b.brep] b
+readbrep [locate_data_file cts21244a.brep] a 
+readbrep [locate_data_file cts21244b.brep] b
 
 bfuse result a b
 

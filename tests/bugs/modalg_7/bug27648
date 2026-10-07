@@ -6,7 +6,7 @@ puts ""
 # Regression vs 6.7.1: General Fuse operation fails to fuse the solids
 #################################################
 
-restore [locate_data_file bug27648_simple.brep] s
+readbrep [locate_data_file bug27648_simple.brep] s
 explode s
 bsection r s_1 s_2
 explode s_2 f

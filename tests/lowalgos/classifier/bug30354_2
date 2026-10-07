@@ -3,7 +3,7 @@ puts "0030354: BOP Cut doesn't modify the attached face"
 puts "============"
 puts ""
 
-restore [locate_data_file bug30354_Face_14.brep] b1
+readbrep [locate_data_file bug30354_Face_14.brep] b1
 point pp 0.0046465389982220402 0.045000000000000005
 
 if { [ regexp "ON" [b2dclassifx b1 pp] ] != 1 } {

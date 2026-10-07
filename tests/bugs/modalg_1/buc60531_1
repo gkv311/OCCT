@@ -3,9 +3,9 @@ puts "========================"
 puts "BUC60531"
 puts "========================"
 
-restore [locate_data_file buc60531a.brep] r1
+readbrep [locate_data_file buc60531a.brep] r1
 checkshape r1
-restore [locate_data_file buc60531b.brep] pl1
+readbrep [locate_data_file buc60531b.brep] pl1
 checkshape pl1
 
 bcut result r1 pl1

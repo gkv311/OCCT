@@ -1,5 +1,5 @@
-restore [locate_data_file CIN900_cts21hlo.brep] a
-restore [locate_data_file CIN900_cts21hlp.brep] b
+readbrep [locate_data_file CIN900_cts21hlo.brep] a
+readbrep [locate_data_file CIN900_cts21hlp.brep] b
 bsection result a b
 
 checkprops result -l 751.43

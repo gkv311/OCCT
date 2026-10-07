@@ -10,7 +10,7 @@ pload QAcommands
 
 dchrono h restart
 
-restore [locate_data_file bug24696_cx_e1200_nurbs.brep] cx
+readbrep [locate_data_file bug24696_cx_e1200_nurbs.brep] cx
 
 bclearobjects
 bcleartools

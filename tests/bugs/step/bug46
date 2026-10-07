@@ -3,7 +3,7 @@ puts "OCC46"
 puts "================"
 puts ""
 
-restore [locate_data_file OCC46.brep] sh 
+readbrep [locate_data_file OCC46.brep] sh 
 explode sh e
 regexp {Mass +: +([-0-9.+eE]+)} [lprops sh_4] full l1
 regexp {Mass +: +([-0-9.+eE]+)} [lprops sh_7] full l2

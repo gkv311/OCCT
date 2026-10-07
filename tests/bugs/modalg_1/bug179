@@ -7,7 +7,7 @@ puts ""
 ## Bug in meshing of the enclosed face 
 ###########################################
 
-restore [locate_data_file OCC179.brep] result
+readbrep [locate_data_file OCC179.brep] result
 
 tclean result
 isos result 0

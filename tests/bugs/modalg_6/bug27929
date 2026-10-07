@@ -8,7 +8,7 @@ puts ""
 
 set Toler 1.0e-14
 
-restore [locate_data_file bug27929_f1.brep] f1
+readbrep [locate_data_file bug27929_f1.brep] f1
 mksurface os1 f1
 svalue os1 0.5 0.5 x1 y1 z1
 svalue os1 0.5 0.5 x2 y2 z2 d1ux d1uy d1uz d1vx d1vy d1vz

@@ -8,8 +8,8 @@ puts ""
 
 set BugNumber OCC6554
 
-restore [locate_data_file OCC6554-shell.brep] sh 
-restore [locate_data_file OCC6554-face.brep] f 
+readbrep [locate_data_file OCC6554-shell.brep] sh 
+readbrep [locate_data_file OCC6554-face.brep] f 
 
 checkshape sh
 checkshape f

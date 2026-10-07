@@ -9,7 +9,7 @@ puts ""
 set BugNumber OCC6063
 cpulimit 1000
 
-restore [locate_data_file OCC6063-2.brep] result
+readbrep [locate_data_file OCC6063-2.brep] result
 
 checkshape result
 

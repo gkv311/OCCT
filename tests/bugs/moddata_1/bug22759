@@ -12,7 +12,7 @@ catch { pload XDE }
 
 cpulimit 400
 
-restore [locate_data_file OCC22759-weldt6.brep] result
+readbrep [locate_data_file OCC22759-weldt6.brep] result
 checkshape result
 tclean result
 

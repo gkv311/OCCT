@@ -1,8 +1,8 @@
 # Original bug : pro10494
 # Date : 24mar98
 
-restore [locate_data_file CTO900_pro10494b.brep] b
-restore [locate_data_file CTO900_pro10494c.brep] c
+readbrep [locate_data_file CTO900_pro10494b.brep] b
+readbrep [locate_data_file CTO900_pro10494c.brep] c
 
 bfuse result b c
 

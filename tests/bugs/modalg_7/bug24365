@@ -8,8 +8,8 @@ puts ""
 # BRepAlgoAPI_Section wrong result, BRepAlgo_Section good result
 ##################################################################
 
-restore [locate_data_file bug24365_faceA.brep] a
-restore [locate_data_file bug24365_faceB.brep] b
+readbrep [locate_data_file bug24365_faceA.brep] a
+readbrep [locate_data_file bug24365_faceB.brep] b
 
 bsection result a b
 

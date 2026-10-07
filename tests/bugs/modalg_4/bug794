@@ -8,7 +8,7 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file OCC794.brep] a 
+readbrep [locate_data_file OCC794.brep] a 
 
 offsetshape result a 10
 

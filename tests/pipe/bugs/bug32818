@@ -3,7 +3,7 @@ puts "0032818: Modeling Algorithms - Result of sweep operation is invalid"
 puts "========"
 puts ""
 
-restore [locate_data_file bug32818.brep] 
+readbrep [locate_data_file bug32818.brep] bug32818 
 explode bug32818
 renamevar bug32818_1 p
 renamevar bug32818_2 pr

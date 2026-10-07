@@ -7,7 +7,7 @@ puts "OCC299"
 puts "================"
 puts ""
 
-restore [locate_data_file OCC298.brep] pr 
+readbrep [locate_data_file OCC298.brep] pr 
 checkshape pr
 
 point p 0.86427836 -1 -1

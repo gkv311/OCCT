@@ -3,7 +3,7 @@ puts "OCC32943: Modeling Algorithms - Boolean operation Common has no result in 
 puts "========================================================================="
 puts ""
 
-restore [locate_data_file bug32943.brep] a
+readbrep [locate_data_file bug32943.brep] a
 explode a
 
 bcommon result a_1 a_2

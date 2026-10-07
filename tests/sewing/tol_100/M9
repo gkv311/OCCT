@@ -1,6 +1,6 @@
 puts "TODO OCC23674 ALL: Error : Number of faults is"
 
-restore [locate_data_file CTO900_cts40185_top.brep] a
+readbrep [locate_data_file CTO900_cts40185_top.brep] a
 
 sewing result $tol a
 

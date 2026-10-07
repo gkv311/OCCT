@@ -3,8 +3,8 @@ puts "OCC22886: Bug in boolean"
 puts "============"
 puts ""
 
-restore [locate_data_file bug22886_solid1.brep] solid1
-restore [locate_data_file bug22886_solid2.brep] solid2
+readbrep [locate_data_file bug22886_solid1.brep] solid1
+readbrep [locate_data_file bug22886_solid2.brep] solid2
 
 bcommon result solid1 solid2
 

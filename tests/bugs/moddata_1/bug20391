@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC20391
 
-restore [locate_data_file bug19811_VanneMP_supports_tiges_V3.brep] a 
+readbrep [locate_data_file bug19811_VanneMP_supports_tiges_V3.brep] a 
 
 if [catch {deform result a 2 2 2}] {
    puts "Faulty ${BugNumber}"

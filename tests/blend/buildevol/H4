@@ -6,7 +6,7 @@
 #fuse s s1 s2
 #save s G5678.brep 
 
-restore [locate_data_file G5678.brep] s
+readbrep [locate_data_file G5678.brep] s
 tscale s 0 0 0 SCALE1
 explode s e
 mkevol result s

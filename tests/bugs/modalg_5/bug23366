@@ -6,8 +6,8 @@ puts ""
 # Cut operation produces invalid shape
 ######################################################
 
-restore [locate_data_file bug23366_finalTool.brep] s1
-restore [locate_data_file bug23366_IntersectionSegment.brep] s2
+readbrep [locate_data_file bug23366_finalTool.brep] s1
+readbrep [locate_data_file bug23366_IntersectionSegment.brep] s2
 
 bop s1 s2
 bopcut result

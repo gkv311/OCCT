@@ -4,6 +4,6 @@ puts "==========================================================="
 
 puts "REQUIRED ALL: Conversion failed"
 
-binrestore [locate_data_file bug33304_bspl_curv.bbrep] a
+readbrep [locate_data_file bug33304_bspl_curv.bbrep] a
 mkcurve c a
 tocanon r c

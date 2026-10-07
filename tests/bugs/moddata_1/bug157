@@ -5,7 +5,7 @@ puts "OCC157"
 puts "================"
 puts ""
 
-restore [locate_data_file OCC157.brep] wire 
+readbrep [locate_data_file OCC157.brep] wire 
 checkshape wire
 
 set Tolerance 100.

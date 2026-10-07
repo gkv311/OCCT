@@ -8,8 +8,8 @@ set GoodNbCurves  1
 
 foreach a [directory c_*] {unset $a}
 
-restore [locate_data_file bug30354_Face_14.brep] b1
-restore [locate_data_file bug30354_vol_neg.brep] b2
+readbrep [locate_data_file bug30354_Face_14.brep] b1
+readbrep [locate_data_file bug30354_vol_neg.brep] b2
 
 explode b2 f
 

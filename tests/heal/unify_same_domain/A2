@@ -6,7 +6,7 @@ puts ""
 # Provide possibility to keep the given edges during unification of faces in ShapeUpgrade_UnifySameDomain algorithm
 ######################################################################################################################
 
-restore [locate_data_file bug28228_face_circle.brep] a
+readbrep [locate_data_file bug28228_face_circle.brep] a
 
 explode a e
 

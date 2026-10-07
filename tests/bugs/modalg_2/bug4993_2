@@ -7,8 +7,8 @@ puts ""
 # (new topology)
 ######################################################
 
-restore [locate_data_file OCC4993-s1.brep] s1 
-restore [locate_data_file OCC4993-s2.brep] s2 
+readbrep [locate_data_file OCC4993-s1.brep] s1 
+readbrep [locate_data_file OCC4993-s2.brep] s2 
 
 checkshape s1
 checkshape s2

@@ -6,7 +6,7 @@ puts ""
 # Bad result of intersection of two faces: curve has a loop
 #######################################################################
 
-restore [locate_data_file bug23998_m1s.brep] b
+readbrep [locate_data_file bug23998_m1s.brep] b
 
 explode b
 

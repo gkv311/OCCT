@@ -6,8 +6,8 @@ puts ""
 # Boolean Fuse Operation Fails
 ######################################################
 
-restore [locate_data_file bug23585a.brep] p
-restore [locate_data_file bug23585b.brep] v
+readbrep [locate_data_file bug23585a.brep] p
+readbrep [locate_data_file bug23585b.brep] v
 
 checkshape p
 tolerance p

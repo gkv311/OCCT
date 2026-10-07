@@ -6,7 +6,7 @@ puts ""
 ## [Regression to OCCT 7.0.0] Number of Intersections Is Wrong
 ####################
 
-restore [locate_data_file bug27565.brep] a
+readbrep [locate_data_file bug27565.brep] a
 explode a
 
 # Test number of solutions in a result.

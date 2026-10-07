@@ -6,7 +6,7 @@ puts ""
 ## fixshape changes source shape
 #######################################################################
 
-restore [locate_data_file bug24658.brep] a
+readbrep [locate_data_file bug24658.brep] a
 
 puts "\nBefore shape healing"
 regexp {Tolerance +MAX=([-0-9.+eE]+)} [tolerance a] full expected_MaxTolerance

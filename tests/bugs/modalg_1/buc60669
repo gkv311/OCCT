@@ -7,9 +7,9 @@ puts ""
 ## Exception ** OSD_SIGBUS: SIGBUS 'bus error' detected. 
 #############################################################
 
-restore [locate_data_file buc60669a.brep] shell1 
+readbrep [locate_data_file buc60669a.brep] shell1 
 checkshape shell1
-restore [locate_data_file buc60669b.brep] shell2
+readbrep [locate_data_file buc60669b.brep] shell2
 checkshape shell2
 
 bsection result shell1 shell2

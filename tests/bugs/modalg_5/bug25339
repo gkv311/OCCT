@@ -6,7 +6,7 @@ puts ""
 # Draw command "mkoffset" does not take into account "intersection" mode on faces
 ######################################################################################
 
-restore [locate_data_file bug25339_face1.brep] a
+readbrep [locate_data_file bug25339_face1.brep] a
 mkoffset r a 1 1. i
 axo
 fit

@@ -10,8 +10,8 @@ set BugNumber OCC22986
 
 #eval datadir ${CfeDir}/data/900
 
-restore [locate_data_file CFE900_cts21gbs.brep] base 
-restore [locate_data_file cts21322_face.brep] wire 
+readbrep [locate_data_file CFE900_cts21gbs.brep] base 
+readbrep [locate_data_file cts21322_face.brep] wire 
 
 explode base face
 copy base_6 fsketch
