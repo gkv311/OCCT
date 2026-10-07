@@ -8,7 +8,7 @@ puts ""
 # Shape becomes invalid when exported to STEP and imported back
 ###############################################################
 
-restore [locate_data_file bug27251_cc.brep] c
+readbrep [locate_data_file bug27251_cc.brep] c
 whatis c
 checkshape c
 

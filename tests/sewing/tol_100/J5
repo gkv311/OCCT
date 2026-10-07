@@ -1,5 +1,5 @@
 #puts "TODO OCC24592 ALL: Error : Number of free edges is"
-restore [locate_data_file CIN902_intcqhmr.brep] a
+readbrep [locate_data_file CIN902_intcqhmr.brep] a
 
 sewing result $tol a
 

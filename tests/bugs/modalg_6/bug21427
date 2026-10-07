@@ -6,8 +6,8 @@ puts ""
 # Operation "cut" crashes on attached shapes
 ######################################################
 
-restore [locate_data_file bug21427a.brep] shape
-restore [locate_data_file bug21427b.brep] tool
+readbrep [locate_data_file bug21427a.brep] shape
+readbrep [locate_data_file bug21427b.brep] tool
 
 bcut result shape tool
 

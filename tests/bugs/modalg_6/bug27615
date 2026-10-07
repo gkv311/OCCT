@@ -6,7 +6,7 @@ puts ""
 # General Fuse operation error
 #################################################
 
-restore [locate_data_file bug27615.brep] p
+readbrep [locate_data_file bug27615.brep] p
 
 whatis p
 tolerance p

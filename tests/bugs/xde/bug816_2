@@ -9,7 +9,7 @@ puts ""
 
 set file ${imagedir}/OCC816.stp
 
-restore [locate_data_file OCC816-lemon.brep] result
+readbrep [locate_data_file OCC816-lemon.brep] result
 
 if [ catch { brepiges result $file } res ] {
    puts "Faulty OCC816 : brepiges not complite"

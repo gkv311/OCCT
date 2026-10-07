@@ -1,2 +1,2 @@
-restore [locate_data_file cts20484-tool1.brep] a
+readbrep [locate_data_file cts20484-tool1.brep] a
 

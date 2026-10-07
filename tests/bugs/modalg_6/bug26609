@@ -7,7 +7,7 @@ puts ""
 ############################################################################
 
 restore [locate_data_file bug26609_p.draw] p
-restore [locate_data_file bug26609_z.brep] z
+readbrep [locate_data_file bug26609_z.brep] z
 
 set cls1 [bclassify z p]
 if { [regexp {OUT} $cls1] } {

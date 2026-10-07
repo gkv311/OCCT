@@ -3,7 +3,7 @@ puts "0031258: Mesh - OCCT 7.4.0 VIS get wrong render data"
 puts "======="
 puts ""
 
-restore [locate_data_file bug31258.brep] result
+readbrep [locate_data_file bug31258.brep] result
 tclean result
 
 vinit

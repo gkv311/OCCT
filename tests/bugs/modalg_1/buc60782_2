@@ -10,7 +10,7 @@ puts ""
 puts "Results of Geom2d_OffsetCurve are sometimes strange (not correct). "
 puts ""
 
-restore [locate_data_file buc60782b.brep] a 
+readbrep [locate_data_file buc60782b.brep] a 
 set che [checkshape a]
 if { [regexp {Faulty} $che ] == 1 } {
     puts "Faulty BUC60782 (case 2): Source shape is invalid"

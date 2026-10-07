@@ -1,8 +1,8 @@
 # Original bug : pro14240
 # Date : 21 Sept 98
 
-restore [locate_data_file CTO900_pro14240c.brep] part
-restore [locate_data_file pro14240d.brep] tool
+readbrep [locate_data_file CTO900_pro14240c.brep] part
+readbrep [locate_data_file pro14240d.brep] tool
 btolx tool
 
 bcut result part tool

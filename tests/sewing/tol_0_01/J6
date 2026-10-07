@@ -1,4 +1,4 @@
-restore [locate_data_file CCV_2_e1_gsx.brep] a
+readbrep [locate_data_file CCV_2_e1_gsx.brep] a
 
 sewing result $tol a
 

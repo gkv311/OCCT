@@ -9,12 +9,12 @@ puts ""
 set BugNumber OCC20285
 
 puts "Load first shape ..."
-restore [locate_data_file OCC20285-main.brep] a1 
+readbrep [locate_data_file OCC20285-main.brep] a1 
 explode a1
 renamevar a1_7 b1
 
 puts "Load second shape ..."
-restore [locate_data_file OCC20285-tool.brep] b2 
+readbrep [locate_data_file OCC20285-tool.brep] b2 
 
 puts "Prepare boolean operation ..."
 bop b1 b2

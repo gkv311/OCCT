@@ -8,6 +8,6 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file OCC14376.brep] Face_8
+readbrep [locate_data_file OCC14376.brep] Face_8
 OCC14376 Face_8
 

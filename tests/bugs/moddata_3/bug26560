@@ -6,7 +6,7 @@ puts ""
 ## BRepBndLib build too large bounding box in Z direction for planar spline edge.
 #####################################################################
 
-restore [locate_data_file bug26560_planarspline.brep] result
+readbrep [locate_data_file bug26560_planarspline.brep] result
 
 bounding result -save Xmin Ymin Zmin Xmax Ymax Zmax -shape resbox
 

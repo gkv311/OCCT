@@ -3,7 +3,7 @@ puts "0031449: Mesh - BRepMesh works too long and produces many free nodes on a 
 puts "================"
 puts ""
 
-restore [locate_data_file bug31449_face_loopback_M.brep] result
+readbrep [locate_data_file bug31449_face_loopback_M.brep] result
 
 incmesh result 0.0001
 

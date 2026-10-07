@@ -1,4 +1,4 @@
-restore [locate_data_file CHE_bb9.brep] a
+readbrep [locate_data_file CHE_bb9.brep] a
 
 sewing result $tol a
 

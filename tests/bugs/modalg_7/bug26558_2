@@ -3,7 +3,7 @@ puts "0026558: Failing to build isoline for offset surface"
 puts "========"
 puts ""
 
-restore [locate_data_file bug26558_s.brep] s
+readbrep [locate_data_file bug26558_s.brep] s
 
 mksurface sur s
 offset o sur -0.5

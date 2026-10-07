@@ -1,8 +1,8 @@
 # Original bug : pro14893
 # Date : 16July98
 
-restore [locate_data_file CTO904_pro14893a.brep] a 
-restore [locate_data_file pro14893b.brep] b
+readbrep [locate_data_file CTO904_pro14893a.brep] a 
+readbrep [locate_data_file pro14893b.brep] b
 
 bfuse result a b
 

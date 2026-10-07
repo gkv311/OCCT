@@ -12,8 +12,8 @@ puts "TODO ?OCC29910 Linux: Error: Tolerance = 5.3375909512079511e-06 is not equ
 puts "TODO ?OCC29910 ALL: Error :  is WRONG because number of VERTEX entities in shape \"result\" is 7"
 puts "TODO ?OCC29910 ALL: Error :  is WRONG because number of EDGE entities in shape \"result\" is 5"
 
-restore [locate_data_file bug29910_f1.brep] f1
-restore [locate_data_file bug29910_f2.brep] f2
+readbrep [locate_data_file bug29910_f1.brep] f1
+readbrep [locate_data_file bug29910_f2.brep] f2
 
 regexp {Tolerance Reached=+([-0-9.+eE]+)\n+([-0-9.+eE]+)} [bopcurves f1 f2 -2d] full Toler NbCurv
 

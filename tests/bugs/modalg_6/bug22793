@@ -6,8 +6,8 @@ puts ""
 # Boolean cut operation hangs computer
 ######################################################
 
-restore [locate_data_file bug22793_Positive.brep] p
-restore [locate_data_file bug22793_Void.brep] v
+readbrep [locate_data_file bug22793_Positive.brep] p
+readbrep [locate_data_file bug22793_Void.brep] v
 
 checkshape p
 tolerance p

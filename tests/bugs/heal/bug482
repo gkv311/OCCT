@@ -6,7 +6,7 @@ puts ""
 ## Regression in ShapeFix_Wireframe (caused by fix on OCC394)
 #################################################
 
-restore [locate_data_file OCC482.brep] a 
+readbrep [locate_data_file OCC482.brep] a 
 
 fixsmall result a 0.05
 

@@ -6,8 +6,8 @@ puts ""
 # Boolean cut fails the first time, works the second time
 ######################################################
 
-restore [locate_data_file bug28967_original.brep] original
-restore [locate_data_file bug28967_envelope.brep] envelope
+readbrep [locate_data_file bug28967_original.brep] original
+readbrep [locate_data_file bug28967_envelope.brep] envelope
 
 bcut result original envelope
 checkshape result

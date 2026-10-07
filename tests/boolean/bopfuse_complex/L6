@@ -1,9 +1,9 @@
 # Original bug : pro15203
 ###########################
-restore [locate_data_file pro15203a.brep] c1
+readbrep [locate_data_file pro15203a.brep] c1
 explode c1 f
 copy c1_1 c1
-restore [locate_data_file pro15203d.brep] c2
+readbrep [locate_data_file pro15203d.brep] c2
 
 explode c2 f
 

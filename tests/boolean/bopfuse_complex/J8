@@ -1,8 +1,8 @@
 # Original bug : fra60275
 # Date : 19Mai98
 
-restore [locate_data_file CTO904_fra60275a.brep] a
-restore [locate_data_file fra60275b.brep] b
+readbrep [locate_data_file CTO904_fra60275a.brep] a
+readbrep [locate_data_file fra60275b.brep] b
 tcopy  b w
 mkplane f w
 

@@ -9,8 +9,8 @@ puts ""
 
 set BugNumber OCC15850
 
-restore [locate_data_file OCC15850_bb.brep] bb
-restore [locate_data_file OCC15850_bc.brep] bc
+readbrep [locate_data_file OCC15850_bb.brep] bb
+readbrep [locate_data_file OCC15850_bc.brep] bc
 
 bop bb bc
 bopsection result

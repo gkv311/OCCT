@@ -6,7 +6,7 @@ puts ""
 # COMPSOLIDs are not exported to STEP
 #######################################################################
 
-restore [locate_data_file bug25092_compsolid.brep] b 
+readbrep [locate_data_file bug25092_compsolid.brep] b 
 
 set aFile ${imagedir}/bug25092.stp
 catch { file delete ${aFile} }

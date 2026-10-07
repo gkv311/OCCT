@@ -3,8 +3,8 @@ puts "0029645: Hang on making pipe shell using BRepOffsetAPI_MakePipeShell"
 puts "========"
 puts ""
 
-restore [locate_data_file bug29645_spine.brep] spine
-restore [locate_data_file bug29645_profile.brep] profile
+readbrep [locate_data_file bug29645_spine.brep] spine
+readbrep [locate_data_file bug29645_profile.brep] profile
 
 mksweep spine
 addsweep profile

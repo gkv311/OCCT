@@ -3,8 +3,8 @@ puts "0030198: Regression to 7.1.0: BRepAlgoAPI_Fuse unlimited memory usage"
 puts "========"
 puts ""
 
-restore [locate_data_file bug30198_src.brep] b1
-restore [locate_data_file bug30198_tool.brep] b2
+readbrep [locate_data_file bug30198_src.brep] b1
+readbrep [locate_data_file bug30198_tool.brep] b2
 
 bclearobjects
 bcleartools

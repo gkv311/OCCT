@@ -13,7 +13,7 @@ puts "#"
 
 set BugNumber OCC7668
 
-restore [locate_data_file OCC7668.brep] a1 
+readbrep [locate_data_file OCC7668.brep] a1 
 
 wire w1 a1
 

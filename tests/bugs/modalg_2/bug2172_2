@@ -9,8 +9,8 @@ puts ""
 ## (bfuse)
 ######################################################
 
-restore [locate_data_file OCC2172-torus.brep] torus 
-restore [locate_data_file OCC2172-cylinder.brep] cylinder 
+readbrep [locate_data_file OCC2172-torus.brep] torus 
+readbrep [locate_data_file OCC2172-cylinder.brep] cylinder 
 
 checkshape torus
 checkshape cylinder

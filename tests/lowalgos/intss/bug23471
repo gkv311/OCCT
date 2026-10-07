@@ -14,7 +14,7 @@ puts ""
 set GoodNbCurv 1
 set GoodLength 79655.615367318111
 
-restore [locate_data_file OCC22790-cx.brep] b
+readbrep [locate_data_file OCC22790-cx.brep] b
 
 explode b
 mksurface s1 b_1

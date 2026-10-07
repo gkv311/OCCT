@@ -1,5 +1,5 @@
-restore [locate_data_file sg1.brep] b1
-restore [locate_data_file sg2.brep] b2
+readbrep [locate_data_file sg1.brep] b1
+readbrep [locate_data_file sg2.brep] b2
 
 bop b1 b2
 bopsection result

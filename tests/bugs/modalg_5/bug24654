@@ -6,7 +6,7 @@ puts ""
 # Result of Boolean operation is invalid for bopargcheck if rotated
 ######################################################
 
-restore [locate_data_file bug24654_qf.brep] result
+readbrep [locate_data_file bug24654_qf.brep] result
 
 set info [bopargcheck result]
 

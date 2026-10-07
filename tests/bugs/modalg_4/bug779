@@ -7,9 +7,9 @@ puts ""
 ## Common operation produces invalid shape
 ################################
 
-restore [locate_data_file OCC779_s1.brep] s1 
+readbrep [locate_data_file OCC779_s1.brep] s1 
 checkshape s1
-restore [locate_data_file OCC779_s2.brep] s2 
+readbrep [locate_data_file OCC779_s2.brep] s2 
 checkshape s2
 
 ttranslate s1 0 0 -30

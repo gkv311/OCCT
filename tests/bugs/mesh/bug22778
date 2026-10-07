@@ -5,7 +5,7 @@
 puts "TODO #22778 All: too many triangles"
 
 # original face on spherical surface
-restore [locate_data_file bug22778_square.brep] s
+readbrep [locate_data_file bug22778_square.brep] s
 checkshape s
 incmesh s 0.001
 set trinfo_s [trinfo s]

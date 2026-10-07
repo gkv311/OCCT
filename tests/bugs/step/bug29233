@@ -6,7 +6,7 @@ puts ""
 # Incorrect result of conversion to the STEP format.
 #####################################################
 
-restore [locate_data_file bug29233.brep] orig
+readbrep [locate_data_file bug29233.brep] orig
 set aTmpFile "$imagedir/${casename}.brep"
 testwritestep "$aTmpFile" orig
 testreadstep  "$aTmpFile" result

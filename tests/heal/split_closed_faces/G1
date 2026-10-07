@@ -1,1 +1,1 @@
-restore [locate_data_file hammer.brep] a
+readbrep [locate_data_file hammer.brep] a

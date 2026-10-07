@@ -5,7 +5,7 @@ puts ""
 
 puts "Boolean operation fails on the objects located far from origin (1.e+8)"
 
-restore [locate_data_file bug29843_loc.brep] s
+readbrep [locate_data_file bug29843_loc.brep] s
 
 explode s
 bclearobjects

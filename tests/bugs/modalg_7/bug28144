@@ -5,7 +5,7 @@ puts "==========================================================================
 
 pload VISUALIZATION
 
-restore [locate_data_file bug28144.brep] a
+readbrep [locate_data_file bug28144.brep] a
 
 smallview
 fit

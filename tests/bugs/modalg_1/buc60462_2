@@ -4,9 +4,9 @@ puts "=========="
 puts "BUC60462"
 puts "=========="
 
-restore [locate_data_file buc60462c.brep] a 
+readbrep [locate_data_file buc60462c.brep] a 
 checkshape a
-restore [locate_data_file buc60462d.brep] b
+readbrep [locate_data_file buc60462d.brep] b
 checkshape b
 puts "Fuse begin"
 bfuse result a b

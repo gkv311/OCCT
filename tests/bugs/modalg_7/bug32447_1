@@ -3,8 +3,8 @@ puts "0032447: BRepOffsetAPI_MakePipeShell result in inaccurate shape when using
 puts "============================================"
 puts ""
 
-restore [locate_data_file bug32447-spine.brep] s
-restore [locate_data_file bug32447-profile.brep] p
+readbrep [locate_data_file bug32447-spine.brep] s
+readbrep [locate_data_file bug32447-profile.brep] p
 
 mksweep s -C 5 0.001
 

@@ -6,7 +6,7 @@ puts ""
 #  Box and Ellipsoid shape boolean cut and common introduce invalid result.
 ###########################################################################
 
-restore [locate_data_file bug27390_Box_Ellipsoid.brep] c
+readbrep [locate_data_file bug27390_Box_Ellipsoid.brep] c
 
 explode c
 

@@ -2,8 +2,8 @@ puts "PRO15203"
 puts "Fuse"
 puts ""
 
-restore [locate_data_file pro15203b.brep] c1
-restore [locate_data_file pro15203d.brep] c2
+readbrep [locate_data_file pro15203b.brep] c1
+readbrep [locate_data_file pro15203d.brep] c2
 
 ########################mod by pkv f
 explode c1 f

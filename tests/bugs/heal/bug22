@@ -8,7 +8,7 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file OCC21.brep] shape
+readbrep [locate_data_file OCC21.brep] shape
 explode shape f
 compound shape_1 shape_2 compoundToBeDivided
 

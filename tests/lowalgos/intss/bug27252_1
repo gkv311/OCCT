@@ -9,7 +9,7 @@ puts ""
 set GoodNbCurv 1
 set MaxTol 1.0e-7
 
-restore [locate_data_file bug27221.brep] a
+readbrep [locate_data_file bug27221.brep] a
 explode a
 mkplane f a_2
 prism p f -25 0 0 

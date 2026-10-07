@@ -1,5 +1,5 @@
-restore [locate_data_file case_2_shell_r.brep] a
-restore [locate_data_file case_2_wire1.brep] b
+readbrep [locate_data_file case_2_shell_r.brep] a
+readbrep [locate_data_file case_2_wire1.brep] b
 
 bcommon result b a
 

@@ -8,8 +8,8 @@ puts ""
 
 set BugNumber OCC13116
 
-restore [locate_data_file OCC13116_sh1.brep] b1
-restore [locate_data_file OCC13116_sh2.brep] b2
+readbrep [locate_data_file OCC13116_sh1.brep] b1
+readbrep [locate_data_file OCC13116_sh2.brep] b2
 
 bop b1 b2
 bopfuse result

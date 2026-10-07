@@ -6,9 +6,9 @@ puts ""
 # BRepOffsetAPI_MakePipeShell throws an exception
 ######################################################
 
-restore [locate_data_file OCC2083-f1.brep] f1 
-restore [locate_data_file OCC2083-f2.brep] f2 
-restore [locate_data_file OCC2083-w.brep] s 
+readbrep [locate_data_file OCC2083-f1.brep] f1 
+readbrep [locate_data_file OCC2083-f2.brep] f2 
+readbrep [locate_data_file OCC2083-w.brep] s 
 
 checkshape f1
 checkshape f2

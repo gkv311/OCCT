@@ -10,10 +10,10 @@ puts "================================="
 
 cpulimit 1000
 
-restore [locate_data_file buc60703a.brep] a 
+readbrep [locate_data_file buc60703a.brep] a 
 # maxtolerance a
 checkshape a
-restore [locate_data_file buc60703b.brep] b
+readbrep [locate_data_file buc60703b.brep] b
 # maxtolerance b
 checkshape b
 

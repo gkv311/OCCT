@@ -4,7 +4,7 @@ puts "         Testing tool for purging locations"
 puts "========="
 puts ""
 
-restore [locate_data_file bug27457_1.brep] s
+readbrep [locate_data_file bug27457_1.brep] s
 set chsh [checkshape s b]
 regexp {Shapes with problems : ([0-9]+)} $chsh full NbSh
 puts "Number of faulty shapes : $NbSh"

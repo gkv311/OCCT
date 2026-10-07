@@ -8,7 +8,7 @@ puts ""
 # BRepBuilderAPI_Sewing produces too small edge covered by its vertices
 #########################################################################
 
-restore [locate_data_file OCC22804-sew_bug.brep] a
+readbrep [locate_data_file OCC22804-sew_bug.brep] a
 
 sewing result 200 a
 checkshape result

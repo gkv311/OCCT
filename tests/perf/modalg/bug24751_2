@@ -13,7 +13,7 @@ buseobb 1
 
 dchrono h restart
 
-restore [locate_data_file bug24696_cx_e1200_nurbs.brep] cx
+readbrep [locate_data_file bug24696_cx_e1200_nurbs.brep] cx
 
 ###------------------####
 trotate cx 0 0 0 0 1 1 45

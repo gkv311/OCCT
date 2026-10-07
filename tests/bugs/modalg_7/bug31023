@@ -3,7 +3,7 @@ puts "OCC31023: Fillet regression in OCCT 7.4 from 7.3"
 puts "=================================================================="
 puts ""
 
-brestore [locate_data_file bug31023.brep] a
+readbrep [locate_data_file bug31023.brep] a
 
 explode a e
 

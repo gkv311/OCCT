@@ -1,5 +1,5 @@
-restore [locate_data_file pro14151a.brep] a
-restore [locate_data_file CFI_pro14fjq.brep] b
+readbrep [locate_data_file pro14151a.brep] a
+readbrep [locate_data_file CFI_pro14fjq.brep] b
 bsection result a b
 
 checkprops result -l 49.9609

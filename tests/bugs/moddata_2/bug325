@@ -7,7 +7,7 @@ puts ""
 ## Checkshape does not recognize an error in a bad face
 ##################################################
 
-restore [locate_data_file OCC325.brep] result
+readbrep [locate_data_file OCC325.brep] result
 
 checkshape result
 

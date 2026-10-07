@@ -1,4 +1,4 @@
-restore [locate_data_file cts20170_base.brep] a
+readbrep [locate_data_file cts20170_base.brep] a
 
 sewing result $tol a
 

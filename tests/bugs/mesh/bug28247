@@ -6,7 +6,7 @@ puts ""
 # Effect of minSize parameter of BRepMesh_IncrementalMesh seems to be too strong
 ################################################################################
 
-restore [locate_data_file bug28247_face.brep] result
+readbrep [locate_data_file bug28247_face.brep] result
 whatis result
 tolerance result
 

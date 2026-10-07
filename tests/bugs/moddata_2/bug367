@@ -6,7 +6,7 @@ puts "BUC61013"
 puts "================"
 puts ""
 
-restore [locate_data_file OCC105.brep] result
+readbrep [locate_data_file OCC105.brep] result
 checkshape result
 
 set step 0.5

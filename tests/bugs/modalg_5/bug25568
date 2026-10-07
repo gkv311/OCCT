@@ -6,8 +6,8 @@ puts ""
 # SIGSEGV in thrusections with edge without 3D curve
 #########################################################################
 
-restore [locate_data_file bug25568_loft-inv1-draw-Loft-00-section.brep] Loft-00-section
-restore [locate_data_file bug25568_loft-inv1-draw-Loft-01-section.brep] Loft-01-section
+readbrep [locate_data_file bug25568_loft-inv1-draw-Loft-00-section.brep] Loft-00-section
+readbrep [locate_data_file bug25568_loft-inv1-draw-Loft-01-section.brep] Loft-01-section
 
 if [info exists result] {unset result}
 

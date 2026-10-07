@@ -7,7 +7,7 @@ puts ""
 ## selfintersecting wire. However BRepCheck gives reply that shape looks OK.
 ###################################################################################
 
-restore [locate_data_file OCC736.brep] result
+readbrep [locate_data_file OCC736.brep] result
 
 set che [checkshape result r]
 

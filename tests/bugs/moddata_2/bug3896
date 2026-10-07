@@ -14,7 +14,7 @@ puts ""
 
 set BugNumber OCC3896
 
-restore [locate_data_file OCC3896-pipe.brep] a 
+readbrep [locate_data_file OCC3896-pipe.brep] a 
 
 explode a f
 compound a_1 a_13 result

@@ -10,7 +10,7 @@ set BugNumber OCC23943
 
 pload XDE
 
-restore [locate_data_file bug23943_b.brep] s
+readbrep [locate_data_file bug23943_b.brep] s
 
 fixshape result s
 checkshape result

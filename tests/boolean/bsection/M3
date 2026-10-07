@@ -1,4 +1,4 @@
-restore [locate_data_file GEN758_nofog.brep] a
+readbrep [locate_data_file GEN758_nofog.brep] a
 explode a f
 
 # see issue #26777

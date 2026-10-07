@@ -1,4 +1,4 @@
-restore [locate_data_file bug29481_ex1.brep] s
+readbrep [locate_data_file bug29481_ex1.brep] s
 explode s f
 
 # fillet removal

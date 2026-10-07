@@ -2,8 +2,8 @@
 # Date : 13Mai98
 # A8.gif
 
-restore [locate_data_file CTO902_cts20460a.brep] a
-restore [locate_data_file CTO902_cts20460b.brep] b
+readbrep [locate_data_file CTO902_cts20460a.brep] a
+readbrep [locate_data_file CTO902_cts20460b.brep] b
 
 bcommon result a b 
 

@@ -6,7 +6,7 @@ puts ""
 # BRepOffsetAPI_ThruSections crashes when lofting through identical profiles
 ######################################################
 
-restore [locate_data_file bug23436_myloft.brep] s
+readbrep [locate_data_file bug23436_myloft.brep] s
 
 explode s
 

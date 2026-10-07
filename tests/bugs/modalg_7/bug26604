@@ -10,9 +10,9 @@ puts ""
 
 pload QAcommands
 
-restore [locate_data_file bug26604_spine.brep] spine
-restore [locate_data_file bug26604_bound1.brep] bound1
-restore [locate_data_file bug26604_bound2.brep] bound2
+readbrep [locate_data_file bug26604_spine.brep] spine
+readbrep [locate_data_file bug26604_bound1.brep] bound1
+readbrep [locate_data_file bug26604_bound2.brep] bound2
 
 mkcurve s spine
 mkcurve b1 bound1

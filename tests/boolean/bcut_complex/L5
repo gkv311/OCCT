@@ -1,8 +1,8 @@
 # Original bug : fra60977
 # Date : 4June98
 
-restore [locate_data_file CTO904_fra60977-part.brep] a 
-restore [locate_data_file fra60977b.brep] b
+readbrep [locate_data_file CTO904_fra60977-part.brep] a 
+readbrep [locate_data_file fra60977b.brep] b
 
 prism b b 0 0 -50
 

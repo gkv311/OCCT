@@ -6,7 +6,7 @@ puts ""
 # Invalid result of a Boolean fuse operation
 #################################################
 
-restore [locate_data_file bug27759_shapes.brep] b
+readbrep [locate_data_file bug27759_shapes.brep] b
 explode b
 
 # use the fuzzy option

@@ -9,7 +9,7 @@ puts ""
 ## and back
 ###########################################################################
 
-restore [locate_data_file OCC24.brep] s
+readbrep [locate_data_file OCC24.brep] s
 checkshape s
 
 explode s f

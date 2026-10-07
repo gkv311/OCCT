@@ -6,7 +6,7 @@ puts ""
 # Section: crash for two faces
 ######################################################
 
-restore [locate_data_file bug24934_f1.brep] f1
+readbrep [locate_data_file bug24934_f1.brep] f1
 
 set info [fixshape ff1 f1]
 if { [regexp "Exception" $info] != 0 } {

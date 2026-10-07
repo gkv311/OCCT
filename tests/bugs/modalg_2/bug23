@@ -8,7 +8,7 @@ puts ""
 ## Checkshape gives result that there is a selfintersection on wire, but there are no intersection on it.
 ##########################################################################################################
 
-restore [locate_data_file OCC23.brep] sh 
+readbrep [locate_data_file OCC23.brep] sh 
 
 checkshape sh
 

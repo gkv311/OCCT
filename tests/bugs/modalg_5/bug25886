@@ -11,7 +11,7 @@ set ok_len_c5x "1.57079"
 
 smallview -2D-
 
-restore [locate_data_file OCC25886_cx.brep] cx
+readbrep [locate_data_file OCC25886_cx.brep] cx
 
 explode cx
 copy cx_1 f

@@ -6,7 +6,7 @@ puts "============"
 ## SplitShape algorithm modifies original shape (increases vertex tolerance of a plitting edge). 
 ###############################################################
 
-restore [locate_data_file BUC60942_splitshape.brep] c 
+readbrep [locate_data_file BUC60942_splitshape.brep] c 
 explode c
 checkshape c_1
 checkshape c_2

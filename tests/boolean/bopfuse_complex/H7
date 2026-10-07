@@ -1,5 +1,5 @@
-restore [locate_data_file a148.brep] a
-restore [locate_data_file b148.brep] b
+readbrep [locate_data_file a148.brep] a
+readbrep [locate_data_file b148.brep] b
 
 bop a b
 bopfuse result

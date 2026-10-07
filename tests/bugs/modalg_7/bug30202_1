@@ -3,8 +3,8 @@ puts "0030202: IntPatch_WLineTool::JoinWLines array out of bounds"
 puts "========"
 puts ""
 
-restore [locate_data_file bug30202_src.brep] b1
-restore [locate_data_file bug30202_tool.brep] b2
+readbrep [locate_data_file bug30202_src.brep] b1
+readbrep [locate_data_file bug30202_tool.brep] b2
 
 bclearobjects
 bcleartools

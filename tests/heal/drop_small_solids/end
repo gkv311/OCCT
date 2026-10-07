@@ -20,9 +20,9 @@ proc cmpprops {cmd shape1 shape2} {
 }
 
 set env(CSF_resDefaults) [file dirname [locate_data_file res]]
-restore [locate_data_file test.brep] a
+readbrep [locate_data_file test.brep] a
 DT_ApplySeq result a res $cmd
-restore [locate_data_file $ref.brep] r
+readbrep [locate_data_file $ref.brep] r
 
 puts [checkshape result]
 if {[statshape result] != [statshape r]} {puts "Error: STATSHAPE"}

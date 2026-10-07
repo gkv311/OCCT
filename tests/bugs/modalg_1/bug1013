@@ -4,7 +4,7 @@ puts "OCC906"
 puts "================"
 puts ""
 
-restore [locate_data_file DXF906.brep] wire 
+readbrep [locate_data_file DXF906.brep] wire 
 checkshape wire
 
 mkplane result wire

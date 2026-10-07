@@ -1,8 +1,8 @@
 # Original bug : cts21240
 # Date : 16July98
 
-restore [locate_data_file cts21240a.brep] a 
-restore [locate_data_file cts21240b.brep] skface
+readbrep [locate_data_file cts21240a.brep] a 
+readbrep [locate_data_file cts21240b.brep] skface
 
 prism b skface 0 0 1 10
 

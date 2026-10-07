@@ -9,7 +9,7 @@ puts ""
 ## situation, while it does not.
 ###########################################################
 
-restore [locate_data_file OCC161.brep] result
+readbrep [locate_data_file OCC161.brep] result
 
 checkshape result
 

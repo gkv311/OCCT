@@ -9,7 +9,7 @@ puts ""
 # BRepOffsetAPI_MakeOffset build invalid wire
 #############################################
 
-restore [locate_data_file bug28571_inputwire.brep] w
+readbrep [locate_data_file bug28571_inputwire.brep] w
 
 openoffset result w 1 1 a
 

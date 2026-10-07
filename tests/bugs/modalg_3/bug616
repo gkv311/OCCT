@@ -7,7 +7,7 @@ puts ""
 ## Function MKOFFSET gives exception for attached face
 ########################################
 
-restore [locate_data_file OCC616.brep] a 
+readbrep [locate_data_file OCC616.brep] a 
 checkshape a
 
 if { [catch {mkoffset result a 5 -2} catch_result] } {

@@ -3,7 +3,7 @@ puts "OCC32960: Wrong result of BRepExtrema_DistShapeShape after translation"
 puts "========"
 # Correct distance is 1.0
 
-restore [locate_data_file bug32960.brep] aShape
+readbrep [locate_data_file bug32960.brep] aShape
 explode aShape
 set anInfo [distmini d aShape_1 aShape_2]
 

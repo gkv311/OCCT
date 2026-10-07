@@ -8,7 +8,7 @@ puts ""
 
 set BugNumber OCC22383
 
-restore [locate_data_file bug21645_Scale1_so1_f3.brep] result
+readbrep [locate_data_file bug21645_Scale1_so1_f3.brep] result
 
 vinit
 tclean result

@@ -7,9 +7,9 @@ puts "OCC144"
 puts "================"
 puts ""
 
-restore [locate_data_file buc60663a.brep] a 
+readbrep [locate_data_file buc60663a.brep] a 
 checkshape a
-restore [locate_data_file buc60663b.brep] b
+readbrep [locate_data_file buc60663b.brep] b
 checkshape b
 
 bsection result a b

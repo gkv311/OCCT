@@ -9,7 +9,7 @@ puts ""
 # ChFi3d_Builder algorithm fails to build fillets if some input edges connect with seam edges
 ######################################################
 
-restore [locate_data_file bug26655_OCC50.brep] a
+readbrep [locate_data_file bug26655_OCC50.brep] a
 
 explode a e
 

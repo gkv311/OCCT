@@ -1,8 +1,8 @@
 # Original bug : id160074
 # Date : 23 Nov 98
 
-restore [locate_data_file CFE900_id160gdu.brep] base
-restore [locate_data_file id160074_face2.brep] cont
+readbrep [locate_data_file CFE900_id160gdu.brep] base
+readbrep [locate_data_file id160074_face2.brep] cont
 
 explode base face
 copy base_8 funtil

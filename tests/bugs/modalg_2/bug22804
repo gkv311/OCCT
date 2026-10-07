@@ -10,7 +10,7 @@ set BugNumber OCC22804
 
 catch {pload XDE}
 
-restore [locate_data_file OCC22804-sew_bug.brep] a 
+readbrep [locate_data_file OCC22804-sew_bug.brep] a 
 
 set tol 200
 sewing result ${tol} a

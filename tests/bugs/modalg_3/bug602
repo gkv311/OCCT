@@ -11,7 +11,7 @@ puts ""
 ## Exception during filet creation if it cross samedge of cylinder.
 ###########################################
 
-restore [locate_data_file OCC602.brep] a 
+readbrep [locate_data_file OCC602.brep] a 
 checkshape a
 
 explode a e

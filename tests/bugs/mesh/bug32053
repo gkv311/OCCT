@@ -3,7 +3,7 @@ puts "0032053: Mesh - Invalid mesh after shape scaling"
 puts "======="
 puts ""
 
-restore [locate_data_file bug32053_prob_face.brep] a
+readbrep [locate_data_file bug32053_prob_face.brep] a
 
 scaleshape result a 0.1
 vdisplay result -dispMode 1

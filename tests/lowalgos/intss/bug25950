@@ -12,8 +12,8 @@ set aGoodNbCurves 3
 
 foreach a [directory res*] {unset $a}
 
-restore [locate_data_file bug25950_b1.brep] b1
-restore [locate_data_file bug25950_b2.brep] b2
+readbrep [locate_data_file bug25950_b1.brep] b1
+readbrep [locate_data_file bug25950_b2.brep] b2
 
 mksurface s1 b1
 mksurface s2 b2

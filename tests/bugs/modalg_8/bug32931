@@ -7,7 +7,7 @@ puts "============"
 puts ""
 
 # Load & prepare data.
-restore [locate_data_file bug32931.brep] b
+readbrep [locate_data_file bug32931.brep] b
 explode b E
 
 # Make screenshot before filleting.

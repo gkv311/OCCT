@@ -4,7 +4,7 @@ puts "============"
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file Top.brep] b
+readbrep [locate_data_file Top.brep] b
 vinit View1
 vdisplay b
 vfit

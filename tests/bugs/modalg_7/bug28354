@@ -14,7 +14,7 @@ puts ""
 #bcut res cylinder box
 #
 
-restore [locate_data_file bug28354.brep] res
+readbrep [locate_data_file bug28354.brep] res
 
 explode res e
 

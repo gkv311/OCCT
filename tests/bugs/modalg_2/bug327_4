@@ -3,7 +3,7 @@ puts " OCC327 "
 puts " case 4 "
 puts "========================"
 
-restore [locate_data_file OCC327d.brep] result
+readbrep [locate_data_file OCC327d.brep] result
 
 set che [checkshape result r]
 if { [regexp {OK} $che] == 1 } {

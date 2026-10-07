@@ -7,7 +7,7 @@ vinit View1
 vdefaults -autoTriang 0
 
 # load and check shape
-restore [locate_data_file bug25055.brep] a
+readbrep [locate_data_file bug25055.brep] a
 
 tcopy a b
 

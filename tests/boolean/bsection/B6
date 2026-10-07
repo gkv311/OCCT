@@ -1,8 +1,8 @@
 puts "TODO #22911 ALL: Error : The command is not valid. The length is"
 puts "TODO #22911 ALL: Error : The length of result shape is"
 
-restore [locate_data_file a16.brep] a
-restore [locate_data_file b16.brep] b
+readbrep [locate_data_file a16.brep] a
+readbrep [locate_data_file b16.brep] b
 bsection result a b
 
 checkprops result -l 76.0946

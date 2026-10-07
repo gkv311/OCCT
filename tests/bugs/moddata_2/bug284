@@ -7,7 +7,7 @@ puts "========"
 ## Command "checkshape" "gives" exception during attempt to check attached shape.
 #########################################################
 
-restore [locate_data_file OCC284.brep] result
+readbrep [locate_data_file OCC284.brep] result
 
 if [catch { checkshape result } catch_result] {
   puts "Faulty OCC284 : here is problem in checkshape function"

@@ -11,7 +11,7 @@ set aTestFile $imagedir/${casename}.xbf
 
 pload XDE OCAF MODELING VISUALIZATION
 
-restore [locate_data_file bug27821_nullsurf.brep] s
+readbrep [locate_data_file bug27821_nullsurf.brep] s
 explode s F
 
 NewDocument D BinXCAF

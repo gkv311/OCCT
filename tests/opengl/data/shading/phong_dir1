@@ -13,7 +13,7 @@ vcaps -ffp 0
 vrenderparams -shadingModel phong
 
 # display shape
-restore [locate_data_file occ/fuse.brep] f
+readbrep [locate_data_file occ/fuse.brep] f
 vaxo
 vdisplay f -dispmode 1
 vfit

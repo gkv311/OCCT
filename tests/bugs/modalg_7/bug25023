@@ -6,10 +6,10 @@ puts ""
 # Check fails after cut operation
 ###################################
 
-restore [locate_data_file bug25023_a.brep] a
+readbrep [locate_data_file bug25023_a.brep] a
 checkshape a
 
-restore [locate_data_file bug25023_b.brep] b
+readbrep [locate_data_file bug25023_b.brep] b
 checkshape b
 
 bopargcheck b a -C

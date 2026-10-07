@@ -6,7 +6,7 @@ puts ""
 # Got wrong result after stitching
 ##################################
 
-restore [locate_data_file bug23171_stitch.brep] a
+readbrep [locate_data_file bug23171_stitch.brep] a
 sewing r 0.000001 a
 
 checkshape r

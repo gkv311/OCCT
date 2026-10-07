@@ -5,10 +5,10 @@ puts "========"
 puts ""
 
 #restore buc60789a.brep S1
-restore [locate_data_file buc60787b.brep] S1 
+readbrep [locate_data_file buc60787b.brep] S1 
 ### (by apn during classification)
 checkshape S1
-restore [locate_data_file buc60789b.brep] S2
+readbrep [locate_data_file buc60789b.brep] S2
 checkshape S2
 
 bcommon result S1 S2

@@ -8,8 +8,8 @@ puts ""
 
 set max_time 0.1
 
-restore [locate_data_file bug26884-f1.brep] f1
-restore [locate_data_file bug26884-f2.brep] f2
+readbrep [locate_data_file bug26884-f1.brep] f1
+readbrep [locate_data_file bug26884-f2.brep] f2
 
 dchrono cr restart
 

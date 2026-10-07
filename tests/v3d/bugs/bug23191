@@ -4,7 +4,7 @@ puts "==========="
 puts ""
 
 pload MODELING VISUALIZATION
-restore [locate_data_file bug23191_irons.brep] i
+readbrep [locate_data_file bug23191_irons.brep] i
 
 explode i
 explode i_2 F

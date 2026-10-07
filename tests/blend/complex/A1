@@ -5,7 +5,7 @@
 ## ====================================
 puts "TODO OCC22817 All:TEST INCOMPLETE"
 
-restore [locate_data_file CFI_indusfjm.brep] s
+readbrep [locate_data_file CFI_indusfjm.brep] s
 explode s e
 blend result s 2 s_4 s_5 s_15 s_16
 

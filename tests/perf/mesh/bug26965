@@ -3,7 +3,7 @@ puts "0026965: BRepMesh_IncrementalMesh hangs, and consumes infinite memory"
 puts "=========="
 puts ""
 
-restore [locate_data_file bug26965_mesh_hang.brep] a
+readbrep [locate_data_file bug26965_mesh_hang.brep] a
 tclean a
 vinit
 vsetdispmode 1

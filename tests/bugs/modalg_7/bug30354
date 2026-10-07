@@ -3,8 +3,8 @@ puts "0030354: BOP Cut doesn't modify the attached face"
 puts "========"
 puts ""
 
-restore [locate_data_file bug30354_Face_14.brep] b1
-restore [locate_data_file bug30354_vol_neg.brep] b2
+readbrep [locate_data_file bug30354_Face_14.brep] b1
+readbrep [locate_data_file bug30354_vol_neg.brep] b2
 
 explode b2 f
 

@@ -12,7 +12,7 @@ dset SCALE 1000.
 dset SCALE1 5
 tolblend 0.01 1e-04 1e-05 1e-03
 
-restore [locate_data_file CFI_5_f12fgk.brep] s 
+readbrep [locate_data_file CFI_5_f12fgk.brep] s 
 tscale s 0 0 0 SCALE1
 explode s E
 

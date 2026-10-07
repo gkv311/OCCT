@@ -7,7 +7,7 @@ puts ""
 # Infinite loop during bisector loci calculation.
 #################################
 
-restore [locate_data_file OCC745_nb5.brep] w 
+readbrep [locate_data_file OCC745_nb5.brep] w 
 checkshape w
 mkplane result w
 topoload result

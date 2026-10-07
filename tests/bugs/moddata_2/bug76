@@ -6,11 +6,11 @@ puts ""
 set vol1_exp 3050.42
 set vol2_exp 10195.3
 
-restore [locate_data_file shading_177.brep] sh1 
+readbrep [locate_data_file shading_177.brep] sh1 
 checkshape sh1
 regexp {Mass +: +([-0-9.+eE]+)} [vprops sh1] full l1
 
-restore [locate_data_file OCC76-2.brep] sh2
+readbrep [locate_data_file OCC76-2.brep] sh2
 checkshape sh2
 regexp {Mass +: +([-0-9.+eE]+)} [vprops sh2] full l2
 
