@@ -212,13 +212,13 @@ namespace
 
       // Define two pcurves of the seam-edge.
       Handle(Geom2d_Curve) aPC1, aPC2;
-      Standard_Real af, al;
-
-      aE.Orientation (TopAbs_FORWARD);
-      aPC1 = BRep_Tool::CurveOnSurface (aE, aF, af, al);
+      Standard_Real af1 = 0.0, al1 = 0.0, af2 = 0.0, al2 = 0.0;
 
       aE.Orientation (TopAbs_REVERSED);
-      aPC2 = BRep_Tool::CurveOnSurface (aE, aF, af, al);
+      aPC2 = BRep_Tool::CurveOnSurface (aE, aF, af2, al2);
+
+      aE.Orientation (TopAbs_FORWARD);
+      aPC1 = BRep_Tool::CurveOnSurface (aE, aF, af1, al1);
 
       if (aPC1.IsNull() || aPC2.IsNull())
       {
@@ -226,7 +226,7 @@ namespace
       }
 
       // Select the correct pcurve of the seam-edge.
-      const gp_Pnt2d& aFPntOfPC1 = aPC1->Value (aPC1->FirstParameter());
+      const gp_Pnt2d& aFPntOfPC1 = aPC1->Value (af1);
 
       if (Abs (aLPntOfIPC1.X() - aFPntOfPC1.X()) > Precision::Confusion())
       {
