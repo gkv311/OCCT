@@ -1,4 +1,6 @@
 Geom2dEvaluator_Curve.hxx
+Geom2dEvaluator_ExprCurve.cxx
+Geom2dEvaluator_ExprCurve.hxx
 Geom2dEvaluator_OffsetCurve.cxx
 Geom2dEvaluator_OffsetCurve.hxx
 Geom2dEvaluator.hxx
