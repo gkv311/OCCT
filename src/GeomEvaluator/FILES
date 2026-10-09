@@ -1,4 +1,8 @@
 GeomEvaluator_Curve.hxx
+GeomEvaluator_ExprCurve.cxx
+GeomEvaluator_ExprCurve.hxx
+GeomEvaluator_ExprSurface.cxx
+GeomEvaluator_ExprSurface.hxx
 GeomEvaluator_OffsetCurve.cxx
 GeomEvaluator_OffsetCurve.hxx
 GeomEvaluator_OffsetSurface.cxx

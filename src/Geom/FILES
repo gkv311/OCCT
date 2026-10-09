@@ -36,6 +36,10 @@ Geom_ElementarySurface.cxx
 Geom_ElementarySurface.hxx
 Geom_Ellipse.cxx
 Geom_Ellipse.hxx
+Geom_ExprCurve.cxx
+Geom_ExprCurve.hxx
+Geom_ExprSurface.cxx
+Geom_ExprSurface.hxx
 Geom_Geometry.cxx
 Geom_Geometry.hxx
 Geom_Hyperbola.cxx
