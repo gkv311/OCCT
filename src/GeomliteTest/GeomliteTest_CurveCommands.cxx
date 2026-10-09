@@ -58,6 +58,8 @@
 #include <Geom2dLProp_CLProps2d.hxx>
 #include <Geom2dLProp_CurAndInf2d.hxx>
 
+#include <Standard_NotImplemented.hxx>
+#include <Standard_NumericError.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
@@ -69,6 +71,7 @@
 
 #include <TColGeom2d_HArray1OfBSplineCurve.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
+#include <GCPnts_TangentialDeflection.hxx>
 
 #include <GeomAbs_Shape.hxx>
 #include <Geom_Curve.hxx>
@@ -79,6 +82,8 @@
 
 #include <GeomAdaptor_Curve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
+#include <AdvApprox_ApproxAFunction.hxx>
+#include <AdvApprox_DichoCutting.hxx>
 #include <Approx_CurvilinearParameter.hxx>
 #include <Approx_CurveOnSurface.hxx>
 #include <Geom_BSplineSurface.hxx>
@@ -86,6 +91,11 @@
 #include <Adaptor3d_Curve.hxx>
 #include <Approx_FitAndDivide.hxx>
 #include <Convert_CompBezierCurvesToBSplineCurve.hxx>
+
+#include <ExprIntrp_GenExp.hxx>
+#include <Expr_UnknownIterator.hxx>
+
+#include <memory>
 
 #ifdef _WIN32
 Standard_IMPORT Draw_Viewer dout;
@@ -1698,6 +1708,767 @@ static Standard_Integer approxcurve(Draw_Interpretor& di, Standard_Integer n, co
   return 0;
 }
 
+//! Evaluator of a 2d or 3d curve defined per-component
+//! Expr_GeneralExpression math laws from one unknown.
+class GeomExpr_Evaluator
+{
+public:
+
+  //! Empty constructor.
+  GeomExpr_Evaluator() {}
+
+  //! Return the dimension of the curve.
+  Standard_Integer Dimension() const { return myDimension; }
+
+  //! Return first parameter.
+  Standard_Real FirstParameter() const { return myFirst; }
+
+  //! Return last parameter.
+  Standard_Real LastParameter() const { return myLast; }
+
+  //! Return continuity characteristic.
+  GeomAbs_Shape Continuity() const { return myContinuity; }
+
+  //! Return continuity characteristic.
+  Standard_Boolean IsCN(const Standard_Integer theN) const
+  {
+    switch (myContinuity)
+    {
+      case GeomAbs_C0: return theN <= 0;
+      case GeomAbs_G1:
+      case GeomAbs_C1: return theN <= 1;
+      case GeomAbs_G2:
+      case GeomAbs_C2: return theN <= 2;
+      case GeomAbs_C3: return theN <= 3;
+      case GeomAbs_CN: return true;
+    }
+    return false;
+  }
+
+  //! Return TRUE if curve is closed.
+  Standard_Boolean IsClosed() const
+  {
+    if (Precision::IsPositiveInfinite(myLast) || Precision::IsNegativeInfinite(myFirst) || myExpr[0].D0.IsNull())
+      return false;
+
+    NCollection_Vec3<double> aPnt1, aPnt2;
+    EvaluateSafe(myFirst, 0, aPnt1.ChangeData());
+    EvaluateSafe(myLast,  0, aPnt2.ChangeData());
+    return (aPnt2 - aPnt1).SquareModulus() <= Precision::SquareConfusion();
+  }
+
+  //! Function evaluation.
+  bool EvaluateSafe(const Standard_Real theParam,
+                    const Standard_Integer theOrder,
+                    Standard_Real* theResult) const
+  {
+    if (theOrder < 0 || theOrder > 2 || myExpr[0].D0.IsNull())
+      return false;
+
+    Handle(Expr_NamedUnknown) aVarCArr[1] = {};
+    const Standard_Real aValCArr[1] = {theParam};
+    Expr_Array1OfNamedUnknown aVarArr(aVarCArr[0], 1, 1);
+    const TColStd_Array1OfReal aValArr(aValCArr[0], 1, 1);
+    try
+    {
+      for (Standard_Integer aDimIter = 0; aDimIter < myDimension; ++aDimIter)
+      {
+        Standard_Real&       aRes   = theResult[aDimIter];
+        const ExprComponent& anExpr = myExpr[aDimIter];
+        aVarArr[1] = anExpr.Unknown;
+        if (theOrder == 0)
+          aRes = anExpr.D0->Evaluate(aVarArr, aValArr);
+        else if (theOrder == 1)
+          aRes = anExpr.D1->Evaluate(aVarArr, aValArr);
+        else if (theOrder == 2)
+          aRes = anExpr.D2->Evaluate(aVarArr, aValArr);
+
+        if (std::isnan(aRes))
+          return false;
+        else if (std::isinf(aRes))
+          return false;
+      }
+    }
+    catch (const Standard_NumericError& )
+    {
+      return false;
+    }
+    return true;
+  }
+
+  //! Function evaluation.
+  //! @throws Standard_ConstructionError in case of failure
+  void Evaluate(const Standard_Real theU,
+                const Standard_Integer theOrder,
+                Standard_Real* theResult) const
+  {
+    if (!EvaluateSafe(theU, theOrder, theResult))
+    {
+      TCollection_AsciiString aMsg = TCollection_AsciiString("D") + theOrder
+                                     + " evaluation failed for parameter " + theU;
+      throw Standard_ConstructionError(aMsg.ToCString());
+    }
+  }
+
+  //! Initializer.
+  void Load(const Handle(Expr_GeneralExpression)& theExprX,
+            const Handle(Expr_GeneralExpression)& theExprY,
+            const Handle(Expr_GeneralExpression)& theExprZ,
+            const Standard_Real theFirst,
+            const Standard_Real theLast,
+            const GeomAbs_Shape theContinuity)
+  {
+    if (theExprX.IsNull() || theExprY.IsNull())
+      throw Standard_NoSuchObject("Null expression");
+
+    for (ExprComponent& aDimIter : myExpr)
+      aDimIter = ExprComponent();
+
+    myDimension = theExprZ.IsNull() ? 2 : 3;
+    myContinuity = theContinuity;
+    myExpr[0].D0 = theExprX;
+    myExpr[1].D0 = theExprY;
+    myExpr[2].D0 = theExprZ;
+    myFirst = theFirst;
+    myLast = theLast;
+
+    Handle(Expr_NamedUnknown) aTestUnknown;
+    for (Standard_Integer aDimIter = 0; aDimIter < myDimension; ++aDimIter)
+    {
+      ExprComponent& anExpr = myExpr[aDimIter];
+      for (Expr_UnknownIterator anUnknownIter(anExpr.D0); anUnknownIter.More(); anUnknownIter.Next())
+      {
+        const Handle(Expr_NamedUnknown) aNewUnknown = anUnknownIter.Value();
+        if (!anExpr.Unknown.IsNull())
+          throw Standard_RangeError("Only one unknown is expected in expression");
+
+        anExpr.Unknown = aNewUnknown;
+      }
+      if (anExpr.Unknown.IsNull())
+        continue;
+
+      if (aTestUnknown.IsNull())
+        aTestUnknown = anExpr.Unknown;
+      else if (anExpr.Unknown->GetName() != aTestUnknown->GetName())
+        throw Standard_RangeError("Expressions should use the same unknown");
+    }
+
+    if (aTestUnknown.IsNull())
+      throw Standard_RangeError("At least one unknown is expected in expression");
+
+    for (Standard_Integer aDimIter = 0; aDimIter < myDimension; ++aDimIter)
+    {
+      ExprComponent& anExpr = myExpr[aDimIter];
+      anExpr.D1 = anExpr.D0->Derivative(anExpr.Unknown);
+      anExpr.D2 = anExpr.D1->Derivative(anExpr.Unknown);
+    }
+  }
+
+  //! Dump object.
+  void DumpJson(Standard_OStream& theOStream, Standard_Integer ) const
+  {
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL(theOStream, myFirst)
+    OCCT_DUMP_FIELD_VALUE_NUMERICAL(theOStream, myLast)
+    if (!myExpr[0].D0.IsNull())
+    {
+      const TCollection_AsciiString anExprX_D0 = myExpr[0].D0->String();
+      const TCollection_AsciiString anExprX_D1 = myExpr[0].D1->String();
+      const TCollection_AsciiString anExprX_D2 = myExpr[0].D2->String();
+      OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprX_D0)
+      OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprX_D1)
+      OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprX_D2)
+    }
+    if (!myExpr[1].D0.IsNull())
+    {
+      const TCollection_AsciiString anExprY_D0 = myExpr[1].D0->String();
+      const TCollection_AsciiString anExprY_D1 = myExpr[1].D1->String();
+      const TCollection_AsciiString anExprY_D2 = myExpr[1].D2->String();
+      OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprY_D0)
+      OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprY_D1)
+      OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprY_D2)
+    }
+    if (!myExpr[2].D0.IsNull())
+    {
+      const TCollection_AsciiString anExprZ_D0 = myExpr[2].D0->String();
+      const TCollection_AsciiString anExprZ_D1 = myExpr[2].D1->String();
+      const TCollection_AsciiString anExprZ_D2 = myExpr[2].D2->String();
+      OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprZ_D0)
+      OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprZ_D1)
+      OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprZ_D2)
+    }
+  }
+
+private:
+  struct ExprComponent
+  {
+    Handle(Expr_GeneralExpression) D0;
+    Handle(Expr_GeneralExpression) D1;
+    Handle(Expr_GeneralExpression) D2;
+    Handle(Expr_NamedUnknown) Unknown;
+  };
+
+private:
+
+  ExprComponent myExpr[3];
+
+  Standard_Integer myDimension = 0;
+  GeomAbs_Shape myContinuity = GeomAbs_C2;
+  Standard_Real myFirst = 0.0;
+  Standard_Real myLast = 1.0;
+
+};
+
+//! 2d or 3d curve evaluator for approximator defined by 2 or 3 (per-component)
+//! Expr_GeneralExpression math laws from one unknown.
+class GeomExpr_ApproxEvaluator : public AdvApprox_EvaluatorFunction
+{
+public:
+
+  //! Main constructor.
+  explicit GeomExpr_ApproxEvaluator(const GeomExpr_Evaluator& theFunc) : myFunc(theFunc) {}
+
+  //! Function evaluation.
+  virtual void Evaluate(Standard_Integer* theDimension,
+                        Standard_Real theStartEnd[2],
+                        Standard_Real* theParameter,
+                        Standard_Integer* theOrder,
+                        Standard_Real* theResult,
+                        Standard_Integer* theErrorCode) override
+  {
+    (void)theStartEnd;
+    theResult[0] = theResult[1] = theResult[2] = 0.0;
+    if (*theDimension != myFunc.Dimension())
+    {
+      *theErrorCode = 1;
+      return;
+    }
+    else if (*theOrder < 0 || *theOrder > 2)
+    {
+      *theErrorCode = 3;
+      return;
+    }
+
+    if (!myFunc.EvaluateSafe(*theParameter, *theOrder, theResult))
+    {
+      *theErrorCode = 2;
+      return;
+    }
+
+    *theErrorCode = 0;
+  }
+
+private:
+  GeomExpr_Evaluator myFunc;
+};
+
+//! 2D curve defined by per-component math expressions from one unknown.
+class GeomExpr_Curve2d : public Geom2d_Curve
+{
+  DEFINE_STANDARD_RTTI_INLINE(GeomExpr_Curve2d, Geom2d_Curve)
+public:
+
+  //! Empty constructor.
+  explicit GeomExpr_Curve2d(const GeomExpr_Evaluator& theFunc) : myFunc(theFunc) {}
+
+  //! Return the first value of the parametric range.
+  virtual Standard_Real FirstParameter() const override { return myFunc.FirstParameter(); }
+
+  //! Return the last value of the parametric range.
+  virtual Standard_Real LastParameter() const override { return myFunc.LastParameter(); }
+
+  //! Return continuity characteristic.
+  virtual GeomAbs_Shape Continuity() const override { return myFunc.Continuity(); }
+
+  //! Return continuity characteristic.
+  virtual Standard_Boolean IsCN (const Standard_Integer theN) const override { return myFunc.IsCN(theN); }
+
+  //! Return closed state.
+  virtual Standard_Boolean IsClosed() const override { return myFunc.IsClosed(); }
+
+  //! Computes the point.
+  virtual void D0(const Standard_Real theU, gp_Pnt2d& theP) const override
+  {
+    NCollection_Vec3<double> aVec;
+    myFunc.Evaluate(theU, 0, aVec.ChangeData());
+    theP.SetCoord(aVec.x(), aVec.y());
+  }
+
+  //! Computes the point with its first derivative.
+  virtual void D1(const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV) const override
+  {
+    NCollection_Vec3<double> aVec;
+    myFunc.Evaluate(theU, 0, aVec.ChangeData());
+    theP.SetCoord(aVec.x(), aVec.y());
+
+    myFunc.Evaluate(theU, 1, aVec.ChangeData());
+    theV.SetCoord(aVec.x(), aVec.y());
+  }
+
+  //! Computes the point along with the first and the second derivatives.
+  virtual void D2(const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2) const override
+  {
+    NCollection_Vec3<double> aVec;
+    myFunc.Evaluate(theU, 0, aVec.ChangeData());
+    theP.SetCoord(aVec.x(), aVec.y());
+
+    myFunc.Evaluate(theU, 1, aVec.ChangeData());
+    theV1.SetCoord(aVec.x(), aVec.y());
+
+    myFunc.Evaluate(theU, 2, aVec.ChangeData());
+    theV2.SetCoord(aVec.x(), aVec.y());
+  }
+
+  //! Computes the point along with the first, second and third derivatives.
+  virtual void D3(const Standard_Real theU, gp_Pnt2d& theP, gp_Vec2d& theV1, gp_Vec2d& theV2, gp_Vec2d& theV3) const override
+  {
+    NCollection_Vec3<double> aVec;
+    myFunc.Evaluate(theU, 0, aVec.ChangeData());
+    theP.SetCoord(aVec.x(), aVec.y());
+
+    myFunc.Evaluate(theU, 1, aVec.ChangeData());
+    theV1.SetCoord(aVec.x(), aVec.y());
+
+    myFunc.Evaluate(theU, 2, aVec.ChangeData());
+    theV2.SetCoord(aVec.x(), aVec.y());
+
+    myFunc.Evaluate(theU, 3, aVec.ChangeData());
+    theV3.SetCoord(aVec.x(), aVec.y());
+  }
+
+  //! Computes the derivative.
+  virtual gp_Vec2d DN(const Standard_Real theU, const Standard_Integer theN) const override
+  {
+    NCollection_Vec3<double> aVec;
+    myFunc.Evaluate(theU, theN, aVec.ChangeData());
+    return gp_Vec2d(aVec.x(), aVec.y());
+  }
+
+  //! Return a copy.
+  virtual Handle(Geom2d_Geometry) Copy() const override
+  {
+    Handle(GeomExpr_Curve2d) aCopy = new GeomExpr_Curve2d(myFunc);
+    return aCopy;
+  }
+
+  //! Dump object.
+  virtual void DumpJson(Standard_OStream& theOStream, Standard_Integer theDepth) const override
+  {
+    OCCT_DUMP_TRANSIENT_CLASS_BEGIN(theOStream)
+    OCCT_DUMP_BASE_CLASS(theOStream, theDepth, Geom2d_Curve)
+    myFunc.DumpJson(theOStream, theDepth);
+  }
+
+public: // unimplemented
+
+  virtual Standard_Boolean IsPeriodic() const override { return false; }
+
+  virtual Standard_Real Period() const override { throw Standard_NotImplemented(); }
+
+  virtual void Reverse() override { throw Standard_NotImplemented(); }
+
+  virtual Standard_Real ReversedParameter (const Standard_Real ) const override
+  {
+    throw Standard_NotImplemented();
+  }
+
+  virtual Standard_Real TransformedParameter (const Standard_Real , const gp_Trsf2d& ) const override
+  {
+    throw Standard_NotImplemented();
+  }
+
+  virtual Standard_Real ParametricTransformation (const gp_Trsf2d& ) const override
+  {
+    throw Standard_NotImplemented();
+  }
+
+  virtual void Transform (const gp_Trsf2d& ) override  { throw Standard_NotImplemented(); }
+
+private:
+  GeomExpr_Evaluator myFunc;
+};
+
+//! 3D curve defined by per-component math expressions from one unknown.
+class GeomExpr_Curve : public Geom_Curve
+{
+  DEFINE_STANDARD_RTTI_INLINE(GeomExpr_Curve, Geom_Curve)
+public:
+
+  //! Empty constructor.
+  explicit GeomExpr_Curve(const GeomExpr_Evaluator& theFunc) : myFunc(theFunc) {}
+
+  //! Return the first value of the parametric range.
+  virtual Standard_Real FirstParameter() const override { return myFunc.FirstParameter(); }
+
+  //! Return the last value of the parametric range.
+  virtual Standard_Real LastParameter() const override { return myFunc.LastParameter(); }
+
+  //! Return continuity characteristic.
+  virtual GeomAbs_Shape Continuity() const override { return myFunc.Continuity(); }
+
+  //! Return continuity characteristic.
+  virtual Standard_Boolean IsCN (const Standard_Integer theN) const override { return myFunc.IsCN(theN); }
+
+  //! Return closed state.
+  virtual Standard_Boolean IsClosed() const override { return myFunc.IsClosed(); }
+
+  //! Computes the point.
+  virtual void D0(const Standard_Real theU, gp_Pnt& theP) const override
+  {
+    myFunc.Evaluate(theU, 0, theP.ChangeCoord().ChangeData());
+  }
+
+  //! Computes the point with its first derivative.
+  virtual void D1(const Standard_Real theU, gp_Pnt& theP, gp_Vec& theV) const override
+  {
+    myFunc.Evaluate(theU, 0, theP.ChangeCoord().ChangeData());
+
+    gp_XYZ aVec;
+    myFunc.Evaluate(theU, 1, aVec.ChangeData());
+    theV = aVec;
+  }
+
+  //! Computes the point along with the first and the second derivatives.
+  virtual void D2(const Standard_Real theU, gp_Pnt& theP, gp_Vec& theV1, gp_Vec& theV2) const override
+  {
+    myFunc.Evaluate(theU, 0, theP.ChangeCoord().ChangeData());
+
+    gp_XYZ aVec;
+    myFunc.Evaluate(theU, 1, aVec.ChangeData());
+    theV1 = aVec;
+
+    myFunc.Evaluate(theU, 2, aVec.ChangeData());
+    theV2 = aVec;
+  }
+
+  //! Computes the point along with the first, second and third derivatives.
+  virtual void D3(const Standard_Real theU, gp_Pnt& theP, gp_Vec& theV1, gp_Vec& theV2, gp_Vec& theV3) const override
+  {
+    myFunc.Evaluate(theU, 0, theP.ChangeCoord().ChangeData());
+
+    gp_XYZ aVec;
+    myFunc.Evaluate(theU, 1, aVec.ChangeData());
+    theV1 = aVec;
+
+    myFunc.Evaluate(theU, 2, aVec.ChangeData());
+    theV2 = aVec;
+
+    myFunc.Evaluate(theU, 3, aVec.ChangeData());
+    theV3 = aVec;
+  }
+
+  //! Computes the derivative.
+  virtual gp_Vec DN(const Standard_Real theU, const Standard_Integer theN) const override
+  {
+    NCollection_Vec3<double> aVec;
+    myFunc.Evaluate(theU, theN, aVec.ChangeData());
+    return gp_Vec(aVec.x(), aVec.y(), aVec.z());
+  }
+
+  //! Return a copy.
+  virtual Handle(Geom_Geometry) Copy() const override
+  {
+    Handle(GeomExpr_Curve) aCopy = new GeomExpr_Curve(myFunc);
+    return aCopy;
+  }
+
+  //! Dump object.
+  virtual void DumpJson(Standard_OStream& theOStream, Standard_Integer theDepth) const override
+  {
+    OCCT_DUMP_TRANSIENT_CLASS_BEGIN(theOStream)
+    OCCT_DUMP_BASE_CLASS(theOStream, theDepth, Geom_Curve)
+    myFunc.DumpJson(theOStream, theDepth);
+  }
+
+public: // unimplemented
+
+  virtual Standard_Boolean IsPeriodic() const override { return false; }
+
+  virtual Standard_Real Period() const override { throw Standard_NotImplemented(); }
+
+  virtual void Reverse() override { throw Standard_NotImplemented(); }
+
+  virtual Standard_Real ReversedParameter (const Standard_Real ) const override
+  {
+    throw Standard_NotImplemented();
+  }
+
+  virtual Standard_Real TransformedParameter (const Standard_Real , const gp_Trsf& ) const override
+  {
+    throw Standard_NotImplemented();
+  }
+
+  virtual Standard_Real ParametricTransformation (const gp_Trsf& ) const override
+  {
+    throw Standard_NotImplemented();
+  }
+
+  virtual void Transform (const gp_Trsf& ) override  { throw Standard_NotImplemented(); }
+
+private:
+  GeomExpr_Evaluator myFunc;
+};
+
+//=======================================================================
+//function : approxexpr
+//purpose :
+//=======================================================================
+static int approxexpr(Draw_Interpretor& theDI, Standard_Integer theNbArgs, const char** theArgVec)
+{
+  TCollection_AsciiString aResName;
+
+  Handle(Expr_GeneralExpression) anExpr[3];
+
+  Standard_Real aParamFirst = 0.0;
+  Standard_Real aParamLast = 1.0;
+  Standard_Real aMaxError = 0.001;
+
+  Standard_Real aTol = 0.0001;
+  GeomAbs_Shape aCont = GeomAbs_C2;
+  Standard_Integer aMaxDeg = 8;
+  Standard_Integer aMaxSeg = IntegerLast();
+
+  Standard_Boolean toApprox = true;
+
+  for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArgCase(theArgVec[anArgIter]);
+    anArgCase.LowerCase();
+    if (anArgIter + 1 < theNbArgs
+        && anArgCase == "-first"
+        && Draw::ParseReal(theArgVec[anArgIter + 1], aParamFirst))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-last"
+             && Draw::ParseReal(theArgVec[anArgIter + 1], aParamLast))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && (anArgCase == "-tolerance" || anArgCase == "-tol")
+             && Draw::ParseReal(theArgVec[anArgIter + 1], aTol))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-maxerror"
+             && Draw::ParseReal(theArgVec[anArgIter + 1], aMaxError))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-maxdegree"
+             && Draw::ParseInteger(theArgVec[anArgIter + 1], aMaxDeg))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-maxsegments"
+             && Draw::ParseInteger(theArgVec[anArgIter + 1], aMaxSeg))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-continuity")
+    {
+      TCollection_AsciiString aClassArg(theArgVec[++anArgIter]);
+      aClassArg.LowerCase();
+      if (aClassArg == "c0" || aClassArg == "0")
+      {
+        aCont = GeomAbs_C0;
+      }
+      else if (aClassArg == "c1" || aClassArg == "1")
+      {
+        aCont = GeomAbs_C1;
+      }
+      else if (aClassArg == "c2" || aClassArg == "2")
+      {
+        aCont = GeomAbs_C2;
+      }
+      else
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+    }
+    else if (anArgCase == "-approx" || anArgCase == "-noapprox")
+    {
+      toApprox = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter);
+    }
+    else if (aResName.IsEmpty())
+    {
+      aResName = theArgVec[anArgIter];
+    }
+    else if (anExpr[0].IsNull() || anExpr[1].IsNull() || anExpr[2].IsNull())
+    {
+      TCollection_AsciiString anExprStrNew = theArgVec[anArgIter];
+
+      Handle(ExprIntrp_GenExp) anExprIntrp = ExprIntrp_GenExp::Create();
+      anExprIntrp->Process(anExprStrNew);
+      if (!anExprIntrp->IsDone())
+      {
+        theDI << "Error: invalid expression '" << anExprStrNew << "'";
+        return 1;
+      }
+
+      Handle(Expr_GeneralExpression)& anExprNew = anExpr[anExpr[0].IsNull() ? 0 : (anExpr[1].IsNull() ? 1 : 2)];
+      anExprNew = anExprIntrp->Expression();
+
+      if (anExprNew.IsNull())
+      {
+        theDI << "Error: invalid expression '" << anExprStrNew << "' (NULL)";
+        return 1;
+      }
+
+      // handle predefined named constants like 'pi'
+      anExprNew = Expr_NamedUnknown::ReplaceConstants(anExprNew);
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
+  }
+
+  if (anExpr[0].IsNull() || anExpr[1].IsNull())
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
+  if (aParamFirst + Precision::PConfusion() >= aParamLast)
+  {
+    theDI << "Syntax error: invalid parameter range";
+    return 1;
+  }
+
+  GeomExpr_Evaluator anExprFunc;
+  anExprFunc.Load(anExpr[0], anExpr[1], anExpr[2], aParamFirst, aParamLast, aCont);
+
+  Handle(GeomExpr_Curve2d) aCurve2d;
+  Handle(GeomExpr_Curve)   aCurve3d;
+  if (anExprFunc.Dimension() == 3)
+    aCurve3d = new GeomExpr_Curve(anExprFunc);
+  else
+    aCurve2d = new GeomExpr_Curve2d(anExprFunc);
+
+  if (!toApprox)
+  {
+    if (anExprFunc.Dimension() == 3)
+      DrawTrSurf::Set(aResName.ToCString(), aCurve3d);
+    else
+      DrawTrSurf::Set(aResName.ToCString(), aCurve2d);
+
+    return 0;
+  }
+
+  static constexpr Standard_Integer TheNbMaxIterations = 100;
+  static constexpr Standard_Integer TheNbMaxSegments = 150;
+
+  // use fixed limit or automatically increase number of segments until desired maximum error is not reached
+  const Standard_Integer aNbMaxIter = aMaxSeg == IntegerLast() ? TheNbMaxIterations : 1;
+  Standard_Integer aSegLimit = aMaxSeg != IntegerLast() ? aMaxSeg : TheNbMaxSegments;
+
+  // estimate a rough initial number of segments with help of GCPnts_TangentialDeflection tool
+  if (aMaxSeg == IntegerLast())
+  {
+    GCPnts_TangentialDeflection aDeflPnts;
+    try
+    {
+      if (anExprFunc.Dimension() == 3)
+      {
+        GeomAdaptor_Curve anAdaptor(aCurve3d);
+        aDeflPnts.Initialize(anAdaptor, 0.5, 0.5);
+      }
+      else
+      {
+        Geom2dAdaptor_Curve anAdaptor(aCurve2d);
+        aDeflPnts.Initialize(anAdaptor, 0.5, 0.5);
+      }
+    }
+    catch (const Standard_ConstructionError& )
+    {
+      theDI << "Error: evaluation failed";
+      return 1;
+    }
+    aSegLimit = Max(aSegLimit, aDeflPnts.NbPoints());
+  }
+
+  GeomExpr_ApproxEvaluator anApproxEval(anExprFunc);
+
+  Standard_Integer aNumDims[3] = {0, 0, 0};
+  Handle(TColStd_HArray1OfReal) aDTols[3];
+  aNumDims[anExprFunc.Dimension() - 1] = 1;
+  aDTols[anExprFunc.Dimension() - 1] = new TColStd_HArray1OfReal(1, 1, aTol);
+
+  const AdvApprox_DichoCutting aCutTool;
+  std::shared_ptr<AdvApprox_ApproxAFunction> anApprox;
+
+  Standard_Integer anIter = 1;
+  for (; anIter <= aNbMaxIter; ++anIter)
+  {
+    anApprox = std::make_shared<AdvApprox_ApproxAFunction>(aNumDims[0], aNumDims[1], aNumDims[2],
+                                                           aDTols[0], aDTols[1], aDTols[2],
+                                                           anExprFunc.FirstParameter(), anExprFunc.LastParameter(),
+                                                           aCont, aMaxDeg, aSegLimit,
+                                                           anApproxEval, aCutTool);
+    if (!anApprox->IsDone())
+    {
+      theDI << "Error: approximation failed";
+      return 1;
+    }
+    else if (!anApprox->HasResult())
+    {
+      theDI << "Error: approximation has no result";
+      return 1;
+    }
+
+    const Standard_Real aMaxCompErr = anApprox->MaxError(anExprFunc.Dimension(), 1);
+    if (aMaxCompErr <= aMaxError)
+      break;
+
+    if (anIter == aNbMaxIter)
+    {
+      theDI << "Error: desired error is not reached after " << aNbMaxIter << " iterations with " << aSegLimit << " segments\n";
+      break;
+    }
+
+    unsigned int aNewLimit = (unsigned int)aSegLimit * 2;
+    if (aNewLimit >= (unsigned int)IntegerLast())
+    {
+      theDI << "Error: desired error is not reached after " << aNbMaxIter << " iterations with " << aSegLimit << " segments\n";
+      break;
+    }
+
+    aSegLimit = (Standard_Integer)aNewLimit;
+  }
+
+  const Standard_Real aMaxCompErr = anApprox->MaxError(anExprFunc.Dimension(), 1);
+  theDI << "NbIterations:  " << anIter << "\n";
+  theDI << "NbMaxSegments: " << aSegLimit << "\n";
+  theDI << "MaxError:      " << aMaxCompErr << "\n";
+  theDI << "Degree:        " << anApprox->Degree() << "\n";
+  theDI << "NbPoles:       " << anApprox->NbPoles() << "\n";
+
+  const Handle(TColStd_HArray1OfReal)    aKnots = anApprox->Knots();
+  const Handle(TColStd_HArray1OfInteger) aMults = anApprox->Multiplicities();
+  if (anExprFunc.Dimension() == 3)
+  {
+    TColgp_Array1OfPnt aPoles(1, anApprox->NbPoles());
+    anApprox->Poles(1, aPoles);
+    Handle(Geom_BSplineCurve) aBCurve = new Geom_BSplineCurve(aPoles, aKnots->Array1(), aMults->Array1(), anApprox->Degree());
+    DrawTrSurf::Set(aResName.ToCString(), aBCurve);
+  }
+  else
+  {
+    TColgp_Array1OfPnt2d aPoles(1, anApprox->NbPoles());
+    anApprox->Poles2d(1, aPoles);
+    Handle(Geom2d_BSplineCurve) aBCurve = new Geom2d_BSplineCurve(aPoles, aKnots->Array1(), aMults->Array1(), anApprox->Degree());
+    DrawTrSurf::Set(aResName.ToCString(), aBCurve);
+  }
+
+  return 0;
+}
 
 //=======================================================================
 //function : fitcurve
@@ -2176,6 +2947,19 @@ void  GeomliteTest::CurveCommands(Draw_Interpretor& theCommands)
                   "approxcurveonsurf name curve2d surface [Tol [cont [maxdeg [maxseg]]]] ",
 		  __FILE__,
 		  approxcurveonsurf,g);
+
+  theCommands.Add("approxexpr", /* [approxexpr] */ R"(
+approxexpr result expressionX expressionY [expressionZ] [-first value]=0.0 [-last value]=1.0
+ [-tolerance value]=0.0001 [-maxError value]=0.001
+ [-maxDegree degree]=8 [-maxSegments number]=auto
+ [-continuity {c0|c1|c2]=c2
+ [-approx {0|1}]=1
+Creates 2d or 3d B-Spline curve as approximation of curve defined by per-component math expressions (laws).
+See also command 'dexpr'.
+ result output drawable curve name
+Example:
+ v2d; approxexpr c Sin(2*u)*3 u*3; 2dfit;
+)" /* [approxexpr] */, __FILE__, approxexpr, g);
 
  theCommands.Add("fitcurve", "fitcurve result  curve [tol [maxdeg [inverse]]]", __FILE__, fitcurve, g);
 
