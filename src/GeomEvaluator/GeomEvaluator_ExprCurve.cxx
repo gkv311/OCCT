@@ -1,0 +1,154 @@
+// Copyright (c) 2015 OPEN CASCADE SAS
+//
+// This file is part of Open CASCADE Technology software library.
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License version 2.1 as published
+// by the Free Software Foundation, with special exception defined in the file
+// OCCT_LGPL_EXCEPTION.txt. Consult the file LICENSE_LGPL_21.txt included in OCCT
+// distribution for complete text of the license and disclaimer of any warranty.
+//
+// Alternatively, this file may be used under the terms of Open CASCADE
+// commercial license or contractual agreement.
+
+#include <GeomEvaluator_ExprCurve.hxx>
+
+#include <Expr_UnknownIterator.hxx>
+#include <Standard_NumericError.hxx>
+
+IMPLEMENT_STANDARD_RTTIEXT(GeomEvaluator_ExprCurve, GeomEvaluator_Curve)
+
+// =======================================================================
+// function : Constructor
+// =======================================================================
+GeomEvaluator_ExprCurve::GeomEvaluator_ExprCurve()
+{
+  //
+}
+
+// =======================================================================
+// function : ShallowCopy
+// =======================================================================
+Handle(GeomEvaluator_Curve) GeomEvaluator_ExprCurve::ShallowCopy() const
+{
+  Handle(GeomEvaluator_ExprCurve) aCopy = new GeomEvaluator_ExprCurve(*this);
+  return aCopy;
+}
+
+// =======================================================================
+// function : Load
+// =======================================================================
+void GeomEvaluator_ExprCurve::Load(const Handle(Expr_GeneralExpression)& theExprX,
+                                   const Handle(Expr_GeneralExpression)& theExprY,
+                                   const Handle(Expr_GeneralExpression)& theExprZ)
+{
+  myExpr = NCollection_Vec3<ExprComponent>();
+  if (theExprX.IsNull() || theExprY.IsNull() || theExprZ.IsNull())
+    throw Standard_NoSuchObject("Null expression");
+
+  NCollection_Vec3<ExprComponent> aNewExpr;
+  aNewExpr.x().Init(theExprX);
+  aNewExpr.y().Init(theExprY);
+  aNewExpr.z().Init(theExprZ);
+
+  Handle(Expr_NamedUnknown) aTestUnknown;
+  for (int aDimIter = 0; aDimIter < aNewExpr.Length(); ++aDimIter)
+  {
+    Handle(Expr_NamedUnknown)& aDimUnknown = aNewExpr[aDimIter].Variable;
+    if (aDimUnknown.IsNull())
+      continue;
+
+    if (aTestUnknown.IsNull())
+      aTestUnknown = aDimUnknown;
+    else if (aDimUnknown->GetName() != aTestUnknown->GetName())
+      throw Standard_ConstructionError("Expressions should use the same unknown");
+  }
+
+  if (aTestUnknown.IsNull())
+    throw Standard_ConstructionError("At least one unknown is expected in expression");
+
+  myExpr = aNewExpr;
+}
+
+// =======================================================================
+// function : Init
+// =======================================================================
+void GeomEvaluator_ExprCurve::ExprComponent::Init(const Handle(Expr_GeneralExpression)& theExpr)
+{
+  for (Expr_UnknownIterator anUnknownIter(theExpr); anUnknownIter.More(); anUnknownIter.Next())
+  {
+    const Handle(Expr_NamedUnknown) aNewUnknown = anUnknownIter.Value();
+    if (!Variable.IsNull())
+      throw Standard_ConstructionError("Only one unknown is expected in expression");
+
+    Variable = aNewUnknown;
+  }
+
+  Derivatives[0] = theExpr;
+  for (size_t aDerIter = 1; aDerIter < Derivatives.size(); ++aDerIter)
+    Derivatives[aDerIter] = Derivatives[aDerIter - 1]->Derivative(Variable);
+}
+
+// =======================================================================
+// function : evaluate
+// =======================================================================
+bool GeomEvaluator_ExprCurve::evaluate(const double theU,
+                                       const int theOrder,
+                                       double (&theResult)[3]) const
+{
+  if (!IsValid() || theOrder < 0 || size_t(theOrder) >= myExpr.x().Derivatives.size())
+    return false;
+
+  Handle(Expr_NamedUnknown) aVarCArr[1] = {};
+  const double aValCArr[1] = {theU};
+  Expr_Array1OfNamedUnknown  aVarArr(aVarCArr[0], 1, 1);
+  const TColStd_Array1OfReal aValArr(aValCArr[0], 1, 1);
+  for (int aDimIter = 0; aDimIter < myExpr.Length(); ++aDimIter)
+  {
+    const ExprComponent& aComp = myExpr[aDimIter];
+
+    double& aRes = theResult[aDimIter];
+    aVarArr[1] = aComp.Variable;
+    try
+    {
+      aRes = aComp.Derivatives[theOrder]->Evaluate(aVarArr, aValArr);
+    }
+    catch (const Standard_NumericError&)
+    {
+      return false; // OCCT math functions line Cos() or Sqrt() throw Standard_NumericError in case of invalid input
+    }
+
+    if (std::isnan(aRes))
+      return false;
+    else if (std::isinf(aRes))
+      return false;
+  }
+  return true;
+}
+
+// =======================================================================
+// function : DumpJson
+// =======================================================================
+void GeomEvaluator_ExprCurve::DumpJson(Standard_OStream& theOStream, int ) const
+{
+  const TCollection_AsciiString anExprXD0 = myExpr.x().String(0);
+  const TCollection_AsciiString anExprYD0 = myExpr.y().String(0);
+  const TCollection_AsciiString anExprZD0 = myExpr.z().String(0);
+  OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprXD0);
+  OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprYD0);
+  OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprZD0);
+
+  const TCollection_AsciiString anExprXD1 = myExpr.x().String(1);
+  const TCollection_AsciiString anExprYD1 = myExpr.y().String(1);
+  const TCollection_AsciiString anExprZD1 = myExpr.z().String(1);
+  OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprXD1);
+  OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprYD1);
+  OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprZD1);
+
+  const TCollection_AsciiString anExprXD2 = myExpr.x().String(2);
+  const TCollection_AsciiString anExprYD2 = myExpr.y().String(2);
+  const TCollection_AsciiString anExprZD2 = myExpr.z().String(2);
+  OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprXD2);
+  OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprYD2);
+  OCCT_DUMP_FIELD_VALUE_STRING(theOStream, anExprZD2);
+}
