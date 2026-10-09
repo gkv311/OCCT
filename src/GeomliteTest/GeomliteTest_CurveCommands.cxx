@@ -37,6 +37,7 @@
 #include <Geom_Line.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom_Ellipse.hxx>
+#include <Geom_ExprCurve.hxx>
 #include <Geom_Parabola.hxx>
 #include <Geom_Hyperbola.hxx>
 #include <Geom_BezierCurve.hxx>
@@ -48,6 +49,7 @@
 #include <Geom2d_Line.hxx>
 #include <Geom2d_Circle.hxx>
 #include <Geom2d_Ellipse.hxx>
+#include <Geom2d_ExprCurve.hxx>
 #include <Geom2d_Parabola.hxx>
 #include <Geom2d_Hyperbola.hxx>
 #include <Geom2d_BezierCurve.hxx>
@@ -69,6 +71,7 @@
 
 #include <TColGeom2d_HArray1OfBSplineCurve.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
+#include <GCPnts_TangentialDeflection.hxx>
 
 #include <GeomAbs_Shape.hxx>
 #include <Geom_Curve.hxx>
@@ -79,6 +82,8 @@
 
 #include <GeomAdaptor_Curve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
+#include <AdvApprox_ApproxAFunction.hxx>
+#include <AdvApprox_DichoCutting.hxx>
 #include <Approx_CurvilinearParameter.hxx>
 #include <Approx_CurveOnSurface.hxx>
 #include <Geom_BSplineSurface.hxx>
@@ -86,6 +91,10 @@
 #include <Adaptor3d_Curve.hxx>
 #include <Approx_FitAndDivide.hxx>
 #include <Convert_CompBezierCurvesToBSplineCurve.hxx>
+
+#include <ExprIntrp_GenExp.hxx>
+
+#include <memory>
 
 #ifdef _WIN32
 Standard_IMPORT Draw_Viewer dout;
@@ -1698,6 +1707,379 @@ static Standard_Integer approxcurve(Draw_Interpretor& di, Standard_Integer n, co
   return 0;
 }
 
+//! 2d curve evaluator for approximator defined by 2 per-component
+//! Expr_GeneralExpression math laws from one unknown.
+class ExprApproxEvaluator2d : public AdvApprox_EvaluatorFunction
+{
+public:
+
+  //! Main constructor.
+  explicit ExprApproxEvaluator2d(const Geom2dEvaluator_ExprCurve& theFunc) : myFunc(theFunc) {}
+
+  //! Function evaluation.
+  virtual void Evaluate(Standard_Integer* theDimension,
+                        Standard_Real theStartEnd[2],
+                        Standard_Real* theParameter,
+                        Standard_Integer* theOrder,
+                        Standard_Real* theResult,
+                        Standard_Integer* theErrorCode) override
+  {
+    (void)theStartEnd;
+    theResult[0] = theResult[1] = theResult[2] = 0.0;
+    if (*theDimension != 2)
+    {
+      *theErrorCode = 1;
+      return;
+    }
+    else if (*theOrder < 0 || *theOrder > 2)
+    {
+      *theErrorCode = 3;
+      return;
+    }
+
+    NCollection_Vec2<double> aRes;
+    if (!myFunc.EvaluateSafe(*theParameter, *theOrder, aRes))
+    {
+      *theErrorCode = 2;
+      return;
+    }
+
+    theResult[0] = aRes.x();
+    theResult[1] = aRes.y();
+    *theErrorCode = 0;
+  }
+
+private:
+  Geom2dEvaluator_ExprCurve myFunc;
+};
+
+//! 3d curve evaluator for approximator defined by 3 per-component
+//! Expr_GeneralExpression math laws from one unknown.
+class ExprApproxEvaluator3d : public AdvApprox_EvaluatorFunction
+{
+public:
+
+  //! Main constructor.
+  explicit ExprApproxEvaluator3d(const GeomEvaluator_ExprCurve& theFunc) : myFunc(theFunc) {}
+
+  //! Function evaluation.
+  virtual void Evaluate(Standard_Integer* theDimension,
+                        Standard_Real theStartEnd[2],
+                        Standard_Real* theParameter,
+                        Standard_Integer* theOrder,
+                        Standard_Real* theResult,
+                        Standard_Integer* theErrorCode) override
+  {
+    (void)theStartEnd;
+    theResult[0] = theResult[1] = theResult[2] = 0.0;
+    if (*theDimension != 3)
+    {
+      *theErrorCode = 1;
+      return;
+    }
+    else if (*theOrder < 0 || *theOrder > 2)
+    {
+      *theErrorCode = 3;
+      return;
+    }
+
+    NCollection_Vec3<double> aRes;
+    if (!myFunc.EvaluateSafe(*theParameter, *theOrder, aRes))
+    {
+      *theErrorCode = 2;
+      return;
+    }
+
+    theResult[0] = aRes.x();
+    theResult[1] = aRes.y();
+    theResult[2] = aRes.z();
+    *theErrorCode = 0;
+  }
+
+private:
+  GeomEvaluator_ExprCurve myFunc;
+};
+
+//=======================================================================
+//function : approxexpr
+//purpose :
+//=======================================================================
+static int approxexpr(Draw_Interpretor& theDI, Standard_Integer theNbArgs, const char** theArgVec)
+{
+  TCollection_AsciiString aResName;
+
+  Handle(Expr_GeneralExpression) anExpr[3];
+
+  Standard_Real aParamFirst = 0.0;
+  Standard_Real aParamLast = 1.0;
+  Standard_Real aMaxError = 0.001;
+
+  Standard_Real aTol = 0.0001;
+  GeomAbs_Shape aCont = GeomAbs_C2;
+  Standard_Integer aMaxDeg = 8;
+  Standard_Integer aMaxSeg = IntegerLast();
+
+  Standard_Boolean toApprox = true;
+
+  for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArgCase(theArgVec[anArgIter]);
+    anArgCase.LowerCase();
+    if (anArgIter + 1 < theNbArgs
+        && anArgCase == "-first"
+        && Draw::ParseReal(theArgVec[anArgIter + 1], aParamFirst))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-last"
+             && Draw::ParseReal(theArgVec[anArgIter + 1], aParamLast))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && (anArgCase == "-tolerance" || anArgCase == "-tol")
+             && Draw::ParseReal(theArgVec[anArgIter + 1], aTol))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-maxerror"
+             && Draw::ParseReal(theArgVec[anArgIter + 1], aMaxError))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-maxdegree"
+             && Draw::ParseInteger(theArgVec[anArgIter + 1], aMaxDeg))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-maxsegments"
+             && Draw::ParseInteger(theArgVec[anArgIter + 1], aMaxSeg))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs
+             && anArgCase == "-continuity")
+    {
+      TCollection_AsciiString aClassArg(theArgVec[++anArgIter]);
+      aClassArg.LowerCase();
+      if (aClassArg == "c0" || aClassArg == "0")
+      {
+        aCont = GeomAbs_C0;
+      }
+      else if (aClassArg == "c1" || aClassArg == "1")
+      {
+        aCont = GeomAbs_C1;
+      }
+      else if (aClassArg == "c2" || aClassArg == "2")
+      {
+        aCont = GeomAbs_C2;
+      }
+      else
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+    }
+    else if (anArgCase == "-approx" || anArgCase == "-noapprox")
+    {
+      toApprox = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter);
+    }
+    else if (aResName.IsEmpty())
+    {
+      aResName = theArgVec[anArgIter];
+    }
+    else if (anExpr[0].IsNull() || anExpr[1].IsNull() || anExpr[2].IsNull())
+    {
+      TCollection_AsciiString anExprStrNew = theArgVec[anArgIter];
+
+      Handle(ExprIntrp_GenExp) anExprIntrp = ExprIntrp_GenExp::Create();
+      anExprIntrp->Process(anExprStrNew);
+      if (!anExprIntrp->IsDone())
+      {
+        theDI << "Error: invalid expression '" << anExprStrNew << "'";
+        return 1;
+      }
+
+      Handle(Expr_GeneralExpression)& anExprNew = anExpr[anExpr[0].IsNull() ? 0 : (anExpr[1].IsNull() ? 1 : 2)];
+      anExprNew = anExprIntrp->Expression();
+
+      if (anExprNew.IsNull())
+      {
+        theDI << "Error: invalid expression '" << anExprStrNew << "' (NULL)";
+        return 1;
+      }
+
+      // handle predefined named constants like 'pi'
+      anExprNew = Expr_GeneralExpression::ReplaceConstants(anExprNew);
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
+  }
+
+  if (anExpr[0].IsNull() || anExpr[1].IsNull())
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
+  if (aParamFirst + Precision::PConfusion() >= aParamLast)
+  {
+    theDI << "Syntax error: invalid parameter range";
+    return 1;
+  }
+
+  const bool is3d = !anExpr[2].IsNull();
+
+  Geom2dEvaluator_ExprCurve anExprFunc2d;
+  GeomEvaluator_ExprCurve   anExprFunc3d;
+  Handle(Geom2d_ExprCurve)  aCurve2d;
+  Handle(Geom_ExprCurve)    aCurve3d;
+  try
+  {
+    if (is3d)
+    {
+      anExprFunc3d.Load(anExpr[0], anExpr[1], anExpr[2]);
+      aCurve3d = new Geom_ExprCurve(anExprFunc3d, aParamFirst, aParamLast, aCont);
+      if (!toApprox)
+      {
+        DrawTrSurf::Set(aResName.ToCString(), aCurve3d);
+        return 0;
+      }
+    }
+    else
+    {
+      anExprFunc2d.Load(anExpr[0], anExpr[1]);
+      aCurve2d = new Geom2d_ExprCurve(anExprFunc2d, aParamFirst, aParamLast, aCont);
+      if (!toApprox)
+      {
+        DrawTrSurf::Set(aResName.ToCString(), aCurve2d);
+        return 0;
+      }
+    }
+  }
+  catch (const Standard_ConstructionError& theErr)
+  {
+    theDI << "Error: construction failed\n" << theErr.GetMessageString();
+    return 1;
+  }
+
+  static constexpr Standard_Integer TheNbMaxIterations = 100;
+  static constexpr Standard_Integer TheNbMaxSegments = 150;
+
+  // use fixed limit or automatically increase number of segments until desired maximum error is not reached
+  const Standard_Integer aNbMaxIter = aMaxSeg == IntegerLast() ? TheNbMaxIterations : 1;
+  Standard_Integer aSegLimit = aMaxSeg != IntegerLast() ? aMaxSeg : TheNbMaxSegments;
+
+  // estimate a rough initial number of segments with help of GCPnts_TangentialDeflection tool
+  if (aMaxSeg == IntegerLast())
+  {
+    GCPnts_TangentialDeflection aDeflPnts;
+    try
+    {
+      if (is3d)
+      {
+        GeomAdaptor_Curve anAdaptor(aCurve3d);
+        aDeflPnts.Initialize(anAdaptor, 0.5, 0.5);
+      }
+      else
+      {
+        Geom2dAdaptor_Curve anAdaptor(aCurve2d);
+        aDeflPnts.Initialize(anAdaptor, 0.5, 0.5);
+      }
+    }
+    catch (const Standard_ConstructionError& )
+    {
+      theDI << "Error: evaluation failed";
+      return 1;
+    }
+    aSegLimit = Max(aSegLimit, aDeflPnts.NbPoints());
+  }
+
+  std::shared_ptr<AdvApprox_EvaluatorFunction> anApproxEval;
+  if (is3d)
+    anApproxEval.reset(new ExprApproxEvaluator3d(anExprFunc3d));
+  else
+    anApproxEval.reset(new ExprApproxEvaluator2d(anExprFunc2d));
+
+  Standard_Integer aNumDims[3] = {0, 0, 0};
+  Handle(TColStd_HArray1OfReal) aDTols[3];
+  aNumDims[is3d ? 2 : 1] = 1;
+  aDTols[is3d ? 2 : 1] = new TColStd_HArray1OfReal(1, 1, aTol);
+
+  const AdvApprox_DichoCutting aCutTool;
+  std::shared_ptr<AdvApprox_ApproxAFunction> anApprox;
+
+  Standard_Integer anIter = 1;
+  for (; anIter <= aNbMaxIter; ++anIter)
+  {
+    anApprox = std::make_shared<AdvApprox_ApproxAFunction>(aNumDims[0], aNumDims[1], aNumDims[2],
+                                                           aDTols[0], aDTols[1], aDTols[2],
+                                                           aParamFirst, aParamLast,
+                                                           aCont, aMaxDeg, aSegLimit,
+                                                           *anApproxEval, aCutTool);
+    if (!anApprox->IsDone())
+    {
+      theDI << "Error: approximation failed";
+      return 1;
+    }
+    else if (!anApprox->HasResult())
+    {
+      theDI << "Error: approximation has no result";
+      return 1;
+    }
+
+    const Standard_Real aMaxCompErr = anApprox->MaxError(is3d ? 3 : 2, 1);
+    if (aMaxCompErr <= aMaxError)
+      break;
+
+    if (anIter == aNbMaxIter)
+    {
+      theDI << "Error: desired error is not reached after " << aNbMaxIter << " iterations with " << aSegLimit << " segments\n";
+      break;
+    }
+
+    unsigned int aNewLimit = (unsigned int)aSegLimit * 2;
+    if (aNewLimit >= (unsigned int)IntegerLast())
+    {
+      theDI << "Error: desired error is not reached after " << aNbMaxIter << " iterations with " << aSegLimit << " segments\n";
+      break;
+    }
+
+    aSegLimit = (Standard_Integer)aNewLimit;
+  }
+
+  const Standard_Real aMaxCompErr = anApprox->MaxError(is3d ? 3 : 2, 1);
+  theDI << "NbIterations:  " << anIter << "\n";
+  theDI << "NbMaxSegments: " << aSegLimit << "\n";
+  theDI << "MaxError:      " << aMaxCompErr << "\n";
+  theDI << "Degree:        " << anApprox->Degree() << "\n";
+  theDI << "NbPoles:       " << anApprox->NbPoles() << "\n";
+
+  const Handle(TColStd_HArray1OfReal)    aKnots = anApprox->Knots();
+  const Handle(TColStd_HArray1OfInteger) aMults = anApprox->Multiplicities();
+  if (is3d)
+  {
+    TColgp_Array1OfPnt aPoles(1, anApprox->NbPoles());
+    anApprox->Poles(1, aPoles);
+    Handle(Geom_BSplineCurve) aBCurve = new Geom_BSplineCurve(aPoles, aKnots->Array1(), aMults->Array1(), anApprox->Degree());
+    DrawTrSurf::Set(aResName.ToCString(), aBCurve);
+  }
+  else
+  {
+    TColgp_Array1OfPnt2d aPoles(1, anApprox->NbPoles());
+    anApprox->Poles2d(1, aPoles);
+    Handle(Geom2d_BSplineCurve) aBCurve = new Geom2d_BSplineCurve(aPoles, aKnots->Array1(), aMults->Array1(), anApprox->Degree());
+    DrawTrSurf::Set(aResName.ToCString(), aBCurve);
+  }
+
+  return 0;
+}
 
 //=======================================================================
 //function : fitcurve
@@ -2176,6 +2558,19 @@ void  GeomliteTest::CurveCommands(Draw_Interpretor& theCommands)
                   "approxcurveonsurf name curve2d surface [Tol [cont [maxdeg [maxseg]]]] ",
 		  __FILE__,
 		  approxcurveonsurf,g);
+
+  theCommands.Add("approxexpr", /* [approxexpr] */ R"(
+approxexpr result expressionX expressionY [expressionZ] [-first value]=0.0 [-last value]=1.0
+ [-tolerance value]=0.0001 [-maxError value]=0.001
+ [-maxDegree degree]=8 [-maxSegments number]=auto
+ [-continuity {c0|c1|c2]=c2
+ [-approx {0|1}]=1
+Creates 2d or 3d B-Spline curve as approximation of curve defined by per-component math expressions (laws).
+See also command 'dexpr'.
+ result output drawable curve name
+Example:
+ v2d; approxexpr c Sin(2*u)*3 u*3; 2dfit;
+)" /* [approxexpr] */, __FILE__, approxexpr, g);
 
  theCommands.Add("fitcurve", "fitcurve result  curve [tol [maxdeg [inverse]]]", __FILE__, fitcurve, g);
 

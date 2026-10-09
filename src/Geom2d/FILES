@@ -19,6 +19,8 @@ Geom2d_Direction.cxx
 Geom2d_Direction.hxx
 Geom2d_Ellipse.cxx
 Geom2d_Ellipse.hxx
+Geom2d_ExprCurve.cxx
+Geom2d_ExprCurve.hxx
 Geom2d_Geometry.cxx
 Geom2d_Geometry.hxx
 Geom2d_Hyperbola.cxx
