@@ -1548,7 +1548,7 @@ static Standard_Integer readbrep (Draw_Interpretor& theDI,
 
     char aStringBuf[255] = {};
     aFile->read (aStringBuf, 255);
-    if (aFile->fail())
+    if (aFile->fail() && aFile->gcount() < 24)
     {
       theDI << "Error: cannot read the file '" << aFileName << "'";
       return 1;

@@ -1,0 +1,40 @@
+puts "Check that readbrep command can read small files (smaller than 255 bytes)"
+
+set test_brep_content {DBRep_DrawableShape
+
+CASCADE Topology V1, (c) Matra-Datavision
+Locations 0
+Curve2ds 0
+Curves 0
+Polygon3D 0
+PolygonOnTriangulations 0
+Surfaces 1
+1 0 0 0 0 0 1 1 0 -0 -0 1 0 
+Triangulations 0
+
+TShapes 1
+Fa
+1  1e-07 1 0
+
+1111000
+*
+
++1 0 
+0
+
+}
+
+set test_file "${imagedir}/${casename}.brep"
+set fd [open "$test_file" w]
+fconfigure $fd -translation lf
+puts $fd $test_brep_content
+close $fd
+
+readbrep "$test_file" a
+
+# reference values
+set nbFaces 1
+
+# checks
+checknbshapes a -face $nbFaces
+puts "TEST COMPLETED"
