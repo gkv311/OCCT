@@ -1099,31 +1099,6 @@ void OpenGl_Context::ReadGlVersion (Standard_Integer& theGlVerMajor,
   OpenGl_GlFunctions::readGlVersion (theGlVerMajor, theGlVerMinor, aVendor);
 }
 
-static Standard_CString THE_DBGMSG_UNKNOWN = "UNKNOWN";
-static Standard_CString THE_DBGMSG_SOURCES[] =
-{
-  ".OpenGL",    // GL_DEBUG_SOURCE_API
-  ".WinSystem", // GL_DEBUG_SOURCE_WINDOW_SYSTEM
-  ".GLSL",      // GL_DEBUG_SOURCE_SHADER_COMPILER
-  ".3rdParty",  // GL_DEBUG_SOURCE_THIRD_PARTY
-  "",           // GL_DEBUG_SOURCE_APPLICATION
-  ".Other"      // GL_DEBUG_SOURCE_OTHER
-};
-
-static Standard_CString THE_DBGMSG_TYPES[] =
-{
-  "Error",           // GL_DEBUG_TYPE_ERROR
-  "Deprecated",      // GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
-  "Undef. behavior", // GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
-  "Portability",     // GL_DEBUG_TYPE_PORTABILITY
-  "Performance",     // GL_DEBUG_TYPE_PERFORMANCE
-  "Other"            // GL_DEBUG_TYPE_OTHER
-};
-
-static Standard_CString THE_DBGMSG_SEV_HIGH   = "High";   // GL_DEBUG_SEVERITY_HIGH
-static Standard_CString THE_DBGMSG_SEV_MEDIUM = "Medium"; // GL_DEBUG_SEVERITY_MEDIUM
-static Standard_CString THE_DBGMSG_SEV_LOW    = "Low";    // GL_DEBUG_SEVERITY_LOW
-
 //! Callback for GL_ARB_debug_output extension
 static void APIENTRY debugCallbackWrap(unsigned int theSource,
                                        unsigned int theType,
@@ -1145,7 +1120,7 @@ void OpenGl_Context::PushMessage (const unsigned int theSource,
                                   const unsigned int theType,
                                   const unsigned int theId,
                                   const unsigned int theSeverity,
-                                  const TCollection_ExtendedString& theMessage)
+                                  const TCollection_AsciiString& theMessage)
 {
   if (caps->suppressExtraMsg
    && theSource >= GL_DEBUG_SOURCE_API
@@ -1155,32 +1130,57 @@ void OpenGl_Context::PushMessage (const unsigned int theSource,
     return;
   }
 
-  Standard_CString& aSrc = (theSource >= GL_DEBUG_SOURCE_API
-                        && theSource <= GL_DEBUG_SOURCE_OTHER)
-                         ? THE_DBGMSG_SOURCES[theSource - GL_DEBUG_SOURCE_API]
-                         : THE_DBGMSG_UNKNOWN;
-  Standard_CString& aType = (theType >= GL_DEBUG_TYPE_ERROR
-                         && theType <= GL_DEBUG_TYPE_OTHER)
-                          ? THE_DBGMSG_TYPES[theType - GL_DEBUG_TYPE_ERROR]
-                          : THE_DBGMSG_UNKNOWN;
-  Standard_CString& aSev = theSeverity == GL_DEBUG_SEVERITY_HIGH
-                         ? THE_DBGMSG_SEV_HIGH
-                         : (theSeverity == GL_DEBUG_SEVERITY_MEDIUM
-                          ? THE_DBGMSG_SEV_MEDIUM
-                          : THE_DBGMSG_SEV_LOW);
+  static constexpr char THE_DBGMSG_UNKNOWN[] = "UNKNOWN";
+  static constexpr const char* THE_DBGMSG_SOURCES[] =
+  {
+    "OpenGL",    // GL_DEBUG_SOURCE_API
+    "WinSystem", // GL_DEBUG_SOURCE_WINDOW_SYSTEM
+    "GLSL",      // GL_DEBUG_SOURCE_SHADER_COMPILER
+    "3rdParty",  // GL_DEBUG_SOURCE_THIRD_PARTY
+    "TKOpenGl",  // GL_DEBUG_SOURCE_APPLICATION
+    "Other"      // GL_DEBUG_SOURCE_OTHER
+  };
+
+  static constexpr char THE_DBGMSG_SEV_HIGH[]   = ".severe_"; // GL_DEBUG_SEVERITY_HIGH
+  static constexpr char THE_DBGMSG_SEV_MEDIUM[] = ".";        // GL_DEBUG_SEVERITY_MEDIUM
+  static constexpr char THE_DBGMSG_SEV_LOW[]    = ".hint_";   // GL_DEBUG_SEVERITY_LOW
+
+  static constexpr const char* THE_DBGMSG_TYPES[] =
+  {
+    "error",       // GL_DEBUG_TYPE_ERROR
+    "deprecated",  // GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR
+    "UB",          // GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR
+    "portability", // GL_DEBUG_TYPE_PORTABILITY
+    "perf",        // GL_DEBUG_TYPE_PERFORMANCE
+    ""             // GL_DEBUG_TYPE_OTHER
+  };
+
+  const char* aSrc = (theSource >= GL_DEBUG_SOURCE_API
+                   && theSource <= GL_DEBUG_SOURCE_OTHER)
+                     ? THE_DBGMSG_SOURCES[theSource - GL_DEBUG_SOURCE_API]
+                     : THE_DBGMSG_UNKNOWN;
+  const char* aType = (theType >= GL_DEBUG_TYPE_ERROR
+                    && theType <= GL_DEBUG_TYPE_OTHER)
+                      ? THE_DBGMSG_TYPES[theType - GL_DEBUG_TYPE_ERROR]
+                      : THE_DBGMSG_UNKNOWN;
+  const char* aSev = theSeverity == GL_DEBUG_SEVERITY_HIGH
+                   ? THE_DBGMSG_SEV_HIGH
+                   : (theSeverity == GL_DEBUG_SEVERITY_MEDIUM
+                      ? THE_DBGMSG_SEV_MEDIUM
+                      : THE_DBGMSG_SEV_LOW);
   Message_Gravity aGrav = theSeverity == GL_DEBUG_SEVERITY_HIGH
                         ? Message_Alarm
                         : (theSeverity == GL_DEBUG_SEVERITY_MEDIUM
                          ? Message_Warning
                          : Message_Info);
 
-  TCollection_ExtendedString aMsg;
-  aMsg += "TKOpenGl"; aMsg += aSrc;
-  aMsg += " | Type: ";        aMsg += aType;
-  aMsg += " | ID: ";          aMsg += (Standard_Integer )theId;
-  aMsg += " | Severity: ";    aMsg += aSev;
-  aMsg += " | Message:\n  ";
-  aMsg += theMessage;
+  TCollection_AsciiString aMsg;
+  aMsg = aMsg + "[" + aSrc + aSev + aType;
+  if (theId != 0)
+    aMsg = aMsg + "#" + int(theId);
+
+  aMsg = aMsg + "] " + theMessage;
+
   Messenger()->Send (aMsg, aGrav);
 }
 
@@ -1220,13 +1220,11 @@ void OpenGl_Context::checkWrongVersion (Standard_Integer theGlVerMajor, Standard
     return;
   }
 
-  PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH,
-               TCollection_AsciiString()
-               + "Error! OpenGL context reports version "
-               + myGlVerMajor  + "." + myGlVerMinor
-               + " but does not export required functions for " + theGlVerMajor + "." + theGlVerMinor
-               + " (" + (theLastFailedProc != NULL ? theLastFailedProc : "") + ")\n"
-               + "Please report this issue to OpenGL driver vendor '" + myVendor + "'");
+  const char* aGapi = myGapi == Aspect_GraphicsLibrary_OpenGLES ? "OpenGL ES" : "OpenGL";
+  Messenger()->SendAlarm() << "Error! Driver reports " << aGapi << " " << myGlVerMajor << "." << myGlVerMinor
+                           << " but lacks '" << (theLastFailedProc != nullptr ? theLastFailedProc : "") << "'"
+                           << " (required for " << theGlVerMajor << "." << theGlVerMinor << ").n"
+                           << "Please report this issue to OpenGL driver vendor '" << myVendor << "'";
 
   // lower internal version
   if (theGlVerMinor > 0)

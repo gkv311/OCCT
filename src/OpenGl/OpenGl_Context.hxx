@@ -705,7 +705,7 @@ public:
                                     const unsigned int theType,
                                     const unsigned int theId,
                                     const unsigned int theSeverity,
-                                    const TCollection_ExtendedString& theMessage);
+                                    const TCollection_AsciiString& theMessage);
 
   //! Adds a filter for messages with theId and theSource (GL_DEBUG_SOURCE_)
   Standard_EXPORT Standard_Boolean ExcludeMessage (const unsigned int theSource,
