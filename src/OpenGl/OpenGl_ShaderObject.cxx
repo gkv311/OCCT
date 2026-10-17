@@ -95,27 +95,25 @@ Standard_Boolean OpenGl_ShaderObject::LoadAndCompile (const Handle(OpenGl_Contex
 
   if (!LoadSource (theCtx, theSource))
   {
+    TCollection_AsciiString aMsg = TCollection_AsciiString ("Error! Failed to set ")
+                                 + getShaderTypeString (myType) + " [" + theId + "] source";
     if (theToPrintSource)
-    {
-      theCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, theSource);
-    }
-    theCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH,
-                         TCollection_AsciiString ("Error! Failed to set ") + getShaderTypeString (myType) + " [" + theId + "] source");
+      aMsg = aMsg + "\n" + theSource;
+
+    theCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, aMsg);
     return false;
   }
 
   if (!Compile (theCtx))
   {
-    if (theToPrintSource)
-    {
-      theCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, putLineNumbers (theSource));
-    }
     TCollection_AsciiString aLog;
     FetchInfoLog (theCtx, aLog);
     if (aLog.IsEmpty())
-    {
       aLog = "Compilation log is empty.";
-    }
+
+    if (theToPrintSource)
+      aLog = aLog + "\n" + putLineNumbers(theSource);
+
     theCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH,
                          TCollection_AsciiString ("Failed to compile ") + getShaderTypeString (myType) + " [" + theId + "]. Compilation log:\n" + aLog);
     return false;
