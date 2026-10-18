@@ -267,52 +267,59 @@ void OSD_MemInfo::Update()
   }
 
   // use procfs on Linux
-  char aBuff[4096];
-  snprintf (aBuff, sizeof(aBuff), "/proc/%d/status", getpid());
+
+  static constexpr char TheVmSize[] = "VmSize:";
+  //static constexpr char TheVmPeak[] = "VmPeak:";
+  static constexpr char TheVmRSS[]  = "VmRSS:";
+  static constexpr char TheVmHWM[]  = "VmHWM:";
+  static constexpr char TheVmData[] = "VmData:";
+  static constexpr char TheVmStk[]  = "VmStk:";
+
   std::ifstream aFile;
-  aFile.open (aBuff);
+  aFile.open ("/proc/self/status");
   if (!aFile.is_open())
   {
     return;
   }
 
+  char aBuff[4096];
   while (!aFile.eof())
   {
     memset (aBuff, 0, sizeof(aBuff));
-    aFile.getline (aBuff, 4096);
+    aFile.getline (aBuff, sizeof(aBuff));
     if (aBuff[0] == '\0')
     {
       continue;
     }
 
-    if (IsActive (MemVirtual)
-     && strncmp (aBuff, "VmSize:", strlen ("VmSize:")) == 0)
+    if (IsActive(MemVirtual)
+     && strncmp(aBuff, TheVmSize, sizeof(TheVmSize) - 1) == 0)
     {
-      myCounters[MemVirtual] = atol (aBuff + strlen ("VmSize:")) * 1024;
+      myCounters[MemVirtual] = atol(aBuff + sizeof(TheVmSize) - 1) * 1024;
     }
-    //else if (strncmp (aBuff, "VmPeak:", strlen ("VmPeak:")) == 0)
-    //  myVirtualPeak = atol (aBuff + strlen ("VmPeak:")) * 1024;
-    else if (IsActive (MemWorkingSet)
-          && strncmp (aBuff, "VmRSS:", strlen ("VmRSS:")) == 0)
+    //else if (strncmp(aBuff, TheVmPeak, sizeof(TheVmPeak) - 1) == 0)
+    //  myVirtualPeak = atol(aBuff + sizeof(TheVmPeak) - 1) * 1024;
+    else if (IsActive(MemWorkingSet)
+          && strncmp(aBuff, TheVmRSS, sizeof(TheVmRSS) - 1) == 0)
     {
-      myCounters[MemWorkingSet] = atol (aBuff + strlen ("VmRSS:")) * 1024; // RSS - resident set size
+      myCounters[MemWorkingSet] = atol(aBuff + sizeof(TheVmRSS) - 1) * 1024; // RSS - resident set size
     }
-    else if (IsActive (MemWorkingSetPeak)
-          && strncmp (aBuff, "VmHWM:", strlen ("VmHWM:")) == 0)
+    else if (IsActive(MemWorkingSetPeak)
+          && strncmp(aBuff, TheVmHWM, sizeof(TheVmHWM) - 1) == 0)
     {
-      myCounters[MemWorkingSetPeak] = atol (aBuff + strlen ("VmHWM:")) * 1024; // HWM - high water mark
+      myCounters[MemWorkingSetPeak] = atol(aBuff + sizeof(TheVmHWM) - 1) * 1024; // HWM - high water mark
     }
-    else if (IsActive (MemPrivate)
-          && strncmp (aBuff, "VmData:", strlen ("VmData:")) == 0)
+    else if (IsActive(MemPrivate)
+          && strncmp(aBuff, TheVmData, sizeof(TheVmData) - 1) == 0)
     {
       if (myCounters[MemPrivate] == Standard_Size(-1)) ++myCounters[MemPrivate];
-      myCounters[MemPrivate] += atol (aBuff + strlen ("VmData:")) * 1024;
+      myCounters[MemPrivate] += atol(aBuff + sizeof(TheVmData) - 1) * 1024;
     }
-    else if (IsActive (MemPrivate)
-          && strncmp (aBuff, "VmStk:", strlen ("VmStk:")) == 0)
+    else if (IsActive(MemPrivate)
+          && strncmp(aBuff, TheVmStk, sizeof(TheVmStk) - 1) == 0)
     {
       if (myCounters[MemPrivate] == Standard_Size(-1)) ++myCounters[MemPrivate];
-      myCounters[MemPrivate] += atol (aBuff + strlen ("VmStk:")) * 1024;
+      myCounters[MemPrivate] += atol(aBuff + sizeof(TheVmStk) - 1) * 1024;
     }
   }
   aFile.close();
