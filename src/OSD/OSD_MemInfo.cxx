@@ -145,16 +145,39 @@ void OSD_MemInfo::Update()
 
   if (IsActive (MemHeapUsage))
   {
-    _HEAPINFO hinfo;
-    int heapstatus;
-    hinfo._pentry = NULL;
+    // lock the heap why walking through it
+    struct HeapSentry
+    {
+      HeapSentry()
+      {
+        if (myHeap == nullptr)
+          return;
+
+        if (HeapLock(myHeap) == FALSE)
+          myHeap = nullptr;
+      }
+      ~HeapSentry()
+      {
+        if (myHeap == nullptr)
+          return;
+
+        HeapUnlock(myHeap);
+      }
+      HANDLE myHeap = (HANDLE)_get_heap_handle();
+    } aHeapSentry;
+
+    _HEAPINFO aHeapInfo = {};
+    int aHeapStatus = 0;
+    int* aPrevEntry = nullptr;
 
     myCounters[MemHeapUsage] = 0;
-    while((heapstatus = _heapwalk(&hinfo)) == _HEAPOK)
+    while ((aHeapStatus = _heapwalk(&aHeapInfo)) == _HEAPOK
+        && aHeapInfo._pentry != aPrevEntry) // workaround for Win11 bugs
     {
-      if (hinfo._useflag == _USEDENTRY)
+      aPrevEntry = aHeapInfo._pentry;
+      if (aHeapInfo._useflag == _USEDENTRY)
       {
-        myCounters[MemHeapUsage] += hinfo._size;
+        myCounters[MemHeapUsage] += aHeapInfo._size;
       }
     }
   }
