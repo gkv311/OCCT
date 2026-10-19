@@ -137,11 +137,19 @@ void GCPnts_QuasiUniformAbscissa::initialize (const TheCurve& theC,
                                               const Standard_Real theU1,
                                               const Standard_Real theU2)
 {
+  myDone = false;
+  myNbPoints = 0;
+  if (theNbPoints < 2)
+    throw Standard_ConstructionError("GCPnts_QuasiUniformAbscissa::Initialize(), number of points should be >= 2");
+
   if (theC.GetType() != GeomAbs_BezierCurve
    && theC.GetType() != GeomAbs_BSplineCurve)
   {
     GCPnts_UniformAbscissa aUA (theC, theNbPoints, theU1, theU2);
     myDone = aUA.IsDone();
+    if (!myDone)
+      return;
+
     myNbPoints = aUA.NbPoints();
     myParams = new TColStd_HArray1OfReal (1, myNbPoints);
     for (Standard_Integer aPntIter = 1 ; aPntIter <= myNbPoints; ++aPntIter)
@@ -150,11 +158,6 @@ void GCPnts_QuasiUniformAbscissa::initialize (const TheCurve& theC,
     }
     return;
   }
-
-  myDone = false;
-  myNbPoints = 0;
-  if (theNbPoints < 2)
-    throw Standard_ConstructionError("GCPnts_QuasiUniformAbscissa::Initialize(), number of points should be >= 2");
 
   // evaluate the approximative length of the 3dCurve
   myNbPoints = theNbPoints;
