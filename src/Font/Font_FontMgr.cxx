@@ -20,9 +20,11 @@
 #include <Font_SystemFont.hxx>
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
+#include <NCollection_Array1.hxx>
 #include <NCollection_Buffer.hxx>
 #include <NCollection_Map.hxx>
 #include <OSD_Environment.hxx>
+#include <OSD_Path.hxx>
 #include <Standard_Stream.hxx>
 #include <Standard_Type.hxx>
 #include <TCollection_HAsciiString.hxx>
@@ -56,7 +58,6 @@ IMPLEMENT_STANDARD_RTTIEXT(Font_FontMgr,Standard_Transient)
 
   #include <OSD_DirectoryIterator.hxx>
   #include <OSD_FileIterator.hxx>
-  #include <OSD_Path.hxx>
   #include <OSD_File.hxx>
   #include <OSD_OpenMode.hxx>
   #include <OSD_Protection.hxx>
@@ -671,75 +672,87 @@ void Font_FontMgr::InitFontDataBase()
   Handle(Font_FTLibrary) aFtLibrary = new Font_FTLibrary();
   NCollection_Sequence<Handle(Font_SystemFont)> aFonts;
 
+  NCollection_Map<TCollection_AsciiString, TCollection_AsciiString> aSupportedExtensions;
+  for (Standard_Integer anIter = 0; Font_FontMgr_Extensions[anIter] != nullptr; ++anIter)
+    aSupportedExtensions.Add(TCollection_AsciiString(Font_FontMgr_Extensions[anIter]));
+
 #if defined(OCCT_UWP)
   // system font files are not accessible
   (void )aFtLibrary;
+  (void )aSupportedExtensions;
 #elif defined(_WIN32)
 
   // font directory is placed in "C:\Windows\Fonts\"
-  UINT aStrLength = GetSystemWindowsDirectoryA (NULL, 0);
-  if (aStrLength == 0)
+  TCollection_AsciiString aFontsDir;
   {
-    return;
-  }
+    const UINT aBuffLen = GetSystemWindowsDirectoryW(nullptr, 0);
+    if (aBuffLen == 0)
+      return;
 
-  char* aWinDir = new char[aStrLength];
-  GetSystemWindowsDirectoryA (aWinDir, aStrLength);
-  TCollection_AsciiString aFontsDir (aWinDir);
-  aFontsDir.AssignCat ("\\Fonts\\");
-  delete[] aWinDir;
+    NCollection_Array1<wchar_t> aBuff(0, aBuffLen);
+    GetSystemWindowsDirectoryW(&aBuff.ChangeFirst(), aBuffLen);
+    aBuff.ChangeLast() = L'\0';
+
+    aFontsDir = TCollection_AsciiString(&aBuff.First()) + "\\Fonts\\";
+  }
 
   // read fonts list from registry
-  HKEY aFontsKey;
-  if (RegOpenKeyExA (HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts",
-                     0, KEY_READ, &aFontsKey) != ERROR_SUCCESS)
+  struct RegistryKey
   {
-    return;
-  }
+    HKEY Key = nullptr;
 
-  NCollection_Map<TCollection_AsciiString> aSupportedExtensions;
-  for (Standard_Integer anIter = 0; Font_FontMgr_Extensions[anIter] != NULL; ++anIter)
-  {
-    Standard_CString anExt = Font_FontMgr_Extensions[anIter];
-    aSupportedExtensions.Add (TCollection_AsciiString (anExt));
-  }
+    RegistryKey() {}
 
-  static const DWORD aBufferSize = 256;
-  char aNameBuff[aBufferSize];
-  char aPathBuff[aBufferSize];
-  DWORD aNameSize = aBufferSize;
-  DWORD aPathSize = aBufferSize;
-  for (DWORD anIter = 0;
-       RegEnumValueA (aFontsKey, anIter,
-                      aNameBuff, &aNameSize, NULL, NULL,
-                      (LPBYTE )aPathBuff, &aPathSize) != ERROR_NO_MORE_ITEMS;
-      ++anIter, aNameSize = aBufferSize, aPathSize = aBufferSize)
-  {
-    aPathBuff[(aPathSize < aBufferSize) ? aPathSize : (aBufferSize - 1)] = '\0'; // ensure string is NULL-terminated
-
-    TCollection_AsciiString aFontName (aNameBuff), aFontPath (aPathBuff);
-    if (aFontPath.Search ("\\") == -1)
+    ~RegistryKey()
     {
-      aFontPath.Insert (1, aFontsDir); // make absolute path
+      if (Key != nullptr)
+        RegCloseKey(Key);
     }
 
-    // check file extension is in list of supported
-    const Standard_Integer anExtensionPosition = aFontPath.SearchFromEnd (".") + 1;
-    if (anExtensionPosition > 0 && anExtensionPosition < aFontPath.Length())
+    bool Open(const HKEY theRoot, const wchar_t* thePath)
     {
-      TCollection_AsciiString aFontExtension = aFontPath.SubString (anExtensionPosition, aFontPath.Length());
+      return RegOpenKeyExW(theRoot, thePath, 0, KEY_READ, &Key) == ERROR_SUCCESS;
+    }
+  };
+
+  // look for global fonts, then user fonts
+  for (const HKEY& aRootKeyIter : {HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER})
+  {
+    RegistryKey aFontsKey;
+    if (!aFontsKey.Open(aRootKeyIter, L"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts"))
+      continue;
+
+    static constexpr DWORD aBufferSize = MAX_PATH;
+    wchar_t aNameBuff[aBufferSize] = {};
+    wchar_t aPathBuff[aBufferSize] = {};
+
+    DWORD aNameSize = aBufferSize;
+    DWORD aPathSize = aBufferSize;
+    for (DWORD anIter = 0;
+         RegEnumValueW(aFontsKey.Key, anIter, aNameBuff, &aNameSize,
+                       nullptr, nullptr, (LPBYTE)aPathBuff, &aPathSize) != ERROR_NO_MORE_ITEMS;
+         ++anIter, aNameSize = aBufferSize, aPathSize = aBufferSize)
+    {
+      // ensure string is NULL-terminated
+      aNameBuff[(aNameSize < aBufferSize) ? aNameSize : (aBufferSize - 1)] = '0';
+      aPathBuff[(aPathSize < aBufferSize) ? aPathSize : (aBufferSize - 1)] = '0';
+
+      TCollection_AsciiString aFontName(aNameBuff), aFontPath(aPathBuff);
+      if (aFontPath.Search("\\") == -1)
+        aFontPath = aFontsDir + aFontPath; // make absolute path
+
+      // check file extension is in list of supported
+      TCollection_AsciiString aFileName, aFontExtension;
+      OSD_Path::FileNameAndExtension(aFontPath, aFileName, aFontExtension);
       aFontExtension.LowerCase();
-      if (aSupportedExtensions.Contains (aFontExtension))
-      {
-        aFonts.Clear();
-        checkFont (aFonts, aFtLibrary, aFontPath.ToCString());
-        RegisterFonts (aFonts, false);
-      }
+      if (!aSupportedExtensions.Contains(aFontExtension))
+        continue;
+
+      aFonts.Clear();
+      checkFont(aFonts, aFtLibrary, aFontPath);
+      RegisterFonts(aFonts, false);
     }
   }
-
-  // close registry key
-  RegCloseKey (aFontsKey);
 
 #else
 
@@ -835,13 +848,6 @@ void Font_FontMgr::InitFontDataBase()
     TCollection_AsciiString aPathStr (anItem);
     OSD_Path aPath (aPathStr);
     addDirsRecursively (aPath, aMapOfFontsDirs);
-  }
-
-  NCollection_Map<TCollection_AsciiString> aSupportedExtensions;
-  for (Standard_Integer anIter = 0; Font_FontMgr_Extensions[anIter] != NULL; ++anIter)
-  {
-    Standard_CString anExt = Font_FontMgr_Extensions[anIter];
-    aSupportedExtensions.Add (TCollection_AsciiString (anExt));
   }
 
   for (NCollection_Map<TCollection_AsciiString>::Iterator anIter (aMapOfFontsDirs);
