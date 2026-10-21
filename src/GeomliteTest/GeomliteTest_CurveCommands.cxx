@@ -1492,208 +1492,278 @@ static Standard_Integer rawcont(Draw_Interpretor& di, Standard_Integer n, const 
   }
   return 0 ;
 }
-//=======================================================================
-//function : approxcurveonsurf
-//purpose  : 
-//=======================================================================
-static Standard_Integer approxcurveonsurf(Draw_Interpretor& di, Standard_Integer n, const char** a)
-{
-  Standard_Real Tol = 1.e-7;              // Tolerance (default 0.1mm) 
-  GeomAbs_Shape Continuity = GeomAbs_C1;  // Continuity order : 0, 1 or 2 (default 1)
-  Standard_Integer MaxDeg = 14;           // Maximum degree
-  Standard_Integer MaxSeg = 16; /*1*/          // Maximum number of segments
-
-  if ( n>8 || n<4) return 1;
-
-  if (n>4) Tol = Max(Draw::Atof(a[4]),1.e-10);
-
-  if (n>5) {
-    if (Draw::Atoi(a[5]) == 0) Continuity = GeomAbs_C0;
-    if (Draw::Atoi(a[5]) == 2) Continuity = GeomAbs_C2;
-  }
-
-  if (n>6) {
-    MaxDeg = Draw::Atoi(a[6]);
-    if (MaxDeg<1 || MaxDeg>14) MaxDeg = 14;
-  }
-
-  if (n>7) MaxSeg = Draw::Atoi(a[7]);
-  Handle(Geom2d_Curve) curve2d = DrawTrSurf::GetCurve2d(a[2]);
-  Handle(Geom_Surface) Surf = DrawTrSurf::GetSurface(a[3]);
-
-  Handle(Geom2dAdaptor_Curve) A2d = new (Geom2dAdaptor_Curve)(curve2d);
-  Handle(GeomAdaptor_Surface) AS = new (GeomAdaptor_Surface)(Surf);
-
-  Approx_CurveOnSurface App(A2d, AS, A2d->FirstParameter(), A2d->LastParameter(), Tol);
-  App.Perform(MaxSeg, MaxDeg, Continuity, Standard_True, Standard_False);
-
-  if(App.HasResult()) {
-    Handle(Geom_BSplineCurve) BSCurve = App.Curve3d(); 
-    DrawTrSurf::Set(a[1], BSCurve);
-    return 0;
-  }
-
-  di << "Approximation failed !\n";
-  return 1;
-			    
-}
 
 //=======================================================================
 //function : approxcurve
 //purpose  : 
 //=======================================================================
-static Standard_Integer approxcurve(Draw_Interpretor& di, Standard_Integer n, const char** a)
-{ 
-  Standard_Real Tol = 1.e-7;              // Tolerance (default 0.1mm) 
-  GeomAbs_Shape Continuity = GeomAbs_C1;  // Continuity order : 0, 1 or 2 (default 1)
-  Standard_Integer MaxDeg = 14;           // Maximum degree
-  Standard_Integer MaxSeg = 16;           // Maximum number of segments
-  
-  Standard_Integer Case, shift;
-// Case == 1 : 3d approximation without reparametrization
-// Case == 2 : 2d approximation without reparametrization
-// Case == 3 : 3d approximation with reparametrization
-// Case == 4 : curve_on_surface approximation with reparametrization
-// Case == 5 : 2 curves_on_surfaces approximation with reparametrization
+static Standard_Integer approxcurve(Draw_Interpretor& theDI, Standard_Integer theNbArgs, const char** theArgVec)
+{
+  TCollection_AsciiString aResName;
 
-  Handle(Geom_Curve) curve;
-  Handle(Geom2d_Curve) curve2d, curve2d2;
-  Handle(Geom_Surface) surface, surface2;
+  double aTol = RealLast();
+  int aMaxSeg = -1;
+  bool isStrict = false;
+  bool isCurvilinearParameter = false;
 
-  if(n < 2) return 1;
+  int aMaxDegree = -1;
+  int aContinuity = -1;
 
-  if (!strcmp(a[1],"-L")) {
-// approximation with curvilinear abscissa reparametrization
-    if (n > 11 || n < 4) return 1;
-    Tol = 1.e-4;
-    curve = DrawTrSurf::GetCurve(a[3]);
-    if (!curve.IsNull()) {
-      shift = 4;
-      Case = 3;
+  Handle(Geom_Curve) aCurve3d;
+  Handle(Geom2d_Curve) aCurve2d, aCurve2d2;
+  Handle(Geom_Surface) aSurface, aSurface2;
+
+  const auto parseCont = [](const char* theArg, int& theCont) -> bool
+  {
+    if (int(theCont) != -1)
+      return false; // already specified
+
+    TCollection_AsciiString aClassArg(theArg);
+    aClassArg.LowerCase();
+    if (aClassArg == "c0" || aClassArg == "0")
+      theCont = GeomAbs_C0;
+    else if (aClassArg == "c1" || aClassArg == "1")
+      theCont = GeomAbs_C1;
+    else if (aClassArg == "c2" || aClassArg == "2")
+      theCont = GeomAbs_C2;
+    else
+      return false;
+
+    return true;
+  };
+
+  const auto parseMaxSegments = [&theDI](const char* theArg, int& theNbSegs) -> bool
+  {
+    if (theNbSegs != -1)
+      return false; // already specified
+    else if (!Draw::ParseInteger(theArg, theNbSegs))
+      return false; // not an integer number
+    else if (theNbSegs >= 1)
+      return true;
+
+    theDI << "Syntax error: number of segments " << theNbSegs << " should be >=1\n";
+    return false;
+  };
+
+  const auto parseTolerance = [&theDI](const char* theArg, double& theTol) -> bool
+  {
+    if (theTol != RealLast())
+      return false; // already specified
+    else if (!Draw::ParseReal(theArg, theTol))
+      return false; // not a real number
+    else if (theTol >= 1.e-10)
+      return true;
+
+    theDI << "Syntax error: tolerance " << theTol << " should be >=1.e-10\n";
+    return false;
+  };
+
+  const auto parseDegree = [&theDI](const char* theArg, int& theDegree) -> bool
+  {
+    if (theDegree != -1)
+      return false; // already specified
+    else if (!Draw::ParseInteger(theArg, theDegree))
+      return false; // not an integer number
+    else if (theDegree >= 1 && theDegree <= 24)
+      return true;
+
+    theDI << "Syntax error: degree " << theDegree << " is out of range [1, 24]\n";
+    return false;
+  };
+
+  for (int anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArgCase(theArgVec[anArgIter]);
+    anArgCase.LowerCase();
+    if (anArgIter + 1 < theNbArgs
+      && (anArgCase == "-tolerance" || anArgCase == "-tol")
+      && parseTolerance(theArgVec[anArgIter + 1], aTol))
+    {
+      ++anArgIter;
     }
-    else {
-// approx curve_on_surface
-      if (n < 5) return 1;
-      curve2d = DrawTrSurf::GetCurve2d(a[3]); 
-      surface = DrawTrSurf::GetSurface(a[4]);
-      if (curve2d.IsNull() || surface.IsNull()) {
-	return 1;
-      }
-      if (n >= 7) {
-	curve2d2 = DrawTrSurf::GetCurve2d(a[5]); 
-	surface2 = DrawTrSurf::GetSurface(a[6]);
-	if (curve2d2.IsNull() || surface2.IsNull()) {
-	  shift = 5;
-	  Case = 4;
-	}
-	else {
-// approx 2 curves_on_surfaces
-	  shift = 7;
-	  Case = 5;
-	}
-      }
-      else {
-	shift = 5;
-	Case = 4;
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-maxsegments"
+          && parseMaxSegments(theArgVec[anArgIter + 1], aMaxSeg))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-maxdegree"
+          && parseDegree(theArgVec[anArgIter + 1], aMaxDegree))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-continuity"
+          && parseCont(theArgVec[anArgIter + 1], aContinuity))
+    {
+      ++anArgIter;
+    }
+    else if (anArgCase == "-strict" || anArgCase == "-nostrict")
+    {
+      isStrict = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter);
+    }
+    else if (anArgCase == "-L")
+    {
+      isCurvilinearParameter = true;
+    }
+    else if (aResName.IsEmpty())
+    {
+      aResName = theArgVec[anArgIter];
+    }
+    else if (aCurve3d.IsNull() && aCurve2d.IsNull())
+    {
+      aCurve3d = DrawTrSurf::GetCurve(theArgVec[anArgIter]);
+      if (aCurve3d.IsNull())
+      {
+        aCurve2d = DrawTrSurf::GetCurve2d(theArgVec[anArgIter]);
+        if (aCurve2d.IsNull())
+        {
+          theDI << "Syntax error: '" << theArgVec[anArgIter] << "' is not a curve";
+          return 1;
+        }
+        if (anArgIter + 1 < theNbArgs)
+        {
+          aSurface = DrawTrSurf::GetSurface(theArgVec[anArgIter + 1]);
+          if (!aSurface.IsNull())
+            ++anArgIter;
+        }
       }
     }
-  }
-  else {
-// approximation without reparamitrization
-    if ( n>7 || n<3) return 1;
-    shift = 3;
-    curve = DrawTrSurf::GetCurve(a[2]);
-    if (curve.IsNull()) {
-      curve2d = DrawTrSurf::GetCurve2d(a[2]); 
-      if (curve2d.IsNull()) {
-	return 1;
+    else if (isCurvilinearParameter
+          && !aSurface.IsNull() && aSurface2.IsNull()
+          && anArgIter + 1 < theNbArgs)
+    {
+      aCurve2d2 = DrawTrSurf::GetCurve2d(theArgVec[anArgIter]);
+      if (aCurve2d2.IsNull())
+      {
+        theDI << "Syntax error: '" << theArgVec[anArgIter] << "' is not a curve";
+        return 1;
       }
-      Case = 2;
+      aSurface2 = DrawTrSurf::GetSurface(theArgVec[++anArgIter]);
+      if (aSurface2.IsNull())
+      {
+        theDI << "Syntax error: '" << theArgVec[anArgIter] << "' is not a surface";
+        return 1;
+      }
+    }
+    // legacy syntax: approxcurve [-L] name curve1 [Surf1] [curve2d2 Surf2] [Tol [cont [maxdeg [maxseg]]]]
+    else if (parseTolerance(theArgVec[anArgIter], aTol))
+    {
+      //
+    }
+    else if (parseCont(theArgVec[anArgIter], aContinuity))
+    {
+      //
+    }
+    else if (parseDegree(theArgVec[anArgIter], aMaxDegree))
+    {
+      //
+    }
+    else if (parseMaxSegments(theArgVec[anArgIter], aMaxSeg))
+    {
+      //
     }
     else
-      Case = 1;
-  }
-  
-  if (n>shift) Tol = Max(Draw::Atof(a[shift]),1.e-10);
-  
-  if (n>shift+1) {
-    if (Draw::Atoi(a[shift+1]) == 0) Continuity = GeomAbs_C0;
-    if (Draw::Atoi(a[shift+1]) == 2) Continuity = GeomAbs_C2;
-  }
-  
-  if (n>shift+2) {
-      MaxDeg = Draw::Atoi(a[shift+2]);
-      if (MaxDeg<1 || MaxDeg>14) MaxDeg = 14;
-    }
-  
-  if (n>shift+3) MaxSeg = Draw::Atoi(a[shift+3]);
-    
-  if (Case == 1) {
-    GeomConvert_ApproxCurve appr(curve, Tol, Continuity, MaxSeg, MaxDeg);
-    if(appr.HasResult()) {
-      //appr.Dump(std::cout);
-      Standard_SStream aSStream;
-      appr.Dump(aSStream);
-      di << aSStream;
-      Handle(Geom_BSplineCurve) BSCurve = appr.Curve(); 
-      DrawTrSurf::Set(a[1], BSCurve);
-    }
- }   
-
-  else if (Case == 2) {
-    Geom2dConvert_ApproxCurve appr(curve2d, Tol, Continuity, MaxSeg, MaxDeg);
-    if(appr.HasResult()) {
-      //appr.Dump(std::cout);
-      Standard_SStream aSStream;
-      appr.Dump(aSStream);
-      di << aSStream;
-      Handle(Geom2d_BSplineCurve) BSCurve = appr.Curve(); 
-      DrawTrSurf::Set(a[1], BSCurve);
-    }
-  }    
-
-  else if (Case == 3) {
-    Handle(Adaptor3d_Curve) HACur = new GeomAdaptor_Curve(curve);
-    Approx_CurvilinearParameter appr(HACur, Tol, Continuity, MaxDeg, MaxSeg);
-    if(appr.HasResult()) {
-      //appr.Dump(std::cout);
-      Standard_SStream aSStream;
-      appr.Dump(aSStream);
-      di << aSStream;
-      Handle(Geom_BSplineCurve) BSCurve = appr.Curve3d(); 
-      DrawTrSurf::Set(a[2], BSCurve);
-    }
-}    
-  else if (Case == 4) {
-    Handle(Adaptor2d_Curve2d) HACur2d = new Geom2dAdaptor_Curve(curve2d);
-    Handle(Adaptor3d_Surface) HASur = new GeomAdaptor_Surface(surface);
-    Approx_CurvilinearParameter appr(HACur2d, HASur, Tol, Continuity, MaxDeg, MaxSeg);
-    if(appr.HasResult()) {
-      //appr.Dump(std::cout);
-      Standard_SStream aSStream;
-      appr.Dump(aSStream);
-      di << aSStream;
-      Handle(Geom_BSplineCurve) BSCurve = appr.Curve3d(); 
-      DrawTrSurf::Set(a[2], BSCurve);
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
     }
   }
 
-  else if (Case == 5) {
-    Handle(Adaptor2d_Curve2d) HACur2d = new Geom2dAdaptor_Curve(curve2d);
-    Handle(Adaptor3d_Surface) HASur = new GeomAdaptor_Surface(surface);
-    Handle(Adaptor2d_Curve2d) HACur2d2 = new Geom2dAdaptor_Curve(curve2d2);
-    Handle(Adaptor3d_Surface) HASur2 = new GeomAdaptor_Surface(surface2);
-    Approx_CurvilinearParameter appr(HACur2d, HASur, HACur2d2, HASur2, Tol, Continuity, MaxDeg, MaxSeg);
-    if(appr.HasResult()) {
-      //appr.Dump(std::cout);
-      Standard_SStream aSStream;
-      appr.Dump(aSStream);
-      di << aSStream;
-      Handle(Geom_BSplineCurve) BSCurve = appr.Curve3d(); 
-      DrawTrSurf::Set(a[2], BSCurve);
-    }
+  if (aResName.IsEmpty()
+   || (aCurve3d.IsNull() && aCurve2d.IsNull()))
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
   }
-  
+
+  // initialize unspecified parameters with defaults
+  if (aTol == RealLast())
+    aTol = isCurvilinearParameter ? 1.e-4 : 1.e-7;
+
+  if (aMaxSeg == -1)
+    aMaxSeg = 16;
+
+  if (aMaxDegree == -1)
+    aMaxDegree = 14;
+
+  if (aContinuity == -1)
+    aContinuity = GeomAbs_C1;
+
+
+  Standard_SStream aDump;
+  Standard_Boolean hasResult = false;
+  if (!isCurvilinearParameter && !aCurve3d.IsNull())
+  {
+    GeomConvert_ApproxCurve anApprox(aCurve3d, aTol, GeomAbs_Shape(aContinuity), aMaxSeg, aMaxDegree);
+    anApprox.Dump(aDump);
+    hasResult = anApprox.HasResult() && (!isStrict || anApprox.IsDone());
+    if (hasResult)
+      DrawTrSurf::Set(aResName.ToCString(), anApprox.Curve());
+  }
+  else if (!isCurvilinearParameter && !aSurface.IsNull())
+  {
+    Handle(Geom2dAdaptor_Curve) aCurvAdapt = new Geom2dAdaptor_Curve(aCurve2d);
+    Handle(GeomAdaptor_Surface) aSurfAdapt = new GeomAdaptor_Surface(aSurface);
+
+    Approx_CurveOnSurface anApprox(aCurvAdapt, aSurfAdapt, aCurvAdapt->FirstParameter(), aCurvAdapt->LastParameter(), aTol);
+    anApprox.Perform(aMaxSeg, aMaxDegree, GeomAbs_Shape(aContinuity), true, false);
+    anApprox.Dump(aDump);
+    hasResult = anApprox.HasResult() && (!isStrict || anApprox.IsDone());
+    if (hasResult)
+      DrawTrSurf::Set(aResName.ToCString(), anApprox.Curve3d());
+  }
+  else if (!isCurvilinearParameter && !aCurve2d.IsNull())
+  {
+    Geom2dConvert_ApproxCurve anApprox(aCurve2d, aTol, GeomAbs_Shape(aContinuity), aMaxSeg, aMaxDegree);
+    anApprox.Dump(aDump);
+    hasResult = anApprox.HasResult() && (!isStrict || anApprox.IsDone());
+    if (hasResult)
+      DrawTrSurf::Set(aResName.ToCString(), anApprox.Curve());
+  }
+  else if (!aSurface2.IsNull())
+  {
+    Handle(Adaptor2d_Curve2d) aCurvAdapt1 = new Geom2dAdaptor_Curve(aCurve2d);
+    Handle(Adaptor3d_Surface) aSurfAdapt1 = new GeomAdaptor_Surface(aSurface);
+    Handle(Adaptor2d_Curve2d) aCurvAdapt2 = new Geom2dAdaptor_Curve(aCurve2d2);
+    Handle(Adaptor3d_Surface) aSurfAdapt2 = new GeomAdaptor_Surface(aSurface2);
+    Approx_CurvilinearParameter anApprox(aCurvAdapt1, aSurfAdapt1, aCurvAdapt2, aSurfAdapt2,
+                                         aTol, GeomAbs_Shape(aContinuity), aMaxDegree, aMaxSeg);
+    anApprox.Dump(aDump);
+    hasResult = anApprox.HasResult() && (!isStrict || anApprox.IsDone());
+    if (hasResult)
+      DrawTrSurf::Set(aResName.ToCString(), anApprox.Curve3d());
+  }
+  else if (!aSurface.IsNull())
+  {
+    Handle(Adaptor2d_Curve2d) aCurvAdapt = new Geom2dAdaptor_Curve(aCurve2d);
+    Handle(Adaptor3d_Surface) aSurfAdapt = new GeomAdaptor_Surface(aSurface);
+    Approx_CurvilinearParameter anApprox(aCurvAdapt, aSurfAdapt, aTol,
+                                         GeomAbs_Shape(aContinuity), aMaxDegree, aMaxSeg);
+    anApprox.Dump(aDump);
+    hasResult = anApprox.HasResult() && (!isStrict || anApprox.IsDone());
+    if (hasResult)
+      DrawTrSurf::Set(aResName.ToCString(), anApprox.Curve3d());
+  }
+  else if (!aCurve3d.IsNull())
+  {
+    Handle(Adaptor3d_Curve) aCurvAdapt = new GeomAdaptor_Curve(aCurve3d);
+    Approx_CurvilinearParameter anApprox(aCurvAdapt, aTol, GeomAbs_Shape(aContinuity), aMaxDegree, aMaxSeg);
+    anApprox.Dump(aDump);
+    hasResult = anApprox.HasResult() && (!isStrict || anApprox.IsDone());
+    if (hasResult)
+      DrawTrSurf::Set(aResName.ToCString(), anApprox.Curve3d());
+  }
+  else
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
+
+  theDI << aDump;
+  if (!hasResult)
+  {
+    theDI << "Error: approximation has no result";
+    return 1;
+  }
 
   return 0;
 }
@@ -2167,15 +2237,26 @@ void  GeomliteTest::CurveCommands(Draw_Interpretor& theCommands)
 		  "rawcont curve1 curve2 u1 u2",
 		  __FILE__,
 		  rawcont,g) ;
-  theCommands.Add("approxcurve",
-                  "approxcurve [-L] name curve1 [Surf1] [curve2d2 Surf2] [Tol [cont [maxdeg [maxseg]]]] ",
-		  __FILE__,
-		  approxcurve,g);
 
-  theCommands.Add("approxcurveonsurf",
-                  "approxcurveonsurf name curve2d surface [Tol [cont [maxdeg [maxseg]]]] ",
-		  __FILE__,
-		  approxcurveonsurf,g);
+  theCommands.Add("approxcurve", /* [approxcurve] */ R"(
+approxcurve result curve1 [surf1] [-L] [curve2d2 surf2]
+            [-tolerance value>=1.e-10] [-strict {0|1}]=0 [-maxSegments number]=16
+            [-continuity {c0|c1|c2}]=c1 [-maxDegree 1..24]=14
+Creates B-Spline curve approximation from the given input curve.
+ result       output B-Spline curve name;
+ curve1       input 2d or 3d curve to approximate;
+ -L           approximation with curvilinear abscissa reparametrization;
+ surf1        input surface to approximate 2d curve into 3d (only with -L);
+ curve2d2     second input 2d curve (only with -L);
+ surf2        input surface for second 2d curve (only with -L);
+ -tolerance   approximation tolerance (by default, 1.e-4 for -L and 1.e-7 otherwise);
+ -strict      if 1, reject result that not reached target tolerance;
+ -maxSegments maximum number of segments (patches) for approximation;
+ -continuity  approximated curve continuity;
+ -maxDegree   maximum degree of approximated B-Spline curve;
+ )" /* [approxcurve] */, __FILE__, approxcurve, g);
+
+  theCommands.Add("approxcurveonsurf", "alias to approxcurve", __FILE__, approxcurve, g);
 
  theCommands.Add("fitcurve", "fitcurve result  curve [tol [maxdeg [inverse]]]", __FILE__, fitcurve, g);
 

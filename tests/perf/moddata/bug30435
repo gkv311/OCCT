@@ -7,7 +7,7 @@ puts ""
 pload QAcommands
 cone con 0 0 0 0 0 -1 1 0 0 -30 0
 2dbeziercurve b 4 0 0 15 15 35 -15 50 1.
-approxcurveonsurf cc b con  1.e-7 1 12 1000
+approxcurve cc b con -tolerance 1.e-7 -continuity c1 -maxDegree 12 -maxSegments 1000
 clear con
 clpoles cc
 
