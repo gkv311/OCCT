@@ -182,9 +182,15 @@ void GeomConvert_ApproxCurve::Approximate(
   return myMaxError;
 }
 
- void GeomConvert_ApproxCurve::Dump(Standard_OStream& o) const
+void GeomConvert_ApproxCurve::Dump(Standard_OStream& theStream) const
 {
-  o << "******* Dump of ApproxCurve *******" << std::endl;
-  o << "*******Error   " << MaxError() << std::endl;
-}
+  theStream << "******* Dump of ApproxCurve *******\n"
+            << "HasResult: " << HasResult() << "\n"
+            << "IsDone:    " << IsDone()    << "\n"
+            << "MaxError:  " << MaxError()  << "\n";
+  if (myBSplCurve.IsNull())
+    return;
 
+  theStream << "Degree:    " << myBSplCurve->Degree()  << "\n"
+            << "NbPoles:   " << myBSplCurve->NbPoles() << "\n";
+}

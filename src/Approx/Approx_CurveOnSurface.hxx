@@ -76,6 +76,9 @@ public:
                                const Standard_Boolean theOnly3d = Standard_False,
                                const Standard_Boolean theOnly2d = Standard_False);
 
+  //! Print the maximum errors(s)
+  Standard_EXPORT void Dump(Standard_OStream& theStream) const;
+
 protected:
 
   //! Checks whether the 2d curve is a isoline. It can be represented by b-spline, bezier,

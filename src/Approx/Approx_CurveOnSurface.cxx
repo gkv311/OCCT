@@ -552,6 +552,30 @@ void Approx_CurveOnSurface::Perform(const Standard_Integer theMaxSegments,
   return myError2dV;
 }
 
+//=======================================================================
+//function : Dump
+//purpose  :
+//=======================================================================
+void Approx_CurveOnSurface::Dump(Standard_OStream& theStream) const
+{
+  theStream << "Dump of Approx_CurveOnSurface\n"
+            << "HasResult:   " << HasResult() << "\n"
+            << "IsDone:      " << IsDone()    << "\n";
+  if (!myCurve2d.IsNull())
+  {
+    theStream << "MaxError2dU: " << myError2dU << "\n"
+              << "MaxError2dV: " << myError2dV << "\n"
+              << "Degree2d:    " << myCurve2d->Degree() << "\n"
+              << "NbPoles2d:   " << myCurve2d->NbPoles() << "\n";
+  }
+  if (!myCurve3d.IsNull())
+  {
+    theStream << "MaxError3d:  " << myError3d << "\n"
+              << "Degree3d:    " << myCurve3d->Degree() << "\n"
+              << "NbPoles3d:   " << myCurve3d->NbPoles() << "\n";
+  }
+}
+
 //=============================================================================
 //function : isIsoLine
 //purpose  :

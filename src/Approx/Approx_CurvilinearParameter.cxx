@@ -621,14 +621,38 @@ Approx_CurvilinearParameter::Approx_CurvilinearParameter(const Handle(Adaptor2d_
 //purpose  : print the maximum errors(s)
 //=======================================================================
 
-void Approx_CurvilinearParameter::Dump(Standard_OStream& o) const
+void Approx_CurvilinearParameter::Dump(Standard_OStream& theStream) const
 {
-  o << "Dump of Approx_CurvilinearParameter" << std::endl;
-  if (myCase==2 || myCase==3) 
-    o << "myMaxError2d1 = " << myMaxError2d1 << std::endl;
-  if (myCase==3) 
-    o << "myMaxError2d2 = " << myMaxError2d2 << std::endl;
-  o << "myMaxError3d = " << myMaxError3d << std::endl;
+  theStream << "Dump of Approx_CurvilinearParameter\n"
+            << "HasResult:   " << HasResult() << "\n"
+            << "IsDone:      " << IsDone()    << "\n";
+
+  if (myCase == 2 || myCase == 3)
+  {
+    theStream << "MaxError2d1: " << myMaxError2d1 << "\n";
+    if (!myCurve2d1.IsNull())
+    {
+      theStream << "Degree2d1:   " << myCurve2d1->Degree()  << "\n"
+                << "NbPoles2d1:  " << myCurve2d1->NbPoles() << "\n";
+    }
+  }
+
+  if (myCase == 3)
+  {
+    theStream << "MaxError2d2: " << myMaxError2d2 << "\n";
+    if (!myCurve2d2.IsNull())
+    {
+      theStream << "Degree2d2:   " << myCurve2d2->Degree()  << "\n"
+                << "NbPoles2d2:  " << myCurve2d2->NbPoles() << "\n";
+    }
+  }
+
+  theStream << "MaxError3d:  " << myMaxError3d << "\n";
+  if (!myCurve3d.IsNull())
+  {
+    theStream << "Degree3d:    " << myCurve3d->Degree()  << "\n"
+              << "NbPoles3d:   " << myCurve3d->NbPoles() << "\n";
+  }
 }
 
 //=======================================================================
