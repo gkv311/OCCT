@@ -821,53 +821,263 @@ static Standard_Integer convbz(Draw_Interpretor& di,
 
 //=======================================================================
 //function : approxsurf
-//purpose  : Approximation d'une Surface par une BSpline non rationnelle
+//purpose  : Approximation of a surface into non-rational BSpline
 //=======================================================================
+static int approxsurf(Draw_Interpretor& theDI, int theNbArgs, const char** theArgVec)
+{
+  TCollection_AsciiString aResName;
+  Handle(Geom_Surface) aSurf;
 
+  double aTol = RealLast();
+  int aMaxSeg = -1;
+  int aPrecMode = -1;
+  bool isStrict = false;
 
-static Standard_Integer approxsurf(Draw_Interpretor& di, Standard_Integer n, const char** a)
-{ 
-// " Tolerance (par defaut 0.1mm) " 
-  Standard_Real Tol = 1.e-4;
-// " Ordres de continuites : 0, 1 ou 2 (par defaut 1)" 
-  GeomAbs_Shape myUCont = GeomAbs_C1, myVCont = GeomAbs_C1;
-// " Degre maximum des carreaux de Bezier 14 par defaut "
-  Standard_Integer degU = 14, degV = 14;
-// " Nombre max de carreaux (par defaut 10)" 
-  Standard_Integer nmax = 16;
-// "Code de precision par defaults"
-  Standard_Integer myPrec = 1;  
+  int aUMaxDegree = -1;
+  int aVMaxDegree = -1;
+  int aUCont = -1;
+  int aVCont = -1;
 
-  if ( n>10 || n<3) return 1;
+  const auto parsePrecMode = [](const char* theArg, int& theMode) -> bool
+  {
+    if (theMode != -1)
+      return false; // already specified
 
-  if (n>3) Tol = Max(Draw::Atof(a[3]),1.e-10);
+    TCollection_AsciiString aClassArg(theArg);
+    aClassArg.LowerCase();
+    if (aClassArg == "0")
+      theMode = 0;
+    else if (aClassArg == "1" || aClassArg == "fast")
+      theMode = 1;
+    else if (aClassArg == "2")
+      theMode = 2;
+    else if (aClassArg == "3" || aClassArg == "precise")
+      theMode = 3;
+    else
+      return false;
 
-  if (n==5)  return 1;
-  
-  if (n>5) {
-    if (Draw::Atoi(a[4]) == 0) myUCont = GeomAbs_C0;
-    if (Draw::Atoi(a[4]) == 2) myUCont = GeomAbs_C2;
-    if (Draw::Atoi(a[5]) == 0) myVCont = GeomAbs_C0;
-    if (Draw::Atoi(a[5]) == 2) myVCont = GeomAbs_C2;
+    return true;
+  };
+
+  const auto parseCont = [](const char* theArg, int& theCont) -> bool
+  {
+    if (int(theCont) != -1)
+      return false; // already specified
+
+    TCollection_AsciiString aClassArg(theArg);
+    aClassArg.LowerCase();
+    if (aClassArg == "c0" || aClassArg == "0")
+      theCont = GeomAbs_C0;
+    else if (aClassArg == "c1" || aClassArg == "1")
+      theCont = GeomAbs_C1;
+    else if (aClassArg == "c2" || aClassArg == "2")
+      theCont = GeomAbs_C2;
+    else
+      return false;
+
+    return true;
+  };
+
+  const auto parseMaxSegments = [&theDI](const char* theArg, int& theNbSegs) -> bool
+  {
+    if (theNbSegs != -1)
+      return false; // already specified
+    else if (!Draw::ParseInteger(theArg, theNbSegs))
+      return false; // not an integer number
+    else if (theNbSegs >= 1)
+      return true;
+
+    theDI << "Syntax error: number of segments " << theNbSegs << " should be >=1\n";
+    return false;
+  };
+
+  const auto parseTolerance = [&theDI](const char* theArg, double& theTol) -> bool
+  {
+    if (theTol != RealLast())
+      return false; // already specified
+    else if (!Draw::ParseReal(theArg, theTol))
+      return false; // not a real number
+    else if (theTol >= 1.e-10)
+      return true;
+
+    theDI << "Syntax error: tolerance " << theTol << " should be >=1.e-10\n";
+    return false;
+  };
+
+  const auto parseDegree = [&theDI](const char* theArg, int& theDegree) -> bool
+  {
+    if (theDegree != -1)
+      return false; // already specified
+    else if (!Draw::ParseInteger(theArg, theDegree))
+      return false; // not an integer number
+    else if (theDegree >= 1 && theDegree <= 24)
+      return true;
+
+    theDI << "Syntax error: degree " << theDegree << " is out of range [1, 24]\n";
+    return false;
+  };
+
+  for (int anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
+  {
+    TCollection_AsciiString anArgCase(theArgVec[anArgIter]);
+    anArgCase.LowerCase();
+    if (anArgIter + 1 < theNbArgs
+      && (anArgCase == "-tolerance" || anArgCase == "-tol")
+      && parseTolerance(theArgVec[anArgIter + 1], aTol))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && (anArgCase == "-mode" || anArgCase == "-precmode")
+          && parsePrecMode(theArgVec[anArgIter + 1], aPrecMode))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-maxsegments"
+          && parseMaxSegments(theArgVec[anArgIter + 1], aMaxSeg))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-maxdegree"
+          && parseDegree(theArgVec[anArgIter + 1], aUMaxDegree))
+    {
+      aVMaxDegree = aUMaxDegree;
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-umaxdegree"
+          && parseDegree(theArgVec[anArgIter + 1], aUMaxDegree))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-vmaxdegree"
+          && parseDegree(theArgVec[anArgIter + 1], aVMaxDegree))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-continuity"
+          && parseCont(theArgVec[anArgIter + 1], aUCont))
+    {
+      aVCont = aUCont;
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-ucontinuity"
+          && parseCont(theArgVec[anArgIter + 1], aUCont))
+    {
+      ++anArgIter;
+    }
+    else if (anArgIter + 1 < theNbArgs && anArgCase == "-vcontinuity"
+          && parseCont(theArgVec[anArgIter + 1], aVCont))
+    {
+      ++anArgIter;
+    }
+    else if (anArgCase == "-strict" || anArgCase == "-nostrict")
+    {
+      isStrict = Draw::ParseOnOffNoIterator(theNbArgs, theArgVec, anArgIter);
+    }
+    else if (aResName.IsEmpty())
+    {
+      aResName = theArgVec[anArgIter];
+    }
+    else if (aSurf.IsNull())
+    {
+      aSurf = DrawTrSurf::GetSurface(theArgVec[anArgIter]);
+      if (aSurf.IsNull())
+      {
+        theDI << "Syntax error: '" << theArgVec[anArgIter] << "' is not a surface";
+        return 1;
+      }
+    }
+    // legacy syntax: approxsurf name surf [Tol [CnU CnV [degU degV [nmax [precMode]]]]
+    else if (parseTolerance(theArgVec[anArgIter], aTol)) // a[3]
+    {
+      //
+    }
+    else if (anArgIter + 1 < theNbArgs
+          && parseCont(theArgVec[anArgIter + 0], aUCont)  // a[4]
+          && parseCont(theArgVec[anArgIter + 1], aVCont)) // a[5]
+    {
+      anArgIter += 1;
+    }
+    else if (anArgIter + 1 < theNbArgs
+          && parseDegree(theArgVec[anArgIter + 0], aUMaxDegree)  // a[6]
+          && parseDegree(theArgVec[anArgIter + 1], aVMaxDegree)) // a[7]
+    {
+      anArgIter += 1;
+    }
+    else if (parseMaxSegments(theArgVec[anArgIter + 0], aMaxSeg)) // a[8]
+    {
+      //
+    }
+    else if (parsePrecMode(theArgVec[anArgIter + 0], aPrecMode)) // a[9]
+    {
+      //
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
   }
 
-  if (n==7)  return 1;
+  if (aSurf.IsNull() || aResName.IsEmpty())
+  {
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
+  }
 
-  if (n>7) {
-    ( degU = (Draw::Atoi(a[6])));
-    ( degV = (Draw::Atoi(a[7])));
-    if ((degU<1) || (degU>24)) degU = 14;
-    if ((degV<1) || (degV>24)) degV = 14; 
-  }  
+  // initialize unspecified parameters with defaults
+  if (aTol == RealLast())
+    aTol = 1.e-4;
 
-  if (n>8) nmax = Draw::Atoi(a[8]);
-  if (n>9) myPrec =  Draw::Atoi(a[9]);
+  if (aPrecMode == -1)
+    aPrecMode = 1;
 
-  Handle(Geom_Surface) surf = DrawTrSurf::GetSurface(a[2]);
-  if (surf.IsNull()) return 1;  
-  GeomConvert_ApproxSurface myApprox(surf,Tol,myUCont,myVCont,degU,degV,nmax,myPrec);
-  if ( myApprox.HasResult()) DrawTrSurf::Set(a[1], myApprox.Surface());
-  di<<a[1]<<"\n";
+  if (aMaxSeg == -1)
+    aMaxSeg = 16;
+
+  if (aUMaxDegree == -1)
+    aUMaxDegree = 14;
+
+  if (aVMaxDegree == -1)
+    aVMaxDegree = 14;
+
+  if (aUCont == -1)
+    aUCont = GeomAbs_C1;
+
+  if (aVCont == -1)
+    aVCont = GeomAbs_C1;
+
+  Handle(Adaptor3d_Surface) aSurfAdaptor = new GeomAdaptor_Surface(aSurf);
+
+  GeomConvert_ApproxSurface anApprox(aSurfAdaptor,
+                                     aTol,
+                                     GeomAbs_Shape(aUCont), GeomAbs_Shape(aVCont),
+                                     aUMaxDegree, aVMaxDegree,
+                                     aMaxSeg, aPrecMode);
+  if (!anApprox.HasResult())
+  {
+    theDI << "Error: approximation has no result";
+    return 1;
+  }
+  else if (!anApprox.IsDone())
+  {
+    if (isStrict)
+    {
+      theDI << "Error: approximation with target tolerance " << aTol << " failed (maxError: " << anApprox.MaxError() << ")";
+      return 1;
+    }
+
+    theDI << "Warning: target tolerance not reached\n";
+  }
+
+  Handle(Geom_BSplineSurface) aResSurf = anApprox.Surface();
+
+  theDI << "MaxError: " << anApprox.MaxError()  << "\n"
+        << "UDegree:  " << aResSurf->UDegree()  << "\n"
+        << "VDegree:  " << aResSurf->VDegree()  << "\n"
+        << "NbUPoles: " << aResSurf->NbUPoles() << "\n"
+        << "NbVPoles: " << aResSurf->NbVPoles() << "\n";
+
+  DrawTrSurf::Set(aResName.ToCString(), aResSurf);
   return 0;
 }
 
@@ -1828,10 +2038,28 @@ void  GeomliteTest::SurfaceCommands(Draw_Interpretor& theCommands)
 		  __FILE__,
 		  convbz,g);
 
-  theCommands.Add("approxsurf",
-                  "approxsurf name surf [Tol [CnU CnV [degU degV [nmax]]]] ",
-		  __FILE__,
-		  approxsurf,g);
+  theCommands.Add("approxsurf", /* [approxsurf] */ R"(
+ approxsurf result surf
+           [-tolerance value]=0.0001 [-strict {0|1}]=0 [-maxSegments number]=16
+           [-precMode {0|1|2|3}]=1
+           [-uContinuity {c0|c1|c2}]=c1 [-vContinuity {c0|c1|c2}]=c1 [-continuity {c0|c1|c2}]
+           [-uMaxDegree degree]=14 [-vMaxDegree degree]=14 [-maxDegree degree]
+ Creates B-Spline surface approximation from the given input surface.
+  result       output B-Spline surface name;
+  surf         input surface to approximate;
+  -tolerance   approximation tolerance;
+  -strict      if 1, reject approximated that not reached target tolerance;
+  -precMode    precision mode:
+               - 0 fastest computation and low precision,
+               - 1 fast    computation and average precision,
+               - 2 average computation and good precision,
+               - 3 slow    computation and very good precision;
+  -maxSegments maximum number of segments (patches) for approximation;
+  -uContinuity approximated surface continuity in U;
+  -vContinuity approximated surface continuity in V;
+  -uMaxDegree  maximum degree of approximated B-Spline surface in U;
+  -vMaxDegree  maximum degree of approximated B-Spline surface in V.
+ )" /* [approxsurf] */, __FILE__, approxsurf, g);
 
   g = "GEOMETRY Curves and Surfaces modification";
 
