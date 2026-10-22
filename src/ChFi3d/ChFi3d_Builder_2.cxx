@@ -2957,11 +2957,11 @@ void ChFi3d_Builder::PerformSetOfKGen(Handle(ChFiDS_Stripe)& Stripe,
 	}
       }
       else if(IF < IL){
-	TColStd_Array1OfReal wv(IF,IL - 1);
+	TColStd_Array1OfReal wv(IF, IL);
 #ifdef OCCT_DEBUG
 	std::cout<<"length of the trajectory : "<<(WL-WF)<<std::endl;
 #endif
-	for(i = IF; i < IL; i++){
+	for(i = IF; i <= IL; i++){
 	  Standard_Integer iloc = i;
 	  if(periodic) iloc = (i - 1)%nbed + 1;
 	  Standard_Real wi = Spine->LastParameter(iloc);
@@ -2990,11 +2990,11 @@ void ChFi3d_Builder::PerformSetOfKGen(Handle(ChFiDS_Stripe)& Stripe,
 	  Standard_Integer j;
 	  Standard_Integer jf = 0, jl = 0;
 	  if(lp < WF+tolesp || fp > WL-tolesp) continue;
-	  for(j = IF; j < IL; j++){
+	  for(j = IF; j <= IL; j++){
 	    jf = j;
 	    if(fp < wv(j) - tolesp) break;
 	  }
-	  for(j = IF; j < IL; j++){
+	  for(j = IF; j <= IL; j++){
 	    jl = j;
 	    if(lp < wv(j) + tolesp) break;
 	  }
