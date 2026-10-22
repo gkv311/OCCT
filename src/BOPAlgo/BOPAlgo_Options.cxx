@@ -43,18 +43,13 @@ namespace
 }
 
 //=======================================================================
-// function: 
-// purpose: 
+// function:
+// purpose:
 //=======================================================================
 BOPAlgo_Options::BOPAlgo_Options()
-:
-  myAllocator(NCollection_BaseAllocator::CommonBaseAllocator()),
-  myReport(new Message_Report),
-  myRunParallel(myGlobalRunParallel),
-  myFuzzyValue(Precision::Confusion()),
-  myUseOBB(Standard_False)
+: BOPAlgo_Options(NCollection_BaseAllocator::CommonBaseAllocator())
 {
-  BOPAlgo_LoadMessages();
+  //
 }
 
 //=======================================================================
@@ -71,6 +66,7 @@ BOPAlgo_Options::BOPAlgo_Options
   myUseOBB(Standard_False)
 {
   BOPAlgo_LoadMessages();
+  myReport->SetLimit(1000);
 }
 
 //=======================================================================
