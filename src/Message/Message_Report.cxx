@@ -53,17 +53,11 @@ void Message_Report::AddAlert (Message_Gravity theGravity, const Handle(Message_
   if (myAlertLevels.IsEmpty())
   {
     Handle (Message_CompositeAlerts) aCompositeAlert = compositeAlerts (Standard_True);
-    if (aCompositeAlert->AddAlert (theGravity, theAlert))
-    {
-      return;
-    }
-
-    // remove alerts under the report only
     const Message_ListOfAlert& anAlerts = aCompositeAlert->Alerts (theGravity);
-    if (anAlerts.Extent() > myLimit)
-    {
-      aCompositeAlert->RemoveAlert (theGravity, anAlerts.First());
-    }
+    if (myLimit >= 0 && anAlerts.Extent() >= myLimit)
+      return; // limit is reached
+
+    aCompositeAlert->AddAlert (theGravity, theAlert);
     return;
   }
 

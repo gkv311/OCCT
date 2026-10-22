@@ -114,12 +114,13 @@ public:
   //! Removes all activated metrics
   void ClearMetrics() { myActiveMetrics.Clear(); }
 
-  //! Returns maximum number of collecting alerts. If the limit is achieved,
-  //! first alert is removed, the new alert is added in the container.
+  //! Returns maximum number of collecting alerts; -1 by default which means no limit.
+  //! If the limit is achieved, the new alerts will be ignored.
   //! @return the limit value
   Standard_Integer Limit() const { return myLimit; }
 
   //! Sets maximum number of collecting alerts.
+  //! A negative value means no limit.
   //! @param theLimit limit value
   void SetLimit(const Standard_Integer theLimit) { myLimit = theLimit; }
 
