@@ -254,10 +254,12 @@ ShapeUpgrade_SplitCurve3d::ShapeUpgrade_SplitCurve3d()
 	  anException.Print(std::cout); std::cout << std::endl;
 #endif
 	  (void)anException;
-	  theNewCurve = new Geom_TrimmedCurve(Handle(Geom_Curve)::DownCast(myCurve->Copy()),Firstt,Lastt);  
 	}
       }
-      else theNewCurve = new Geom_TrimmedCurve(Handle(Geom_Curve)::DownCast(myCurve->Copy()),Firstt,Lastt);  
+    }
+    if (theNewCurve.IsNull())
+    {
+      theNewCurve = new Geom_TrimmedCurve(Handle(Geom_Curve)::DownCast(myCurve->Copy()),Firstt,Lastt);
     }
     myResultingCurves->SetValue (i, theNewCurve);
   }
