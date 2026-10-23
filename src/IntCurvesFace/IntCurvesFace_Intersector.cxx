@@ -253,6 +253,9 @@ void IntCurvesFace_Intersector::InternalCall(const IntCurveSurface_HInter &HICS,
           for(; anExp.More(); anExp.Next())
           {
             TopoDS_Edge anE = TopoDS::Edge(anExp.Current());
+            if (BRep_Tool::Degenerated(anE))
+              continue;
+
             Standard_Real f, l;
             Handle(Geom_Curve) aPC = BRep_Tool::Curve (anE, f, l);
             GeomAPI_ProjectPointOnCurve aProj (HICSPointindex.Pnt(), aPC, f, l);
