@@ -913,6 +913,8 @@ Standard_Boolean ShapeFix_Wire::FixSelfIntersection()
   
   if ( NeedFix ( myFixIntersectingEdgesMode ) )
   {
+    nb = sbwd->NbEdges(); // recompute number of edges, as it might be changed by fixes above
+
     Standard_Integer num = ( myClosedMode ? 1 : 2 );
     for ( ; nb >1 && num <= nb; num++ )
     {
