@@ -175,8 +175,16 @@ Methode:
   myDone = Standard_False;
 
   math_FunctionRoots S (myF, myumin, myusup, mynbsample, mytolu, mytolF, mytolF);
-  if (!S.IsDone() ||
-      S.IsAllNull()) { return; }
+  if (!S.IsDone())
+    return;
+
+  if (S.IsAllNull() && myF.NbExt() == 0)
+  {
+    // add the point in the middle of interval
+    double aVal = 0.0;
+    myF.Value((myumin + myusup) * 0.5, aVal);
+    myF.GetStateNumber(); // add evaluated point as solution
+  }
 
   myDone = Standard_True;
 }
