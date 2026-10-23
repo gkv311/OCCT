@@ -1697,24 +1697,11 @@ Handle(Geom_Surface) StepToGeom::MakeSurface (const Handle(StepGeom_Surface)& SS
       Handle(Geom_Surface) aBasisSurface = MakeSurface (OS->BasisSurface(), theLocalFactors);
       if (! aBasisSurface.IsNull())
       {
-        // sln 03.10.01. BUC61003. creation of  offset surface is corrected
         const Standard_Real anOffset = OS->Distance() * theLocalFactors.LengthFactor();
-        if (aBasisSurface->Continuity() == GeomAbs_C0)
-        {
-          const BRepBuilderAPI_MakeFace aBFace(aBasisSurface, Precision::Confusion());
-          if (aBFace.IsDone())
-          {
-            const TopoDS_Shape aResult = ShapeAlgo::AlgoContainer()->C0ShapeToC1Shape(aBFace.Face(), Abs(anOffset));
-            if (aResult.ShapeType() == TopAbs_FACE)
-            {
-              aBasisSurface = BRep_Tool::Surface(TopoDS::Face(aResult));
-            }
-          }
-        }
-        if(aBasisSurface->Continuity() != GeomAbs_C0)
-        {
-          return new Geom_OffsetSurface ( aBasisSurface, anOffset );
-        }
+
+        // create offset surface even from GeomAbs_C0 basis surface,
+        // to be treated by higher level algorithms if necessary
+        return new Geom_OffsetSurface(aBasisSurface, anOffset, true);
       }
     }
     else if (SS->IsKind(STANDARD_TYPE(StepGeom_SurfaceReplica))) { //:n7 abv 16 Feb 99
