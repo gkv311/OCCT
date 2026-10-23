@@ -406,7 +406,7 @@ static void ComputePCA(const TopoDS_Shape& theS,
   }
   else
   {
-    BRepBndLib::Add(aST, aShapeBox);
+    BRepBndLib::Add(aST, aShapeBox, theIsTriangulationUsed);
   }
   if (aShapeBox.IsVoid())
   {
