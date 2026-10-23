@@ -46,10 +46,14 @@ void RWHeaderSection_RWFileName::ReadStep
 
 	Handle(Interface_HArray1OfHAsciiString) aAuthor;
 	Handle(TCollection_HAsciiString) aAuthorItem;
-	Standard_Integer nsub3;
-	nsub3 = data->SubListNumber(num, 3, Standard_False);
-	if (nsub3 !=0) {
-	  Standard_Integer nb3 = data->NbParams(nsub3);
+	const Standard_Integer nsub3 = data->SubListNumber(num, 3, Standard_False);
+	const Standard_Integer nb3 = nsub3 != 0 ? data->NbParams(nsub3) : 0;
+	if (nsub3 == 0)
+	{
+	  ach->AddFail("Parameter #3 (author) is not a LIST");
+	}
+	else if (nb3 != 0)
+	{
 	  aAuthor = new Interface_HArray1OfHAsciiString (1, nb3);
 	  for (Standard_Integer i3 = 1; i3 <= nb3; i3 ++) {
 	    Standard_Boolean stat3 = data->ReadString
@@ -57,27 +61,25 @@ void RWHeaderSection_RWFileName::ReadStep
 	    if (stat3) aAuthor->SetValue(i3,aAuthorItem);
 	  }
 	}
-	else {
-	  ach->AddFail("Parameter #3 (author) is not a LIST");
-	}
 
 	// --- own field : organization ---
 
 	Handle(Interface_HArray1OfHAsciiString) aOrganization;
 	Handle(TCollection_HAsciiString) aOrganizationItem;
-	Standard_Integer nsub4;
-	nsub4 = data->SubListNumber(num, 4, Standard_False);
-	if (nsub4 !=0) {
-	  Standard_Integer nb4 = data->NbParams(nsub4);
+	const Standard_Integer nsub4 = data->SubListNumber(num, 4, Standard_False);
+	const Standard_Integer nb4 = nsub4 != 0 ? data->NbParams(nsub4) : 0;
+	if (nsub4 == 0)
+	{
+	  ach->AddFail("Parameter #4 (organization) is not a LIST");
+	}
+	else if (nb4 != 0)
+	{
 	  aOrganization = new Interface_HArray1OfHAsciiString (1, nb4);
 	  for (Standard_Integer i4 = 1; i4 <= nb4; i4 ++) {
 	    Standard_Boolean stat4 = data->ReadString
 	         (nsub4,i4,"organization",ach,aOrganizationItem);
 	    if (stat4) aOrganization->SetValue(i4,aOrganizationItem);
 	  }
-	}
-	else {
-	  ach->AddFail("Parameter #4 (organization) is not a LIST");
 	}
 
 	// --- own field : preprocessorVersion ---
@@ -121,6 +123,10 @@ void RWHeaderSection_RWFileName::WriteStep
 	for (Standard_Integer i3 = 1;  i3 <= ent->NbAuthor();  i3 ++) {
 	  SW.Send(ent->AuthorValue(i3));
 	}
+	if (ent->NbAuthor() <= 0)
+	{
+	  SW.Send("");
+	}
 	SW.CloseSub();
 
 	// --- own field : organization ---
@@ -128,6 +134,10 @@ void RWHeaderSection_RWFileName::WriteStep
 	SW.OpenSub();
 	for (Standard_Integer i4 = 1;  i4 <= ent->NbOrganization();  i4 ++) {
 	  SW.Send(ent->OrganizationValue(i4));
+	}
+	if (ent->NbOrganization() <= 0)
+	{
+	  SW.Send("");
 	}
 	SW.CloseSub();
 
