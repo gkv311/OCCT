@@ -2336,8 +2336,8 @@ void FindSplitPoint(SplitDS &theSplitDS,
       anExtCC.Points(anIdx, aPOnC1, aPOnC2);
 
       theSplitDS.myExtPS->Perform(aPOnC2.Value());
-      if (!theSplitDS.myExtPS->IsDone())
-        return;
+      if (!theSplitDS.myExtPS->IsDone() || theSplitDS.myExtPS->NbExt() < 1)
+        continue;
 
       // Find point with the minimal Euclidean distance to avoid
       // false positive points detection.
