@@ -424,11 +424,8 @@ void BRepCheck_Edge::InContext(const TopoDS_Shape& S)
 
       if (!pcurvefound) {
         Handle(Geom_Plane) P;
-        Handle(Standard_Type) dtyp = Su->DynamicType();
-        if (dtyp == STANDARD_TYPE(Geom_RectangularTrimmedSurface)) {
-          P = Handle(Geom_Plane)::DownCast
-            (Handle(Geom_RectangularTrimmedSurface)::
-            DownCast(Su)->BasisSurface());
+        if (Handle(Geom_RectangularTrimmedSurface) aTrimSurf = Handle(Geom_RectangularTrimmedSurface)::DownCast(Su)) {
+          P = Handle(Geom_Plane)::DownCast(aTrimSurf->BasisSurface());
         }
         else {
           P = Handle(Geom_Plane)::DownCast(Su);
