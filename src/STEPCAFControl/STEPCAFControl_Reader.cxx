@@ -5671,7 +5671,7 @@ Standard_Boolean STEPCAFControl_Reader::findReprItems(const Handle(XSControl_Wor
   Handle(Transfer_Binder) aBinder;
   const Handle(Transfer_TransientProcess)& aTP = theWS->TransferReader()->TransientProcess();
   Handle(StepRepr_HArray1OfRepresentationItem) aReprItems = aRepr->Items();
-  if (!aReprItems->IsEmpty())
+  if (!aReprItems.IsNull() && !aReprItems->IsEmpty())
   {
     for (Standard_Integer anInd = aReprItems->Lower(); anInd <= aReprItems->Upper(); anInd++)
     {

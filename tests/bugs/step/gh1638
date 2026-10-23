@@ -1,0 +1,55 @@
+puts "========"
+puts "NULL-dereference in STEPCAFControl_Reader"
+puts "========"
+puts ""
+
+set test_data {ISO-10303-21;
+HEADER;
+FILE_DESCRIPTION(('null representation items crash in STEPCAFControl_Reader::findReprItems'),'2;1');
+FILE_NAME('null_items_repro.stp','2026-10-13T00:00:00',(''),(''),'','','');
+FILE_SCHEMA(('AUTOMOTIVE_DESIGN { 1 0 10303 214 1 1 1 1 }'));
+ENDSEC;
+DATA;
+/* A part with one line segment, so the transfer has a shape. */
+#1=APPLICATION_CONTEXT('automotive design');
+#2=PRODUCT_CONTEXT('',#1,'mechanical');
+#3=PRODUCT('part','part','',(#2));
+#4=PRODUCT_DEFINITION_CONTEXT('part definition',#1,'design');
+#5=PRODUCT_DEFINITION_FORMATION('','',#3);
+#6=PRODUCT_DEFINITION('design','',#5,#4);
+#7=PRODUCT_DEFINITION_SHAPE('','',#6);
+#8=(LENGTH_UNIT()NAMED_UNIT(*)SI_UNIT(.MILLI.,.METRE.));
+#9=(NAMED_UNIT(*)PLANE_ANGLE_UNIT()SI_UNIT($,.RADIAN.));
+#10=(NAMED_UNIT(*)SI_UNIT($,.STERADIAN.)SOLID_ANGLE_UNIT());
+#11=UNCERTAINTY_MEASURE_WITH_UNIT(LENGTH_MEASURE(1.E-07),#8,'distance_accuracy_value','');
+#12=(GEOMETRIC_REPRESENTATION_CONTEXT(3)GLOBAL_UNCERTAINTY_ASSIGNED_CONTEXT((#11))GLOBAL_UNIT_ASSIGNED_CONTEXT((#8,#9,#10))REPRESENTATION_CONTEXT('',''));
+#20=CARTESIAN_POINT('',(0.,0.,0.));
+#21=CARTESIAN_POINT('',(1.,0.,0.));
+#22=POLYLINE('',(#20,#21));
+#23=GEOMETRIC_CURVE_SET('',(#22));
+#24=GEOMETRICALLY_BOUNDED_WIREFRAME_SHAPE_REPRESENTATION('',(#23),#12);
+#25=SHAPE_DEFINITION_REPRESENTATION(#7,#24);
+/* The trigger. ReadMetadata starts at GENERAL_PROPERTY #31, reaches
+   PROPERTY_DEFINITION #33 on SHAPE_ASPECT #30, then the other
+   PROPERTY_DEFINITION #34 on the same aspect, then SHAPE_REPRESENTATION #35
+   through #36. #35 has '$' for its items, so Items() is null. */
+#30=SHAPE_ASPECT('aspect','',#7,.F.);
+#31=GENERAL_PROPERTY('prop','prop','');
+#32=GENERAL_PROPERTY_ASSOCIATION('','',#31,#33);
+#33=PROPERTY_DEFINITION('prop','',#30);
+#34=PROPERTY_DEFINITION('other','',#30);
+#35=SHAPE_REPRESENTATION('',$,#12);
+#36=SHAPE_DEFINITION_REPRESENTATION(#34,#35);
+ENDSEC;
+END-ISO-10303-21;
+}
+
+set fd [open ${imagedir}/${casename}.stp w]
+fconfigure $fd -translation lf
+puts $fd $test_data
+close $fd
+
+ReadStep D ${imagedir}/${casename}.stp
+XGetProperties D
+XGetOneShape s D
+checknbshapes s -edge 1 -compound 1
