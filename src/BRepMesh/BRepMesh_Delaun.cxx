@@ -650,6 +650,8 @@ void BRepMesh_Delaun::insertInternalEdges()
   {
     const Standard_Integer aLinkIndex = anInernalEdgesIt.Key();
     const BRepMesh_PairOfIndex& aPair = myMeshData->ElementsConnectedTo(aLinkIndex);
+    if (aPair.IsEmpty())
+      continue;
 
     // Check both sides of link for adjusted triangle.
     Standard_Boolean isGo[2] = { Standard_True, Standard_True };
