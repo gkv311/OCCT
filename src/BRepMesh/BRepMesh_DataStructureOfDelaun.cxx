@@ -196,7 +196,11 @@ Standard_Integer BRepMesh_DataStructureOfDelaun::AddElement(
 
   const Standard_Integer (&e)[3] = theElement.myEdges;
   for (Standard_Integer i = 0; i < 3; ++i)
-    myLinks(e[i]).Append(aElementIndex);
+  {
+    BRepMesh_PairOfIndex& aPair = myLinks(e[i]);
+    Standard_ASSERT(aPair.Extent() < 2, "More than 2 elements in the pair", continue);
+    aPair.Append(aElementIndex);
+  }
 
   return aElementIndex;
 }
