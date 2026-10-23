@@ -1856,6 +1856,7 @@ InsertAdditionalPointOrAdjust(Standard_Boolean& ToAdjust,
   Standard_Integer i;
   Standard_Integer nbPntDropped = 0;
   Standard_Integer lastValid = firstElem; // indice of last undropped point
+  const Standard_Real anEps2 = Precision::SquarePConfusion();
 
   // will store 0 when the point is to be removed, 1 otherwise
   TColStd_Array1OfInteger tmpParam(firstElem, lastElem);
@@ -1867,7 +1868,7 @@ InsertAdditionalPointOrAdjust(Standard_Boolean& ToAdjust,
   for (i = firstElem + 1; i <= lastElem ; i ++) {
     Curr = points->Value(i);
     Standard_Real CurDist2 = Prev.SquareDistance(Curr);
-    if (CurDist2 < gp::Resolution()) {  // test 0
+    if (CurDist2 < anEps2) { // skip too small segments to avoid issues with B-Spline
       nbPntDropped ++;
       if ( i == lastElem ) tmpParam.SetValue(lastValid, 0); // last point kept
       else tmpParam.SetValue(i, 0);    // current dropped, lastValid unchanged
