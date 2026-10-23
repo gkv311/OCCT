@@ -28,7 +28,7 @@ namespace
 //function : add
 //purpose  : Adds the elements of the list to the map.
 //==============================================================================
-void add(TopTools_MapOfShape& theMap, const TopTools_ListOfShape& theList)
+static void add(TopTools_IndexedMapOfShape& theMap, const TopTools_ListOfShape& theList)
 {
   for (TopTools_ListOfShape::Iterator aSIt(theList); aSIt.More(); aSIt.Next())
   {
@@ -239,7 +239,7 @@ void BRepTools_History::Merge(const BRepTools_History& theHistory23)
         aMIt1.More(); aMIt1.Next())
       {
         TopTools_ListOfShape& aL12 = aMIt1.ChangeValue();
-        TopTools_MapOfShape aAdditions[2]; // The G and M additions.
+        TopTools_IndexedMapOfShape aAdditions[2]; // The G and M additions.
         for (TopTools_ListOfShape::Iterator aSIt2(aL12); aSIt2.More();)
         {
           const TopoDS_Shape& aS2 = aSIt2.Value();
