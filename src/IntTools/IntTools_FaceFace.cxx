@@ -2265,9 +2265,11 @@ void  PerformPlanes(const Handle(GeomAdaptor_Surface)& theS1,
   if(P21 >= P12) return;
   if(P22 <= P11) return;
 
-  Standard_Real pmin, pmax;
-  pmin = Max(P11, P21);
-  pmax = Min(P12, P22);
+  Standard_Real pmin = Max(P11, P21);
+  Standard_Real pmax = Min(P12, P22);
+  // clamp values to avoid numerical issues
+  pmin = Max(pmin, -Precision::Infinite());
+  pmax = Min(pmax, Precision::Infinite());
 
   if(pmax - pmin <= TolTang) return;
 
