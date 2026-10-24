@@ -417,7 +417,8 @@ void  BRepClass_Intersector::Perform(const gp_Lin2d& L,
   gp_Pnt2d pdeb, pfin;
   C.D0(deb, pdeb);
   C.D0(fin, pfin);
-  Standard_Real toldeb = 1.e-5, tolfin = 1.e-5;
+  const Standard_Real toldeb = Precision::PConfusion();
+  const Standard_Real tolfin = Precision::PConfusion();
 
   IntRes2d_Domain DL;
   //
