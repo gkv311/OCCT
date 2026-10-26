@@ -223,7 +223,7 @@ jobs:
         nb_bad=`grep -o --count ': BAD' $testslog || echo -n`
         nb_failed=`grep -o --count ': FAILED' $testslog || echo -n`
         nb_skipped=`grep -o --count ': SKIPPED' $testslog || echo -n`
-        nb_improved=`grep -o --count ': IMPROVED' $testslog || echo -n`
+        nb_improved=`grep -o --count ': IMPROVEMENT' $testslog || echo -n`
         nb_ko=$((nb_failed+nb_improved))
         echo "nb_ok=$nb_ok" >> $GITHUB_OUTPUT
         echo "nb_bad=$nb_bad" >> $GITHUB_OUTPUT
@@ -278,7 +278,7 @@ jobs:
         nb_bad=`grep -o --count ': BAD' $testslog || echo -n`
         nb_failed=`grep -o --count ': FAILED' $testslog || echo -n`
         nb_skipped=`grep -o --count ': SKIPPED' $testslog || echo -n`
-        nb_improved=`grep -o --count ': IMPROVED' $testslog || echo -n`
+        nb_improved=`grep -o --count ': IMPROVEMENT' $testslog || echo -n`
         list_failed=''
         if [[ $nb_failed != '0' && $nb_skipped != '0' ]]; then
           list_failed=`sed '/^Failed/,/^Skipped/!d;//d' $testslog`
