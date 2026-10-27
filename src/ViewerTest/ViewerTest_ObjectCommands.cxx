@@ -6930,32 +6930,115 @@ private:
       aPrsGroupFwd->SetGroupPrimitivesAspect(myOrientAspects.back());
     }
 
+    struct NormalPrs
+    {
+      NCollection_List<Handle(Graphic3d_ArrayOfSegments)> Segments;
+      int NbNull = 0;
+    } aNormalsFwd, aNormalsRev;
+
     const Standard_Real aArrowAngle  = myDrawer->ArrowAspect()->Angle();
     const Standard_Real aArrowLength = myNormalLength * 0.1;
     for (const std::pair<const TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt>>>& aFaceIt : aNormalMap)
     {
       const Standard_Boolean toReverse = myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED;
 
-      Handle(Graphic3d_Group)& aPrsGroup = !myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED
-                                         ? aPrsGroupRev
-                                         : aPrsGroupFwd;
+      auto& aNormals = !myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED
+                     ? aNormalsRev
+                     : aNormalsFwd;
 
       Handle(Graphic3d_ArrayOfSegments) aSegments = new Graphic3d_ArrayOfSegments (2 * aFaceIt.second.Size());
       for (const std::pair<gp_Pnt, gp_Pnt>& aPntIt : aFaceIt.second)
       {
-        std::pair<gp_Pnt, gp_Pnt> aPair = aPntIt;
-        if (toReverse)
+        const gp_Vec aDir = aPntIt.first.XYZ() - aPntIt.second.XYZ();
+        if (aDir.SquareMagnitude() <= gp::Resolution())
         {
-          const gp_Vec aDir = aPair.first.XYZ() - aPair.second.XYZ();
-          aPair.second = aPair.first.XYZ() + aDir.XYZ();
+          ++aNormals.NbNull;
+          continue;
         }
 
-        aSegments->AddVertex (aPair.first);
-        aSegments->AddVertex (aPair.second);
-        Prs3d_Arrow::Draw (aPrsGroup, aPair.second, gp_Vec(aPair.first, aPair.second), aArrowAngle, aArrowLength);
+        std::pair<gp_Pnt, gp_Pnt> aPair = aPntIt;
+        if (toReverse)
+          aPair.second = aPair.first.XYZ() + aDir.XYZ();
+
+        aSegments->AddVertex(aPair.first);
+        aSegments->AddVertex(aPair.second);
+        Handle(Graphic3d_ArrayOfSegments) anArrow =
+            Prs3d_Arrow::DrawSegments(aPair.second, gp_Vec(aPair.first, aPair.second), aArrowAngle, aArrowLength, 15);
+        aNormals.Segments.Append(anArrow);
+      }
+      aNormals.Segments.Append(aSegments);
+    }
+
+    const auto mergeSegments = [](const NCollection_List<Handle(Graphic3d_ArrayOfSegments)>& theList)
+                               -> Handle(Graphic3d_ArrayOfSegments)
+    {
+      int aNbVerts = 0, aNbSegs = 0;
+      for (const Handle(Graphic3d_ArrayOfSegments)& aSegIter : theList)
+      {
+        aNbVerts += aSegIter->VertexNumber();
+        if (aSegIter->EdgeNumber() > 0)
+          aNbSegs += aSegIter->EdgeNumber() / 2;
+        else
+          aNbSegs += aSegIter->VertexNumber() / 2;
       }
 
-      aPrsGroup->AddPrimitiveArray (aSegments);
+      if (aNbSegs == 0)
+        return nullptr;
+
+      Handle(Graphic3d_ArrayOfSegments) aSegs = new Graphic3d_ArrayOfSegments(aNbVerts, aNbSegs * 2);
+      for (const Handle(Graphic3d_ArrayOfSegments)& aSegIter : theList)
+      {
+        const int aVertShift = aSegs->VertexNumber();
+        for (int aVertIter = 1; aVertIter <= aSegIter->VertexNumber(); ++aVertIter)
+          aSegs->AddVertex(aSegIter->Vertice(aVertIter));
+
+        if (aSegIter->EdgeNumber() > 0)
+        {
+          for (int anIndexIter = 1; anIndexIter <= aSegIter->EdgeNumber(); ++anIndexIter)
+            aSegs->AddEdge(aSegIter->Edge(anIndexIter) + aVertShift);
+        }
+        else
+        {
+          for (int aVertIter = 1; aVertIter <= aSegIter->VertexNumber(); ++aVertIter)
+            aSegs->AddEdge(aVertIter + aVertShift);
+        }
+      }
+      return aSegs;
+    };
+
+    if (Handle(Graphic3d_ArrayOfSegments) aSegsFwd = mergeSegments(aNormalsFwd.Segments))
+      aPrsGroupFwd->AddPrimitiveArray(aSegsFwd);
+
+    if (Handle(Graphic3d_ArrayOfSegments) aSegsRev = mergeSegments(aNormalsRev.Segments))
+      aPrsGroupRev->AddPrimitiveArray(aSegsRev);
+
+    if (aNormalsFwd.NbNull != 0 || aNormalsRev.NbNull != 0)
+    {
+      Handle(Graphic3d_ArrayOfPoints) aPointsFwd, aPointsRev;
+      if (aNormalsFwd.NbNull != 0)
+        aPointsFwd = new Graphic3d_ArrayOfPoints(aNormalsFwd.NbNull);
+
+      if (aNormalsRev.NbNull != 0)
+        aPointsRev = new Graphic3d_ArrayOfPoints(aNormalsRev.NbNull);
+
+      for (const std::pair<const TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt>>>& aFaceIt : aNormalMap)
+      {
+        Handle(Graphic3d_ArrayOfPoints)& aPoints = !myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED
+                                                 ? aPointsRev
+                                                 : aPointsFwd;
+        for (const std::pair<gp_Pnt, gp_Pnt>& aPntIt : aFaceIt.second)
+        {
+          const gp_Vec aDir = gp_Vec(aPntIt.first, aPntIt.second);
+          if (aDir.SquareMagnitude() <= gp::Resolution())
+            aPoints->AddVertex(aPntIt.first);
+        }
+      }
+
+      if (!aPointsFwd.IsNull())
+        aPrsGroupFwd->AddPrimitiveArray(aPointsFwd);
+
+      if (!aPointsRev.IsNull())
+        aPrsGroupRev->AddPrimitiveArray(aPointsRev);
     }
   }
 
