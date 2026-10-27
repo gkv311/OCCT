@@ -23,10 +23,12 @@
 #include <Draw_Color.hxx>
 #include <Draw_Drawable3D.hxx>
 #include <Draw_Interpretor.hxx>
+#include <Graphic3d_Vec2.hxx>
 #include <NCollection_DataMap.hxx>
 #include <NCollection_Vector.hxx>
 #include <Standard_OStream.hxx>
 #include <TopoDS_Shape.hxx>
+#include <TopTools_ShapeMapHasher.hxx>
 
 class Draw_Display;
 class Poly_Triangulation;
@@ -104,48 +106,77 @@ public:
 
 public:
 
-  //! Auxiliary method computing nodal normals for presentation purposes.
-  //! @param[out] theNormals  vector of computed normals (pair of points [from, to])
-  //! @param[in] theFace      input face
-  //! @param[in] theLength    normal length
-  //! @return FALSE if normals can not be computed
-  Standard_EXPORT static Standard_Boolean addMeshNormals (NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> >& theNormals,
-                                                          const TopoDS_Face&  theFace,
-                                                          const Standard_Real theLength);
+  //! Vector of point pairs defining gp_Vec presentations from specified gp_Pnt.
+  typedef NCollection_Vector<std::pair<gp_Pnt, gp_Pnt>> VectorOfPairs;
+  //! Map per-shape vector of point pairs.
+  typedef NCollection_IndexedDataMap<TopoDS_Shape, VectorOfPairs, TopTools_ShapeMapHasher> MapOfShapePntPairs;
 
-  //! Auxiliary method computing nodal normals for presentation purposes.
-  //! @param[out] theNormals  map of computed normals (grouped per Face)
-  //! @param[in] theShape     input shape which will be exploded into Faces
-  //! @param[in] theLength    normal length
-  Standard_EXPORT static void addMeshNormals (NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > > & theNormals,
-                                              const TopoDS_Shape& theShape,
-                                              const Standard_Real theLength);
+  //! Compute presetation of surface normals or tangents.
+  //! @param[out] theVectors result list of presentation vectors
+  //! @param[in]  theFace    face to make presentation for
+  //! @param[in]  theNbAlong number of vectors in U and V direction or (0,0) to take points from triangulation
+  //! @param[in]  theNormals compute normals (TRUE) or tangent (FALES)
+  //! @param[in]  theScale   presentation vector scale factor
+  //! @param[in]  theToNormalize flag to normalize vector prior to applying scale factor
+  Standard_EXPORT static bool addSurfaceVectors(VectorOfPairs& theVectors,
+                                                const TopoDS_Face& theFace,
+                                                const Graphic3d_Vec2i& theNbAlong,
+                                                const bool theNormals,
+                                                const double theScale,
+                                                const bool theToNormalize);
 
-  //! Auxiliary method computing surface normals distributed within the Face for presentation purposes.
-  //! @param[out] theNormals   vector of computed normals (pair of points [from, to])
-  //! @param[in] theFace       input face
-  //! @param[in] theLength     normal length
-  //! @param[in] theNbAlongU   number along U
-  //! @param[in] theNbAlongV   number along V
-  //! @return FALSE if normals can not be computed
-  Standard_EXPORT static Standard_Boolean addSurfaceNormals (NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> >& theNormals,
-                                                             const TopoDS_Face&     theFace,
-                                                             const Standard_Real    theLength,
-                                                             const Standard_Integer theNbAlongU,
-                                                             const Standard_Integer theNbAlongV);
+  //! Compute presetation of surface normals or tangents.
+  //! @param[out] theVectors result map of presentation vectors grouped per face
+  //! @param[in]  theShape   shape to make presentation for
+  //! @param[in]  theNbAlong number of vectors in U and V direction or (0,0) to take points from triangulation
+  //! @param[in]  theNormals compute normals (TRUE) or tangent (FALES)
+  //! @param[in]  theScale   presentation vector scale factor
+  //! @param[in]  theToNormalize flag to normalize vector prior to applying scale factor
+  Standard_EXPORT static bool addSurfaceVectors(MapOfShapePntPairs& theVectors,
+                                                const TopoDS_Shape& theShape,
+                                                const Graphic3d_Vec2i& theNbAlong,
+                                                const bool theNormals,
+                                                const double theScale,
+                                                const bool theToNormalize);
 
-  //! Auxiliary method computing surface normals distributed within the Face for presentation purposes.
-  //! @param[out] theNormals   map of computed normals (grouped per Face)
-  //! @param[in] theShape      input shape which will be exploded into Faces
-  //! @param[in] theLength     normal length
-  //! @param[in] theNbAlongU   number along U
-  //! @param[in] theNbAlongV   number along V
-  //! @return FALSE if normals can not be computed
-  Standard_EXPORT static void addSurfaceNormals (NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > >& theNormals,
-                                                 const TopoDS_Shape&    theShape,
-                                                 const Standard_Real    theLength,
-                                                 const Standard_Integer theNbAlongU,
-                                                 const Standard_Integer theNbAlongV);
+  //! Compute presetation of surface normals.
+  //! @param[out] theVectors result map of presentation vectors grouped per face
+  //! @param[in]  theShape   shape to make presentation for
+  //! @param[in]  theNbAlong number of vectors in U and V direction or (0,0) to take points from triangulation
+  //! @param[in]  theScale   presentation vector scale factor
+  //! @param[in]  theToNormalize flag to normalize vector prior to applying scale factor
+  static bool addSurfaceNormals(MapOfShapePntPairs& theVectors,
+                                const TopoDS_Shape& theShape,
+                                const Graphic3d_Vec2i& theNbAlong,
+                                const double theScale,
+                                const bool theToNormalize)
+  {
+    return addSurfaceVectors(theVectors, theShape, theNbAlong, true, theScale, theToNormalize);
+  }
+
+  //! Compute presetation of curve tangents.
+  //! @param[out] theVectors result list of presentation vectors
+  //! @param[in]  theEdge    edge to make presentation for
+  //! @param[in]  theNbAlong number of vectors in U direction or 0 to take points from triangulation
+  //! @param[in]  theScale   presentation vector scale factor
+  //! @param[in]  theToNormalize flag to normalize vector prior to applying scale factor
+  Standard_EXPORT static bool addCurveTangents(VectorOfPairs& theVectors,
+                                               const TopoDS_Edge& theEdge,
+                                               const int theNbAlong,
+                                               const double theScale,
+                                               const bool theToNormalize);
+
+  //! Compute presetation of curve tangents.
+  //! @param[out] theVectors result presentation vectors grouped by edge
+  //! @param[in]  theShape   shape to make presentation for
+  //! @param[in]  theNbAlong number of vectors in U direction or 0 to take points from triangulation
+  //! @param[in]  theScale   presentation vector scale factor
+  //! @param[in]  theToNormalize flag to normalize vector prior to applying scale factor
+  Standard_EXPORT static bool addCurveTangents(MapOfShapePntPairs& theVectors,
+                                               const TopoDS_Shape& theShape,
+                                               const int theNbAlong,
+                                               const double theScale,
+                                               const bool theToNormalize);
 
 private:
 

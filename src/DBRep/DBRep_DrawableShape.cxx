@@ -35,6 +35,7 @@
 #include <Draw_ProgressIndicator.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <gp_Trsf.hxx>
+#include <Message.hxx>
 #include <Message_ProgressIndicator.hxx>
 #include <HLRBRep.hxx>
 #include <Poly_Connect.hxx>
@@ -1167,160 +1168,309 @@ void  DBRep_DrawableShape::display(const Handle(Poly_Triangulation)& T,
   }
 }
 
-//=======================================================================
-//function : addMeshNormals
-//purpose  :
-//=======================================================================
-Standard_Boolean DBRep_DrawableShape::addMeshNormals (NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> >& theNormals,
-                                                      const TopoDS_Face& theFace,
-                                                      const Standard_Real theLength)
+//! Return a pair of points for displaying the vector @p theVec from the point @p thePnt
+//! scaled by factor @p theScale (normalized before scaling if @p theToNormalize).
+//! Prints warning message in case of a zero-length vector with location details
+//! specified by optional U and V coordinates @p theU and @p theV and name @p theName.
+static std::pair<gp_Pnt, gp_Pnt> makeVecPrs(const double* theU, const double* theV,
+                                            const gp_Pnt& thePnt, const gp_Vec& theVec,
+                                            const double theScale, const bool theToNormalize,
+                                            const char* theName)
 {
-  TopLoc_Location aLoc;
-  const Handle(Poly_Triangulation)& aTriangulation = BRep_Tool::Triangulation (theFace, aLoc);
-  const Standard_Boolean hasNormals = aTriangulation->HasNormals();
-  if (aTriangulation.IsNull()
-  || (!hasNormals && !aTriangulation->HasUVNodes()))
+  static constexpr double TheMinLen = 1e-10;
+
+  gp_Vec aVec = theVec;
+
+  const double aLen = theVec.Magnitude();
+  if (aLen > TheMinLen)
   {
-    return Standard_False;
+    if (theToNormalize && theScale != 0.0)
+      aVec.Multiply(theScale / aLen);
+    else if (!theToNormalize && theScale != 0.0)
+      aVec.Multiply(theScale);
+  }
+  else
+  {
+    // print warning
+    if (!theToNormalize && theScale != 0.0)
+      aVec.Multiply(theScale);
+
+    if (theV != nullptr)
+      Message::SendWarning() << "Null " << theName << " at U = " << *theU << ", V = " << *theV;
+    else if (theU != nullptr)
+      Message::SendWarning() << "Null " << theName << " at U = " << *theU;
+    else
+      Message::SendWarning() << "Null " << theName << " at node "
+                             << "X = " << thePnt.X() << ", Y = " << thePnt.Y() << ", Z = " << thePnt.Z();
   }
 
-  BRepAdaptor_Surface aSurface (theFace);
-  for (Standard_Integer aNodeIter = 1; aNodeIter <= aTriangulation->NbNodes(); ++aNodeIter)
-  {
-    gp_Pnt aP1 = aTriangulation->Node (aNodeIter);
-    if (!aLoc.IsIdentity())
-    {
-      aP1.Transform (aLoc.Transformation());
-    }
-
-    gp_Vec aNormal;
-    if (hasNormals)
-    {
-      aNormal = aTriangulation->Normal (aNodeIter);
-    }
-    else
-    {
-      const gp_Pnt2d& aUVNode = aTriangulation->UVNode (aNodeIter);
-      gp_Pnt aDummyPnt;
-      gp_Vec aV1, aV2;
-      aSurface.D1 (aUVNode.X(), aUVNode.Y(), aDummyPnt, aV1, aV2);
-      aNormal = aV1.Crossed (aV2);
-    }
-
-    const Standard_Real aNormalLen = aNormal.Magnitude();
-    if (aNormalLen > 1.e-10)
-    {
-      aNormal.Multiply (theLength / aNormalLen);
-    }
-    else
-    {
-      aNormal.SetCoord (aNormalLen / 2.0, 0.0, 0.0);
-      std::cout << "Null normal at node X = " << aP1.X() << ", Y = " << aP1.Y() << ", Z = " << aP1.Z() << "\n";
-    }
-
-    const gp_Pnt aP2 = aP1.Translated (aNormal);
-    theNormals.Append (std::pair<gp_Pnt, gp_Pnt> (aP1, aP2));
-  }
-  return Standard_True;
+  const gp_Pnt aPnt2 = thePnt.Translated(aVec);
+  return std::make_pair(thePnt, aPnt2);
 }
 
-//=======================================================================
-//function : addMeshNormals
-//purpose  :
-//=======================================================================
-void DBRep_DrawableShape::addMeshNormals (NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > > & theNormals,
-                                          const TopoDS_Shape& theShape,
-                                          const Standard_Real theLength)
+// =======================================================================
+// function : addSurfaceVectors
+// =======================================================================
+bool DBRep_DrawableShape::addSurfaceVectors(VectorOfPairs& theVectors,
+                                            const TopoDS_Face& theFace,
+                                            const Graphic3d_Vec2i& theNbAlong,
+                                            const bool theNormals,
+                                            const double theScale,
+                                            const bool theToNormalize)
 {
-  TopLoc_Location aLoc;
-  for (TopExp_Explorer aFaceIt(theShape, TopAbs_FACE); aFaceIt.More(); aFaceIt.Next())
+  BRepAdaptor_Surface aSurface(theFace, false);
+  if ((theNbAlong.x() == 0 && theNbAlong.y() == 0) || aSurface.Surface().Surface().IsNull())
   {
-    const TopoDS_Face& aFace = TopoDS::Face(aFaceIt.Current());
-    NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> >* aFaceNormals = theNormals.ChangeSeek(aFace);
-    if (aFaceNormals == NULL)
-    {
-      aFaceNormals = theNormals.Bound(aFace, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> >());
-    }
-
-    addMeshNormals (*aFaceNormals, aFace, theLength);
-  }
-}
-
-//=======================================================================
-//function : addSurfaceNormals
-//purpose  :
-//=======================================================================
-Standard_Boolean DBRep_DrawableShape::addSurfaceNormals (NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> >& theNormals,
-                                                         const TopoDS_Face&     theFace,
-                                                         const Standard_Real    theLength,
-                                                         const Standard_Integer theNbAlongU,
-                                                         const Standard_Integer theNbAlongV)
-{
-  {
+    // show vectors at 3d points taken from triangulation
     TopLoc_Location aLoc;
-    const Handle(Geom_Surface)& aSurface = BRep_Tool::Surface (theFace, aLoc);
-    if (aSurface.IsNull())
+
+    const Handle(Poly_Triangulation)& aPolyTri = BRep_Tool::Triangulation(theFace, aLoc);
+    if (aPolyTri.IsNull())
+      return false;
+
+    const bool hasUV      = aPolyTri->HasUVNodes();
+    const bool hasNormals = aPolyTri->HasNormals();
+    const bool toEvalSurf = !theNormals || !hasNormals;
+    if (toEvalSurf && (!hasUV || aSurface.Surface().Surface().IsNull()))
+      return false;
+
+    try
     {
-      return Standard_False;
+      for (int aNodeIter = 1; aNodeIter <= aPolyTri->NbNodes(); ++aNodeIter)
+      {
+        const gp_Pnt   aPnt    = aPolyTri->Node(aNodeIter).Transformed(aLoc.Transformation());
+        const gp_Pnt2d aUVNode = hasUV ? aPolyTri->UVNode(aNodeIter) : gp_Pnt2d();
+
+        gp_Vec aV1, aV2;
+        if (toEvalSurf)
+        {
+          gp_Pnt aDummyPnt; // assume that triangulation node lies exactly on the surface
+          aSurface.D1(aUVNode.X(), aUVNode.Y(), aDummyPnt, aV1, aV2);
+        }
+
+        const Graphic3d_Vec2d aUV(aUVNode.X(), aUVNode.Y());
+        if (theNormals)
+        {
+          gp_Vec aNormal;
+          if (hasNormals)
+          {
+            gp_Vec3f aVec3f;
+            aPolyTri->Normal(aNodeIter, aVec3f);
+            aNormal.SetCoord(aVec3f.x(), aVec3f.y(), aVec3f.z());
+          }
+          else
+          {
+            aNormal = aV1.Crossed(aV2);
+          }
+
+          theVectors.Append(makeVecPrs(hasUV ? &aUV[0] : nullptr, hasUV ? &aUV[1] : nullptr,
+                                       aPnt, aNormal, theScale, theToNormalize, "normal"));
+        }
+        else
+        {
+          theVectors.Append(makeVecPrs(hasUV ? &aUV[0] : nullptr, hasUV ? &aUV[1] : nullptr,
+                                       aPnt, aV1, theScale, theToNormalize, "D1U"));
+          theVectors.Append(makeVecPrs(hasUV ? &aUV[0] : nullptr, hasUV ? &aUV[1] : nullptr,
+                                       aPnt, aV2, theScale, theToNormalize, "D1V"));
+        }
+      }
+      return true;
+    }
+    catch (const Standard_Failure& anExcept)
+    {
+      Message::SendFail() << "DBRep_DrawableShape::addSurfaceVectors() caught exception: " << anExcept.GetMessageString();
+      return false;
     }
   }
 
-  Standard_Real aUmin = 0.0, aVmin = 0.0, aUmax = 0.0, aVmax = 0.0;
-  BRepTools::UVBounds (theFace, aUmin, aUmax, aVmin, aVmax);
-  const Standard_Boolean isUseMidU = (theNbAlongU == 1);
-  const Standard_Boolean isUseMidV = (theNbAlongV == 1);
-  const Standard_Real aDU = (aUmax - aUmin) / (isUseMidU ? 2 : (theNbAlongU - 1));
-  const Standard_Real aDV = (aVmax - aVmin) / (isUseMidV ? 2 : (theNbAlongV - 1));
+  if (theNbAlong.x() == 0 || theNbAlong.y() == 0)
+    return false; // invalid input
 
-  BRepAdaptor_Surface aSurface (theFace);
-  for (Standard_Integer aUIter = 0; aUIter < theNbAlongU; ++aUIter)
+  try
   {
-    const Standard_Real aU = aUmin + (isUseMidU ? 1 : aUIter) * aDU;
-    for (Standard_Integer aVIter = 0; aVIter < theNbAlongV; ++aVIter)
+    aSurface.Initialize(theFace, true);
+
+    // distribute points across geometry within face UV range,
+    // but without face boundary classification
+    const double aUmin = aSurface.FirstUParameter();
+    const double aVmin = aSurface.FirstVParameter();
+    const double aUmax = aSurface.LastUParameter();
+    const double aVmax = aSurface.LastVParameter();
+
+    const bool isUseMidU = (theNbAlong.x() == 1);
+    const bool isUseMidV = (theNbAlong.y() == 1);
+    const double aDU = (aUmax - aUmin) / (isUseMidU ? 2 : (theNbAlong.x() - 1));
+    const double aDV = (aVmax - aVmin) / (isUseMidV ? 2 : (theNbAlong.y() - 1));
+    for (int aUIter = 0; aUIter < theNbAlong.x(); ++aUIter)
     {
-      const Standard_Real aV = aVmin + (isUseMidV ? 1 : aVIter) * aDV;
-
-      gp_Pnt aP1;
-      gp_Vec aV1, aV2;
-      aSurface.D1 (aU, aV, aP1, aV1, aV2);
-
-      gp_Vec aVec = aV1.Crossed (aV2);
-      Standard_Real aNormalLen = aVec.Magnitude();
-      if (aNormalLen > 1.e-10)
+      const double aU = aUmin + (isUseMidU ? 1 : aUIter) * aDU;
+      for (int aVIter = 0; aVIter < theNbAlong.y(); ++aVIter)
       {
-        aVec.Multiply (theLength / aNormalLen);
-      }
-      else
-      {
-        aVec.SetCoord (aNormalLen / 2.0, 0.0, 0.0);
-        std::cout << "Null normal at U = " << aU << ", V = " << aV << "\n";
-      }
+        const double aV = aVmin + (isUseMidV ? 1 : aVIter) * aDV;
 
-      const gp_Pnt aP2 = aP1.Translated(aVec);
-      theNormals.Append (std::pair<gp_Pnt, gp_Pnt> (aP1, aP2));
+        gp_Pnt aPnt;
+        gp_Vec aV1, aV2;
+        aSurface.D1(aU, aV, aPnt, aV1, aV2);
+        if (theNormals)
+        {
+          theVectors.Append(makeVecPrs(&aU, &aV, aPnt, aV1.Crossed(aV2), theScale, theToNormalize, "normal"));
+        }
+        else
+        {
+          theVectors.Append(makeVecPrs(&aU, &aV, aPnt, aV1, theScale, theToNormalize, "D1U"));
+          theVectors.Append(makeVecPrs(&aU, &aV, aPnt, aV2, theScale, theToNormalize, "D1V"));
+        }
+      }
     }
+    return true;
   }
-  return Standard_True;
+  catch (const Standard_Failure& anExcept)
+  {
+    Message::SendFail() << "DBRep_DrawableShape::addSurfaceVectors() caught exception: " << anExcept.GetMessageString();
+    return false;
+  }
 }
 
-//=======================================================================
-//function : addSurfaceNormals
-//purpose  :
-//=======================================================================
-void DBRep_DrawableShape::addSurfaceNormals (NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > >& theNormals,
-                                             const TopoDS_Shape&    theShape,
-                                             const Standard_Real    theLength,
-                                             const Standard_Integer theNbAlongU,
-                                             const Standard_Integer theNbAlongV)
+// =======================================================================
+// function : addSurfaceVectors
+// =======================================================================
+bool DBRep_DrawableShape::addSurfaceVectors(MapOfShapePntPairs& theVectors,
+                                            const TopoDS_Shape& theShape,
+                                            const Graphic3d_Vec2i& theNbAlong,
+                                            const bool theNormals,
+                                            const double theScale,
+                                            const bool theToNormalize)
 {
-  for (TopExp_Explorer aFaceIt (theShape, TopAbs_FACE); aFaceIt.More(); aFaceIt.Next())
+  int aNbFacesOk = 0, aNbFacesTotal = 0;
+  const VectorOfPairs anEmptyVectors;
+
+  TopLoc_Location aLoc;
+  for (TopExp_Explorer aFaceIt(theShape, TopAbs_FACE); aFaceIt.More(); aFaceIt.Next(), ++aNbFacesTotal)
   {
-    const TopoDS_Face& aFace = TopoDS::Face (aFaceIt.Current());
-    NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> >* aFaceNormals = theNormals.ChangeSeek (aFace);
-    if (aFaceNormals == NULL)
-    {
-      aFaceNormals = theNormals.Bound (aFace, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> >());
-    }
-    addSurfaceNormals (*aFaceNormals, aFace, theLength, theNbAlongU, theNbAlongV);
+    const TopoDS_Face& aFace   = TopoDS::Face(aFaceIt.Current());
+    const int          anIndex = theVectors.Add(aFace, anEmptyVectors);
+    VectorOfPairs&     aVecPrs = theVectors.ChangeFromIndex(anIndex);
+    if (addSurfaceVectors(aVecPrs, aFace, theNbAlong, theNormals, theScale, theToNormalize))
+      ++aNbFacesOk;
   }
+
+  return aNbFacesOk == aNbFacesTotal && aNbFacesOk != 0;
+}
+
+// =======================================================================
+// function : addSurfaceVectors
+// =======================================================================
+bool DBRep_DrawableShape::addCurveTangents(VectorOfPairs& theVectors,
+                                           const TopoDS_Edge& theEdge,
+                                           const int theNbAlong,
+                                           const double theScale,
+                                           const bool theToNormalize)
+{
+  double aFirst = 0.0, aLast = 0.0;
+  TopLoc_Location aLoc;
+  {
+    const Handle(Geom_Curve)& aCurve = BRep_Tool::Curve(theEdge, aLoc, aFirst, aLast);
+    if (aCurve.IsNull())
+    {
+      Handle(Geom2d_Curve) aPCurve;
+      Handle(Geom_Surface) aSurf;
+      BRep_Tool::CurveOnSurface(theEdge, aPCurve, aSurf, aLoc, aFirst, aLast);
+      if (aPCurve.IsNull())
+        return false;
+    }
+  }
+
+  BRepAdaptor_Curve aCurve(theEdge);
+
+  const auto addTangent = [&aCurve, &theVectors, theScale, theToNormalize](const gp_Pnt* thePnt, double theU) -> void
+  {
+    gp_Pnt aPnt;
+    gp_Vec aVec;
+    aCurve.D1(theU, aPnt, aVec);
+    theVectors.Append(makeVecPrs(&theU, nullptr, thePnt != nullptr ? *thePnt : aPnt, aVec, theScale, theToNormalize, "tangent"));
+  };
+
+  try
+  {
+    const Handle(Poly_Polygon3D) aPoly = theNbAlong == 0 ? BRep_Tool::Polygon3D(theEdge, aLoc) : Handle(Poly_Polygon3D)();
+    if (!aPoly.IsNull() && aPoly->HasParameters())
+    {
+      // show vectors at 3d points taken from polygon 3d
+      for (int aNodeIter = 1; aNodeIter <= aPoly->NbNodes(); ++aNodeIter)
+        addTangent(&aPoly->Nodes()[aNodeIter], aPoly->Parameters()[aNodeIter]);
+
+      return true;
+    }
+  }
+  catch (const Standard_Failure& anExcept)
+  {
+    Message::SendFail() << "DBRep_DrawableShape::addCurveTangents() caught exception for Poly_Polygon3D: " << anExcept.GetMessageString();
+    return false;
+  }
+
+  try
+  {
+    Handle(Poly_Triangulation) aPolyTri;
+    Handle(Poly_PolygonOnTriangulation) aPolyOnTri;
+    if (theNbAlong == 0)
+      BRep_Tool::PolygonOnTriangulation(theEdge, aPolyOnTri, aPolyTri, aLoc);
+
+    if (!aPolyOnTri.IsNull() && aPolyOnTri->HasParameters())
+    {
+      // show vectors at 3d points taken from triangulation
+      for (int aNodeIter = 1; aNodeIter <= aPolyOnTri->NbNodes(); ++aNodeIter)
+      {
+        const gp_Pnt aPnt = aPolyTri->Node(aPolyOnTri->Node(aNodeIter));
+        addTangent(&aPnt, aPolyOnTri->Parameters()->Value(aNodeIter));
+      }
+
+      return true;
+    }
+  }
+  catch (const Standard_Failure& anExcept)
+  {
+    Message::SendFail() << "DBRep_DrawableShape::addCurveTangents() caught exception for Poly_PolygonOnTriangulation: " << anExcept.GetMessageString();
+    return false;
+  }
+
+  try
+  {
+    // distribute points across geometry within edge parametric range
+    const bool isUseMidU = (theNbAlong == 1);
+    const double aDU = (aLast - aFirst) / (isUseMidU ? 2 : (theNbAlong - 1));
+    for (int aUIter = 0; aUIter < theNbAlong; ++aUIter)
+      addTangent(nullptr, aFirst + (isUseMidU ? 1 : aUIter) * aDU);
+
+    return true;
+  }
+  catch (const Standard_Failure& anExcept)
+  {
+    Message::SendFail() << "DBRep_DrawableShape::addCurveTangents() caught exception: " << anExcept.GetMessageString();
+    return false;
+  }
+}
+
+// =======================================================================
+// function : addCurveTangents
+// =======================================================================
+bool DBRep_DrawableShape::addCurveTangents(MapOfShapePntPairs& theVectors,
+                                           const TopoDS_Shape& theShape,
+                                           const int theNbAlong,
+                                           const double theScale,
+                                           const bool theToNormalize)
+{
+  int aNbEdgesOk = 0, aNbEdgesTotal = 0;
+  const VectorOfPairs anEmptyVectors;
+
+  TopLoc_Location aLoc;
+  for (TopExp_Explorer anEdgeIt(theShape, TopAbs_EDGE); anEdgeIt.More(); anEdgeIt.Next(), ++aNbEdgesTotal)
+  {
+    const TopoDS_Edge& anEdge  = TopoDS::Edge(anEdgeIt.Current());
+    const int          anIndex = theVectors.Add(anEdge, anEmptyVectors);
+    VectorOfPairs&     aVecPrs = theVectors.ChangeFromIndex(anIndex);
+    if (addCurveTangents(aVecPrs, anEdge, theNbAlong, theScale, theToNormalize))
+      ++aNbEdgesOk;
+  }
+
+  return aNbEdgesOk == aNbEdgesTotal && aNbEdgesOk != 0;
 }

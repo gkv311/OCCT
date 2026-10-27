@@ -6,27 +6,43 @@ puts "================================"
 pload MODELING VISUALIZATION
 box s 100 200 300
 explode s F
+renamevar s_1 s
 vinit View1
-vdisplay s_1 -dispMode 1
+vdisplay s -dispMode 1
 vfit
 
-voriface s_1 -oriented 0
+voriface s -oriented 0 -mesh 0 -nbAlong 1 -tangents 0
 vdump $imagedir/${casename}_facescol.png
 
-voriface s_1 -oriented 1
+voriface s -oriented 1 -mesh 0 -nbAlong 10 -tangents 0
 vdump $imagedir/${casename}_facesdir.png
 
-voriedge s_1 -oriented 0
+voriface s -oriented 1 -mesh 1 -nbAlong 1 -tangents 0
+vdump $imagedir/${casename}_facesdir_mesh.png
+
+voriface s -oriented 1 -mesh 0 -nbAlong 10 -tangents 1
+vdump $imagedir/${casename}_facesd1.png
+
+voriface s -oriented 1 -mesh 1 -nbAlong 1 -tangents 1
+vdump $imagedir/${casename}_facesd1_mesh.png
+
+voriedge s -oriented 0 -mesh 0 -nbAlong 1 -tangents 0
 vdump $imagedir/${casename}_edgescol.png
 
-voriedge s_1 -oriented 1
+voriedge s -oriented 1 -mesh 0 -nbAlong 1 -tangents 0
 vdump $imagedir/${casename}_edgesdir.png
 
-vorishape s_1 -oriented 0
+voriedge s -oriented 1 -mesh 0 -nbAlong 10 -tangents 1
+vdump $imagedir/${casename}_edgesd1.png
+
+voriedge s -oriented 1 -mesh 1 -nbAlong 1 -tangents 1
+vdump $imagedir/${casename}_edgesd1_mesh.png
+
+vorishape s -oriented 0 -mesh 0 -nbAlong 1 -tangents 0
 vdump $imagedir/${casename}_all.png
 
-donly s_1
+donly s
 axo
 fit
-vori s_1
+vori s
 xwd $imagedir/${casename}_axo.png
