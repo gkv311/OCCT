@@ -1251,17 +1251,11 @@ static Standard_Integer normals (Draw_Interpretor& theDI,
 
   DBRep_WriteColorOrientation();
 
-  NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > > aNormals;
-  if (toUseMesh)
-  {
-    DBRep_DrawableShape::addMeshNormals (aNormals, aShape, aLength);
-  }
-  else
-  {
-    DBRep_DrawableShape::addSurfaceNormals (aNormals, aShape, aLength, aNbAlongU, aNbAlongV);
-  }
-
-  for (NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > >::Iterator aFaceIt (aNormals); aFaceIt.More(); aFaceIt.Next())
+  DBRep_DrawableShape::MapOfShapePntPairs aNormals;
+  DBRep_DrawableShape::addSurfaceNormals(aNormals, aShape,
+                                         toUseMesh ? Graphic3d_Vec2i(0) : Graphic3d_Vec2i(aNbAlongU, aNbAlongV),
+                                         aLength, true);
+  for (DBRep_DrawableShape::MapOfShapePntPairs::Iterator aFaceIt (aNormals); aFaceIt.More(); aFaceIt.Next())
   {
     Standard_Boolean bReverse = Standard_False;
     TopAbs_Orientation aFaceOri = aFaceIt.Key().Orientation();

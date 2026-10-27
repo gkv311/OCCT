@@ -6792,7 +6792,10 @@ public:
   : AIS_ColoredShape (theShape)
   {
     for (Handle(Graphic3d_AspectLine3d)& anOriIter : myOrientAspects)
+    {
       anOriIter = new Graphic3d_AspectLine3d(Quantity_NOC_BLACK, Aspect_TOL_SOLID, 1.0f);
+      anOriIter->SetMarkerType(Aspect_TOM_X);
+    }
 
     myOrientAspects[TopAbs_FORWARD]->SetColor(Quantity_NOC_RED);
     myOrientAspects[TopAbs_REVERSED]->SetColor(Quantity_NOC_BLUE);
@@ -6801,15 +6804,26 @@ public:
     myOrientAspects[TopAbs_EXTERNAL + 1]->SetColor(Quantity_NOC_GRAY);
   }
 
-  //! Set surface normal length.
-  void SetNormalLength(Standard_Real theLen)
+  //! Set normals/tangent presentation vectors scale factor.
+  void SetVectorScale(Standard_Real theScale)
   {
-    if (myNormalLength == theLen)
+    if (myVectorScale == theScale)
       return;
 
-    myNormalLength = theLen;
-    if (myToShowFaces)
+    myVectorScale = theScale;
+    if (myToShowFaces || (myToShowEdges && myToShowTangents))
       SetToUpdate();
+  }
+
+  //! Set to normalize vectors presentations before applying scale factor.
+  void SetNormalizeVectors(bool theToNorm)
+  {
+    if (myToNormalizeVec == theToNorm)
+      return;
+
+    myToNormalizeVec = theToNorm;
+    if (myToShowFaces || (myToShowEdges && myToShowTangents))
+     SetToUpdate();
   }
 
   //! Set number of normals along surface U.
@@ -6819,7 +6833,7 @@ public:
       return;
 
     myNbAlongU = theNumber;
-    if (myToShowFaces)
+    if (myToShowFaces || (myToShowEdges && myToShowTangents))
       SetToUpdate();
   }
 
@@ -6841,7 +6855,7 @@ public:
       return;
 
     myToUseMesh = theToUse;
-    if (myToShowFaces)
+    if (myToShowFaces || (myToShowEdges && myToShowTangents))
       SetToUpdate();
   }
 
@@ -6852,6 +6866,16 @@ public:
       return;
 
     myToApplyOri = theToApply;
+    SetToUpdate();
+  }
+
+  //! Set to show tangents (surface, curve) vectors or (surface) normals vectors.
+  void SetShowTangents(bool theToShow)
+  {
+    if (myToShowTangents == theToShow)
+      return;
+
+    myToShowTangents = theToShow;
     SetToUpdate();
   }
 
@@ -6904,18 +6928,20 @@ private:
       myDrawer->UnsetOwnFaceBoundaryDraw();
 
     if (myToShowFaces)
-      computeOrientationOfFaces(thePrs);
+      computeFaceVectors(thePrs, !myToShowTangents);
+
+    if (myToShowEdges && myToShowTangents)
+      computeEdgeTangents(thePrs);
   }
 
-  //! Add surface(s) normal(s) to indicate orientation of face(s).
-  //! Note: for faces shared between multiple shells the orientation is taken from first inclusion.
-  void computeOrientationOfFaces(const Handle(Prs3d_Presentation)& thePrs)
+  //! Add curve(s) tangents.
+  //! Note: for edges shared between multiple faces the orientation is taken from first inclusion.
+  void computeEdgeTangents(const Handle(Prs3d_Presentation)& thePrs)
   {
-    NCollection_DataMap<TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt> > > aNormalMap;
-    if (myToUseMesh)
-      DBRep_DrawableShape::addMeshNormals (aNormalMap, myshape, myNormalLength);
-    else
-      DBRep_DrawableShape::addSurfaceNormals (aNormalMap, myshape, myNormalLength, myNbAlongU, myNbAlongV);
+    DBRep_DrawableShape::MapOfShapePntPairs aMap;
+    DBRep_DrawableShape::addCurveTangents(aMap, myshape,
+                                          !myToUseMesh ? myNbAlongU : 0,
+                                          myVectorScale, myToNormalizeVec);
 
     Handle(Graphic3d_Group) aPrsGroupRev;
     Handle(Graphic3d_Group) aPrsGroupFwd = thePrs->NewGroup();
@@ -6930,32 +6956,154 @@ private:
       aPrsGroupFwd->SetGroupPrimitivesAspect(myOrientAspects.back());
     }
 
+    addVectors(aPrsGroupFwd, aPrsGroupRev, aMap);
+  }
+
+  //! Add surface(s) tangents of normals to indicate orientation of face(s).
+  //! Note: for faces shared between multiple shells the orientation is taken from first inclusion.
+  void computeFaceVectors(const Handle(Prs3d_Presentation)& thePrs, const bool theNormals)
+  {
+    DBRep_DrawableShape::MapOfShapePntPairs aMap;
+    DBRep_DrawableShape::addSurfaceVectors(aMap, myshape,
+                                           myToUseMesh ? Graphic3d_Vec2i(0) : Graphic3d_Vec2i(myNbAlongU, myNbAlongV),
+                                           theNormals,
+                                           myVectorScale, myToNormalizeVec);
+
+    Handle(Graphic3d_Group) aPrsGroupRev;
+    Handle(Graphic3d_Group) aPrsGroupFwd = thePrs->NewGroup();
+    if (!myToApplyOri)
+    {
+      aPrsGroupRev = thePrs->NewGroup();
+      aPrsGroupRev->SetGroupPrimitivesAspect(myOrientAspects[TopAbs_REVERSED]);
+      aPrsGroupFwd->SetGroupPrimitivesAspect(myOrientAspects[TopAbs_FORWARD]);
+    }
+    else
+    {
+      aPrsGroupFwd->SetGroupPrimitivesAspect(myOrientAspects.back());
+    }
+
+    addVectors(aPrsGroupFwd, aPrsGroupRev, aMap);
+  }
+
+  //! Add surface(s) normal(s) to indicate orientation of face(s).
+  //! Note: for faces shared between multiple shells the orientation is taken from first inclusion.
+  void addVectors(const Handle(Graphic3d_Group)& thePrsGroupFwd,
+                  const Handle(Graphic3d_Group)& thePrsGroupRev,
+                  const DBRep_DrawableShape::MapOfShapePntPairs& theMap)
+  {
+    struct NormalPrs
+    {
+      NCollection_List<Handle(Graphic3d_ArrayOfSegments)> Segments;
+      int NbNull = 0;
+    } aNormalsFwd, aNormalsRev;
+
+    const auto isNullVec = [](const gp_Vec& theVec) -> bool
+    {
+      return !(theVec.SquareMagnitude() > Precision::SquareConfusion());
+    };
+
     const Standard_Real aArrowAngle  = myDrawer->ArrowAspect()->Angle();
-    const Standard_Real aArrowLength = myNormalLength * 0.1;
-    for (const std::pair<const TopoDS_Face, NCollection_Vector<std::pair<gp_Pnt, gp_Pnt>>>& aFaceIt : aNormalMap)
+    for (const std::pair<const TopoDS_Shape, DBRep_DrawableShape::VectorOfPairs>& aFaceIt : theMap)
     {
       const Standard_Boolean toReverse = myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED;
 
-      Handle(Graphic3d_Group)& aPrsGroup = !myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED
-                                         ? aPrsGroupRev
-                                         : aPrsGroupFwd;
+      auto& aNormals = !myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED
+                     ? aNormalsRev
+                     : aNormalsFwd;
 
       Handle(Graphic3d_ArrayOfSegments) aSegments = new Graphic3d_ArrayOfSegments (2 * aFaceIt.second.Size());
       for (const std::pair<gp_Pnt, gp_Pnt>& aPntIt : aFaceIt.second)
       {
-        std::pair<gp_Pnt, gp_Pnt> aPair = aPntIt;
-        if (toReverse)
+        const gp_Vec aDir(aPntIt.first, aPntIt.second);
+        if (isNullVec(aDir))
         {
-          const gp_Vec aDir = aPair.first.XYZ() - aPair.second.XYZ();
-          aPair.second = aPair.first.XYZ() + aDir.XYZ();
+          ++aNormals.NbNull;
+          continue;
         }
 
-        aSegments->AddVertex (aPair.first);
-        aSegments->AddVertex (aPair.second);
-        Prs3d_Arrow::Draw (aPrsGroup, aPair.second, gp_Vec(aPair.first, aPair.second), aArrowAngle, aArrowLength);
+        std::pair<gp_Pnt, gp_Pnt> aPair = aPntIt;
+        if (toReverse)
+          aPair.second = aPair.first.XYZ() - aDir.XYZ();
+
+        aSegments->AddVertex(aPair.first);
+        aSegments->AddVertex(aPair.second);
+        const double aArrowLength = (aPair.first.Distance(aPair.second)) * 0.1;
+        Handle(Graphic3d_ArrayOfSegments) anArrow =
+            Prs3d_Arrow::DrawSegments(aPair.second, gp_Vec(aPair.first, aPair.second), aArrowAngle, aArrowLength, 15);
+        aNormals.Segments.Append(anArrow);
+      }
+      aNormals.Segments.Append(aSegments);
+    }
+
+    const auto mergeSegments = [](const NCollection_List<Handle(Graphic3d_ArrayOfSegments)>& theList)
+                               -> Handle(Graphic3d_ArrayOfSegments)
+    {
+      int aNbVerts = 0, aNbSegs = 0;
+      for (const Handle(Graphic3d_ArrayOfSegments)& aSegIter : theList)
+      {
+        aNbVerts += aSegIter->VertexNumber();
+        if (aSegIter->EdgeNumber() > 0)
+          aNbSegs += aSegIter->EdgeNumber() / 2;
+        else
+          aNbSegs += aSegIter->VertexNumber() / 2;
       }
 
-      aPrsGroup->AddPrimitiveArray (aSegments);
+      if (aNbSegs == 0)
+        return nullptr;
+
+      Handle(Graphic3d_ArrayOfSegments) aSegs = new Graphic3d_ArrayOfSegments(aNbVerts, aNbSegs * 2);
+      for (const Handle(Graphic3d_ArrayOfSegments)& aSegIter : theList)
+      {
+        const int aVertShift = aSegs->VertexNumber();
+        for (int aVertIter = 1; aVertIter <= aSegIter->VertexNumber(); ++aVertIter)
+          aSegs->AddVertex(aSegIter->Vertice(aVertIter));
+
+        if (aSegIter->EdgeNumber() > 0)
+        {
+          for (int anIndexIter = 1; anIndexIter <= aSegIter->EdgeNumber(); ++anIndexIter)
+            aSegs->AddEdge(aSegIter->Edge(anIndexIter) + aVertShift);
+        }
+        else
+        {
+          for (int aVertIter = 1; aVertIter <= aSegIter->VertexNumber(); ++aVertIter)
+            aSegs->AddEdge(aVertIter + aVertShift);
+        }
+      }
+      return aSegs;
+    };
+
+    if (Handle(Graphic3d_ArrayOfSegments) aSegsFwd = mergeSegments(aNormalsFwd.Segments))
+      thePrsGroupFwd->AddPrimitiveArray(aSegsFwd);
+
+    if (Handle(Graphic3d_ArrayOfSegments) aSegsRev = mergeSegments(aNormalsRev.Segments))
+      thePrsGroupRev->AddPrimitiveArray(aSegsRev);
+
+    if (aNormalsFwd.NbNull != 0 || aNormalsRev.NbNull != 0)
+    {
+      Handle(Graphic3d_ArrayOfPoints) aPointsFwd, aPointsRev;
+      if (aNormalsFwd.NbNull != 0)
+        aPointsFwd = new Graphic3d_ArrayOfPoints(aNormalsFwd.NbNull);
+
+      if (aNormalsRev.NbNull != 0)
+        aPointsRev = new Graphic3d_ArrayOfPoints(aNormalsRev.NbNull);
+
+      for (const std::pair<const TopoDS_Shape, DBRep_DrawableShape::VectorOfPairs>& aFaceIt : theMap)
+      {
+        Handle(Graphic3d_ArrayOfPoints)& aPoints = !myToApplyOri && aFaceIt.first.Orientation() == TopAbs_REVERSED
+                                                 ? aPointsRev
+                                                 : aPointsFwd;
+        for (const std::pair<gp_Pnt, gp_Pnt>& aPntIt : aFaceIt.second)
+        {
+          if (isNullVec(gp_Vec(aPntIt.first, aPntIt.second)))
+            aPoints->AddVertex(aPntIt.first);
+        }
+      }
+
+      if (!aPointsFwd.IsNull())
+        thePrsGroupFwd->AddPrimitiveArray(aPointsFwd);
+
+      if (!aPointsRev.IsNull())
+        thePrsGroupRev->AddPrimitiveArray(aPointsRev);
     }
   }
 
@@ -7080,13 +7228,15 @@ private:
 
 private:
 
-  Standard_Real    myNormalLength = 10;
+  Standard_Real    myVectorScale = 10.0;
   Standard_Integer myNbAlongU = 1;
   Standard_Integer myNbAlongV = 1;
+  Standard_Boolean myToShowTangents = false;
   Standard_Boolean myToUseMesh = false;
   Standard_Boolean myToApplyOri = false;
   Standard_Boolean myToShowEdges = false;
   Standard_Boolean myToShowFaces = false;
+  Standard_Boolean myToNormalizeVec = true;
 
   std::array<Handle(Graphic3d_AspectLine3d), TopAbs_EXTERNAL + 2> myOrientAspects;
   std::array<TopoDS_Compound, TopAbs_EXTERNAL + 1> myColoredEdges;
@@ -7131,6 +7281,8 @@ static int VOriShape (Draw_Interpretor& theDI,
   Standard_Boolean isOn = Standard_True;
   Standard_Integer isUseMesh = -1;
   Standard_Real    aLength = -1;
+  Standard_Integer toNormalizeVecs = -1;
+  Standard_Integer toShowTangents = -1;
   Standard_Integer aNbAlongU = -1, aNbAlongV = -1;
   Standard_Integer isOriented = -1;
 
@@ -7172,6 +7324,14 @@ static int VOriShape (Draw_Interpretor& theDI,
         theDI << "Syntax error: length should not be zero";
         return 1;
       }
+    }
+    else if (aParam == "-normalize")
+    {
+      toNormalizeVecs = Draw::ParseOnOffIterator(theArgNum, theArgs, anArgIter) ? 1 : 0;
+    }
+    else if (aParam == "-tangents" || aParam == "-notangents")
+    {
+      toShowTangents = Draw::ParseOnOffNoIterator(theArgNum, theArgs, anArgIter) ? 1 : 0;
     }
     else if (aParam == "-orient"
           || aParam == "-oriented")
@@ -7281,7 +7441,13 @@ static int VOriShape (Draw_Interpretor& theDI,
       aShapeNormPrs->SetApplyOrientation(isOriented == 1);
 
     if (aLength != -1)
-      aShapeNormPrs->SetNormalLength(aLength);
+      aShapeNormPrs->SetVectorScale(aLength);
+
+    if (toNormalizeVecs != -1)
+      aShapeNormPrs->SetNormalizeVectors(toNormalizeVecs == 1);
+
+    if (toShowTangents != -1)
+      aShapeNormPrs->SetShowTangents(toShowTangents == 1);
 
     if (aNbAlongU != -1)
       aShapeNormPrs->SetNbAlongU(aNbAlongU);
@@ -7987,6 +8153,7 @@ Prints or sets the display priority for an object.
 vorishape shape [-edges {0|1}]=1 [-faces {0|1}]=1 [-oriented {0|1}]=0
                 [-useMesh]=0 [-length Value]=10
                 [-nbAlongU Number]=1 [-nbAlongV Number]=1 [-nbAlong Number]=1
+                [-tangents {0|1}]=0
 Visualizes shape orientations.
  -edges    mark orientation of edge by color
            and display curve tangent arrow at tail
@@ -7994,11 +8161,12 @@ Visualizes shape orientations.
            at the middle of the its parametric space
  -oriented apply topological orientation to result direction
            (curve tangent, surface normal) instead of applying color code
- -nbAlong  number of normals along U and V to show per face
- -nbAlongU number of normals along U to show per face
+ -nbAlong  number of normals/tangents along U and V to show per face/edge
+ -nbAlongU number of normals/tangents along U to show per face/edge
  -nbAlongV number of normals along V to show per face
  -useMesh  show triangulation normals instead of splitting UV surface
- -length   normal vector length scale factor
+ -length   normal/tangent vector length scale factor
+ -tangents show curve/surface tangents instead of surface normals
 )" /* [vorishape] */);
   addCmd("vnormals", VOriShape, /* [vnormals] */ R"(
 vnormals shape [{on|off}]=on [-oriented {0|1}]=0
