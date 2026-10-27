@@ -14,15 +14,16 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
 #include <ExprIntrp_Generator.hxx>
-#include <Standard_Type.hxx>
+
+#include <Standard_ArrayStreamBuffer.hxx>
+#include <Standard_ErrorHandler.hxx>
 #include <TCollection_AsciiString.hxx>
 
-IMPLEMENT_STANDARD_RTTIEXT(ExprIntrp_Generator,Standard_Transient)
+#include "ExprIntrp_yaccintrf.pxx"
+#include "ExprIntrp.tab.hxx"
 
-#include <ExprIntrp_yaccanal.hxx>
-ExprIntrp_Analysis ExprIntrp_Recept;
+IMPLEMENT_STANDARD_RTTIEXT(ExprIntrp_Generator,Standard_Transient)
 
 ExprIntrp_Generator::ExprIntrp_Generator()
 {
@@ -68,5 +69,37 @@ Handle(Expr_NamedExpression) ExprIntrp_Generator::GetNamed (const TCollection_As
   }
   Handle(Expr_NamedExpression) curexp;
   return curexp;
+}
+
+bool ExprIntrp_Generator::Parse(ExprIntrp_Analysis& theRecept,
+                                const TCollection_AsciiString& theStr)
+{
+  if (theStr.IsEmpty())
+    return false;
+
+  Standard_ArrayStreamBuffer aBuffer(theStr.ToCString(), theStr.Length());
+  std::istream aStream(&aBuffer);
+  try
+  {
+    OCC_CATCH_SIGNALS
+
+    ExprIntrp_yaccintrf aCtx(theRecept);
+
+    ExprIntrp::scanner aScanner(aCtx, aStream);
+    aScanner.yyrestart(&aStream);
+
+    ExprIntrp::parser aParser(&aScanner);
+    const int aRes = aParser.parse();
+    if (aRes != 0 && !aCtx.ExprIntrp_GetLastError().IsEmpty())
+    {
+      Message::SendTrace() << "Expression '" << theStr << "' cannot be parsed, " << aCtx.ExprIntrp_GetLastError();
+    }
+    return aRes == 0;
+  }
+  catch (const Standard_Failure& anExcept)
+  {
+    Message::SendTrace() << "Expression '" << theStr << "' cannot be parsed: " << anExcept;
+    return false;
+  }
 }
 

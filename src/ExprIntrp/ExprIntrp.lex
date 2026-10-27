@@ -15,92 +15,118 @@
  commercial license or contractual agreement.
 */ 
 
-%option yywrap
+/*
+    c++                 generate C++ parser class
+    8bit                don't fail on 8-bit input characters
+    warn                warn about inconsistencies
+    nodefault           don't create default echo-all rule
+    noinput             disables the generation of code for reading input from standard input
+    noyywrap            don't use yywrap() function
+    yyclass             define name of the scanner class
+*/
+%option c++
+%option 8bit warn nodefault
+%option noyywrap
+%option noinput
+%option yyclass="ExprIntrp::scanner"
+
+%top{
+// This file is part of Open CASCADE Technology software library.
+// This file is generated, do not modify it directly; edit source file ExprIntrp.lex instead.
+
+// Pre-include stdlib.h to avoid redefinition of integer type macros (INT8_MIN and similar in generated code)
+#if !defined(_MSC_VER) || (_MSC_VER >= 1600) // Visual Studio 2010+
+  #include "stdint.h"
+#endif
+}
+
 %{
-#include <ExprIntrp.tab.h>
+#include <ExprIntrp.tab.hxx>
+#include "stdio.h"
 
-#include <ExprIntrp_yaccintrf.hxx>
+// Tell flex which function to define
+#ifdef  YY_DECL
+  #undef YY_DECL
+#endif
+#define YY_DECL int ExprIntrp::scanner::lex(ExprIntrp::parser::semantic_type* /*yylval*/)
 
-#define YY_SKIP_YYWRAP
+// Disable checking for eof
+#ifdef  YY_INTERACTIVE
+  #undef YY_INTERACTIVE
+#endif
 
-static YY_BUFFER_STATE ExprIntrp_bufstring;
+typedef ExprIntrp::parser::token token;
 
-void ExprIntrp_start_string(const char* str)
-{
-  // depending on configuration and generator, yyconst may be defined as const or empty
-  ExprIntrp_bufstring = ExprIntrp_scan_string((yyconst char*)str);
-}
+#include <Standard_Failure.hxx>
+#define YY_FATAL_ERROR(theMsg) throw Standard_Failure(theMsg);
 
-void ExprIntrp_stop_string()
-{
-  ExprIntrp_delete_buffer(ExprIntrp_bufstring);
-  ExprIntrp_bufstring = (YY_BUFFER_STATE) 0;
-}
+#if defined(_MSC_VER)
+  // add includes for flex 2.91 (Linux version)
+  #include <stdlib.h>
+  #include <io.h>
 
-static int yywrap()
-{
-  return 1;
-}
+  // Avoid includion of unistd.h if parser is generated on Linux (flex 2.5.35)
+  #ifndef YY_NO_UNISTD_H
+    #define YY_NO_UNISTD_H
+  #endif
 
-// provide safe error handler (exception instead of exit())
-#define YY_FATAL_ERROR(msg) ExprIntrperror(msg)
-
-// MSVC specifics
-#ifdef _MSC_VER
-
-// add includes for flex 2.91 (Linux version)
-#include <stdlib.h>
-#include <io.h>
-
-// Avoid includion of unistd.h if parser is generated on Linux (flex 2.5.35)
-#define YY_NO_UNISTD_H
-
-// disable MSVC warnings in flex 2.89 and 2.5.35 code
-// Note that Intel compiler also defines _MSC_VER but has different warning ids
-#if defined(__INTEL_COMPILER)
-#pragma warning(disable:177 1786 1736)
+  // disable MSVC warnings in flex 2.89 and 2.5.35 code
+  // Note that Intel compiler also defines _MSC_VER but has different warning ids
+  #if defined(__INTEL_COMPILER)
+    #pragma warning(disable:177 1786 1736)
+  #elif defined(__clang__)
+    #pragma GCC diagnostic ignored "-Wunused-function"
+    #pragma GCC diagnostic ignored "-Winconsistent-dllimport"
+    #pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
+  #else
+    #pragma warning(disable:4131 4244 4273 4127 4267)
+  #endif
 #elif defined(__clang__)
-#pragma GCC diagnostic ignored "-Wunused-function"
-#pragma GCC diagnostic ignored "-Winconsistent-dllimport"
-#pragma GCC diagnostic ignored "-Wunneeded-internal-declaration"
-#else
-#pragma warning(disable:4131 4244 4273 4127 4267)
+  // disable Clang warnings in flex code
+  #pragma clang diagnostic ignored "-Wshorten-64-to-32"
+  #if __has_warning("-Wmisleading-indentation")
+    #pragma clang diagnostic ignored "-Wmisleading-indentation"
+  #endif
+#elif defined(__GNUC__)
+  // disable GCC warnings in flex code
+  #pragma GCC diagnostic ignored "-Wunused-function"
+  #if (__GNUC__ >= 6)
+    #pragma GCC diagnostic ignored "-Wmisleading-indentation"
+  #endif
 #endif
-
-#endif /* MSC_VER */
-
-#ifdef __GNUC__
-// add includes for flex 2.91 (Linux version)
-#include <unistd.h>
-
-// disable GCC warnings in flex 2.91 code
-#pragma GCC diagnostic ignored "-Wunused-function"
-#endif
-
 %}
 %%
-" "		{;}
-"+"		{return(SUMOP) ;}
-"-"		{return(MINUSOP) ;}
-"/"		{return(DIVIDEOP) ;}
-"^"		{return(EXPOP) ;}
-"**"		{return(EXPOP) ;}
-"*"		{return(MULTOP) ;}
-"("		{return(PARENTHESIS);}
-"["		{return(BRACKET);}
-")"		{return(ENDPARENTHESIS);}
-"]"		{return(ENDBRACKET);}
-","		{return(COMMA);}
-"@"		{return(DIFFERENTIAL);}
-"<-"		{return(ASSIGNOP);}
-"="		{return(EQUALOP);}
-"Deassign"      {return(DEASSIGNKEY);}
-"Deriv"         {return(DERIVKEY);}
-"Const"         {return(CONSTKEY);}
-"Sum"           {return(SUMKEY);}
-"Prod"          {return(PRODKEY);}
-[0-9.]+e[+|-]?[0-9]+ {ExprIntrp_SetResult(); return(VALUE);}
-[0-9.]+		{ExprIntrp_SetResult(); return(VALUE);}
-[a-zA-Z][a-zA-Z0-9_]*	{ExprIntrp_SetResult(); return(IDENTIFIER);}
-";"		{return(RELSEPARATOR);}
-"'"+            {ExprIntrp_SetDegree();return(DERIVATE);}
+" "             {;}
+"+"             { return(token::SUMOP); }
+"-"             { return(token::MINUSOP); }
+"/"             { return(token::DIVIDEOP); }
+"^"             { return(token::EXPOP); }
+"**"            { return(token::EXPOP); }
+"*"             { return(token::MULTOP); }
+"("             { return(token::PARENTHESIS); }
+"["             { return(token::BRACKET); }
+")"             { return(token::ENDPARENTHESIS); }
+"]"             { return(token::ENDBRACKET); }
+","             { return(token::COMMA); }
+"@"             { return(token::DIFFERENTIAL); }
+"<-"            { return(token::ASSIGNOP); }
+"="             { return(token::EQUALOP); }
+"Deassign"      { return(token::DEASSIGNKEY); }
+"Deriv"         { return(token::DERIVKEY); }
+"Const"         { return(token::CONSTKEY); }
+"Sum"           { return(token::SUMKEY); }
+"Prod"          { return(token::PRODKEY); }
+
+[0-9.]+e[+|-]?[0-9]+   { myCtx.ExprIntrp_SetResult(YYText(), YYLeng()); return(token::VALUE); }
+[0-9.]+	               { myCtx.ExprIntrp_SetResult(YYText(), YYLeng()); return(token::VALUE); }
+[a-zA-Z][a-zA-Z0-9_]*  { myCtx.ExprIntrp_SetResult(YYText(), YYLeng()); return(token::IDENTIFIER); }
+";"                    { return(token::RELSEPARATOR); }
+"'"+                   { myCtx.ExprIntrp_SetDegree(YYText(), YYLeng()); return(token::DERIVATE); }
+
+%%
+
+ExprIntrp::scanner::scanner(ExprIntrp_yaccintrf& theCtx, std::istream& theIn)
+: ExprIntrpFlexLexer(&theIn, static_cast<std::ostream*>(nullptr)), myCtx(theCtx)
+{
+  //
+}

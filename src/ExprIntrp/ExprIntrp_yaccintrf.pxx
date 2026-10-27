@@ -1,0 +1,98 @@
+// Created on: 1992-02-17
+// Created by: Arnaud BOUZY
+// Copyright (c) 1992-1999 Matra Datavision
+// Copyright (c) 1999-2014 OPEN CASCADE SAS
+//
+// This file is part of Open CASCADE Technology software library.
+//
+// This library is free software; you can redistribute it and/or modify it under
+// the terms of the GNU Lesser General Public License version 2.1 as published
+// by the Free Software Foundation, with special exception defined in the file
+// OCCT_LGPL_EXCEPTION.txt. Consult the file LICENSE_LGPL_21.txt included in OCCT
+// distribution for complete text of the license and disclaimer of any warranty.
+//
+// Alternatively, this file may be used under the terms of Open CASCADE
+// commercial license or contractual agreement.
+
+#ifndef ExprIntrp_yaccintrf_HeaderFile
+#define ExprIntrp_yaccintrf_HeaderFile
+
+#include <ExprIntrp_Analysis.hxx>
+#include <TCollection_AsciiString.hxx>
+
+//! Context for Flex/Bison parser.
+class ExprIntrp_yaccintrf
+{
+public:
+  DEFINE_STANDARD_ALLOC
+
+  explicit ExprIntrp_yaccintrf(ExprIntrp_Analysis& theRecept);
+
+  ExprIntrp_yaccintrf(ExprIntrp_yaccintrf& ) = delete;
+  ExprIntrp_yaccintrf& operator=(ExprIntrp_yaccintrf&) = delete;
+
+public:
+
+  const TCollection_AsciiString& ExprIntrp_GetLastError() const;
+  void ExprIntrp_SetLastError(const TCollection_AsciiString& theErr);
+  const TCollection_AsciiString& ExprIntrp_GetResult() const;
+  void ExprIntrp_SetResult(const char* theStr, int theLen);
+  int  ExprIntrp_GetDegree() const;
+  void ExprIntrp_SetDegree(const char* theStr, int theLen);
+
+public:
+
+  void ExprIntrp_EndOfFuncDef();
+  void ExprIntrp_EndOfRelation();
+  void ExprIntrp_AssignVariable();
+  void ExprIntrp_EndOfAssign();
+  void ExprIntrp_Deassign();
+  void ExprIntrp_SumOperator();
+  void ExprIntrp_MinusOperator();
+  void ExprIntrp_ProductOperator();
+  void ExprIntrp_DivideOperator();
+  void ExprIntrp_ExpOperator();
+  void ExprIntrp_UnaryMinusOperator();
+  void ExprIntrp_UnaryPlusOperator();
+  void ExprIntrp_VariableIdentifier();
+  void ExprIntrp_NumValue();
+  void ExprIntrp_EndFunction();
+  void ExprIntrp_EndDerFunction();
+  void ExprIntrp_EndDifferential();
+  void ExprIntrp_EndDiffFunction();
+  void ExprIntrp_EndFuncArg();
+  void ExprIntrp_NextFuncArg();
+  void ExprIntrp_StartFunction();
+  void ExprIntrp_DefineFunction();
+  void ExprIntrp_StartDerivate();
+  void ExprIntrp_EndDerivate();
+  void ExprIntrp_DiffVar();
+  void ExprIntrp_DiffDegree();
+  void ExprIntrp_VerDiffDegree();
+  void ExprIntrp_DiffDegreeVar();
+  void ExprIntrp_StartDifferential();
+  void ExprIntrp_Derivation();
+  void ExprIntrp_EndDerivation();
+  void ExprIntrp_DerivationValue();
+  void ExprIntrp_ConstantIdentifier();
+  void ExprIntrp_ConstantDefinition();
+  void ExprIntrp_Sumator();
+  void ExprIntrp_Productor();
+  void ExprIntrp_EndOfEqual();
+
+private:
+
+  ExprIntrp_Analysis& ExprIntrp_Recept;
+
+  TCollection_AsciiString ExprIntrp_lastError;
+  TCollection_AsciiString ExprIntrp_curres;
+  int ExprIntrp_degree = 0;
+
+  TCollection_AsciiString ExprIntrp_assname;
+  TCollection_AsciiString ExprIntrp_funcdefname;
+  Standard_Integer ExprIntrp_nbargs = 0;
+  Standard_Integer ExprIntrp_nbdiff = 0;
+
+};
+
+#endif
