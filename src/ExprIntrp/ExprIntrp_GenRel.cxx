@@ -14,14 +14,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <ExprIntrp_GenRel.hxx>
 
 #include <Expr_GeneralRelation.hxx>
-#include <ExprIntrp.hxx>
-#include <ExprIntrp_GenRel.hxx>
-#include <ExprIntrp_yaccanal.hxx>
+#include <ExprIntrp_Analysis.hxx>
 #include <Standard_NoSuchObject.hxx>
-#include <Standard_Type.hxx>
-#include <TCollection_AsciiString.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ExprIntrp_GenRel,ExprIntrp_Generator)
 
@@ -37,19 +34,18 @@ Handle( ExprIntrp_GenRel ) ExprIntrp_GenRel::Create()
 
 void ExprIntrp_GenRel::Process (const TCollection_AsciiString& str)
 {
-  Handle(ExprIntrp_GenRel) me = this;
   done = Standard_False;
-  if (ExprIntrp::Parse(me,str)) {
-    if (!ExprIntrp_Recept.IsRelStackEmpty()) {
-      myRelation = ExprIntrp_Recept.PopRelation();
+  myRelation.Nullify();
+
+  ExprIntrp_Analysis aRecept;
+  aRecept.SetMaster(this);
+  if (Parse(aRecept, str))
+  {
+    if (!aRecept.IsRelStackEmpty())
+    {
+      myRelation = aRecept.PopRelation();
       done = Standard_True;
     }
-    else {
-      myRelation.Nullify();
-    }
-  }
-  else {
-    myRelation.Nullify();
   }
 }
  

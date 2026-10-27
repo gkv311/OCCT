@@ -12,8 +12,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <ExprIntrp_yaccintrf.hxx>
-#include <ExprIntrp_yaccanal.hxx>
+#include "ExprIntrp_yaccintrf.pxx"
+
 #include <Expr_GeneralExpression.hxx>
 #include <Expr_NamedExpression.hxx>
 #include <Expr_NamedConstant.hxx>
@@ -51,32 +51,66 @@
 #include <Expr_Array1OfNamedUnknown.hxx>
 #include <Expr_Array1OfGeneralExpression.hxx>
 
-static TCollection_AsciiString ExprIntrp_assname;
-static TCollection_AsciiString ExprIntrp_funcdefname;
-static Standard_Integer ExprIntrp_nbargs;
-static Standard_Integer ExprIntrp_nbdiff;
+ExprIntrp_yaccintrf::ExprIntrp_yaccintrf(ExprIntrp_Analysis& theRecept)
+: ExprIntrp_Recept(theRecept)
+{
+  //
+}
 
-extern "C" void ExprIntrp_StartFunction()
+const TCollection_AsciiString& ExprIntrp_yaccintrf::ExprIntrp_GetLastError() const
+{
+  return ExprIntrp_lastError;
+}
+
+void ExprIntrp_yaccintrf::ExprIntrp_SetLastError(const TCollection_AsciiString& theErr)
+{
+  ExprIntrp_lastError = theErr;
+}
+
+const TCollection_AsciiString& ExprIntrp_yaccintrf::ExprIntrp_GetResult() const
+{
+  return ExprIntrp_curres;
+}
+
+void ExprIntrp_yaccintrf::ExprIntrp_SetResult(const char* theStr, int theLen)
+{
+  (void)theLen;
+  ExprIntrp_curres = theStr;
+}
+
+int ExprIntrp_yaccintrf::ExprIntrp_GetDegree() const
+{
+  return ExprIntrp_degree;
+}
+
+void ExprIntrp_yaccintrf::ExprIntrp_SetDegree(const char* theStr, int theLen)
+{
+  (void)theLen;
+  //ExprIntrp_degree = theLen;
+  ExprIntrp_degree = (int)strlen(theStr);
+}
+
+void ExprIntrp_yaccintrf::ExprIntrp_StartFunction()
 {
   const TCollection_AsciiString& name = ExprIntrp_GetResult();
   ExprIntrp_Recept.PushName(name);
   ExprIntrp_nbargs = 0;
 }
 
-extern "C" void ExprIntrp_StartDerivate()
+void ExprIntrp_yaccintrf::ExprIntrp_StartDerivate()
 {
   const TCollection_AsciiString& name = ExprIntrp_GetResult();
   ExprIntrp_Recept.PushName(name);
 }
 
-extern "C" void ExprIntrp_EndDerivate()
+void ExprIntrp_yaccintrf::ExprIntrp_EndDerivate()
 {
   int degree;
   degree = ExprIntrp_GetDegree();
   ExprIntrp_Recept.PushValue(degree);
 }
 
-extern "C" void ExprIntrp_Derivation()
+void ExprIntrp_yaccintrf::ExprIntrp_Derivation()
 {
   ExprIntrp_Recept.PushValue(1);
   const TCollection_AsciiString& thename = ExprIntrp_GetResult();
@@ -90,14 +124,14 @@ extern "C" void ExprIntrp_Derivation()
   ExprIntrp_Recept.Push(namexp);
 }
 
-extern "C" void ExprIntrp_DerivationValue()
+void ExprIntrp_yaccintrf::ExprIntrp_DerivationValue()
 {
   const TCollection_AsciiString& aStr = ExprIntrp_GetResult();
   ExprIntrp_Recept.PopValue();
   ExprIntrp_Recept.PushValue(aStr.IntegerValue());
 }
 
-extern "C" void ExprIntrp_EndDerivation()
+void ExprIntrp_yaccintrf::ExprIntrp_EndDerivation()
 {
   Standard_Integer degree = ExprIntrp_Recept.PopValue();
   Handle(Expr_NamedUnknown) var = Handle(Expr_NamedUnknown)::DownCast(ExprIntrp_Recept.Pop());
@@ -106,13 +140,13 @@ extern "C" void ExprIntrp_EndDerivation()
   ExprIntrp_Recept.Push(exp);
 }
 
-extern "C" void ExprIntrp_StartDifferential()
+void ExprIntrp_yaccintrf::ExprIntrp_StartDifferential()
 {
   ExprIntrp_StartDerivate();
   ExprIntrp_nbdiff = 0;
 }
 
-extern "C" void ExprIntrp_DiffDegreeVar()
+void ExprIntrp_yaccintrf::ExprIntrp_DiffDegreeVar()
 {
   const TCollection_AsciiString& aStr = ExprIntrp_GetResult();
   const char* s = aStr.ToCString();
@@ -125,20 +159,20 @@ extern "C" void ExprIntrp_DiffDegreeVar()
   ExprIntrp_nbdiff++;
 }
 
-extern "C" void ExprIntrp_DiffVar()
+void ExprIntrp_yaccintrf::ExprIntrp_DiffVar()
 {
   ExprIntrp_Recept.PushValue(1);
   ExprIntrp_DiffDegreeVar();
 }
 
-extern "C" void ExprIntrp_DiffDegree()
+void ExprIntrp_yaccintrf::ExprIntrp_DiffDegree()
 {
   const TCollection_AsciiString& aStr = ExprIntrp_GetResult();
   Standard_Integer deg = aStr.IntegerValue();
   ExprIntrp_Recept.PushValue(deg);
 }
 
-extern "C" void ExprIntrp_VerDiffDegree()
+void ExprIntrp_yaccintrf::ExprIntrp_VerDiffDegree()
 {
   const TCollection_AsciiString& aStr = ExprIntrp_GetResult();
   Standard_Integer deg = aStr.IntegerValue();
@@ -149,7 +183,7 @@ extern "C" void ExprIntrp_VerDiffDegree()
   ExprIntrp_Recept.PushValue(deg);
 }
 
-extern "C" void ExprIntrp_EndDifferential()
+void ExprIntrp_yaccintrf::ExprIntrp_EndDifferential()
 {
   TCollection_AsciiString name = ExprIntrp_Recept.PopName();
   Handle(Expr_GeneralFunction) thefunc = ExprIntrp_Recept.GetFunction(name);
@@ -172,7 +206,7 @@ extern "C" void ExprIntrp_EndDifferential()
   ExprIntrp_Recept.PushFunction(thefunc);
 }
 
-extern "C" void ExprIntrp_EndDiffFunction()
+void ExprIntrp_yaccintrf::ExprIntrp_EndDiffFunction()
 {
   Handle(Expr_GeneralFunction) thefunc = ExprIntrp_Recept.PopFunction();
   if (thefunc.IsNull()) {
@@ -276,7 +310,7 @@ static Handle(Expr_GeneralExpression) ExprIntrp_StandardFunction(const TCollecti
 }
 
 
-extern "C" void ExprIntrp_EndDerFunction()
+void ExprIntrp_yaccintrf::ExprIntrp_EndDerFunction()
 {
   TCollection_AsciiString name = ExprIntrp_Recept.PopName();
   Handle(Expr_GeneralExpression) op = ExprIntrp_Recept.Pop();
@@ -323,7 +357,7 @@ extern "C" void ExprIntrp_EndDerFunction()
   }
 }
     
-extern "C" void ExprIntrp_EndFunction()
+void ExprIntrp_yaccintrf::ExprIntrp_EndFunction()
 {
   TCollection_AsciiString name = ExprIntrp_Recept.PopName();
   Handle(Expr_GeneralExpression) op = ExprIntrp_Recept.Pop();
@@ -370,17 +404,17 @@ extern "C" void ExprIntrp_EndFunction()
   }
 }
 
-extern "C" void ExprIntrp_NextFuncArg()
+void ExprIntrp_yaccintrf::ExprIntrp_NextFuncArg()
 {
   ExprIntrp_nbargs++;
 }
 
-extern "C" void ExprIntrp_EndFuncArg()
+void ExprIntrp_yaccintrf::ExprIntrp_EndFuncArg()
 {
   ExprIntrp_nbargs++;
 }
 
-extern "C" void ExprIntrp_SumOperator()
+void ExprIntrp_yaccintrf::ExprIntrp_SumOperator()
 {
   Handle(Expr_GeneralExpression) op2 = ExprIntrp_Recept.Pop();
   Handle(Expr_GeneralExpression) op1 = ExprIntrp_Recept.Pop();
@@ -389,7 +423,7 @@ extern "C" void ExprIntrp_SumOperator()
   ExprIntrp_Recept.Push(res);
 }
 
-extern "C" void ExprIntrp_MinusOperator()
+void ExprIntrp_yaccintrf::ExprIntrp_MinusOperator()
 {
   Handle(Expr_GeneralExpression) op2 = ExprIntrp_Recept.Pop();
   Handle(Expr_GeneralExpression) op1 = ExprIntrp_Recept.Pop();
@@ -397,7 +431,7 @@ extern "C" void ExprIntrp_MinusOperator()
   ExprIntrp_Recept.Push(res->ShallowSimplified());
 }
 
-extern "C" void ExprIntrp_DivideOperator()
+void ExprIntrp_yaccintrf::ExprIntrp_DivideOperator()
 {
   Handle(Expr_GeneralExpression) op2 = ExprIntrp_Recept.Pop();
   Handle(Expr_GeneralExpression) op1 = ExprIntrp_Recept.Pop();
@@ -405,7 +439,7 @@ extern "C" void ExprIntrp_DivideOperator()
   ExprIntrp_Recept.Push(res->ShallowSimplified());
 }
 
-extern "C" void ExprIntrp_ExpOperator()
+void ExprIntrp_yaccintrf::ExprIntrp_ExpOperator()
 {
   Handle(Expr_GeneralExpression) op2 = ExprIntrp_Recept.Pop();
   Handle(Expr_GeneralExpression) op1 = ExprIntrp_Recept.Pop();
@@ -413,7 +447,7 @@ extern "C" void ExprIntrp_ExpOperator()
   ExprIntrp_Recept.Push(res->ShallowSimplified());
 }
 
-extern "C" void ExprIntrp_ProductOperator()
+void ExprIntrp_yaccintrf::ExprIntrp_ProductOperator()
 {
   Handle(Expr_GeneralExpression) op2 = ExprIntrp_Recept.Pop();
   Handle(Expr_GeneralExpression) op1 = ExprIntrp_Recept.Pop();
@@ -421,20 +455,20 @@ extern "C" void ExprIntrp_ProductOperator()
   ExprIntrp_Recept.Push(res->ShallowSimplified());
 }
 
-extern "C" void ExprIntrp_UnaryMinusOperator()
+void ExprIntrp_yaccintrf::ExprIntrp_UnaryMinusOperator()
 {
   Handle(Expr_GeneralExpression) op = ExprIntrp_Recept.Pop();
   Handle(Expr_UnaryMinus) res = new Expr_UnaryMinus(op);
   ExprIntrp_Recept.Push(res->ShallowSimplified());
 }
 
-extern "C" void ExprIntrp_UnaryPlusOperator()
+void ExprIntrp_yaccintrf::ExprIntrp_UnaryPlusOperator()
 {
   Handle(Expr_GeneralExpression) op = ExprIntrp_Recept.Pop();
   ExprIntrp_Recept.Push(op);
 }
 
-extern "C" void ExprIntrp_VariableIdentifier()
+void ExprIntrp_yaccintrf::ExprIntrp_VariableIdentifier()
 {
   const TCollection_AsciiString& thename = ExprIntrp_GetResult();
   Handle(Expr_NamedExpression) nameexp = ExprIntrp_Recept.GetNamed(thename);
@@ -445,7 +479,7 @@ extern "C" void ExprIntrp_VariableIdentifier()
   ExprIntrp_Recept.Push(nameexp);
 }
 
-extern "C" void ExprIntrp_NumValue()
+void ExprIntrp_yaccintrf::ExprIntrp_NumValue()
 {
   const TCollection_AsciiString& aStr = ExprIntrp_GetResult();
   Standard_Real value = aStr.RealValue();
@@ -453,12 +487,12 @@ extern "C" void ExprIntrp_NumValue()
   ExprIntrp_Recept.Push(nval);
 }
 
-extern "C" void ExprIntrp_AssignVariable()
+void ExprIntrp_yaccintrf::ExprIntrp_AssignVariable()
 {
   ExprIntrp_assname = ExprIntrp_GetResult();
 }
 
-extern "C" void ExprIntrp_Deassign()
+void ExprIntrp_yaccintrf::ExprIntrp_Deassign()
 {
   const TCollection_AsciiString& thename = ExprIntrp_GetResult();
   Handle(Expr_NamedExpression) nameexp = ExprIntrp_Recept.GetNamed(thename);
@@ -472,25 +506,13 @@ extern "C" void ExprIntrp_Deassign()
   var->Deassign();
 }
 
-extern "C" void ExprIntrp_DefineFunction()
+void ExprIntrp_yaccintrf::ExprIntrp_DefineFunction()
 {
   ExprIntrp_funcdefname = ExprIntrp_Recept.PopName();
   ExprIntrp_Recept.PushValue(ExprIntrp_nbargs);
 }
 
-extern "C" void ExprIntrp_close()
-{
-  ExprIntrp_stop_string();
-}
-
-extern "C" void ExprIntrperror(char* msg)
-{
-  ExprIntrp_close();
-  throw ExprIntrp_SyntaxError(msg);
-}
-
-
-extern "C" void ExprIntrp_EndOfEqual()
+void ExprIntrp_yaccintrf::ExprIntrp_EndOfEqual()
 {
   Handle(Expr_GeneralExpression) memb2 = ExprIntrp_Recept.Pop();
   Handle(Expr_GeneralExpression) memb1 = ExprIntrp_Recept.Pop();
@@ -498,7 +520,7 @@ extern "C" void ExprIntrp_EndOfEqual()
   ExprIntrp_Recept.PushRelation(res);
 }
 
-extern "C" void ExprIntrp_EndOfRelation()
+void ExprIntrp_yaccintrf::ExprIntrp_EndOfRelation()
 {
   Handle(Expr_SystemRelation) sys;
   Handle(Expr_GeneralRelation) currel;
@@ -524,7 +546,7 @@ extern "C" void ExprIntrp_EndOfRelation()
   }
 }
 
-extern "C" void ExprIntrp_EndOfAssign()
+void ExprIntrp_yaccintrf::ExprIntrp_EndOfAssign()
 {
   Handle(Expr_NamedExpression) namexp = ExprIntrp_Recept.GetNamed(ExprIntrp_assname);
   Handle(Expr_NamedUnknown) namu;
@@ -542,7 +564,7 @@ extern "C" void ExprIntrp_EndOfAssign()
   namu->Assign(ExprIntrp_Recept.Pop());
 }
 
-extern "C" void ExprIntrp_EndOfFuncDef()
+void ExprIntrp_yaccintrf::ExprIntrp_EndOfFuncDef()
 {
   Handle(Expr_GeneralExpression) theexp = ExprIntrp_Recept.Pop();
   Standard_Integer nbargs = ExprIntrp_Recept.PopValue();
@@ -571,13 +593,13 @@ extern "C" void ExprIntrp_EndOfFuncDef()
   ExprIntrp_Recept.Use(thefunc);
 }
 
-extern "C" void ExprIntrp_ConstantIdentifier()
+void ExprIntrp_yaccintrf::ExprIntrp_ConstantIdentifier()
 {
   const TCollection_AsciiString& thename = ExprIntrp_GetResult();
   ExprIntrp_Recept.PushName(thename);
 }
 
-extern "C" void ExprIntrp_ConstantDefinition()
+void ExprIntrp_yaccintrf::ExprIntrp_ConstantDefinition()
 {
   TCollection_AsciiString name = ExprIntrp_Recept.PopName();
   const TCollection_AsciiString& aStr = ExprIntrp_GetResult();
@@ -589,7 +611,7 @@ extern "C" void ExprIntrp_ConstantDefinition()
 }
 
 
-extern "C" void ExprIntrp_Sumator()
+void ExprIntrp_yaccintrf::ExprIntrp_Sumator()
 {
   Handle(Expr_NumericValue) number = Handle(Expr_NumericValue)::DownCast(ExprIntrp_Recept.Pop());
   Standard_Integer nb = (Standard_Integer) number->GetValue();
@@ -617,7 +639,7 @@ extern "C" void ExprIntrp_Sumator()
   ExprIntrp_Recept.Push(res->ShallowSimplified());
 }
 
-extern "C" void ExprIntrp_Productor()
+void ExprIntrp_yaccintrf::ExprIntrp_Productor()
 {
   Handle(Expr_NumericValue) number = Handle(Expr_NumericValue)::DownCast(ExprIntrp_Recept.Pop());
   Standard_Integer nb = (Standard_Integer) number->GetValue();

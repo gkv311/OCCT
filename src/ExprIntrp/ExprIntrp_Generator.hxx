@@ -24,6 +24,7 @@
 #include <Standard_Transient.hxx>
 class Expr_NamedFunction;
 class Expr_NamedExpression;
+class ExprIntrp_Analysis;
 class TCollection_AsciiString;
 
 
@@ -66,7 +67,10 @@ protected:
   
   Standard_EXPORT ExprIntrp_Generator();
 
-
+  //! Parse the given expression @p theStr and fill in @p theRecept.
+  //! Returns FALSE in case of invalid expression.
+  Standard_EXPORT bool Parse(ExprIntrp_Analysis& theRecept,
+                             const TCollection_AsciiString& theStr);
 
 private:
 
