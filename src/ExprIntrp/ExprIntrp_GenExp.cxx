@@ -14,14 +14,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <ExprIntrp_GenExp.hxx>
 
 #include <Expr_GeneralExpression.hxx>
-#include <ExprIntrp.hxx>
-#include <ExprIntrp_GenExp.hxx>
-#include <ExprIntrp_yaccanal.hxx>
+#include <ExprIntrp_Analysis.hxx>
 #include <Standard_NoSuchObject.hxx>
-#include <Standard_Type.hxx>
-#include <TCollection_AsciiString.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ExprIntrp_GenExp,ExprIntrp_Generator)
 
@@ -37,20 +34,22 @@ Handle( ExprIntrp_GenExp ) ExprIntrp_GenExp::Create()
 
 void ExprIntrp_GenExp::Process (const TCollection_AsciiString& str)
 {
-  Handle(ExprIntrp_GenExp) me = this;
   done = Standard_False;
-  if (ExprIntrp::Parse(me,str)) {
-    if (!ExprIntrp_Recept.IsExpStackEmpty()) {
-      myExpression = ExprIntrp_Recept.Pop();
+  myExpression.Nullify();
+
+  ExprIntrp_Analysis aRecept;
+  aRecept.SetMaster(this);
+  if (Parse(aRecept, str))
+  {
+    if (!aRecept.IsExpStackEmpty())
+    {
+      myExpression = aRecept.Pop();
       done = Standard_True;
     }
-    else {
-      myExpression.Nullify();
+    else
+    {
       done = Standard_True;
     }
-  }
-  else {
-    myExpression.Nullify();
   }
 }
  

@@ -14,12 +14,9 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-
-#include <ExprIntrp.hxx>
 #include <ExprIntrp_GenFct.hxx>
-#include <ExprIntrp_yaccanal.hxx>
-#include <Standard_Type.hxx>
-#include <TCollection_AsciiString.hxx>
+
+#include <ExprIntrp_Analysis.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ExprIntrp_GenFct,ExprIntrp_Generator)
 
@@ -35,8 +32,10 @@ Handle( ExprIntrp_GenFct ) ExprIntrp_GenFct::Create()
 
 void ExprIntrp_GenFct::Process (const TCollection_AsciiString& str)
 {
-  Handle(ExprIntrp_GenFct) me = this;
-  done = ExprIntrp::Parse(me,str);
+  ExprIntrp_Analysis aRecept;
+  aRecept.SetMaster(this);
+
+  done = Parse(aRecept, str);
 }
  
 Standard_Boolean ExprIntrp_GenFct::IsDone() const
