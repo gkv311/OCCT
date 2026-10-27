@@ -113,8 +113,12 @@ void GeomConvert_ApproxSurface_Eval::Evaluate (Standard_Integer * Dimension,
 
 // Initialisation
 
-  myAdaptor = myAdaptor->UTrim (UStartEnd[0], UStartEnd[1], Precision::PConfusion());
-  myAdaptor = myAdaptor->VTrim (VStartEnd[0], VStartEnd[1], Precision::PConfusion());
+  if (myAdaptor->FirstUParameter() != UStartEnd[0] || myAdaptor->LastUParameter() != UStartEnd[1])
+    myAdaptor = myAdaptor->UTrim (UStartEnd[0], UStartEnd[1], Precision::PConfusion());
+
+  if (myAdaptor->FirstVParameter() != VStartEnd[0] || myAdaptor->LastVParameter() != VStartEnd[1])
+    myAdaptor = myAdaptor->VTrim (VStartEnd[0], VStartEnd[1], Precision::PConfusion());
+
 /*
   for (idim=1;idim<=*Dimension;idim++) {
     for (jpar=1;jpar<=*NbParams;jpar++) {
