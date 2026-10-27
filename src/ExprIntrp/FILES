@@ -1,8 +1,6 @@
-ExprIntrp.cxx
-ExprIntrp.hxx
 ExprIntrp.lex
-ExprIntrp.tab.c
-ExprIntrp.tab.h
+ExprIntrp.tab.cxx
+ExprIntrp.tab.hxx
 ExprIntrp.yacc
 ExprIntrp_Analysis.cxx
 ExprIntrp_Analysis.hxx
@@ -23,8 +21,6 @@ ExprIntrp_StackOfGeneralExpression.hxx
 ExprIntrp_StackOfGeneralFunction.hxx
 ExprIntrp_StackOfGeneralRelation.hxx
 ExprIntrp_SyntaxError.hxx
-ExprIntrp_yaccanal.hxx
 ExprIntrp_yaccintrf.cxx
-ExprIntrp_yaccintrf.hxx
-ExprIntrp_yacclex.cxx
-lex.ExprIntrp.c
+ExprIntrp_yaccintrf.pxx
+lex.ExprIntrp.cxx
