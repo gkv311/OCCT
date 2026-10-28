@@ -16,6 +16,7 @@
 #include <BRepMesh_DelaunayBaseMeshAlgo.hxx>
 #include <BRepMesh_MeshTool.hxx>
 #include <BRepMesh_Delaun.hxx>
+#include <IMeshData_Face.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(BRepMesh_DelaunayBaseMeshAlgo, BRepMesh_ConstrainedBaseMeshAlgo)
 
@@ -50,8 +51,10 @@ void BRepMesh_DelaunayBaseMeshAlgo::generateMesh(const Message_ProgressRange& th
     aVerticesOrder.Append(i);
   }
 
+  const bool hasSelfInter = getDFace()->IsSet(IMeshData_SelfIntersectingWire);
+
   std::pair<Standard_Integer, Standard_Integer> aCellsCount = getCellsCount (aVerticesOrder.Size ());
-  BRepMesh_Delaun aMesher(aStructure, aVerticesOrder, aCellsCount.first, aCellsCount.second);
+  BRepMesh_Delaun aMesher(aStructure, aVerticesOrder, aCellsCount.first, aCellsCount.second, hasSelfInter);
   BRepMesh_MeshTool aCleaner(aStructure);
   aCleaner.EraseFreeLinks();
 
