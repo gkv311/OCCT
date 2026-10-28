@@ -116,8 +116,10 @@ BRepMesh_Delaun::BRepMesh_Delaun(IMeshData::Array1OfVertexOfDelaun& theVertices)
 //=======================================================================
 BRepMesh_Delaun::BRepMesh_Delaun(
   const Handle(BRepMesh_DataStructureOfDelaun)& theOldMesh,
-  IMeshData::Array1OfVertexOfDelaun&            theVertices)
-: myMeshData( theOldMesh )
+  IMeshData::Array1OfVertexOfDelaun&            theVertices,
+  const Standard_Boolean                        theHasSelfInter)
+: myMeshData(theOldMesh),
+  myHasSelfInter(theHasSelfInter)
 {
   if ( theVertices.Length() > 2 )
   {
@@ -131,8 +133,10 @@ BRepMesh_Delaun::BRepMesh_Delaun(
 //=======================================================================
 BRepMesh_Delaun::BRepMesh_Delaun(
   const Handle(BRepMesh_DataStructureOfDelaun)& theOldMesh,
-  IMeshData::VectorOfInteger&                   theVertexIndices)
-: myMeshData( theOldMesh )
+  IMeshData::VectorOfInteger&                   theVertexIndices,
+  const Standard_Boolean                        theHasSelfInter)
+: myMeshData(theOldMesh),
+  myHasSelfInter(theHasSelfInter)
 {
   perform(theVertexIndices);
 }
@@ -144,8 +148,10 @@ BRepMesh_Delaun::BRepMesh_Delaun(
 BRepMesh_Delaun::BRepMesh_Delaun (const Handle (BRepMesh_DataStructureOfDelaun)& theOldMesh,
                                   IMeshData::VectorOfInteger&                    theVertexIndices,
                                   const Standard_Integer                         theCellsCountU,
-                                  const Standard_Integer                         theCellsCountV)
-: myMeshData (theOldMesh)
+                                  const Standard_Integer                         theCellsCountV,
+                                  const Standard_Boolean                         theHasSelfInter)
+: myMeshData(theOldMesh),
+  myHasSelfInter(theHasSelfInter)
 {
   perform (theVertexIndices, theCellsCountU, theCellsCountV);
 }
@@ -841,6 +847,9 @@ void BRepMesh_Delaun::cleanupMesh()
 //=======================================================================
 void BRepMesh_Delaun::frontierAdjust()
 {
+  if (myHasSelfInter)
+    return; // avoid adjustments of boundaries with self-intersections
+
   Handle(IMeshData::MapOfInteger)  aFrontier = Frontier();
 
   Handle(NCollection_IncAllocator) aAllocator =

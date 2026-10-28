@@ -44,21 +44,24 @@ public:
                                    const Standard_Boolean                        isFillCircles);
 
   //! Creates the triangulation with an empty Mesh data structure.
-  Standard_EXPORT BRepMesh_Delaun (IMeshData::Array1OfVertexOfDelaun& theVertices);
+  Standard_EXPORT explicit BRepMesh_Delaun (IMeshData::Array1OfVertexOfDelaun& theVertices);
 
   //! Creates the triangulation with an existent Mesh data structure.
   Standard_EXPORT BRepMesh_Delaun (const Handle(BRepMesh_DataStructureOfDelaun)& theOldMesh,
-                                   IMeshData::Array1OfVertexOfDelaun&            theVertices);
+                                   IMeshData::Array1OfVertexOfDelaun&            theVertices,
+                                   const Standard_Boolean                        theHasSelfInter = false);
 
   //! Creates the triangulation with an existant Mesh data structure.
   Standard_EXPORT BRepMesh_Delaun (const Handle(BRepMesh_DataStructureOfDelaun)& theOldMesh,
-                                   IMeshData::VectorOfInteger&                   theVertexIndices);
+                                   IMeshData::VectorOfInteger&                   theVertexIndices,
+                                   const Standard_Boolean                        theHasSelfInter = false);
 
   //! Creates the triangulation with an existant Mesh data structure.
   Standard_EXPORT BRepMesh_Delaun (const Handle (BRepMesh_DataStructureOfDelaun)& theOldMesh,
                                    IMeshData::VectorOfInteger&                    theVertexIndices,
                                    const Standard_Integer                         theCellsCountU,
-                                   const Standard_Integer                         theCellsCountV);
+                                   const Standard_Integer                         theCellsCountV,
+                                   const Standard_Boolean                         theHasSelfInter);
 
   //! Initializes the triangulation with an array of vertices.
   Standard_EXPORT void Init (IMeshData::Array1OfVertexOfDelaun& theVertices);
@@ -380,6 +383,7 @@ private:
   IMeshData::VectorOfInteger             mySupVert {3};
   BRepMesh_Triangle                      mySupTrian;
   Standard_Boolean                       myInitCircles = false;
+  Standard_Boolean                       myHasSelfInter = false; //!< flag to forbid adjustments near boundaries
 };
 
 #endif
