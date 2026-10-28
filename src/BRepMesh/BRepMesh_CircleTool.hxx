@@ -36,20 +36,10 @@ public:
   DEFINE_STANDARD_ALLOC
   
   //! Constructor.
-  //! @param theAllocator memory allocator to be used by internal structures.
-  Standard_EXPORT BRepMesh_CircleTool(
-  const Handle(NCollection_IncAllocator)& theAllocator);
-
-  //! Constructor.
-  //! @param theReservedSize size to be reserved for vector of circles.
-  //! @param theAllocator memory allocator to be used by internal structures.
-  Standard_EXPORT BRepMesh_CircleTool(
-    const Standard_Integer                  theReservedSize,
-    const Handle(NCollection_IncAllocator)& theAllocator);
+  Standard_EXPORT BRepMesh_CircleTool();
 
   //! Initializes the tool.
-  //! @param theReservedSize size to be reserved for vector of circles.
-  void Init(const Standard_Integer /*theReservedSize*/)
+  void Init()
   {
     myTolerance = Precision::PConfusion();
   }
@@ -58,7 +48,7 @@ public:
   //! @param theSize cell size to be set for X and Y dimensions.
   void SetCellSize(const Standard_Real theSize)
   {
-    myCellFilter.Reset(theSize, myAllocator);
+    myCellFilter.Reset(theSize);
   }
 
   //! Sets new size for cell filter.
@@ -69,7 +59,7 @@ public:
   {
     Standard_Real aCellSizeC[2] = { theSizeX, theSizeY };
     NCollection_Array1<Standard_Real> aCellSize(aCellSizeC[0], 1, 2);
-    myCellFilter.Reset(aCellSize, myAllocator);
+    myCellFilter.Reset(aCellSize);
   }
 
   //! Sets limits of inspection area.
@@ -145,7 +135,6 @@ private:
 private:
 
   Standard_Real                     myTolerance;
-  Handle(NCollection_IncAllocator)  myAllocator;
   IMeshData::CircleCellFilter       myCellFilter;
   BRepMesh_CircleInspector          mySelector;
   gp_XY                             myFaceMax;
