@@ -72,6 +72,9 @@ class NCollection_IncAllocator : public NCollection_BaseAllocator
   //! Free a previously allocated memory. Does nothing
   Standard_EXPORT virtual void  Free            (void *anAddress) Standard_OVERRIDE;
 
+  //! Return TRUE, the Free() method is implemented as no-op by this allocator.
+  virtual bool IsNoopFree() const Standard_OVERRIDE { return true; }
+
   //! Diagnostic method, returns the total allocated size
   Standard_EXPORT size_t        GetMemSize      () const;
 
