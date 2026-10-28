@@ -377,9 +377,9 @@ private:
 
   Handle(BRepMesh_DataStructureOfDelaun) myMeshData;
   BRepMesh_CircleTool                    myCircles;
-  IMeshData::VectorOfInteger             mySupVert;
-  Standard_Boolean                       myInitCircles;
+  IMeshData::VectorOfInteger             mySupVert {3};
   BRepMesh_Triangle                      mySupTrian;
+  Standard_Boolean                       myInitCircles = false;
 };
 
 #endif
