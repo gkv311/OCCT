@@ -46,11 +46,21 @@
 */              
 class NCollection_BaseAllocator : public Standard_Transient
 {
- public:
-  // ---------- PUBLIC METHODS ------------
-  Standard_EXPORT virtual void* Allocate (const size_t size);
-  Standard_EXPORT virtual void  Free     (void * anAddress);
-  
+public:
+  //! Allocate new block of memory of size @p theSize in bytes.
+  //! Default implementation redirects to Standard::Allocate().
+  Standard_EXPORT virtual void* Allocate(const size_t theSize);
+
+  //! Release the block of memory @p theAddress, previously allocated by this allocator.
+  //! Default implementation redirects to Standard::Free().
+  Standard_EXPORT virtual void Free(void* theAddress);
+
+  //! Return TRUE if Free() is implemented as no-op by this allocator
+  //! (e.g. the memory is released with allocator itself).
+  //! Default implementation returns FALSE.
+  virtual bool IsNoopFree() const { return false; }
+
+public:
   //! CommonBaseAllocator
   //! This method is designed to have the only one BaseAllocator (to avoid
   //! useless copying of collections). However one can use operator new to

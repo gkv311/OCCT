@@ -18,10 +18,15 @@
 #include <Standard.hxx>
 #include <Standard_TypeDef.hxx>
 
+#include <algorithm>
+#include <cstring>
+#include <type_traits>
+
 //! Auxiliary class optimizing creation of array buffer 
 //! (using stack allocation for small arrays).
 template<class theItem, Standard_Integer MAX_ARRAY_SIZE = 1024> class NCollection_LocalArray
 {
+  static_assert(std::is_trivially_copyable<theItem>::value, "Type should be trivially copyable");
 public:
 
   explicit NCollection_LocalArray (const size_t theSize)
@@ -48,6 +53,9 @@ public:
 
     mySize = theSize;
   }
+
+  //! Resize the array to @p theSize while preserving existing content.
+  void Resize (const size_t theSize);
 
   size_t Size() const
   {
@@ -79,5 +87,46 @@ protected:
   size_t mySize;
 
 };
+
+// =======================================================================
+// function : Resize
+// =======================================================================
+template<class theItem, Standard_Integer MAX_ARRAY_SIZE>
+inline void NCollection_LocalArray<theItem, MAX_ARRAY_SIZE>::Resize(const size_t theSize)
+{
+  const bool wasLocal   = myPtr == myBuffer;
+  const bool toUseLocal = theSize <= size_t(MAX_ARRAY_SIZE);
+  if (toUseLocal == wasLocal)
+  {
+    if (toUseLocal || theSize <= mySize)
+    {
+      mySize = theSize; // shrink logical size without reallocation
+      return;
+    }
+    else
+    {
+      myPtr = static_cast<theItem*>(Standard::Reallocate(myPtr, theSize * sizeof(theItem)));
+      mySize = theSize;
+      return;
+    }
+  }
+
+  // copy data from local buffer to dynamic buffer
+  const size_t aNbCopy = std::min(mySize, theSize);
+  if (aNbCopy == 0)
+  {
+    Allocate(theSize);
+    return;
+  }
+
+  const theItem* anOldPtr = myPtr;
+  myPtr = nullptr;
+  Allocate(theSize);
+
+  std::memcpy(myPtr, anOldPtr, aNbCopy * sizeof(theItem));
+
+  if (!wasLocal)
+    Standard::Free(anOldPtr);
+}
 
 #endif // _NCollection_LocalArray_HeaderFile

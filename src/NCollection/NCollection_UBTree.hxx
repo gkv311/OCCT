@@ -18,6 +18,8 @@
 
 #include <NCollection_BaseAllocator.hxx>
 #include <NCollection_DefineAlloc.hxx>
+#include <NCollection_LocalArray.hxx>
+#include <Standard_Assert.hxx>
 
 /**
  * The algorithm of unbalanced binary tree of overlapped bounding boxes.
@@ -216,13 +218,67 @@ public:
     static void delNode (TreeNode * theNode,
                          const Handle(NCollection_BaseAllocator)& theAlloc)
     {
-      if (theNode) {
-        if (theNode -> myChildren) {
-          delNode (&theNode -> myChildren[0], theAlloc);
-          delNode (&theNode -> myChildren[1], theAlloc);
-          theAlloc->Free(theNode -> myChildren);
+      if (theNode == nullptr)
+        return;
+
+      if (theNode->myChildren == nullptr
+       || theAlloc->IsNoopFree()) // invalidate only root node in case of NCollection_IncAllocator
+      {
+        theNode->myChildren = nullptr;
+        return;
+      }
+
+      // use dynamic buffer instead of recursion to avoid stack overflow in case of a large unbalanced tree
+      static constexpr int TheStackSize = 64;
+      NCollection_LocalArray<TreeNode*, TheStackSize> aStack(TheStackSize);
+
+      size_t aTop = 0;
+      aStack[aTop++] = theNode;
+      while (aTop != 0)
+      {
+        TreeNode* aNode = aStack[--aTop];
+        Standard_ASSERT_VOID(!aNode->IsLeaf(), "Invalid UB-tree structure");
+
+        TreeNode* aChild0 = &aNode->myChildren[0];
+        TreeNode* aChild1 = &aNode->myChildren[1];
+        if (!aChild0->IsLeaf())
+        {
+          if (!aChild1->IsLeaf())
+          {
+            if (aTop + 3 > aStack.Size())
+              aStack.Resize(aStack.Size() * 2);
+
+            // release both children first, then re-iterate the parent
+            aStack[aTop++] = aNode;
+            aStack[aTop++] = aChild0;
+            aStack[aTop++] = aChild1;
+          }
+          else
+          {
+            if (aTop + 2 > aStack.Size())
+              aStack.Resize(aStack.Size() * 2);
+
+            // release the child node first, then re-iterate the parent
+            aStack[aTop++] = aNode;
+            aStack[aTop++] = aChild0;
+          }
         }
-        theNode->~TreeNode();
+        else if (!aChild1->IsLeaf())
+        {
+          if (aTop + 2 > aStack.Size())
+            aStack.Resize(aStack.Size() * 2);
+
+          // release the child node first, then re-iterate the parent
+          aStack[aTop++] = aNode;
+          aStack[aTop++] = aChild1;
+        }
+        else
+        {
+          aChild0->myParent = nullptr;
+          aChild1->myParent = nullptr;
+          theAlloc->Free(aNode->myChildren);
+          aNode->myChildren = nullptr;
+        }
       }
     }
 
@@ -416,20 +472,39 @@ Standard_Integer NCollection_UBTree<TheObjType,TheBndType>::Select
   if (theSelector.Reject (theBranch.Bnd()))
     return 0;
 
+  // use dynamic buffer instead of recursion to avoid stack overflow in case of a large unbalanced tree
+  static constexpr int TheStackSize = 64;
+  NCollection_LocalArray<const TreeNode*, TheStackSize> aStack(TheStackSize);
+
   Standard_Integer nSel = 0;
 
-  if (theBranch.IsLeaf()) {
-    // It is a leaf => try to accept the object
-    if (theSelector.Accept (theBranch.Object()))
-      nSel++;
-  }
-  else {
-    // It is a branch => select from its children
-    nSel += Select (theBranch.Child(0), theSelector);
-    if (!theSelector.Stop())
-      nSel += Select (theBranch.Child(1), theSelector);
-  }
+  size_t aTop = 0;
+  aStack[aTop++] = &theBranch;
+  while (aTop != 0)
+  {
+    const TreeNode* aNode = aStack[--aTop];
+    if (aNode->IsLeaf())
+    {
+      if (theSelector.Accept(aNode->Object()))
+        ++nSel;
 
+      if (theSelector.Stop())
+        return nSel;
+    }
+    else
+    {
+      if (aTop + 2 > aStack.Size())
+        aStack.Resize(aStack.Size() * 2);
+
+      const TreeNode& aChild1 = aNode->Child(1);
+      if (!theSelector.Reject(aChild1.Bnd()))
+        aStack[aTop++] = &aChild1;
+
+      const TreeNode& aChild0 = aNode->Child(0);
+      if (!theSelector.Reject(aChild0.Bnd()))
+        aStack[aTop++] = &aChild0;
+    }
+  }
   return nSel;
 }
 
