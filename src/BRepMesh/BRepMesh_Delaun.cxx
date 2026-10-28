@@ -87,11 +87,7 @@ BRepMesh_Delaun::BRepMesh_Delaun (
   const Standard_Integer                        theCellsCountU,
   const Standard_Integer                        theCellsCountV,
   const Standard_Boolean                        isFillCircles)
-: myMeshData ( theOldMesh ),
-  myCircles (new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
-  mySupVert (3),
-  myInitCircles (Standard_False)
+: myMeshData ( theOldMesh )
 {
   if (isFillCircles)
   {
@@ -104,10 +100,6 @@ BRepMesh_Delaun::BRepMesh_Delaun (
 //purpose  : Creates the triangulation with an empty Mesh data structure
 //=======================================================================
 BRepMesh_Delaun::BRepMesh_Delaun(IMeshData::Array1OfVertexOfDelaun& theVertices)
-: myCircles (theVertices.Length(), new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
-  mySupVert (3),
-  myInitCircles (Standard_False)
 {
   if ( theVertices.Length() > 2 )
   {
@@ -125,11 +117,7 @@ BRepMesh_Delaun::BRepMesh_Delaun(IMeshData::Array1OfVertexOfDelaun& theVertices)
 BRepMesh_Delaun::BRepMesh_Delaun(
   const Handle(BRepMesh_DataStructureOfDelaun)& theOldMesh,
   IMeshData::Array1OfVertexOfDelaun&            theVertices)
-: myMeshData( theOldMesh ),
-  myCircles ( theVertices.Length(), new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
-  mySupVert (3),
-  myInitCircles (Standard_False)
+: myMeshData( theOldMesh )
 {
   if ( theVertices.Length() > 2 )
   {
@@ -144,11 +132,7 @@ BRepMesh_Delaun::BRepMesh_Delaun(
 BRepMesh_Delaun::BRepMesh_Delaun(
   const Handle(BRepMesh_DataStructureOfDelaun)& theOldMesh,
   IMeshData::VectorOfInteger&                   theVertexIndices)
-: myMeshData( theOldMesh ),
-  myCircles ( theVertexIndices.Length(), new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
-  mySupVert (3),
-  myInitCircles (Standard_False)
+: myMeshData( theOldMesh )
 {
   perform(theVertexIndices);
 }
@@ -161,11 +145,7 @@ BRepMesh_Delaun::BRepMesh_Delaun (const Handle (BRepMesh_DataStructureOfDelaun)&
                                   IMeshData::VectorOfInteger&                    theVertexIndices,
                                   const Standard_Integer                         theCellsCountU,
                                   const Standard_Integer                         theCellsCountV)
-: myMeshData (theOldMesh),
-  myCircles (theVertexIndices.Length (), new NCollection_IncAllocator(
-             IMeshData::MEMORY_BLOCK_SIZE_HUGE)),
-  mySupVert (3),
-  myInitCircles (Standard_False)
+: myMeshData (theOldMesh)
 {
   perform (theVertexIndices, theCellsCountU, theCellsCountV);
 }
