@@ -78,19 +78,19 @@ constexpr Standard_Integer Square(const Standard_Integer Value)
 // ------------------------------------------------------------------
 // IntegerFirst : Returns the minimum value of an integer
 // ------------------------------------------------------------------
-inline Standard_Integer  IntegerFirst()
+constexpr Standard_Integer IntegerFirst()
 { return INT_MIN; }
 
 // ------------------------------------------------------------------
 // IntegerLast : Returns the maximum value of an integer
 // ------------------------------------------------------------------
-inline Standard_Integer  IntegerLast()
+constexpr Standard_Integer IntegerLast()
 { return INT_MAX; }
 
 // ------------------------------------------------------------------
 // IntegerSize : Returns the size in digits of an integer
 // ------------------------------------------------------------------
-inline Standard_Integer  IntegerSize()
+constexpr Standard_Integer IntegerSize()
 { return BITS(Standard_Integer); }
 
 
