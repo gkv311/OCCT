@@ -47,7 +47,7 @@ Standard_Boolean Expr_GeneralExpression::IsShareable() const
    if (ContainsUnknowns()) {
      throw Expr_NotEvaluable();
    }
-   Expr_Array1OfNamedUnknown tabvr(1,1);
-   TColStd_Array1OfReal tabvl(1,1);
+   Expr_Array1OfNamedUnknown tabvr;
+   TColStd_Array1OfReal tabvl;
    return Evaluate(tabvr,tabvl);
  }
