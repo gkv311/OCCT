@@ -58,18 +58,10 @@ const BRepTopAdaptor_FClass2d& operator= (const BRepTopAdaptor_FClass2d& Other) 
   //! (Caution: Internal use . see the code for more details)
   Standard_EXPORT TopAbs_State TestOnRestriction (const gp_Pnt2d& Puv, const Standard_Real Tol, const Standard_Boolean RecadreOnPeriodic = Standard_True) const;
 
-
-
-
-protected:
-
-
-
-
+  //! Return initialization tolerance.
+  Standard_Real Tolerance() const { return Toluv; }
 
 private:
-
-
 
   BRepTopAdaptor_SeqOfPtr TabClass;
   TColStd_SequenceOfInteger TabOrien;
@@ -83,7 +75,6 @@ private:
   Standard_Real Umax;
   Standard_Real Vmin;
   Standard_Real Vmax;
-
 
 };
 
