@@ -27,7 +27,10 @@
 #include <TopAbs_State.hxx>
 #include <TopAbs_Orientation.hxx>
 
+#include <memory>
+
 class Adaptor3d_HVertex;
+class BRepTopAdaptor_FClass2d;
 class gp_Pnt2d;
 class gp_Pnt;
 
@@ -88,11 +91,7 @@ public:
   //! considered as an arc on the surface.
   Standard_EXPORT virtual TopAbs_Orientation Orientation (const Handle(Adaptor3d_HVertex)& C) Standard_OVERRIDE;
   
-  Standard_EXPORT void Destroy();
-~BRepTopAdaptor_TopolTool()
-{
-  Destroy();
-}
+  Standard_EXPORT ~BRepTopAdaptor_TopolTool();
   
   //! answers if arcs and vertices may have 3d representations,
   //! so that we could use Tol3d and Pnt methods.
@@ -136,7 +135,7 @@ private:
 
   TopExp_Explorer myVIterator;
   TopoDS_Face myFace;
-  Standard_Address myFClass2d;
+  std::unique_ptr<BRepTopAdaptor_FClass2d> myFClass2d;
   Handle(BRepAdaptor_Curve2d) myCurve;
   TColStd_ListOfTransient myCurves;
   TColStd_ListIteratorOfListOfTransient myCIterator;
