@@ -44,8 +44,7 @@ static
 //purpose  : 
 //=======================================================================
   BRepTopAdaptor_TopolTool::BRepTopAdaptor_TopolTool ()
-  : myFClass2d(NULL),
-    myU0(0.0),
+  : myU0(0.0),
     myV0(0.0),
     myDU(0.0),
     myDV(0.0)
@@ -57,8 +56,7 @@ static
 //function : BRepTopAdaptor_TopolTool
 //purpose  : 
 //=======================================================================
-  BRepTopAdaptor_TopolTool::BRepTopAdaptor_TopolTool(const Handle(Adaptor3d_Surface)& S) 
-: myFClass2d(NULL)
+BRepTopAdaptor_TopolTool::BRepTopAdaptor_TopolTool(const Handle(Adaptor3d_Surface)& S)
 {
   Initialize(S);
   //myS = S;
@@ -83,10 +81,7 @@ static
   TopoDS_Shape s_wnt = brhs->Face();
   s_wnt.Orientation(TopAbs_FORWARD);
   myFace = TopoDS::Face(s_wnt);
-  if(myFClass2d != NULL) { 
-    delete (BRepTopAdaptor_FClass2d *)myFClass2d;
-  } 
-  myFClass2d = NULL;
+  myFClass2d.reset();
   myNbSamplesU=-1;
   myS = S;
   myCurves.Clear();
@@ -192,10 +187,13 @@ static
 {
   if(myFace.IsNull())
     return TopAbs_UNKNOWN;
-  if(myFClass2d == NULL) { 
-    myFClass2d = (void *) new BRepTopAdaptor_FClass2d(myFace,Tol);
-  } 
-  return(((BRepTopAdaptor_FClass2d *)myFClass2d)->Perform(P,RecadreOnPeriodic));
+
+  if (myFClass2d.get() == nullptr || myFClass2d->Tolerance() != Tol)
+  {
+    myFClass2d.reset(new BRepTopAdaptor_FClass2d(myFace, Tol));
+  }
+
+  return myFClass2d->Perform(P,RecadreOnPeriodic);
 }
 
 //=======================================================================
@@ -206,22 +204,21 @@ static
 							  const Standard_Real Tol,
 							  const Standard_Boolean RecadreOnPeriodic)
 {
-  if(myFClass2d == NULL) { 
-    myFClass2d = (void *) new BRepTopAdaptor_FClass2d(myFace,Tol);
-  } 
-  return(TopAbs_ON==((BRepTopAdaptor_FClass2d *)myFClass2d)->TestOnRestriction(P,Tol,RecadreOnPeriodic));
+  if (myFClass2d.get() == nullptr || myFClass2d->Tolerance() != Tol)
+  {
+    myFClass2d.reset(new BRepTopAdaptor_FClass2d(myFace, Tol));
+  }
+
+  return myFClass2d->TestOnRestriction(P, Tol, RecadreOnPeriodic) == TopAbs_ON;
 }
 
 //=======================================================================
 //function : Destroy
 //purpose  : 
 //=======================================================================
-  void BRepTopAdaptor_TopolTool::Destroy() 
+BRepTopAdaptor_TopolTool::~BRepTopAdaptor_TopolTool()
 { 
-  if(myFClass2d != NULL) { 
-    delete (BRepTopAdaptor_FClass2d *)myFClass2d;
-    myFClass2d=NULL;
-  }
+  //
 }
 //=======================================================================
 //function : Orientation
