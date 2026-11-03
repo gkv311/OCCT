@@ -23,17 +23,29 @@
 #include <Expr_PolyFunction.hxx>
 #include <Expr_Exponentiate.hxx>
 #include <Expr_Absolute.hxx>
+#include <Expr_ArcCosecant.hxx>
+#include <Expr_ArcCsch.hxx>
 #include <Expr_ArcCosine.hxx>
+#include <Expr_ArcCotangent.hxx>
+#include <Expr_ArcCoth.hxx>
+#include <Expr_ArcSecant.hxx>
+#include <Expr_ArcSech.hxx>
 #include <Expr_ArcSine.hxx>
 #include <Expr_ArcTangent.hxx>
 #include <Expr_ArgCosh.hxx>
 #include <Expr_ArgSinh.hxx>
 #include <Expr_ArgTanh.hxx>
+#include <Expr_Cosecant.hxx>
+#include <Expr_Csch.hxx>
 #include <Expr_Cosh.hxx>
 #include <Expr_Cosine.hxx>
+#include <Expr_Cotangent.hxx>
+#include <Expr_Coth.hxx>
 #include <Expr_Exponential.hxx>
 #include <Expr_LogOf10.hxx>
 #include <Expr_LogOfe.hxx>
+#include <Expr_Secant.hxx>
+#include <Expr_Sech.hxx>
 #include <Expr_Sign.hxx>
 #include <Expr_Sine.hxx>
 #include <Expr_Sinh.hxx>
@@ -275,17 +287,29 @@ private:
   ExprIntrp_Factory()
   {
     add<Expr_Absolute>("Abs");
+    add<Expr_ArcCosecant>("ACsc", "ArcCsc");
     add<Expr_ArcCosine>("ACos", "ArcCos");
+    add<Expr_ArcCotangent>("ACot", "ArcCot");
+    add<Expr_ArcCoth>("ACoth", "ArcCoth");
+    add<Expr_ArcCsch>("ACsch", "ArcCsch");
+    add<Expr_ArcSecant>("ASec", "ArcSec");
+    add<Expr_ArcSech>("ASech", "ArcSech");
     add<Expr_ArcSine>("ASin", "ArcSin");
     add<Expr_ArcTangent>("ATan", "ArcTan");
     add<Expr_ArgCosh>("ACosh", "ArcCosh");
     add<Expr_ArgSinh>("ASinh", "ArcSinh");
     add<Expr_ArgTanh>("ATanh", "ArcTanh");
+    add<Expr_Cosecant>("Csc");
     add<Expr_Cosh>("Cosh");
     add<Expr_Cosine>("Cos");
+    add<Expr_Cotangent>("Cot");
+    add<Expr_Coth>("Coth");
+    add<Expr_Csch>("Csch");
     add<Expr_Exponential>("Exp");
     add<Expr_LogOf10>("Log");
     add<Expr_LogOfe>("Ln");
+    add<Expr_Secant>("Sec");
+    add<Expr_Sech>("Sech");
     add<Expr_Sign>("Sign");
     add<Expr_Sine>("Sin");
     add<Expr_Sinh>("Sinh");

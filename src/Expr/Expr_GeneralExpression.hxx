@@ -17,17 +17,11 @@
 #ifndef _Expr_GeneralExpression_HeaderFile
 #define _Expr_GeneralExpression_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_Type.hxx>
-
-#include <Standard_Transient.hxx>
-#include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
 #include <Expr_Array1OfNamedUnknown.hxx>
 #include <TColStd_Array1OfReal.hxx>
-class Expr_NamedUnknown;
-class TCollection_AsciiString;
+#include <TCollection_AsciiString.hxx>
 
+class Expr_NamedUnknown;
 
 class Expr_GeneralExpression;
 DEFINE_STANDARD_HANDLE(Expr_GeneralExpression, Standard_Transient)
