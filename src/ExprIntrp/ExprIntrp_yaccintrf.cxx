@@ -23,17 +23,29 @@
 #include <Expr_PolyFunction.hxx>
 #include <Expr_Exponentiate.hxx>
 #include <Expr_Absolute.hxx>
+#include <Expr_ArcCosecant.hxx>
+#include <Expr_ArcCsch.hxx>
 #include <Expr_ArcCosine.hxx>
+#include <Expr_ArcCotangent.hxx>
+#include <Expr_ArcCoth.hxx>
+#include <Expr_ArcSecant.hxx>
+#include <Expr_ArcSech.hxx>
 #include <Expr_ArcSine.hxx>
 #include <Expr_ArcTangent.hxx>
 #include <Expr_ArgCosh.hxx>
 #include <Expr_ArgSinh.hxx>
 #include <Expr_ArgTanh.hxx>
+#include <Expr_Cosecant.hxx>
+#include <Expr_Csch.hxx>
 #include <Expr_Cosh.hxx>
 #include <Expr_Cosine.hxx>
+#include <Expr_Cotangent.hxx>
+#include <Expr_Coth.hxx>
 #include <Expr_Exponential.hxx>
 #include <Expr_LogOf10.hxx>
 #include <Expr_LogOfe.hxx>
+#include <Expr_Secant.hxx>
+#include <Expr_Sech.hxx>
 #include <Expr_Sign.hxx>
 #include <Expr_Sine.hxx>
 #include <Expr_Sinh.hxx>
@@ -258,6 +270,24 @@ static Handle(Expr_GeneralExpression) ExprIntrp_StandardFunction(const TCollecti
   else if ((name == "acos") || (name == "ACos")) {
     res = new Expr_ArcCosine(op);
   }
+  else if ((name == "acot") || (name == "ACot")) {
+    res = new Expr_ArcCotangent(op);
+  }
+  else if ((name == "acoth") || (name == "ACoth")) {
+    res = new Expr_ArcCoth(op);
+  }
+  else if ((name == "acsc") || (name == "ACsc")) {
+    res = new Expr_ArcCosecant(op);
+  }
+  else if ((name == "acsch") || (name == "ACsch")) {
+    res = new Expr_ArcCsch(op);
+  }
+  else if ((name == "asec") || (name == "ASec")) {
+    res = new Expr_ArcSecant(op);
+  }
+  else if ((name == "asech") || (name == "ASech")) {
+    res = new Expr_ArcSech(op);
+  }
   else if ((name == "asin") || (name == "ASin")) {
     res = new Expr_ArcSine(op);
   }
@@ -279,6 +309,18 @@ static Handle(Expr_GeneralExpression) ExprIntrp_StandardFunction(const TCollecti
   else if ((name == "cos") || (name == "Cos")) {
     res = new Expr_Cosine(op);
   }
+  else if ((name == "csc") || (name == "Csc")) {
+    res = new Expr_Cosecant(op);
+  }
+  else if ((name == "csch") || (name == "Csch")) {
+    res = new Expr_Csch(op);
+  }
+  else if ((name == "cot") || (name == "Cot")) {
+    res = new Expr_Cotangent(op);
+  }
+  else if ((name == "coth") || (name == "Coth")) {
+    res = new Expr_Coth(op);
+  }
   else if ((name == "exp") || (name == "Exp")) {
     res = new Expr_Exponential(op);
   }
@@ -287,6 +329,12 @@ static Handle(Expr_GeneralExpression) ExprIntrp_StandardFunction(const TCollecti
   }
   else if ((name == "Log") || (name == "Ln")) {
     res = new Expr_LogOfe(op);
+  }
+  else if ((name == "sec") || (name == "Sec")) {
+    res = new Expr_Secant(op);
+  }
+  else if ((name == "sech") || (name == "Sech")) {
+    res = new Expr_Sech(op);
   }
   else if ((name == "sign") || (name == "Sign")) {
     res = new Expr_Sign(op);

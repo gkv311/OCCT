@@ -34,10 +34,9 @@ class Expr_UnaryExpression : public Expr_GeneralExpression
 
 public:
 
-  
   //! Returns the operand used
-    const Handle(Expr_GeneralExpression)& Operand() const;
-  
+  const Handle(Expr_GeneralExpression)& Operand() const { return myOperand; }
+
   //! Sets the operand used
   //! Raises InvalidOperand if <exp> contains <me>.
   Standard_EXPORT void SetOperand (const Handle(Expr_GeneralExpression)& exp);
@@ -71,26 +70,14 @@ public:
   DEFINE_STANDARD_RTTIEXT(Expr_UnaryExpression,Expr_GeneralExpression)
 
 protected:
-
   
   //! Sets the operand used during creation
   Standard_EXPORT void CreateOperand (const Handle(Expr_GeneralExpression)& exp);
 
-
-
-private:
-
+protected:
 
   Handle(Expr_GeneralExpression) myOperand;
 
-
 };
-
-
-#include <Expr_UnaryExpression.lxx>
-
-
-
-
 
 #endif // _Expr_UnaryExpression_HeaderFile
