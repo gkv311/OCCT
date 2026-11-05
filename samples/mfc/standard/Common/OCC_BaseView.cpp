@@ -24,9 +24,6 @@ END_MESSAGE_MAP()
 //purpose  :
 //=======================================================================
 OCC_BaseView::OCC_BaseView()
-: myUpdateRequests (0),
-  myCurZoom (0.0),
-  myCurrentMode (CurAction3d_Nothing)
 {
   myDefaultGestures = myMouseGestureMap;
 }
