@@ -87,12 +87,12 @@ protected:
   Handle(V3d_View)    myView;
   AIS_MouseGestureMap myDefaultGestures;
   Graphic3d_Vec2i     myClickPos;
-  Standard_Real       myCurZoom;
-  unsigned int        myUpdateRequests; //!< counter for unhandled update requests
+  Standard_Real       myCurZoom = 0.0;
+  unsigned int        myUpdateRequests = 0; //!< counter for unhandled update requests
 
 private:
 
-  CurAction3d         myCurrentMode;
+  CurAction3d         myCurrentMode = CurAction3d_Nothing;
 
 // message map functions
 protected:

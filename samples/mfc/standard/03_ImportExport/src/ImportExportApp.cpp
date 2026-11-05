@@ -45,7 +45,7 @@ BOOL CImportExportApp::InitInstance()
   }
 
   SampleName = "ImportExport"; //for about dialog
-  SetSamplePath (L"..\\..\\05_ImportExport");
+  SetSamplePath (L"..\\..\\03_ImportExport");
 
   AfxEnableControlContainer();
 

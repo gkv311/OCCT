@@ -160,13 +160,13 @@ void CDimensionDlg::CreateLengthParamsTab()
 {
   TC_ITEM aTabItem;
   aTabItem.mask = TCIF_TEXT;
-  aTabItem.pszText = L"Edge";
+  aTabItem.pszText = const_cast<wchar_t*>(L"Edge");
   myLengthParams->InsertItem (0, &aTabItem);
-  aTabItem.pszText = L"Vertices";
+  aTabItem.pszText = const_cast<wchar_t*>(L"Vertices");
   myLengthParams->InsertItem (1, &aTabItem);
-  aTabItem.pszText = L"Parallel edges";
+  aTabItem.pszText = const_cast<wchar_t*>(L"Parallel edges");
   myLengthParams->InsertItem (2, &aTabItem);
-  aTabItem.pszText = L"Parallel faces";
+  aTabItem.pszText = const_cast<wchar_t*>(L"Parallel faces");
   myLengthParams->InsertItem (3, &aTabItem);
 
   CLengthParamsEdgePage *aPage1 = new CLengthParamsEdgePage (myAISContext);
@@ -211,11 +211,11 @@ void CDimensionDlg::CreateAngleParamsTab()
 {
   TC_ITEM aTabItem;
   aTabItem.mask = TCIF_TEXT;
-  aTabItem.pszText = L"Two edges";
+  aTabItem.pszText = const_cast<wchar_t*>(L"Two edges");
   myAngleParams->InsertItem (0, &aTabItem);
-  aTabItem.pszText = L"Three vertices";
+  aTabItem.pszText = const_cast<wchar_t*>(L"Three vertices");
   myAngleParams->InsertItem (1, &aTabItem);
-  aTabItem.pszText = L"Two faces";
+  aTabItem.pszText = const_cast<wchar_t*>(L"Two faces");
   myAngleParams->InsertItem (2, &aTabItem);
 
   CLengthParamsEdgesPage *aPage1 = new CLengthParamsEdgesPage (myAISContext, true);
@@ -252,7 +252,7 @@ void CDimensionDlg::CreateRadiusParamsTab()
 {
   TC_ITEM aTabItem;
   aTabItem.mask = TCIF_TEXT;
-  aTabItem.pszText = L"Circle or arc";
+  aTabItem.pszText = const_cast<wchar_t*>(L"Circle or arc");
   myRadiusParams->InsertItem (0, &aTabItem);
   CRadiusParamsPage *aPage1 = new CRadiusParamsPage (myAISContext);
   aTabItem.mask = TCIF_PARAM;
@@ -272,7 +272,7 @@ void CDimensionDlg::CreateDiameterParamsTab()
 {
   TC_ITEM aTabItem;
   aTabItem.mask = TCIF_TEXT;
-  aTabItem.pszText = L"Circle or arc";
+  aTabItem.pszText = const_cast<wchar_t*>(L"Circle or arc");
   myDiameterParams->InsertItem (0, &aTabItem);
   CRadiusParamsPage *aPage1 = new CRadiusParamsPage (myAISContext,Standard_True);
   aTabItem.mask = TCIF_PARAM;

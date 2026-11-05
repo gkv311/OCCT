@@ -4,7 +4,7 @@
 # For canceling of applying new policies use:
 # cmake_policy(PUSH) before `cmake_minimum_required`
 # and cmake_policy(POP) after.
-cmake_minimum_required (VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.5...4.1 FATAL_ERROR)
 
 project (mfcsample)
 
@@ -82,7 +82,6 @@ set (COMMON_HEADER_FILES ${MFC_STANDARD_COMMON_SAMPLES_DIR}/AISDialogs.h
                          ${MFC_STANDARD_COMMON_SAMPLES_DIR}/OCC_StereoConfigDlg.h
                          ${MFC_STANDARD_COMMON_SAMPLES_DIR}/ParamsFacesPage.h
                          ${MFC_STANDARD_COMMON_SAMPLES_DIR}/ResultDialog.h
-                         ${MFC_STANDARD_COMMON_SAMPLES_DIR}/User_Cylinder.hxx
                          ${MFC_STANDARD_COMMON_SAMPLES_DIR}/ColoredMeshDlg.h
                          ${MFC_STANDARD_COMMON_SAMPLES_DIR}/DimensionDlg.h
                          ${MFC_STANDARD_COMMON_SAMPLES_DIR}/LengthParamsEdgePage.h

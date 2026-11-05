@@ -50,9 +50,8 @@ public:
   inline   Standard_Boolean GetDisplayPole() const;
   inline   void SetDisplayPole(const Standard_Boolean aNewDisplayPole) ;
 
-  inline   Standard_Boolean ISession2D_Curve::GetDisplayCurbure() const;
-  inline   void ISession2D_Curve::SetDisplayCurbure
-                (const Standard_Boolean aNewDisplayCurbure);
+  inline   Standard_Boolean GetDisplayCurbure() const;
+  inline   void SetDisplayCurbure(const Standard_Boolean aNewDisplayCurbure);
 
   inline   Standard_Real GetDiscretisation() const;
   inline   void SetDiscretisation(const Standard_Real aNewDiscretisation) ;

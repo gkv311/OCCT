@@ -4,7 +4,7 @@
 # For canceling of applying new policies use:
 # cmake_policy(PUSH) before `cmake_minimum_required`
 # and cmake_policy(POP) after.
-cmake_minimum_required (VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.5...4.1 FATAL_ERROR)
 
 project (Geometry)
 
