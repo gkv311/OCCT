@@ -2967,18 +2967,15 @@ void ChFi3d_Builder::PerformIntersectionAtEnd(const Standard_Integer Index)
 //=======================================================================
 void ChFi3d_Builder::PerformMoreSurfdata(const Standard_Integer Index)
 {
-  TopOpeBRepDS_DataStructure &DStr = myDS->ChangeDS();
-  const ChFiDS_ListOfStripe  &aLOfStripe = myVDataMap(Index);
-  Handle(ChFiDS_Stripe)       aStripe;
-  Handle(ChFiDS_Spine)        aSpine;
-  Standard_Real               aTol3d = 1.e-4;
+  static constexpr double aTol3d = 1.e-4;
 
-
+  TopOpeBRepDS_DataStructure& DStr       = myDS->ChangeDS();
+  const ChFiDS_ListOfStripe&  aLOfStripe = myVDataMap(Index);
   if (aLOfStripe.IsEmpty())
     return;
 
-  aStripe = aLOfStripe.First();
-  aSpine  = aStripe->Spine();
+  const Handle(ChFiDS_Stripe) aStripe = aLOfStripe.First();
+  const Handle(ChFiDS_Spine)  aSpine  = aStripe->Spine();
 
   ChFiDS_SequenceOfSurfData &aSeqSurfData =
                                aStripe->ChangeSetOfSurfData()->ChangeSequence();
@@ -3074,12 +3071,10 @@ void ChFi3d_Builder::PerformMoreSurfdata(const Standard_Integer Index)
   if (!aCP1onArc.IsOnArc())
     return;
 
-// determination of neighbor surface
-  Standard_Integer indSurface;
-  if (is1stCP1OnArc)
-    indSurface = myListStripe.First()->SetOfSurfData()->Value(anInd)->IndexOfS1();
-  else
-    indSurface = myListStripe.First()->SetOfSurfData()->Value(anInd)->IndexOfS2();
+  // determination of neighbor surface
+  const int indSurface = is1stCP1OnArc
+                       ? aStripe->SetOfSurfData()->Value(anInd)->IndexOfS1()
+                       : aStripe->SetOfSurfData()->Value(anInd)->IndexOfS2();
 
   aNeighborFace = TopoDS::Face(myDS->Shape(indSurface));
 

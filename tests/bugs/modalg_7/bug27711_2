@@ -1,13 +1,7 @@
-puts "TODO OCC27711 ALL: ERROR: OCC27711 is reproduced. Result of blend operation is WRONG."
-puts "TODO OCC27711 ALL: Error: tolerance"
-puts "TODO OCC27711 ALL: Faulty shapes in variables faulty_1 to faulty_"
 puts "========"
-puts "OCC27711"
+puts "OCC27711: Blend-on-blend corrupts the shape"
 puts "========"
 puts ""
-#####################################
-# Blend-on-blend corrupts the shape
-#####################################
 
 smallview
 
