@@ -1347,47 +1347,64 @@ TopoDS_Shape DBRep::getShape (Standard_CString& theName,
   return aShape;
 }
 
-static Standard_Integer XProgress (Draw_Interpretor& di, Standard_Integer argc, const char **argv)
+static Standard_Integer XProgress (Draw_Interpretor& theDI, Standard_Integer theNbArgs, const char** theArgVec)
 {
-  for ( Standard_Integer i=1; i < argc; i++ )
+  for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
   {
-    Standard_Boolean turn = Standard_True;
-    if ( argv[i][0] == '-' ) turn = Standard_False;
-    else if ( argv[i][0] != '+' ) continue;
-
-    TCollection_AsciiString anArgCase (argv[i]);
+    TCollection_AsciiString anArgCase(theArgVec[anArgIter]);
     anArgCase.LowerCase();
-    if ( argv[i][1] == 't' ) Draw_ProgressIndicator::DefaultTclMode() = turn;
-    else if (argv[i][1] == 'c') Draw_ProgressIndicator::DefaultConsoleMode() = turn;
-    else if ( argv[i][1] == 'g' ) Draw_ProgressIndicator::DefaultGraphMode() = turn;
-    else if ( ! strcmp ( argv[i], "-stop" ) && i+1 < argc )
+    if (anArgIter + 1 < theNbArgs && anArgCase == "-stop")
     {
       Standard_Address aPtr = 0;
-      if (sscanf (argv[++i], "%p", &aPtr) == 1)
-        Draw_ProgressIndicator::StopIndicator() = aPtr;
+      if (sscanf(theArgVec[++anArgIter], "%p", &aPtr) != 1)
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+
+      Draw_ProgressIndicator::StopIndicator() = aPtr;
       return 0;
     }
+    else if (anArgCase.Length() == 2
+          && (anArgCase.Value(1) == '-' || anArgCase.Value(1) == '+'))
+    {
+      const bool toEnable = anArgCase.Value(1) == '+';
+      if (anArgCase.Value(2) == 't')
+      {
+        Draw_ProgressIndicator::DefaultTclMode() = toEnable;
+      }
+      else if (anArgCase.Value(2) == 'c')
+      {
+        Draw_ProgressIndicator::DefaultConsoleMode() = toEnable;
+      }
+      else if (anArgCase.Value(2) == 'g')
+      {
+        Draw_ProgressIndicator::DefaultGraphMode() = toEnable;
+        Draw_ProgressIndicator::DefaultIconMode() = toEnable;
+      }
+      else if (anArgCase.Value(2) == 'i')
+      {
+        Draw_ProgressIndicator::DefaultIconMode() = toEnable;
+      }
+      else
+      {
+        theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+        return 1;
+      }
+    }
+    else
+    {
+      theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
+      return 1;
+    }
   }
-  di << "Progress Indicator defaults: tcl mode is ";
-  if ( Draw_ProgressIndicator::DefaultTclMode() ) {
-    di<<"ON";
-  } else {
-    di<<"OFF";
-  }
-  di<<", console mode is ";
-  if (Draw_ProgressIndicator::DefaultConsoleMode()) {
-    di << "ON";
-  }
-  else {
-    di << "OFF";
-  }
-  di << ", graphical mode is ";
-  if ( Draw_ProgressIndicator::DefaultGraphMode() ) {
-    di<<"ON";
-  } else {
-    di<<"OFF";
-  }
-  di<< "\n";
+
+  theDI << "Progress Indicator defaults: "
+        << "tcl mode is "         << (Draw_ProgressIndicator::DefaultTclMode()     ? "ON" : "OFF")
+        << ", console mode is "   << (Draw_ProgressIndicator::DefaultConsoleMode() ? "ON" : "OFF")
+        << ", graphical mode is " << (Draw_ProgressIndicator::DefaultGraphMode()   ? "ON" : "OFF")
+        << ", icon taskbar mode is " << (Draw_ProgressIndicator::DefaultIconMode() ? "ON" : "OFF")
+        << "\n";
   return 0;
 }
 
@@ -1671,15 +1688,16 @@ void  DBRep::BasicCommands(Draw_Interpretor& theCommands)
   theCommands.Add("purgemmgt",
 		  "returns the free memory from the system to the memory manager",
 		  __FILE__,purgemmgt,g);
-  
+
   // Add command for DRAW-specific ProgressIndicator
-  theCommands.Add ( "XProgress",
-                    "XProgress [+|-t] [+|-c] [+|-g]"
-                    "\n\t\t The options are:"
-                    "\n\t\t   +|-t :  switch on/off output to tcl of Progress Indicator"
-                    "\n\t\t   +|-c :  switch on/off output to cout of Progress Indicator"
-                    "\n\t\t   +|-g :  switch on/off graphical mode of Progress Indicator",
-                   __FILE__, XProgress,"DE: General");
+  theCommands.Add("XProgress", R"(
+XProgress [+t|-t] [+c|-c] [+g|-g] [+i|-i]
+Configure progress indicator:
+ +t|-t switch on/off output to Tcl
+ +c|-c switch on/off output to std::cout
+ +g|-g switch on/off graphical and taskbar icon mode
+ +i|-i switch on/off taskbar icon mode )", __FILE__, XProgress, "DE: General");
+
   theCommands.Add("writebrep",
                   "writebrep shape filename [-binary {0|1}]=0 [-version Version]=4"
                   "\n\t\t:                          [-triangles {0|1}]=1 [-normals {0|1}]=0"

@@ -44,6 +44,7 @@ Draw_ProgressIndicator::Draw_ProgressIndicator (const Draw_Interpretor &di, Stan
 : myTclMode ( DefaultTclMode() ),
   myConsoleMode ( DefaultConsoleMode() ),
   myGraphMode ( DefaultGraphMode() && !Draw_VirtualWindows ),
+  myIconMode ( DefaultIconMode() && !Draw_VirtualWindows ),
   myDraw ( (Draw_Interpretor*)&di ),
   myShown ( Standard_False ),
   myBreak ( Standard_False ),
@@ -150,7 +151,7 @@ void Draw_ProgressIndicator::TextProgress(const Message_ProgressScope& theScope,
 
 void Draw_ProgressIndicator::Show (const Message_ProgressScope& theScope, const Standard_Boolean force)
 {
-  if (!myGraphMode && !myTclMode && !myConsoleMode)
+  if (!myGraphMode && !myTclMode && !myConsoleMode && !myIconMode)
     return;
 
   // remember time of the first call to Show as process start time
@@ -169,7 +170,7 @@ void Draw_ProgressIndicator::Show (const Message_ProgressScope& theScope, const 
   if ( ! force && (1. - aPosition) > Precision::Confusion() && Abs (aPosition - myLastPosition) < myUpdateThreshold)
     return; // return if update interval has not elapsed
 
-  if (myGraphMode && myGuiThreadId != OSD_Thread::Current())
+  if ((myGraphMode || myIconMode) && myGuiThreadId != OSD_Thread::Current())
     return;
 
   myLastPosition = aPosition;
@@ -180,10 +181,11 @@ void Draw_ProgressIndicator::Show (const Message_ProgressScope& theScope, const 
 
   // Show graphic progress bar.
   // It will be updated only within GUI thread.
+  const bool wasShown = myShown;
   if (myGraphMode)
   {
     // In addition, write elapsed/estimated/remaining time
-    if ( GetPosition() > 0.01 ) { 
+    if ( GetPosition() > 0.01 ) {
       time_t aTimeT;
       time ( &aTimeT );
       Standard_Size aTime = (Standard_Size)aTimeT;
@@ -193,7 +195,8 @@ void Draw_ProgressIndicator::Show (const Message_ProgressScope& theScope, const 
   
     // eval will reset current string result - backup it beforehand
     const TCollection_AsciiString aTclResStr (myDraw->Result());
-    if ( ! myShown ) {
+    if (!wasShown)
+    {
       char command[1024];
       Snprintf (command, "toplevel .xprogress -height 100 -width 410;"
                          "wm title .xprogress \"Progress\";"
@@ -206,28 +209,6 @@ void Draw_ProgressIndicator::Show (const Message_ProgressScope& theScope, const 
                          "pack .xprogress.bar .xprogress.text .xprogress.stop -side top;", this );
       myDraw->Eval ( command );
       myShown = Standard_True;
-
-    #ifdef _WIN32
-      if (myTaskbarList == nullptr
-       && CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&myTaskbarList) == S_OK)
-      {
-        // Take top-level Tk window created by DrawDefault.
-        // The calls `winfo id .` and `winfo id .xprogress` return something different and cannot be used.
-        // Fallback showing progress on console window (GetConsoleWindow will work conhost, but not with Terminal).
-        myTaskbarWin1 = FindWindowW(L"TkTopLevel", L"Draw");
-        myTaskbarWin2 = GetConsoleWindow();
-        if (myTaskbarWin1 == nullptr && myTaskbarWin2 == nullptr) // no window to use
-        {
-          myTaskbarList->Release();
-          myTaskbarList = nullptr;
-        }
-      }
-      if (myTaskbarWin1 != nullptr)
-        myTaskbarList->SetProgressState((HWND)myTaskbarWin1, TBPF_NORMAL);
-
-      if (myTaskbarWin2 != nullptr)
-        myTaskbarList->SetProgressState((HWND)myTaskbarWin2, TBPF_NORMAL);
-#endif
     }
     std::stringstream aCommand;
     aCommand.setf(std::ios::fixed, std::ios::floatfield);
@@ -243,10 +224,41 @@ void Draw_ProgressIndicator::Show (const Message_ProgressScope& theScope, const 
   }
 
 #ifdef _WIN32
-  if (myGraphMode && myTaskbarWin1 != nullptr)
+  if (!wasShown && myIconMode)
+  {
+    if (myTaskbarList == nullptr)
+    {
+      // should be called once for each thread (use the same parameters as in Image_RWWinCodec)
+      CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+    }
+
+    if (myTaskbarList == nullptr
+     && CoCreateInstance(CLSID_TaskbarList, nullptr, CLSCTX_ALL, IID_ITaskbarList3, (void**)&myTaskbarList) == S_OK)
+    {
+      // Take top-level Tk window created by DrawDefault.
+      // The calls `winfo id .` and `winfo id .xprogress` return something different and cannot be used.
+      // Fallback showing progress on console window (GetConsoleWindow will work conhost, but not with Terminal).
+      myTaskbarWin1 = FindWindowW(L"TkTopLevel", L"Draw");
+      myTaskbarWin2 = GetConsoleWindow();
+      if (myTaskbarWin1 == nullptr && myTaskbarWin2 == nullptr) // no window to use
+      {
+        myTaskbarList->Release();
+        myTaskbarList = nullptr;
+      }
+    }
+    if (myTaskbarWin1 != nullptr)
+      myTaskbarList->SetProgressState((HWND)myTaskbarWin1, TBPF_NORMAL);
+
+    if (myTaskbarWin2 != nullptr)
+      myTaskbarList->SetProgressState((HWND)myTaskbarWin2, TBPF_NORMAL);
+
+    myShown = Standard_True;
+  }
+
+  if (myIconMode && myTaskbarWin1 != nullptr)
     myTaskbarList->SetProgressValue((HWND)myTaskbarWin1, int(100.0 * aPosition), 100);
 
-  if (myGraphMode && myTaskbarWin2 != nullptr)
+  if (myIconMode && myTaskbarWin2 != nullptr)
     myTaskbarList->SetProgressValue((HWND)myTaskbarWin2, int(100.0 * aPosition), 100);
 #endif
 
@@ -383,6 +395,16 @@ Standard_Boolean &Draw_ProgressIndicator::DefaultGraphMode()
 }
 
 //=======================================================================
+//function : DefaultIconMode
+//purpose  :
+//=======================================================================
+Standard_Boolean &Draw_ProgressIndicator::DefaultIconMode()
+{
+  static Standard_Boolean defIconMode = Standard_False;
+  return defIconMode;
+}
+
+//=======================================================================
 //function : StopIndicator
 //purpose  : 
 //=======================================================================
@@ -413,6 +435,16 @@ Draw_TestProgressIndicator::Draw_TestProgressIndicator(const Standard_Real theMa
 : Draw_ProgressIndicator(theDI, theUpdateThreshold)
 {
   myRoot.reset(new Message_ProgressScope(Start(), nullptr, theMax, theMax <= 0.0));
+}
+
+//=======================================================================
+//function : ~Draw_TestProgressIndicator
+//purpose  :
+//=======================================================================
+Draw_TestProgressIndicator::~Draw_TestProgressIndicator()
+{
+  // reset root to suppress output within TextProgress() from destructor in case of aborted progress
+  myRoot.reset();
 }
 
 //=======================================================================

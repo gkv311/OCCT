@@ -90,6 +90,9 @@ public:
   //! Get/Set default value for graph mode
   Standard_EXPORT static Standard_Boolean& DefaultGraphMode();
 
+  //! Get/Set default value for taskbar icon mode
+  Standard_EXPORT static Standard_Boolean& DefaultIconMode();
+
   //! Internal method for implementation of UserBreak mechanism;
   //! note that it uses static variable and thus not thread-safe! 
   Standard_EXPORT static Standard_Address& StopIndicator();
@@ -100,6 +103,7 @@ private:
   Standard_Boolean myTclMode;
   Standard_Boolean myConsoleMode;
   Standard_Boolean myGraphMode;
+  Standard_Boolean myIconMode;
   Draw_Interpretor* myDraw;
   Standard_Boolean myShown;
   Standard_Boolean myBreak;
@@ -128,6 +132,9 @@ public:
   Standard_EXPORT Draw_TestProgressIndicator(const Standard_Real theMax,
                                              const Draw_Interpretor& theDI,
                                              const Standard_Real theUpdateThreshold = 1.);
+
+  //! Destructor.
+  Standard_EXPORT virtual ~Draw_TestProgressIndicator();
 
   //! Open scope.
   Standard_EXPORT void Open(const TCollection_AsciiString& theName);
