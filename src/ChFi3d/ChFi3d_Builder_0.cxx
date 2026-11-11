@@ -2939,6 +2939,16 @@ static void CurveCleaner(Handle(Geom_BSplineCurve)& BS,
     }
   }
 }
+
+//! Returns true if the curve, or the basis curve of a trimmed curve, is periodic.
+static bool isBasisPeriodic(const Handle(Geom_Curve)& theCurve)
+{
+  if (const Handle(Geom_TrimmedCurve) aTrimmed = Handle(Geom_TrimmedCurve)::DownCast(theCurve))
+    return aTrimmed->BasisCurve()->IsPeriodic();
+
+  return theCurve->IsPeriodic();
+}
+
 //=======================================================================
 //function : ComputeCurves
 //purpose  : Calculates intersection between two HSurfaces.
@@ -3193,7 +3203,7 @@ Standard_Boolean ChFi3d_ComputeCurves(const Handle(Adaptor3d_Surface)&   S1,
               }
               ptestdeb = C3d->Value(Uf);
               ptestfin = C3d->Value(Ul);
-              if (C3d->IsPeriodic() && !(failedF && failedL)) {
+              if (isBasisPeriodic(C3d) && !(failedF && failedL)) {
                 // assure the same order of ends, otherwise TrimmedCurve will take
                 // the other part of C3d
                 gp_Pnt Ptmp;
