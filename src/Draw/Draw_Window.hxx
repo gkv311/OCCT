@@ -22,7 +22,7 @@
 #endif
 
 #include <Aspect_Drawable.hxx>
-#include <NCollection_Vec2.hxx>
+#include <Graphic3d_Vec2.hxx>
 #include <TCollection_AsciiString.hxx>
 
 #include <memory>
@@ -32,15 +32,23 @@ const Standard_Integer MAXCOLOR = 15;
 //! Segment definition.
 struct Draw_XSegment
 {
-  NCollection_Vec2<short> Points[2]; // same as XSegment
+#if defined(_WIN32) || defined(__APPLE__)
+  typedef float value_type;
+#else
+  // XSegment from Xlib
+  typedef short value_type;
+#endif
+  NCollection_Vec2<value_type> Points[2];
 
-  NCollection_Vec2<short>&       operator[](int theIndex)       { return Points[theIndex]; }
-  const NCollection_Vec2<short>& operator[](int theIndex) const { return Points[theIndex]; }
+  NCollection_Vec2<value_type>&       operator[](int theIndex)       { return Points[theIndex]; }
+  const NCollection_Vec2<value_type>& operator[](int theIndex) const { return Points[theIndex]; }
 
-  void Init (Standard_Integer theXStart, Standard_Integer theYStart, Standard_Integer theXEnd, Standard_Integer theYEnd)
+  void Init(double theXStart, double theYStart, double theXEnd, double theYEnd)
   {
-    Points[0].SetValues ((short )theXStart, (short )theYStart);
-    Points[1].SetValues ((short )theXEnd,   (short )theYEnd);
+    // note - explicitly cast double -> float -> int through float
+    // to avoid extra jumps due to rounding issues
+    Points[0].SetValues(value_type((float)theXStart), value_type((float)theYStart));
+    Points[1].SetValues(value_type((float)theXEnd),   value_type((float)theYEnd));
   }
 };
 

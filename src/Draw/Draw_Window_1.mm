@@ -96,6 +96,7 @@ static Standard_Integer getScreenBottom()
 }
 
 extern Standard_Boolean Draw_VirtualWindows;
+extern Standard_Boolean Draw_LineSmoothing;
 static Standard_Boolean Draw_IsInZoomingMode = Standard_False;
 
 Standard_Real Draw_RGBColorsArray[MAXCOLOR][3] = {{1.0,  1.0,  1.0},
@@ -441,7 +442,7 @@ void Draw_Window::DrawSegments (const Draw_XSegment* theSegments,
 
   NSBezierPath* aPath = [[[NSBezierPath alloc] init] autorelease];
 
-  NSImage* anImage;
+  NSImage* anImage = nullptr;
   Standard_Integer anIter = 0;
   
   if (Draw_IsInZoomingMode)
@@ -471,7 +472,16 @@ void Draw_Window::DrawSegments (const Draw_XSegment* theSegments,
                                            blue: Draw_RGBColorsArray[myCurrentColor][2]
                                           alpha: 1.0f];
   [aColor set];
+
+  // manage line smoothing
+  NSGraphicsContext* aCtx = [NSGraphicsContext currentContext];
+  const BOOL wasAntialias = [aCtx shouldAntialias];
+  [aCtx setShouldAntialias: Draw_LineSmoothing];
+
   [aPath stroke];
+
+  [aCtx setShouldAntialias: wasAntialias];
+
   [anImage unlockFocus];
 
   if (!myUseBuffer)

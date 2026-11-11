@@ -1610,37 +1610,19 @@ void Draw_Display::DrawTo (const gp_Pnt2d& pp2)
 
   case DRAW : {
 
-#if 1
     Standard_Integer x0,y0,x1,y1;
     curview->GetFrame(x0,y0,x1,y1);
 
-
-    //Standard_Integer qx0,qy0,qx1,qy1;
-    //curview->viewer->GetFrame(curview->id,qx0,qy0,qx1,qy1);
-    //if(qx0!=x0 || qx1!=x1 || qy0!=y0 || qy1!=y1) {
-    //  x0=qx0; x1=qx1; y0=qy0; y1=qy1;
-    //}
-
-
-
     gp_Pnt2d PI1(p1);
     gp_Pnt2d PI2(p2);
-
     if(Trim(PI1,PI2,x0,y0,x1,y1))
     {
-      segm[nbseg].Init(static_cast<Standard_Integer>( PI1.X() + curview->GetDx()),
-                       static_cast<Standard_Integer>(-PI1.Y() - curview->GetDy()),
-                       static_cast<Standard_Integer>( PI2.X() + curview->GetDx()),
-                       static_cast<Standard_Integer>(-PI2.Y() - curview->GetDy()));
+      segm[nbseg].Init( PI1.X() + curview->GetDx() + 0.5,
+                       -PI1.Y() - curview->GetDy() - 0.5,
+                        PI2.X() + curview->GetDx() + 0.5,
+                       -PI2.Y() - curview->GetDy() - 0.5);
       ++nbseg;
     }
-#else
-    segm[nbseg].Init(static_cast<Standard_Integer>( p1.X() + curview->GetDx()),
-                     static_cast<Standard_Integer>(-p1.Y() - curview->GetDy()),
-                     static_cast<Standard_Integer>( p2.X() + curview->GetDx()),
-                     static_cast<Standard_Integer>(-p2.Y() - curview->GetDy()));
-    nbseg++;
-#endif
     if (nbseg == MAXSEGMENT) {
       Draw_Flush();
     }

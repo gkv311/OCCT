@@ -17,6 +17,7 @@
 // include windows.h first to have all definitions available
 #ifdef _WIN32
 #include <windows.h>
+#include <gdiplus.h>
 #endif
 
 #include <Draw_Window.hxx>
@@ -85,27 +86,47 @@
 #define CLIENTWND 0
 
 //! Creation of color stylos
+static constexpr COLORREF Draw_colorRefTab[MAXCOLOR] =
+{
+  RGB(255,255,255),
+  RGB(255,0,0),
+  RGB(0,255,0),
+  RGB(0,0,255),
+  RGB(0,255,255),
+  RGB(255,215,0),
+  RGB(255,0,255),
+  RGB(255,52,179),
+  RGB(255,165,0),
+  RGB(255,228,225),
+  RGB(255,160,122),
+  RGB(199,21,133),
+  RGB(255,255,0),
+  RGB(240,230,140),
+  RGB(255,127,80)
+};
+
+//! Creation of color stylos
 static HPEN Draw_colorPenTab[MAXCOLOR] =
 {
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,255,255)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,0,0)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(0,255,0)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(0,0,255)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(0,255,255)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,215,0)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,0,255)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,52,179)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,165,0)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,228,225)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,160,122)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(199,21,133)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,255,0)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(240,230,140)),
-  CreatePen(PS_SOLID, PENWIDTH, RGB(255,127,80))
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[0]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[1]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[2]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[3]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[4]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[5]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[6]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[7]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[8]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[9]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[10]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[11]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[12]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[13]),
+  CreatePen(PS_SOLID, PENWIDTH, Draw_colorRefTab[14])
 };
 
 // Correspondence mode X11 and WINDOWS NT
-static const int Draw_modeTab[16] =
+static constexpr int Draw_modeTab[16] =
 {
   R2_BLACK, R2_MASKPEN, R2_MASKPENNOT, R2_COPYPEN,
   R2_MASKNOTPEN, R2_NOP, R2_XORPEN, R2_MERGEPEN,
@@ -116,11 +137,25 @@ static const int Draw_modeTab[16] =
 
 extern Standard_Boolean Draw_Batch;
 extern Standard_Boolean Draw_VirtualWindows;
+Standard_Boolean Draw_LineSmoothing = Standard_False;
 Standard_Boolean Draw_BlackBackGround = Standard_True;
 #if defined(_WIN32)
 // indicates SUBSYSTEM:CONSOLE linker option, to be set to True in main()
 Standard_EXPORT Standard_Boolean Draw_IsConsoleSubsystem = Standard_False;
 HWND Draw_Window::hWndClientMDI = 0;
+
+//! Initialized GDI+ once.
+static bool hasGdiPlus()
+{
+  static bool isInitialized = []() -> bool
+  {
+    static Gdiplus::GdiplusStartupInput aGdiInput;
+    static ULONG_PTR aToken = 0;
+    Gdiplus::GdiplusStartup(&aToken, &aGdiInput, nullptr);
+    return true;
+  }();
+  return isInitialized;
+}
 #endif
 
 //! Return termination callbacks.
@@ -874,11 +909,57 @@ void Draw_Window::DrawSegments (const Draw_XSegment* theSegments,
 #ifdef _WIN32
   HDC hDC = GetDC (myWindow);
   HDC aWorkDC = myUseBuffer ? getMemDC(hDC) : hDC;
-  for (int aSegIter = 0; aSegIter < theNbElems; ++aSegIter)
+  const bool toUseGdiPlus = Draw_LineSmoothing;
+  if (toUseGdiPlus && hasGdiPlus())
   {
-    const Draw_XSegment& aSeg = theSegments[aSegIter];
-    MoveToEx(aWorkDC, aSeg[0].x(), aSeg[0].y(), NULL);
-    LineTo  (aWorkDC, aSeg[1].x(), aSeg[1].y());
+    Gdiplus::Graphics aGraphics(aWorkDC);
+    if (Draw_LineSmoothing)
+      aGraphics.SetSmoothingMode(Gdiplus::SmoothingModeHighQuality);
+
+    Gdiplus::Color aColor;
+    aColor.SetFromCOLORREF(Draw_colorRefTab[myCurrentColor]);
+    Gdiplus::Pen aPen(aColor, PENWIDTH);
+
+    Standard_STATIC_ASSERT(sizeof(Draw_XSegment) == sizeof(Gdiplus::PointF) * 2);
+    for (int aSegIter = 0; aSegIter < theNbElems; ++aSegIter)
+    {
+      const Draw_XSegment& aSeg = theSegments[aSegIter];
+
+      int aSeg2Index = aSegIter;
+      for (const Graphic3d_Vec2* aPnt2Ptr = &aSeg[1]; aSeg2Index + 1 < theNbElems; ++aSeg2Index)
+      {
+        const Draw_XSegment& aSeg2 = theSegments[aSeg2Index + 1];
+        if (aSeg2[0] != *aPnt2Ptr)
+            break;
+
+        aPnt2Ptr = &aSeg2[1];
+      }
+
+      if (aSeg2Index != aSegIter)
+      {
+        // draw connected segments in batch, which is much faster in GDI+ than drawing individual segments;
+        // DrawLines() takes a polyline on input, not the list of line segments,
+        // but redundant duplicated points will be implicitly skipped
+        aGraphics.DrawLines(&aPen, (const Gdiplus::PointF*)&aSeg, (aSeg2Index - aSegIter +1) * 2);
+        aSegIter = aSeg2Index;
+      }
+      else
+      {
+        // note that this call is much slower than in GDI even without smoothing!
+        aGraphics.DrawLine(&aPen, (const Gdiplus::PointF&)aSeg[0], (const Gdiplus::PointF&)aSeg[1]);
+      }
+    }
+  }
+  else
+  {
+    for (int aSegIter = 0; aSegIter < theNbElems; ++aSegIter)
+    {
+      const Draw_XSegment& aSeg = theSegments[aSegIter];
+      const Graphic3d_Vec2i aPnt1(aSeg[0]);
+      const Graphic3d_Vec2i aPnt2(aSeg[1]);
+      MoveToEx(aWorkDC, aPnt1.x(), aPnt1.y(), nullptr);
+      LineTo  (aWorkDC, aPnt2.x(), aPnt2.y());
+    }
   }
   if (myUseBuffer)
   {

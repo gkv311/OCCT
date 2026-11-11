@@ -39,6 +39,7 @@
 extern Draw_Viewer dout;
 extern Standard_Boolean Draw_Batch;
 extern Standard_Boolean Draw_Bounds;
+extern Standard_Boolean Draw_LineSmoothing;
 extern Standard_Boolean Draw_BlackBackGround;
 
 #define DEFROTATE (5 * M_PI/ 180.)
@@ -804,6 +805,31 @@ static Standard_Integer dfont(Draw_Interpretor& di,
   return 0;
 } // dfont
 
+// =======================================================================
+// function : dsmoothing
+// =======================================================================
+static int dsmoothing(Draw_Interpretor& theDI, int theNbArgs, const char** theArgVec)
+{
+  bool toEnable = false;
+  if (theNbArgs == 1)
+  {
+    theDI << "Smoothing: " << (Draw_LineSmoothing ? "1" : "0");
+    return 0;
+  }
+  else if (theNbArgs == 2 && Draw::ParseOnOff(theArgVec[1], toEnable))
+  {
+    if (Draw_LineSmoothing == toEnable)
+      return 0;
+
+    Draw_LineSmoothing = toEnable;
+    dout.RepaintAll();
+    return 0;
+  }
+
+  theDI << "Syntax error: wrong number of arguments";
+  return 1;
+}
+
 //=======================================================================
 //function : hcolor
 //purpose  :
@@ -1441,6 +1467,9 @@ void Draw::GraphicCommands(Draw_Interpretor& theCommands)
   		  __FILE__,dtext,g);
   theCommands.Add("dfont","dfont [name size] : set name and size of Draw font, or reset to default",
   		  __FILE__,dfont,g);
+
+  theCommands.Add("dsmoothing", "dsmoothing [{on|off}] : enable or disable line smoothing",
+                  __FILE__, dsmoothing, g);
 
   theCommands.Add("dexpr", /* [dexpr] */ R"(
 dexpr expression [x=value_of_x] ... [y=value_of_y]
