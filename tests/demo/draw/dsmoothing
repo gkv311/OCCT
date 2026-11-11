@@ -1,0 +1,13 @@
+puts "Check functionality of dsmoothing command (enable/disable line smoothing)"
+
+pload MODELING
+
+pcylinder c 100 200
+axo
+fit
+dsmoothing 0
+xwd "${imagedir}/${casename}_off.png"
+dsmoothing 1
+xwd "${imagedir}/${casename}_on.png"
+
+puts "TEST COMPLETED"
