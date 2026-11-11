@@ -50,6 +50,7 @@
 #include <ExprIntrp_SyntaxError.hxx>
 #include <Expr_Array1OfNamedUnknown.hxx>
 #include <Expr_Array1OfGeneralExpression.hxx>
+#include <NCollection_DataMap.hxx>
 
 ExprIntrp_yaccintrf::ExprIntrp_yaccintrf(ExprIntrp_Analysis& theRecept)
 : ExprIntrp_Recept(theRecept)
@@ -244,69 +245,98 @@ void ExprIntrp_yaccintrf::ExprIntrp_EndDiffFunction()
     ExprIntrp_Recept.Push(res);
   }
 }
-  
-static Handle(Expr_GeneralExpression) ExprIntrp_StandardFunction(const TCollection_AsciiString& name, const Handle(Expr_GeneralExpression)& op)
-{
-// return standard functions equivalent corresponding to <name> 
-// with given operand <op> if exists. Returns null value if not.
-// <name> is not case sensitive
 
-  Handle(Expr_GeneralExpression) res;
-  if ((name == "abs") || (name == "Abs")) {
-    res = new Expr_Absolute(op);
+//! Map of expression constructors.
+struct ExprIntrp_Factory
+{
+  typedef Handle(Expr_GeneralExpression) (*ExprConstructor_t)(const Handle(Expr_GeneralExpression)& theOp);
+
+  //! Return factory for the given name or NULL if not found.
+  static ExprConstructor_t Find(const TCollection_AsciiString& theName)
+  {
+    TCollection_AsciiString aName(theName);
+    aName.LowerCase();
+
+    ExprConstructor_t aFact = nullptr;
+    Instance().myMap.Find(aName, aFact);
+    return aFact;
   }
-  else if ((name == "acos") || (name == "ACos")) {
-    res = new Expr_ArcCosine(op);
+
+private:
+
+  //! Return a global instance.
+  static const ExprIntrp_Factory& Instance()
+  {
+    static const ExprIntrp_Factory aFactory;
+    return aFactory;
   }
-  else if ((name == "asin") || (name == "ASin")) {
-    res = new Expr_ArcSine(op);
+
+  //! Constructor.
+  ExprIntrp_Factory()
+  {
+    add<Expr_Absolute>("Abs");
+    add<Expr_ArcCosine>("ACos", "ArcCos");
+    add<Expr_ArcSine>("ASin", "ArcSin");
+    add<Expr_ArcTangent>("ATan", "ArcTan");
+    add<Expr_ArgCosh>("ACosh", "ArcCosh");
+    add<Expr_ArgSinh>("ASinh", "ArcSinh");
+    add<Expr_ArgTanh>("ATanh", "ArcTanh");
+    add<Expr_Cosh>("Cosh");
+    add<Expr_Cosine>("Cos");
+    add<Expr_Exponential>("Exp");
+    add<Expr_LogOf10>("Log");
+    add<Expr_LogOfe>("Ln");
+    add<Expr_Sign>("Sign");
+    add<Expr_Sine>("Sin");
+    add<Expr_Sinh>("Sinh");
+    add<Expr_SquareRoot>("Sqrt");
+    add<Expr_Tangent>("Tan");
+    add<Expr_Tanh>("Tanh");
   }
-  else if ((name == "atan") || (name == "ATan")) {
-    res = new Expr_ArcTangent(op);
+
+  //! Bind expression constructor with the given names.
+  template<class ClassName>
+  void add(const char* theName1, const char* theName2 = nullptr)
+  {
+    TCollection_AsciiString aName(theName1);
+    aName.LowerCase();
+    myMap.Bind(aName, &factory<ClassName>);
+    if (theName2 != nullptr)
+    {
+      aName = theName2;
+      aName.LowerCase();
+      myMap.Bind(aName, &factory<ClassName>);
+    }
   }
-  else if ((name == "acosh") || (name == "ACosh")) {
-    res = new Expr_ArgCosh(op);
+
+  //! Template function creating expression.
+  template<class ClassName>
+  static Handle(Expr_GeneralExpression) factory(const Handle(Expr_GeneralExpression)& theOp)
+  {
+    return new ClassName(theOp);
   }
-  else if ((name == "asinh") || (name == "ASinh")) {
-    res = new Expr_ArgSinh(op);
+
+  typedef NCollection_DataMap<TCollection_AsciiString, ExprConstructor_t, TCollection_AsciiString> MapOfExprConstructors;
+
+private:
+
+  MapOfExprConstructors myMap;
+
+};
+
+//! Return standard functions equivalent corresponding to @p theName
+//! with given operand @p theOp if exists. Returns null value if not.
+//! Note that @p theName is case insensitive.
+static Handle(Expr_GeneralExpression) ExprIntrp_StandardFunction(const TCollection_AsciiString& theName,
+                                                                 const Handle(Expr_GeneralExpression)& theOp)
+{
+  ExprIntrp_Factory::ExprConstructor_t aFactory = ExprIntrp_Factory::Find(theName);
+  if (aFactory != nullptr)
+  {
+    Handle(Expr_GeneralExpression) aRes = aFactory(theOp);
+    return aRes;
   }
-  else if ((name == "atanh") || (name == "ATanh")) {
-    res = new Expr_ArgTanh(op);
-  }
-  else if ((name == "cosh") || (name == "Cosh")) {
-    res = new Expr_Cosh(op);
-  }
-  else if ((name == "cos") || (name == "Cos")) {
-    res = new Expr_Cosine(op);
-  }
-  else if ((name == "exp") || (name == "Exp")) {
-    res = new Expr_Exponential(op);
-  }
-  else if (name == "log") {
-    res = new Expr_LogOf10(op);
-  }
-  else if ((name == "Log") || (name == "Ln")) {
-    res = new Expr_LogOfe(op);
-  }
-  else if ((name == "sign") || (name == "Sign")) {
-    res = new Expr_Sign(op);
-  }
-  else if ((name == "sin") || (name == "Sin")) {
-    res = new Expr_Sine(op);
-  }
-  else if ((name == "sinh") || (name == "Sinh")) {
-    res = new Expr_Sinh(op);
-  }
-  else if ((name == "sqrt") || (name == "Sqrt")) {
-    res = new Expr_SquareRoot(op);
-  }
-  else if ((name == "tan") || (name == "Tan")) {
-    res = new Expr_Tangent(op);
-  }
-  else if ((name == "tanh") || (name == "Tanh")) {
-    res = new Expr_Tanh(op);
-  }
-  return res;
+  return Handle(Expr_GeneralExpression)();
 }
 
 
