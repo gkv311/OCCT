@@ -17,38 +17,27 @@
 #ifndef _AdvApprox_ApproxAFunction_HeaderFile
 #define _AdvApprox_ApproxAFunction_HeaderFile
 
-#include <Standard.hxx>
-#include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
-
-#include <Standard_Integer.hxx>
-#include <TColStd_HArray1OfReal.hxx>
-#include <Standard_Real.hxx>
-#include <GeomAbs_Shape.hxx>
-#include <Standard_Boolean.hxx>
-#include <TColStd_HArray2OfReal.hxx>
-#include <TColgp_HArray2OfPnt2d.hxx>
-#include <TColgp_HArray2OfPnt.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
-#include <Standard_Address.hxx>
 #include <AdvApprox_EvaluatorFunction.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
+#include <GeomAbs_Shape.hxx>
+#include <Standard_ConstructionError.hxx>
+#include <TColStd_HArray1OfReal.hxx>
+#include <TColStd_HArray1OfInteger.hxx>
+#include <TColStd_HArray2OfReal.hxx>
 #include <TColgp_Array1OfPnt.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
+#include <TColgp_HArray2OfPnt.hxx>
+#include <TColgp_HArray2OfPnt2d.hxx>
 #include <Standard_OStream.hxx>
+
 class AdvApprox_Cutting;
 
-
-
-//! this approximate a given function
-class AdvApprox_ApproxAFunction 
+//! This tool approximates a given function.
+class AdvApprox_ApproxAFunction
 {
 public:
 
   DEFINE_STANDARD_ALLOC
 
-  
   //! Constructs approximator tool.
   //!
   //! Warning:
@@ -68,26 +57,48 @@ public:
   //! the nth entry described by Num3DSS
   //! The same type of schema applies to the Poles1d, Poles2d and
   //! Poles.
-  Standard_EXPORT AdvApprox_ApproxAFunction(const Standard_Integer Num1DSS, const Standard_Integer Num2DSS, const Standard_Integer Num3DSS, const Handle(TColStd_HArray1OfReal)& OneDTol, const Handle(TColStd_HArray1OfReal)& TwoDTol, const Handle(TColStd_HArray1OfReal)& ThreeDTol, const Standard_Real First, const Standard_Real Last, const GeomAbs_Shape Continuity, const Standard_Integer MaxDeg, const Standard_Integer MaxSeg, const AdvApprox_EvaluatorFunction& Func);
-  
+  Standard_EXPORT AdvApprox_ApproxAFunction(const Standard_Integer Num1DSS,
+                                            const Standard_Integer Num2DSS,
+                                            const Standard_Integer Num3DSS,
+                                            const Handle(TColStd_HArray1OfReal)& OneDTol,
+                                            const Handle(TColStd_HArray1OfReal)& TwoDTol,
+                                            const Handle(TColStd_HArray1OfReal)& ThreeDTol,
+                                            const Standard_Real First, const Standard_Real Last,
+                                            const GeomAbs_Shape Continuity,
+                                            const Standard_Integer MaxDeg,
+                                            const Standard_Integer MaxSeg,
+                                            AdvApprox_EvaluatorFunction& Func);
+
   //! Approximation with user methode of cutting
-  Standard_EXPORT AdvApprox_ApproxAFunction(const Standard_Integer Num1DSS, const Standard_Integer Num2DSS, const Standard_Integer Num3DSS, const Handle(TColStd_HArray1OfReal)& OneDTol, const Handle(TColStd_HArray1OfReal)& TwoDTol, const Handle(TColStd_HArray1OfReal)& ThreeDTol, const Standard_Real First, const Standard_Real Last, const GeomAbs_Shape Continuity, const Standard_Integer MaxDeg, const Standard_Integer MaxSeg, const AdvApprox_EvaluatorFunction& Func, const AdvApprox_Cutting& CutTool);
-  
-  Standard_EXPORT static void Approximation (const Standard_Integer TotalDimension, const Standard_Integer TotalNumSS, const TColStd_Array1OfInteger& LocalDimension, const Standard_Real First, const Standard_Real Last, AdvApprox_EvaluatorFunction& Evaluator, const AdvApprox_Cutting& CutTool, const Standard_Integer ContinuityOrder, const Standard_Integer NumMaxCoeffs, const Standard_Integer MaxSegments, const TColStd_Array1OfReal& TolerancesArray, const Standard_Integer code_precis, Standard_Integer& NumCurves, TColStd_Array1OfInteger& NumCoeffPerCurveArray, TColStd_Array1OfReal& LocalCoefficientArray, TColStd_Array1OfReal& IntervalsArray, TColStd_Array1OfReal& ErrorMaxArray, TColStd_Array1OfReal& AverageErrorArray, Standard_Integer& ErrorCode);
-  
-    Standard_Boolean IsDone() const;
-  
-    Standard_Boolean HasResult() const;
-  
-  //! returns the poles from the algorithms as is
-    Handle(TColStd_HArray2OfReal) Poles1d() const;
-  
-  //! returns the poles from the algorithms as is
-    Handle(TColgp_HArray2OfPnt2d) Poles2d() const;
-  
-  //! -- returns the poles from the algorithms as is
-    Handle(TColgp_HArray2OfPnt) Poles() const;
-  
+  Standard_EXPORT AdvApprox_ApproxAFunction(const Standard_Integer theNum1DSS,
+                                            const Standard_Integer theNum2DSS,
+                                            const Standard_Integer theNum3DSS,
+                                            const Handle(TColStd_HArray1OfReal)& theOneDTol,
+                                            const Handle(TColStd_HArray1OfReal)& theTwoDTol,
+                                            const Handle(TColStd_HArray1OfReal)& theThreeDTol,
+                                            const Standard_Real theFirst, const Standard_Real theLast,
+                                            const GeomAbs_Shape theContinuity,
+                                            const Standard_Integer theMaxDeg,
+                                            const Standard_Integer theMaxSeg,
+                                            AdvApprox_EvaluatorFunction& theFunc,
+                                            const AdvApprox_Cutting& theCutTool);
+
+  //! Returns TRUE if the approximation has been done within required tolerance.
+  Standard_Boolean IsDone() const { return myDone; }
+
+  //! Returns TRUE if the approximation did come out
+  //! with a result that is not NECESSARELY within the required tolerance.
+  Standard_Boolean HasResult() const { return myHasResult; }
+
+  //! Returns the poles from the algorithms as is.
+  Handle(TColStd_HArray2OfReal) Poles1d() const { return my1DPoles; }
+
+  //! Returns the poles from the algorithms as is.
+  Handle(TColgp_HArray2OfPnt2d) Poles2d() const { return my2DPoles; }
+
+  //! Returns the poles from the algorithms as is.
+  Handle(TColgp_HArray2OfPnt) Poles() const { return  my3DPoles; }
+
   //! as the name says
   Standard_EXPORT Standard_Integer NbPoles() const;
   
@@ -99,16 +110,22 @@ public:
   
   //! returns the poles at Index from the 3d subspace
   Standard_EXPORT void Poles (const Standard_Integer Index, TColgp_Array1OfPnt& P) const;
-  
-    Standard_Integer Degree() const;
-  
-    Standard_Integer NbKnots() const;
-  
-    Standard_Integer NumSubSpaces (const Standard_Integer Dimension) const;
-  
-    Handle(TColStd_HArray1OfReal) Knots() const;
-  
-    Handle(TColStd_HArray1OfInteger) Multiplicities() const;
+
+  Standard_Integer Degree() const { return myDegree; }
+
+  Standard_Integer NbKnots() const { return myKnots->Length(); }
+
+  Standard_Integer NumSubSpaces (const Standard_Integer theDimension) const
+  {
+    if (theDimension < 1 || theDimension > 3)
+      throw Standard_ConstructionError();
+
+    return myNumSubSpaces[theDimension - 1];
+  }
+
+  Handle(TColStd_HArray1OfReal) Knots() const { return myKnots; }
+
+  Handle(TColStd_HArray1OfInteger) Multiplicities() const { return myMults; }
   
   //! returns the error as is in the algorithms
   Standard_EXPORT Handle(TColStd_HArray1OfReal) MaxError (const Standard_Integer Dimension) const;
@@ -123,39 +140,52 @@ public:
   //! display information on approximation.
   Standard_EXPORT void Dump (Standard_OStream& o) const;
 
+private:
 
+  Standard_EXPORT static void Approximation (const Standard_Integer TotalDimension,
+                                             const Standard_Integer TotalNumSS,
+                                             const TColStd_Array1OfInteger& LocalDimension,
+                                             const Standard_Real First, const Standard_Real Last,
+                                             AdvApprox_EvaluatorFunction& Evaluator,
+                                             const AdvApprox_Cutting& CutTool,
+                                             const Standard_Integer ContinuityOrder,
+                                             const Standard_Integer NumMaxCoeffs,
+                                             const Standard_Integer MaxSegments,
+                                             const TColStd_Array1OfReal& TolerancesArray,
+                                             const Standard_Integer code_precis,
+                                             Standard_Integer& NumCurves,
+                                             TColStd_Array1OfInteger& NumCoeffPerCurveArray,
+                                             TColStd_Array1OfReal& LocalCoefficientArray,
+                                             TColStd_Array1OfReal& IntervalsArray,
+                                             TColStd_Array1OfReal& ErrorMaxArray,
+                                             TColStd_Array1OfReal& AverageErrorArray,
+                                             Standard_Integer& ErrorCode);
 
-
-protected:
-
-
-
-
+  Standard_EXPORT void Perform(const Standard_Integer Num1DSS,
+                               const Standard_Integer Num2DSS,
+                               const Standard_Integer Num3DSS,
+                               const AdvApprox_Cutting& CutTool);
 
 private:
 
-  
-  Standard_EXPORT void Perform (const Standard_Integer Num1DSS, const Standard_Integer Num2DSS, const Standard_Integer Num3DSS, const AdvApprox_Cutting& CutTool);
-
-
-  Standard_Integer myNumSubSpaces[3];
+  Standard_Integer myNumSubSpaces[3] {};
   Handle(TColStd_HArray1OfReal) my1DTolerances;
   Handle(TColStd_HArray1OfReal) my2DTolerances;
   Handle(TColStd_HArray1OfReal) my3DTolerances;
-  Standard_Real myFirst;
-  Standard_Real myLast;
-  GeomAbs_Shape myContinuity;
-  Standard_Integer myMaxDegree;
-  Standard_Integer myMaxSegments;
-  Standard_Boolean myDone;
-  Standard_Boolean myHasResult;
+  Standard_Real myFirst = 0.0;
+  Standard_Real myLast = 0.0;
+  GeomAbs_Shape myContinuity = GeomAbs_C0;
+  Standard_Integer myMaxDegree = 0;
+  Standard_Integer myMaxSegments = 0;
+  Standard_Boolean myDone = false;
+  Standard_Boolean myHasResult = false;
   Handle(TColStd_HArray2OfReal) my1DPoles;
   Handle(TColgp_HArray2OfPnt2d) my2DPoles;
   Handle(TColgp_HArray2OfPnt) my3DPoles;
   Handle(TColStd_HArray1OfReal) myKnots;
   Handle(TColStd_HArray1OfInteger) myMults;
-  Standard_Integer myDegree;
-  Standard_Address myEvaluator;
+  Standard_Integer myDegree = 0;
+  AdvApprox_EvaluatorFunction* myEvaluator = nullptr;
   Handle(TColStd_HArray1OfReal) my1DMaxError;
   Handle(TColStd_HArray1OfReal) my1DAverageError;
   Handle(TColStd_HArray1OfReal) my2DMaxError;
@@ -163,14 +193,6 @@ private:
   Handle(TColStd_HArray1OfReal) my3DMaxError;
   Handle(TColStd_HArray1OfReal) my3DAverageError;
 
-
 };
-
-
-#include <AdvApprox_ApproxAFunction.lxx>
-
-
-
-
 
 #endif // _AdvApprox_ApproxAFunction_HeaderFile

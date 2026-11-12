@@ -141,26 +141,26 @@ public:
   //! display information on approximation.
   Standard_EXPORT void Dump (Standard_OStream& o) const;
 
-
-
-
-protected:
-
-
-
-
-
 private:
 
-  
-  Standard_EXPORT void Approximation (const Handle(TColStd_HArray1OfReal)& OneDTol, const Handle(TColStd_HArray1OfReal)& TwoDTol, const Handle(TColStd_HArray1OfReal)& ThreeDTol, const Standard_Real BounTol, const Standard_Real First, const Standard_Real Last, const GeomAbs_Shape Continuity, const Standard_Integer Degmax, const Standard_Integer Segmax, const AdvApprox_EvaluatorFunction& TheApproxFunction, const AdvApprox_Cutting& TheCuttingTool);
-  
+  Standard_EXPORT void Approximation(const Handle(TColStd_HArray1OfReal)& OneDTol,
+                                     const Handle(TColStd_HArray1OfReal)& TwoDTol,
+                                     const Handle(TColStd_HArray1OfReal)& ThreeDTol,
+                                     const Standard_Real BounTol,
+                                     const Standard_Real First, const Standard_Real Last,
+                                     const GeomAbs_Shape Continuity,
+                                     const Standard_Integer Degmax,
+                                     const Standard_Integer Segmax,
+                                     AdvApprox_EvaluatorFunction& TheApproxFunction,
+                                     const AdvApprox_Cutting& TheCuttingTool);
+
   Standard_EXPORT Standard_Boolean D0 (const Standard_Real Param, const Standard_Real First, const Standard_Real Last, Standard_Real& Result);
   
   Standard_EXPORT Standard_Boolean D1 (const Standard_Real Param, const Standard_Real First, const Standard_Real Last, Standard_Real& Result);
   
   Standard_EXPORT Standard_Boolean D2 (const Standard_Real Param, const Standard_Real First, const Standard_Real Last, Standard_Real& Result);
 
+private:
 
   Handle(Approx_SweepFunction) myFunc;
   Standard_Boolean done;
