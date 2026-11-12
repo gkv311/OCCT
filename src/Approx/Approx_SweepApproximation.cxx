@@ -247,7 +247,7 @@ Approximation(const Handle(TColStd_HArray1OfReal)& OneDTol,
 	      const Standard_Real First,const Standard_Real Last,
 	      const GeomAbs_Shape Continuity,const Standard_Integer Degmax,
 	      const Standard_Integer Segmax,
-	      const AdvApprox_EvaluatorFunction& TheApproxFunction,
+	      AdvApprox_EvaluatorFunction& TheApproxFunction,
 	      const AdvApprox_Cutting& TheCuttingTool) 
 {
  AdvApprox_ApproxAFunction Approx(Num1DSS, 

@@ -22,6 +22,7 @@
 // Modified     PMN 15/04/1997 : Gestion fine de la continuite aux lieux de decoupes 
 
 #include <AdvApprox_ApproxAFunction.hxx>
+
 #include <AdvApprox_DichoCutting.hxx>
 #include <AdvApprox_EvaluatorFunction.hxx>
 #include <AdvApprox_SimpleApprox.hxx>
@@ -601,68 +602,61 @@ void AdvApprox_ApproxAFunction::Approximation(
 //    {;}  fin de la boucle while   
     } 
   return;
-}	
-//=======================================================================
-//function : AdvApprox_ApproxAFunction
-//purpose  : Constructeur avec Decoupe Dichotomique
-//=======================================================================
-
-AdvApprox_ApproxAFunction::
-AdvApprox_ApproxAFunction(const Standard_Integer Num1DSS,
-			  const Standard_Integer Num2DSS,
-			  const Standard_Integer Num3DSS,
-			  const Handle(TColStd_HArray1OfReal)& OneDTol, 
-			  const Handle(TColStd_HArray1OfReal)& TwoDTol, 
-			  const Handle(TColStd_HArray1OfReal)& ThreeDTol, 
-			  const Standard_Real First, 
-			  const Standard_Real Last,
-			  const GeomAbs_Shape Continuity, 
-			  const Standard_Integer MaxDeg, 
-			  const Standard_Integer MaxSeg, 
-			  const AdvApprox_EvaluatorFunction& Func) :
-			  my1DTolerances(OneDTol),
-			  my2DTolerances(TwoDTol),
-			  my3DTolerances(ThreeDTol),
-			  myFirst(First),
-			  myLast(Last),
-			  myContinuity(Continuity),
-			  myMaxDegree(MaxDeg),
-			  myMaxSegments(MaxSeg),
-			  myDone(Standard_False),
-			  myHasResult(Standard_False),
-			  myEvaluator((Standard_Address)&Func) 
-{
-  AdvApprox_DichoCutting Cut;
-  Perform(Num1DSS, Num2DSS, Num3DSS, Cut);
 }
 
-AdvApprox_ApproxAFunction::
-AdvApprox_ApproxAFunction(const Standard_Integer Num1DSS,
-			  const Standard_Integer Num2DSS,
-			  const Standard_Integer Num3DSS,
-			  const Handle(TColStd_HArray1OfReal)& OneDTol, 
-			  const Handle(TColStd_HArray1OfReal)& TwoDTol, 
-			  const Handle(TColStd_HArray1OfReal)& ThreeDTol, 
-			  const Standard_Real First, 
-			  const Standard_Real Last,
-			  const GeomAbs_Shape Continuity, 
-			  const Standard_Integer MaxDeg, 
-			  const Standard_Integer MaxSeg, 
-			  const AdvApprox_EvaluatorFunction& Func,
-			  const AdvApprox_Cutting& CutTool) :
-			  my1DTolerances(OneDTol),
-			  my2DTolerances(TwoDTol),
-			  my3DTolerances(ThreeDTol),
-			  myFirst(First),
-			  myLast(Last),
-			  myContinuity(Continuity),
-			  myMaxDegree(MaxDeg),
-			  myMaxSegments(MaxSeg),
-			  myDone(Standard_False),
-			  myHasResult(Standard_False),
-			  myEvaluator((Standard_Address)&Func) 
+//=======================================================================
+//function : AdvApprox_ApproxAFunction
+//=======================================================================
+AdvApprox_ApproxAFunction::AdvApprox_ApproxAFunction(const Standard_Integer theNum1DSS,
+                                                     const Standard_Integer theNum2DSS,
+                                                     const Standard_Integer theNum3DSS,
+                                                     const Handle(TColStd_HArray1OfReal)& theOneDTol,
+                                                     const Handle(TColStd_HArray1OfReal)& theTwoDTol,
+                                                     const Handle(TColStd_HArray1OfReal)& theThreeDTol,
+                                                     const Standard_Real theFirst,
+                                                     const Standard_Real theLast,
+                                                     const GeomAbs_Shape theContinuity,
+                                                     const Standard_Integer theMaxDeg,
+                                                     const Standard_Integer theMaxSeg,
+                                                     AdvApprox_EvaluatorFunction& theFunc)
+: AdvApprox_ApproxAFunction(theNum1DSS, theNum2DSS, theNum3DSS,
+                            theOneDTol, theTwoDTol, theThreeDTol,
+                            theFirst, theLast,
+                            theContinuity,
+                            theMaxDeg, theMaxSeg,
+                            theFunc,
+                            AdvApprox_DichoCutting())
 {
-  Perform(Num1DSS, Num2DSS, Num3DSS, CutTool);
+  //
+}
+
+//=======================================================================
+//function : AdvApprox_ApproxAFunction
+//=======================================================================
+AdvApprox_ApproxAFunction::AdvApprox_ApproxAFunction(const Standard_Integer theNum1DSS,
+                                                     const Standard_Integer theNum2DSS,
+                                                     const Standard_Integer theNum3DSS,
+                                                     const Handle(TColStd_HArray1OfReal)& theOneDTol,
+                                                     const Handle(TColStd_HArray1OfReal)& theTwoDTol,
+                                                     const Handle(TColStd_HArray1OfReal)& theThreeDTol,
+                                                     const Standard_Real theFirst,
+                                                     const Standard_Real theLast,
+                                                     const GeomAbs_Shape theContinuity,
+                                                     const Standard_Integer theMaxDeg,
+                                                     const Standard_Integer theMaxSeg,
+                                                     AdvApprox_EvaluatorFunction& theFunc,
+                                                     const AdvApprox_Cutting& theCutTool)
+: my1DTolerances(theOneDTol),
+  my2DTolerances(theTwoDTol),
+  my3DTolerances(theThreeDTol),
+  myFirst(theFirst),
+  myLast(theLast),
+  myContinuity(theContinuity),
+  myMaxDegree(theMaxDeg),
+  myMaxSegments(theMaxSeg),
+  myEvaluator(&theFunc)
+{
+  Perform(theNum1DSS, theNum2DSS, theNum3DSS, theCutTool);
 }
 
 //=======================================================================
@@ -674,284 +668,292 @@ void AdvApprox_ApproxAFunction::Perform(const Standard_Integer Num1DSS,
 					const Standard_Integer Num3DSS, 
 					const AdvApprox_Cutting& CutTool)
 {
-  if (Num1DSS < 0 ||
-      Num2DSS < 0 ||
-      Num3DSS < 0 ||
-      Num1DSS + Num2DSS + Num3DSS <= 0 ||
-      myLast < myFirst ||
-      myMaxDegree < 1  ||
-      myMaxSegments < 0)
+  myDone = myHasResult = false;
+
+  if (Num1DSS < 0 || Num2DSS < 0 || Num3DSS < 0
+   || Num1DSS + Num2DSS + Num3DSS <= 0
+   || myLast < myFirst
+   || myMaxDegree < 1
+   || myMaxSegments < 0)
+  {
     throw Standard_ConstructionError();
-  if (myMaxDegree > 14) { 
-      myMaxDegree = 14 ;
   }
+
+  if (myMaxDegree > 14)
+  {
+    myMaxDegree = 14;
+  }
+
   //
   // Input 
   // 
-  myNumSubSpaces[0] = Num1DSS ;
-  myNumSubSpaces[1] = Num2DSS ;
-  myNumSubSpaces[2] = Num3DSS ;
-  Standard_Integer  TotalNumSS  =
-    Num1DSS + Num2DSS + Num3DSS,
-  ii,
-  jj,
-  kk,
-  index,
-  dim_index,
-  local_index;
-  Standard_Integer  TotalDimension =
-    myNumSubSpaces[0] + 2 * myNumSubSpaces[1] + 3 * myNumSubSpaces[2] ;
-  Standard_Real  error_value ;
+  myNumSubSpaces[0] = Num1DSS;
+  myNumSubSpaces[1] = Num2DSS;
+  myNumSubSpaces[2] = Num3DSS;
 
-  Standard_Integer ContinuityOrder=0 ;
-  switch (myContinuity) {
-  case GeomAbs_C0:
-    ContinuityOrder = 0 ;
-    break ;
-  case GeomAbs_C1: 
-    ContinuityOrder = 1 ;
-    break ;
-  case GeomAbs_C2:
-    ContinuityOrder = 2 ;
-    break ;
-  default:
-    throw Standard_ConstructionError();
+  Standard_Integer ContinuityOrder = 0;
+  switch (myContinuity)
+  {
+    case GeomAbs_C0: ContinuityOrder = 0; break;
+    case GeomAbs_C1: ContinuityOrder = 1; break;
+    case GeomAbs_C2: ContinuityOrder = 2; break;
+    default:
+      throw Standard_ConstructionError();
   }
-  Standard_Real ApproxStartEnd[2] ;
-  Standard_Integer NumMaxCoeffs = Max(myMaxDegree + 1, 2 * ContinuityOrder + 2);
+
+  const Standard_Integer TotalNumSS     = Num1DSS + Num2DSS + Num3DSS;
+  const Standard_Integer TotalDimension = myNumSubSpaces[0] + 2 * myNumSubSpaces[1] + 3 * myNumSubSpaces[2];
+  const Standard_Integer NumMaxCoeffs   = Max(myMaxDegree + 1, 2 * ContinuityOrder + 2);
+
   myMaxDegree = NumMaxCoeffs - 1;
-  Standard_Integer code_precis = 1 ;
+
+  const Standard_Integer code_precis = 1;
   //
   //  WARNING : the polynomial coefficients are the 
   //  taylor expansion of the polynomial at 0.0e0 !
   //
-  ApproxStartEnd[0] =  -1.0e0 ;
-  ApproxStartEnd[1] =  1.0e0 ;
-  
-  TColStd_Array1OfInteger LocalDimension(1,TotalNumSS) ;
+  const Standard_Real ApproxStartEnd[2] = { -1.0e0, 1.0e0 };
 
-  
-  index = 1 ;
-  TColStd_Array1OfReal LocalTolerances(1,TotalNumSS) ;
-  
-  for(jj = 1; jj <= myNumSubSpaces[0] ; jj++) {
-    LocalTolerances.SetValue(index,my1DTolerances->Value(jj)) ;
-    LocalDimension.SetValue(index,1) ;
-    index += 1 ;
+  Standard_Integer index = 1;
+
+  TColStd_Array1OfInteger LocalDimension (1, TotalNumSS);
+  TColStd_Array1OfReal    LocalTolerances(1, TotalNumSS);
+  for (Standard_Integer jj = 1; jj <= myNumSubSpaces[0]; ++jj)
+  {
+    LocalTolerances.SetValue(index, my1DTolerances->Value(jj));
+    LocalDimension.SetValue(index, 1);
+    index += 1;
   }
-  for(jj = 1 ; jj <= myNumSubSpaces[1] ; jj++) {
-    LocalTolerances.SetValue(index,my2DTolerances->Value(jj)) ;
-    LocalDimension.SetValue(index,2) ;
-    index += 1 ;
+  for (Standard_Integer jj = 1; jj <= myNumSubSpaces[1]; ++jj)
+  {
+    LocalTolerances.SetValue(index, my2DTolerances->Value(jj));
+    LocalDimension.SetValue(index, 2);
+    index += 1;
   }
-  for(jj = 1; jj <= myNumSubSpaces[2] ; jj++) {
-    LocalTolerances.SetValue(index,my3DTolerances->Value(jj)) ;
-    LocalDimension.SetValue(index,3) ;
-    index += 1 ;
+  for (Standard_Integer jj = 1; jj <= myNumSubSpaces[2]; ++jj)
+  {
+    LocalTolerances.SetValue(index, my3DTolerances->Value(jj));
+    LocalDimension.SetValue(index, 3);
+    index += 1;
   }
+
   //
   // Output
   //
   
-  Standard_Integer ErrorCode = 0,
-  NumCurves,
-  size = 
-    myMaxSegments * NumMaxCoeffs * TotalDimension ;
-  Handle(TColStd_HArray1OfInteger)  NumCoeffPerCurvePtr =
-    new TColStd_HArray1OfInteger (1,myMaxSegments) ;
+  Standard_Integer ErrorCode = 0;
+  Standard_Integer NumCurves = 0;
 
-  Handle(TColStd_HArray1OfReal)  LocalCoefficientsPtr =
-    new TColStd_HArray1OfReal(1,size) ;
+  const Standard_Integer size = myMaxSegments * NumMaxCoeffs * TotalDimension;
+  Handle(TColStd_HArray1OfInteger) NumCoeffPerCurvePtr = new TColStd_HArray1OfInteger(1, myMaxSegments);
+  Handle(TColStd_HArray1OfReal) LocalCoefficientsPtr = new TColStd_HArray1OfReal(1, size);
+  Handle(TColStd_HArray1OfReal) IntervalsPtr =  new TColStd_HArray1OfReal(1, myMaxSegments + 1);
 
-  Handle(TColStd_HArray1OfReal)  IntervalsPtr = 
-    new TColStd_HArray1OfReal (1,myMaxSegments+1) ;
+  TColStd_Array1OfReal ErrorMax    (1, myMaxSegments * TotalNumSS);
+  TColStd_Array1OfReal AverageError(1, myMaxSegments * TotalNumSS);
 
-  TColStd_Array1OfReal ErrorMax(1,myMaxSegments * TotalNumSS) ;
+  Approximation(TotalDimension, TotalNumSS, LocalDimension,
+                myFirst, myLast,
+                *myEvaluator,
+                CutTool, ContinuityOrder, NumMaxCoeffs,
+                myMaxSegments, LocalTolerances, code_precis,
+                NumCurves,                            // Nombre de courbe en sortie
+                NumCoeffPerCurvePtr->ChangeArray1(),  // Nbre de coeff par courbe
+                LocalCoefficientsPtr->ChangeArray1(), // Les Coeffs solutions
+                IntervalsPtr->ChangeArray1(),         // La Table des decoupes
+                ErrorMax,                             // Majoration de l'erreur
+                AverageError,                         // Erreur moyenne constatee
+                ErrorCode);
+  if (ErrorCode == 0)
+  {
+    myDone = myHasResult = true;
+  }
+  else if (ErrorCode == -1)
+  {
+    myDone = false;
+    myHasResult = true;
+  }
+  else
+  {
+    return;
+  }
 
-  TColStd_Array1OfReal AverageError(1,myMaxSegments * TotalNumSS) ;
-  
-  Approximation ( TotalDimension,
-                  TotalNumSS,   LocalDimension,
-                  myFirst,      myLast,
-                  *(AdvApprox_EvaluatorFunction*)myEvaluator, 
-                  CutTool, ContinuityOrder, NumMaxCoeffs,
-                  myMaxSegments, LocalTolerances, code_precis,
-                  NumCurves,                            // Nombre de courbe en sortie
-                  NumCoeffPerCurvePtr->ChangeArray1(),  // Nbre de coeff par courbe
-                  LocalCoefficientsPtr->ChangeArray1(), // Les Coeffs solutions
-                  IntervalsPtr->ChangeArray1(),         // La Table des decoupes
-                  ErrorMax,                             // Majoration de l'erreur
-                  AverageError,                         // Erreur moyenne constatee
-                  ErrorCode) ;
-  
-  if (ErrorCode == 0 || ErrorCode == -1)    {
-    //
-    // si tout est OK ou bien on a un resultat dont l une des erreurs max est
-    // plus grande que la tolerance demandee
+  //
+  // si tout est OK ou bien on a un resultat dont l une des erreurs max est
+  // plus grande que la tolerance demandee
 
-    TColStd_Array1OfInteger TabContinuity(1, NumCurves); 
-    TColStd_Array2OfReal PolynomialIntervalsPtr (1,NumCurves,1,2);
-    for (ii = PolynomialIntervalsPtr.LowerRow() ;
-	 ii <= PolynomialIntervalsPtr.UpperRow() ;
-	 ii++) {
-      // On force un degre 1 minimum (PRO5474)
-      NumCoeffPerCurvePtr->ChangeValue(ii) = 
-	   Max(2, NumCoeffPerCurvePtr->Value(ii));
-      PolynomialIntervalsPtr.SetValue(ii,1,ApproxStartEnd[0]) ;
-      PolynomialIntervalsPtr.SetValue(ii,2,ApproxStartEnd[1]) ;
+  TColStd_Array1OfInteger TabContinuity(1, NumCurves);
+  TColStd_Array2OfReal PolynomialIntervalsPtr (1,NumCurves,1,2);
+  for (Standard_Integer ii = PolynomialIntervalsPtr.LowerRow(); ii <= PolynomialIntervalsPtr.UpperRow(); ++ii)
+  {
+    // On force un degre 1 minimum (PRO5474)
+    NumCoeffPerCurvePtr->ChangeValue(ii) = Max(2, NumCoeffPerCurvePtr->Value(ii));
+    PolynomialIntervalsPtr.SetValue(ii, 1, ApproxStartEnd[0]);
+    PolynomialIntervalsPtr.SetValue(ii, 2, ApproxStartEnd[1]);
+  }
+
+  PrepareConvert(NumCurves, myMaxDegree, ContinuityOrder,
+                 Num1DSS, Num2DSS, Num3DSS,
+                 NumCoeffPerCurvePtr->Array1(),
+                 LocalCoefficientsPtr->ChangeArray1(),
+                 PolynomialIntervalsPtr, IntervalsPtr->Array1(),
+                 LocalTolerances, ErrorMax,
+                 TabContinuity);
+
+  Convert_CompPolynomialToPoles AConverter(NumCurves,
+                                           TotalDimension,
+                                           myMaxDegree,
+                                           TabContinuity,
+                                           NumCoeffPerCurvePtr->Array1(),
+                                           LocalCoefficientsPtr->Array1(),
+                                           PolynomialIntervalsPtr,
+                                           IntervalsPtr->Array1());
+  if (!AConverter.IsDone())
+  {
+    myDone = myHasResult = false;
+    return;
+  }
+
+  Handle(TColStd_HArray2OfReal) PolesPtr;
+  AConverter.Poles(PolesPtr);
+  AConverter.Knots(myKnots);
+  AConverter.Multiplicities(myMults);
+  myDegree = AConverter.Degree();
+  index = 0;
+  if (myNumSubSpaces[0] > 0)
+  {
+    my1DPoles = new TColStd_HArray2OfReal(1, PolesPtr->ColLength(),
+                                          1, myNumSubSpaces[0]);
+    my1DMaxError     = new TColStd_HArray1OfReal(1, myNumSubSpaces[0]);
+    my1DAverageError = new TColStd_HArray1OfReal(1, myNumSubSpaces[0]);
+    for (Standard_Integer ii = 1; ii <= PolesPtr->ColLength(); ++ii)
+    {
+      for (Standard_Integer jj = 1; jj <= myNumSubSpaces[0]; ++jj)
+      {
+        my1DPoles->SetValue(ii, jj, PolesPtr->Value(ii, jj));
+      }
     }
 
-    PrepareConvert(NumCurves, myMaxDegree, ContinuityOrder,  
-		   Num1DSS, Num2DSS, Num3DSS,
-		   NumCoeffPerCurvePtr->Array1(), 
-		   LocalCoefficientsPtr->ChangeArray1(),
-		   PolynomialIntervalsPtr, IntervalsPtr->Array1(),
-                   LocalTolerances, ErrorMax,
-		   TabContinuity);
-           
-    Convert_CompPolynomialToPoles
-      AConverter(NumCurves,
-		 TotalDimension,
-		 myMaxDegree,
-		 TabContinuity, 
-		 NumCoeffPerCurvePtr->Array1(),
-		 LocalCoefficientsPtr->Array1(),
-		 PolynomialIntervalsPtr,
-		 IntervalsPtr->Array1());
-
-    if (AConverter.IsDone()) {
-      Handle(TColStd_HArray2OfReal) PolesPtr ;
-      AConverter.Poles(PolesPtr) ;
-      AConverter.Knots(myKnots) ;
-      AConverter.Multiplicities(myMults) ;
-      myDegree = AConverter.Degree() ;
-      index = 0 ;
-      if (myNumSubSpaces[0] > 0) {
-	my1DPoles = new TColStd_HArray2OfReal(1,PolesPtr->ColLength(),
-					      1,myNumSubSpaces[0]) ;
-	my1DMaxError = new TColStd_HArray1OfReal(1,myNumSubSpaces[0]) ;
-	my1DAverageError = new TColStd_HArray1OfReal(1,myNumSubSpaces[0]) ;
-	for (ii = 1 ; ii <= PolesPtr->ColLength() ; ii++) {
-	  for (jj = 1 ; jj <= myNumSubSpaces[0] ; jj++) {
-	    my1DPoles->SetValue(ii,jj, PolesPtr->Value(ii,jj)) ;
-	  }
-	}
-	
-	for (jj = 1 ; jj <= myNumSubSpaces[0] ; jj++) {
-	  error_value = 0.0e0 ;
-	  for (ii = 1 ; ii <= NumCurves ; ii++) {      
-	    local_index = (ii - 1) * TotalNumSS ;
-	    error_value = Max(ErrorMax(local_index + jj),error_value)  ;
-	    
-	  }
-	  my1DMaxError->SetValue(jj, error_value) ;
-	}
-	for (jj = 1 ; jj <= myNumSubSpaces[0] ; jj++) {
-	  error_value = 0.0e0 ;
-	  for (ii = 1 ; ii <= NumCurves ; ii++) {      
-	    local_index = (ii - 1) * TotalNumSS ;
-	    error_value += AverageError(local_index + jj)  ;
-	    
-	  }
-	  error_value /= (Standard_Real) NumCurves ;
-	  my1DAverageError->SetValue(jj, error_value) ;
-	}
-	index += myNumSubSpaces[0] ;
+    for (Standard_Integer jj = 1; jj <= myNumSubSpaces[0]; ++jj)
+    {
+      Standard_Real error_value = 0.0;
+      for (Standard_Integer ii = 1; ii <= NumCurves; ++ii)
+      {
+        const Standard_Integer local_index = (ii - 1) * TotalNumSS;
+        error_value = Max(ErrorMax(local_index + jj), error_value);
       }
-
-      dim_index = index; //Pour le cas ou il n'y a pas de 2D
-
-      if (myNumSubSpaces[1] > 0) {
-	gp_Pnt2d Point2d ;
-	my2DPoles = new TColgp_HArray2OfPnt2d(1,PolesPtr->ColLength(),
-					      1,myNumSubSpaces[1]) ;
-	my2DMaxError = new TColStd_HArray1OfReal(1,myNumSubSpaces[1]) ;
-	my2DAverageError = new TColStd_HArray1OfReal(1,myNumSubSpaces[1]) ;
-	for (ii = 1 ; ii <= PolesPtr->ColLength() ; ii++) {
-	  for (jj = 1 ; jj <= myNumSubSpaces[1] ; jj++) {
-	    local_index = index + (jj-1) * 2 ;
-	    for (kk = 1; kk <= 2 ; kk++) {
-	      Point2d.SetCoord(kk, 
-			       PolesPtr->Value(ii,local_index + kk)) ;
-	    }
-	    my2DPoles->SetValue(ii,jj, Point2d) ;
-	  }
-	}
-	
-	for (jj = 1 ; jj <= myNumSubSpaces[1] ; jj++) {
-	  error_value = 0.0e0 ;
-	  for (ii = 1 ; ii <= NumCurves ; ii++) {      
-	    local_index = (ii - 1) * TotalNumSS + index ;
-	    error_value = Max(ErrorMax(local_index + jj),error_value)  ;
-	    
-	  }
-	  my2DMaxError->SetValue(jj, error_value) ;
-	}
-	for (jj = 1 ; jj <= myNumSubSpaces[1] ; jj++) {
-	  error_value = 0.0e0 ;
-	  for (ii = 1 ; ii <= NumCurves ; ii++) {      
-	    local_index = (ii - 1) * TotalNumSS + index ;
-	    error_value += AverageError(local_index + jj)  ;
-	    
-	  }
-	  error_value /= (Standard_Real) NumCurves ;
-	  my2DAverageError->SetValue(jj, error_value) ;
-	}
-	index += myNumSubSpaces[1] ;
-	// Pour les poles il faut doubler le decalage :
-	dim_index = index + myNumSubSpaces[1];
+      my1DMaxError->SetValue(jj, error_value);
+      if (error_value > my1DTolerances->Value(jj))
+        myDone = false; // insufficient precision
+    }
+    for (Standard_Integer jj = 1; jj <= myNumSubSpaces[0]; ++jj)
+    {
+      Standard_Real error_value = 0.0;
+      for (Standard_Integer ii = 1; ii <= NumCurves; ++ii)
+      {
+        const Standard_Integer local_index = (ii - 1) * TotalNumSS;
+        error_value += AverageError(local_index + jj);
       }
+      error_value /= (Standard_Real) NumCurves;
+      my1DAverageError->SetValue(jj, error_value);
+    }
+    index += myNumSubSpaces[0];
+  }
 
-      if (myNumSubSpaces[2] > 0) {
-	gp_Pnt Point ;
-	my3DPoles = new TColgp_HArray2OfPnt(1,PolesPtr->ColLength(),
-					    1,myNumSubSpaces[2]) ;
-	my3DMaxError = new TColStd_HArray1OfReal(1,myNumSubSpaces[2]) ;
-	my3DAverageError = new TColStd_HArray1OfReal(1,myNumSubSpaces[2]) ;
-	for (ii = 1 ; ii <= PolesPtr->ColLength() ; ii++) {
-	  for (jj = 1 ; jj <= myNumSubSpaces[2] ; jj++) {
-	    local_index = dim_index + (jj-1) * 3 ;
-	    for (kk = 1; kk <= 3 ; kk++) {
-	      Point.SetCoord(kk, 
-			     PolesPtr->Value(ii,local_index + kk)) ;
-	    }
-	    my3DPoles->SetValue(ii,jj,Point) ;
-	    
-	  }
-	}
-	
-	for (jj = 1 ; jj <= myNumSubSpaces[2] ; jj++) {
-	  error_value = 0.0e0 ;
-	  for (ii = 1 ; ii <= NumCurves ; ii++) {      
-	    local_index = (ii - 1) * TotalNumSS + index ;
-	    error_value = Max(ErrorMax(local_index + jj),error_value)  ;
-	    
-	  }
-	  my3DMaxError->SetValue(jj, error_value) ;
-	}
-	for (jj = 1 ; jj <= myNumSubSpaces[2] ; jj++) {
-	  error_value = 0.0e0 ;
-	  for (ii = 1 ; ii <= NumCurves ; ii++) {      
-	    local_index = (ii - 1) * TotalNumSS + index ;
-	    error_value += AverageError(local_index + jj)  ;
-	    
-	  }
-	  error_value /= (Standard_Real) NumCurves ;
-	  my3DAverageError->SetValue(jj, error_value) ;
-	}
+  Standard_Integer dim_index = index; // Pour le cas ou il n'y a pas de 2D
+  if (myNumSubSpaces[1] > 0)
+  {
+    gp_Pnt2d Point2d;
+    my2DPoles = new TColgp_HArray2OfPnt2d(1, PolesPtr->ColLength(),
+                                          1, myNumSubSpaces[1]);
+    my2DMaxError     = new TColStd_HArray1OfReal(1, myNumSubSpaces[1]);
+    my2DAverageError = new TColStd_HArray1OfReal(1, myNumSubSpaces[1]);
+    for (Standard_Integer ii = 1; ii <= PolesPtr->ColLength(); ++ii)
+    {
+      for (Standard_Integer jj = 1; jj <= myNumSubSpaces[1]; ++jj)
+      {
+        const Standard_Integer local_index = index + (jj-1) * 2;
+        for (Standard_Integer kk = 1; kk <= 2 ; kk++)
+        {
+          Point2d.SetCoord(kk, PolesPtr->Value(ii, local_index + kk));
+        }
+        my2DPoles->SetValue(ii, jj, Point2d);
       }
-      if (ErrorCode == 0) {
-	myDone = Standard_True ;
-	myHasResult = Standard_True ;
-      } 
-      else if (ErrorCode == -1) {
-	myHasResult = Standard_True ;
+    }
+
+    for (Standard_Integer jj = 1; jj <= myNumSubSpaces[1]; ++jj)
+    {
+      Standard_Real error_value = 0.0;
+      for (Standard_Integer ii = 1 ; ii <= NumCurves; ++ii)
+      {
+        const Standard_Integer local_index = (ii - 1) * TotalNumSS + index;
+        error_value = Max(ErrorMax(local_index + jj), error_value);
       }
-      
+      my2DMaxError->SetValue(jj, error_value);
+      if (error_value > my2DTolerances->Value(jj))
+        myDone = false; // insufficient precision
+    }
+    for (Standard_Integer jj = 1; jj <= myNumSubSpaces[1]; ++jj)
+    {
+      Standard_Real error_value = 0.0;
+      for (Standard_Integer ii = 1; ii <= NumCurves; ++ii)
+      {
+        const Standard_Integer local_index = (ii - 1) * TotalNumSS + index;
+        error_value += AverageError(local_index + jj);
+      }
+      error_value /= (Standard_Real) NumCurves;
+      my2DAverageError->SetValue(jj, error_value);
+    }
+    index += myNumSubSpaces[1];
+    // Pour les poles il faut doubler le decalage :
+    dim_index = index + myNumSubSpaces[1];
+  }
+
+  if (myNumSubSpaces[2] > 0)
+  {
+    gp_Pnt Point;
+    my3DPoles = new TColgp_HArray2OfPnt(1, PolesPtr->ColLength(),
+                                        1, myNumSubSpaces[2]);
+    my3DMaxError     = new TColStd_HArray1OfReal(1, myNumSubSpaces[2]);
+    my3DAverageError = new TColStd_HArray1OfReal(1, myNumSubSpaces[2]);
+    for (Standard_Integer ii = 1; ii <= PolesPtr->ColLength(); ++ii)
+    {
+      for (Standard_Integer jj = 1; jj <= myNumSubSpaces[2]; ++jj)
+      {
+        const Standard_Integer local_index = dim_index + (jj-1) * 3;
+        for (Standard_Integer kk = 1; kk <= 3; ++kk)
+        {
+          Point.SetCoord(kk, PolesPtr->Value(ii, local_index + kk));
+        }
+        my3DPoles->SetValue(ii, jj, Point);
+      }
+    }
+
+    for (Standard_Integer jj = 1; jj <= myNumSubSpaces[2]; ++jj)
+    {
+      Standard_Real error_value = 0.0;
+      for (Standard_Integer ii = 1; ii <= NumCurves; ++ii)
+      {
+        const Standard_Integer local_index = (ii - 1) * TotalNumSS + index;
+        error_value = Max(ErrorMax(local_index + jj),error_value);
+      }
+      my3DMaxError->SetValue(jj, error_value);
+      if (error_value > my3DTolerances->Value(jj))
+        myDone = false; // insufficient precision
+    }
+    for (Standard_Integer jj = 1; jj <= myNumSubSpaces[2]; ++jj)
+    {
+      Standard_Real error_value = 0.0;
+      for (Standard_Integer ii = 1; ii <= NumCurves; ++ii)
+      {
+        const Standard_Integer local_index = (ii - 1) * TotalNumSS + index;
+        error_value += AverageError(local_index + jj);
+      }
+      error_value /= (Standard_Real )NumCurves;
+      my3DAverageError->SetValue(jj, error_value);
     }
   }
 }
-
 
 //=======================================================================
 //function : Poles

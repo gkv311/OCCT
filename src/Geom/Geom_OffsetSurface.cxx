@@ -552,7 +552,8 @@ Handle(Geom_Curve) Geom_OffsetSurface::UIso (const Standard_Real UU) const
     AdvApprox_ApproxAFunction Approx(Num1, Num2, Num3, T1, T2, T3,
       V1, V2, Cont, MaxDeg, MaxSeg, ev);
 
-    Standard_ConstructionError_Raise_if (!Approx.IsDone(), " Geom_OffsetSurface : UIso");
+    // IsDone()=false if Precision::Approximation() tolerance is not reached
+    Standard_ConstructionError_Raise_if (!Approx.HasResult(), " Geom_OffsetSurface : UIso");
 
     const Standard_Integer NbPoles = Approx.NbPoles();
 
@@ -593,7 +594,8 @@ Handle(Geom_Curve) Geom_OffsetSurface::VIso (const Standard_Real VV) const
     AdvApprox_ApproxAFunction Approx (Num1, Num2, Num3, T1, T2, T3,
       U1, U2, Cont, MaxDeg, MaxSeg, ev);
 
-    Standard_ConstructionError_Raise_if (!Approx.IsDone(), " Geom_OffsetSurface : VIso");
+    // IsDone()=false if Precision::Approximation() tolerance is not reached
+    Standard_ConstructionError_Raise_if (!Approx.HasResult(), " Geom_OffsetSurface : VIso");
 
     TColgp_Array1OfPnt      Poles( 1, Approx.NbPoles());
     TColStd_Array1OfReal    Knots( 1, Approx.NbKnots());
