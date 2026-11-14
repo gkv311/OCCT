@@ -1,0 +1,60 @@
+puts {
+===============================================================================
+Visualization - solid of a cylindrical face and two planar caps
+cannot be picked when the cylinder surface origin is not on a cap
+===============================================================================
+}
+
+pload MODELING VISUALIZATION
+# solid Z = [10, 20]; its cylindrical surface has origin at Z = 0 (not on a cap)
+cylinder cs 0 0 0  0 0 1  1
+mkface fl cs 0 2*pi 10 20
+circle c1 0 0 10  0 0 1  1
+circle c2 0 0 20  0 0 1  1
+mkedge e1 c1
+mkedge e2 c2
+wire w1 e1
+wire w2 e2
+mkplane f1 w1
+mkplane f2 w2
+sewing sh fl f1 f2
+mkvolume sol sh
+
+# reference: the same solid made by BRepPrimAPI (surface origin on the bottom cap)
+pcylinder  ref 1 10
+ttranslate ref 3 0 10
+
+vinit View1 w=600 h=600
+vdisplay sol ref -dispMode 1
+vviewparams -eye 0 -60 15 -at 1.5 0 15 -up 0 0 1
+vfit
+
+proc test_probe {theName theX theMode} {
+  puts "=== START PROBING $theName $theMode ==="
+  vselmode $theName -set $theMode 1
+  set hits {}
+  for {set z -2} {$z <= 22} {incr z 2} {
+    set p [vconvert $theX -1 $z window]
+    vmoveto [expr int([lindex $p 2])] [expr int([lindex $p 3])]
+    set sensEnts [vstate -entities]
+    set l [string trim [lindex [split $sensEnts \n] 1]]
+    if {$l == ""} { continue }
+
+    set sensName ":SENS_UNKNOWN"
+    if { [string match "*Select3D_SensitiveCylinder*" $sensEnts] } { set sensName ":SENS_CYLINDER" }
+
+    lappend hits "z=$z:[lindex $l 0]$sensName"
+  }
+
+  set refHits [string map "NAME $theName" "z=10:NAME:SENS_CYLINDER z=12:NAME:SENS_CYLINDER z=14:NAME:SENS_CYLINDER z=16:NAME:SENS_CYLINDER z=18:NAME:SENS_CYLINDER"]
+
+  puts "======================================="
+  puts "$theName $theMode: $hits"
+  if { "$hits" != "$refHits" } { puts "Error: wrong picking result for $theName $theMode" }
+}
+
+test_probe sol 0 FACE
+test_probe ref 3 FACE
+
+test_probe sol 0 SOLID
+test_probe ref 3 SOLID
