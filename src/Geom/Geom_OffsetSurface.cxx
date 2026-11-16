@@ -455,22 +455,36 @@ void Geom_OffsetSurface_UIsoEvaluator::Evaluate(Standard_Integer *,/*Dimension*/
   Standard_Integer *DerivativeRequest,
   Standard_Real    *Result,
   Standard_Integer *ReturnCode) 
-{ 
+{
   gp_Pnt P;
-  if (*DerivativeRequest == 0) {
-    P = CurrentSurface.Value(IsoPar,*Parameter);
-    Result[0] = P.X();
-    Result[1] = P.Y();
-    Result[2] = P.Z();
+  gp_Vec DU, DV;
+  try
+  {
+    if (*DerivativeRequest == 0)
+    {
+      P = CurrentSurface.Value(IsoPar, *Parameter);
+      Result[0] = P.X();
+      Result[1] = P.Y();
+      Result[2] = P.Z();
+      *ReturnCode = 0;
+      return;
+    }
+    else if (*DerivativeRequest == 1)
+    {
+      CurrentSurface.D1(IsoPar, *Parameter, P, DU, DV);
+      Result[0] = DV.X();
+      Result[1] = DV.Y();
+      Result[2] = DV.Z();
+      *ReturnCode = 0;
+      return;
+    }
   }
-  else {
-    gp_Vec DU,DV;
-    CurrentSurface.D1(IsoPar,*Parameter,P,DU,DV);
-    Result[0] = DV.X();
-    Result[1] = DV.Y();
-    Result[2] = DV.Z();
+  catch (const Standard_Failure&)
+  {
   }
-  *ReturnCode = 0;
+
+  Result[0] = Result[1] = Result[2] = 0;
+  *ReturnCode = 3; // evaluation failed
 }
 
 class Geom_OffsetSurface_VIsoEvaluator : public AdvApprox_EvaluatorFunction
@@ -497,22 +511,36 @@ void Geom_OffsetSurface_VIsoEvaluator::Evaluate(Standard_Integer *,/*Dimension*/
   Standard_Integer *DerivativeRequest,
   Standard_Real    *Result,
   Standard_Integer *ReturnCode) 
-{ 
+{
   gp_Pnt P;
-  if (*DerivativeRequest == 0) {
-    P = CurrentSurface->Value(*Parameter,IsoPar);
-    Result[0] = P.X();
-    Result[1] = P.Y();
-    Result[2] = P.Z();
+  gp_Vec DU, DV;
+  try
+  {
+    if (*DerivativeRequest == 0)
+    {
+      P = CurrentSurface->Value(*Parameter, IsoPar);
+      Result[0] = P.X();
+      Result[1] = P.Y();
+      Result[2] = P.Z();
+      *ReturnCode = 0;
+      return;
+    }
+    else if (*DerivativeRequest == 1)
+    {
+      CurrentSurface->D1(*Parameter, IsoPar, P, DU, DV);
+      Result[0] = DU.X();
+      Result[1] = DU.Y();
+      Result[2] = DU.Z();
+      *ReturnCode = 0;
+      return;
+    }
   }
-  else {
-    gp_Vec DU,DV;
-    CurrentSurface->D1(*Parameter,IsoPar,P,DU,DV);
-    Result[0] = DU.X();
-    Result[1] = DU.Y();
-    Result[2] = DU.Z();
+  catch (const Standard_Failure&)
+  {
   }
-  *ReturnCode = 0;
+
+  Result[0] = Result[1] = Result[2] = 0;
+  *ReturnCode = 3; // evaluation failed
 }
 
 //=======================================================================

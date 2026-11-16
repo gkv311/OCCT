@@ -1039,39 +1039,53 @@ void GeomLib_CurveOnSurfaceEvaluator::Evaluate (Standard_Integer *,/*Dimension*/
                                                 Standard_Real    *Result,// [Dimension]
                                                 Standard_Integer *ReturnCode)
 {
-  gp_Pnt Point;
-
-  //Gestion des positionnements gauche / droite
-  if ((DebutFin[0] != FirstParam) || (DebutFin[1] != LastParam)) 
-    { 
+  try
+  {
+    if ((DebutFin[0] != FirstParam) || (DebutFin[1] != LastParam))
+    {
+      // trim range
       TrimCurve = CurveOnSurface.Trim(DebutFin[0], DebutFin[1], Precision::PConfusion());
       FirstParam = DebutFin[0];
-      LastParam  = DebutFin[1];
+      LastParam = DebutFin[1];
     }
 
-  //Positionemment
-  if (*DerivativeRequest == 0)
+    gp_Pnt Point;
+    gp_Vec Vector, VecBis;
+    switch (*DerivativeRequest)
     {
-     TrimCurve->D0((*Parameter), Point) ;
-   
-     for (Standard_Integer ii = 0 ; ii < 3 ; ii++)
-       Result[ii] = Point.Coord(ii + 1);
-   }
-  if (*DerivativeRequest == 1) 
-    {
-      gp_Vec Vector;
-      TrimCurve->D1((*Parameter), Point, Vector);
-      for (Standard_Integer ii = 0 ; ii < 3 ; ii++)
-        Result[ii] = Vector.Coord(ii + 1) ;
+      case 0:
+        TrimCurve->D0((*Parameter), Point);
+        for (int ii = 0; ii < 3; ++ii)
+          Result[ii] = Point.Coord(ii + 1);
+
+        *ReturnCode = 0;
+        return;
+      case 1:
+        TrimCurve->D1((*Parameter), Point, Vector);
+        for (int ii = 0; ii < 3; ++ii)
+          Result[ii] = Vector.Coord(ii + 1);
+
+        *ReturnCode = 0;
+        return;
+      case 2:
+        TrimCurve->D2((*Parameter), Point, VecBis, Vector);
+        for (int ii = 0; ii < 3; ++ii)
+          Result[ii] = Vector.Coord(ii + 1);
+
+        *ReturnCode = 0;
+        return;
+      default:
+        break;
     }
-  if (*DerivativeRequest == 2) 
-    {
-      gp_Vec Vector, VecBis;
-      TrimCurve->D2((*Parameter), Point, VecBis, Vector);
-      for (Standard_Integer ii = 0 ; ii < 3 ; ii++)
-        Result[ii] = Vector.Coord(ii + 1) ;
-    }
-  ReturnCode[0] = 0;
+  }
+  catch (const Standard_Failure&)
+  {
+  }
+
+  for (int ii = 0; ii < 3; ++ii)
+    Result[ii] = 0.0;
+
+  *ReturnCode = 3; // evaluation failed
 }
 
 //=======================================================================

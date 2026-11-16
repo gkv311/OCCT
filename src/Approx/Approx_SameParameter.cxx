@@ -72,35 +72,44 @@ void Approx_SameParameter_Evaluator::Evaluate (Standard_Integer *,/*Dimension*/
 {
   const Standard_Integer aDegree = 3;
   Standard_Integer extrap_mode[2] = {aDegree, aDegree};
-  Standard_Real eval_result[2];
-  Standard_Real *PolesArray = (Standard_Real *) &Poles(Poles.Lower()) ;
-
-  // Evaluate the 1D B-Spline that represents the change in parameterization.
-  BSplCLib::Eval(*Parameter,
-                 Standard_False,
-                 *DerivativeRequest,
-                 extrap_mode[0],
-                 aDegree,
-                 FlatKnots,
-                 1,
-                 PolesArray[0],
-                 eval_result[0]);
-
-  gp_Pnt2d aPoint;
-  gp_Vec2d aVector;
-  if (*DerivativeRequest == 0)
+  Standard_Real    eval_result[2];
+  Standard_Real*   PolesArray = const_cast<double*>(&Poles.First());
+  try
   {
-    HCurve2d->D0(eval_result[0], aPoint);
-    aPoint.Coord(Result[0],Result[1]);
+    // Evaluate the 1D B-Spline that represents the change in parameterization.
+    BSplCLib::Eval(*Parameter,
+                   Standard_False,
+                   *DerivativeRequest,
+                   extrap_mode[0],
+                   aDegree,
+                   FlatKnots,
+                   1,
+                   PolesArray[0],
+                   eval_result[0]);
+
+    gp_Pnt2d aPoint;
+    gp_Vec2d aVector;
+    if (*DerivativeRequest == 0)
+    {
+      HCurve2d->D0(eval_result[0], aPoint);
+      aPoint.Coord(Result[0], Result[1]);
+      *ReturnCode = 0;
+      return;
+    }
+    else if (*DerivativeRequest == 1)
+    {
+      HCurve2d->D1(eval_result[0], aPoint, aVector);
+      aVector.Multiply(eval_result[1]);
+      aVector.Coord(Result[0], Result[1]);
+      *ReturnCode = 0;
+      return;
+    }
   }
-  else if (*DerivativeRequest == 1)
+  catch (const Standard_Failure&)
   {
-    HCurve2d->D1(eval_result[0], aPoint, aVector);
-    aVector.Multiply(eval_result[1]);
-    aVector.Coord(Result[0],Result[1]);
   }
 
-  ReturnCode[0] = 0;
+  *ReturnCode = 3; // evaluation failed
 }
 
 //=======================================================================

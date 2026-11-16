@@ -524,51 +524,54 @@ Standard_Real Approx_CurvlinFunc::GetSParameter(Adaptor3d_Curve& C, const Standa
 
 Standard_Boolean Approx_CurvlinFunc::EvalCase1(const Standard_Real S, const Standard_Integer Order, TColStd_Array1OfReal& Result) const
 {
-  if(myCase != 1) throw Standard_ConstructionError("Approx_CurvlinFunc::EvalCase1");
+  if (myCase != 1)
+    throw Standard_ConstructionError("Approx_CurvlinFunc::EvalCase1");
 
   gp_Pnt C;
   gp_Vec dC_dU, dC_dS, d2C_dU2, d2C_dS2;
-  Standard_Real U, Mag, dU_dS, d2U_dS2;
-  
-  U = GetUParameter (*myC3D, S, 1);
+  Standard_Real Mag, dU_dS, d2U_dS2;
+  try
+  {
+    const Standard_Real U = GetUParameter(*myC3D, S, 1);
+    switch (Order)
+    {
+      case 0:
+        myC3D->D0(U, C);
 
-  switch(Order) {
+        Result(0) = C.X();
+        Result(1) = C.Y();
+        Result(2) = C.Z();
+        return Standard_True;
+      case 1:
+        myC3D->D1(U, C, dC_dU);
+        Mag = dC_dU.Magnitude();
+        dU_dS = myLength / Mag;
+        dC_dS = dC_dU * dU_dS;
 
-  case 0: 
-    myC3D->D0(U, C);
+        Result(0) = dC_dS.X();
+        Result(1) = dC_dS.Y();
+        Result(2) = dC_dS.Z();
+        return Standard_True;
+      case 2:
+        myC3D->D2(U, C, dC_dU, d2C_dU2);
+        Mag = dC_dU.Magnitude();
+        dU_dS = myLength / Mag;
+        d2U_dS2 = -myLength * dC_dU.Dot(d2C_dU2) * dU_dS / (Mag * Mag * Mag);
+        d2C_dS2 = d2C_dU2 * dU_dS * dU_dS + dC_dU * d2U_dS2;
 
-    Result(0) = C.X();
-    Result(1) = C.Y();
-    Result(2) = C.Z();
-    break;
-    
-  case 1:
-    myC3D->D1(U, C, dC_dU);
-    Mag = dC_dU.Magnitude();
-    dU_dS = myLength/Mag;
-    dC_dS = dC_dU*dU_dS;
-
-    Result(0) = dC_dS.X();
-    Result(1) = dC_dS.Y();
-    Result(2) = dC_dS.Z();
-    break;
-
-  case 2:
-    myC3D->D2(U, C, dC_dU, d2C_dU2);
-    Mag = dC_dU.Magnitude();
-    dU_dS = myLength/Mag;
-    d2U_dS2 = -myLength*dC_dU.Dot(d2C_dU2)*dU_dS/(Mag*Mag*Mag);
-    d2C_dS2 = d2C_dU2*dU_dS*dU_dS + dC_dU*d2U_dS2;
-
-    Result(0) = d2C_dS2.X();
-    Result(1) = d2C_dS2.Y();
-    Result(2) = d2C_dS2.Z();
-    break;
-
-  default: Result(0) = Result(1) = Result(2) = 0;
-    return Standard_False;
+        Result(0) = d2C_dS2.X();
+        Result(1) = d2C_dS2.Y();
+        Result(2) = d2C_dS2.Z();
+        return Standard_True;
+      default:
+        break;
+    }
   }
-  return Standard_True;
+  catch (const Standard_Failure&)
+  {
+  }
+  Result(0) = Result(1) = Result(2) = 0;
+  return Standard_False;
 }
 
 Standard_Boolean Approx_CurvlinFunc::EvalCase2(const Standard_Real S, const Standard_Integer Order, TColStd_Array1OfReal& Result) const
@@ -608,96 +611,108 @@ Standard_Boolean Approx_CurvlinFunc::EvalCurOnSur(const Standard_Real S, const S
 {
   Handle(Adaptor2d_Curve2d) Cur2D;
   Handle(Adaptor3d_Surface) Surf;
-  Standard_Real U=0, Length=0;
 
-  if (NumberOfCurve == 1) {
+  Standard_Real U = 0, Length = 0;
+  if (NumberOfCurve == 1)
+  {
     Cur2D = myC2D1;
-    Surf = mySurf1;    
+    Surf = mySurf1;
     Adaptor3d_CurveOnSurface CurOnSur(myC2D1, mySurf1);
     U = GetUParameter(CurOnSur, S, 1);
-    if(myCase == 3) Length = myLength1;
-    else Length = myLength;
+    if (myCase == 3)
+      Length = myLength1;
+    else
+      Length = myLength;
   }
-  else if (NumberOfCurve == 2) {
+  else if (NumberOfCurve == 2)
+  {
     Cur2D = myC2D2;
-    Surf = mySurf2;    
+    Surf = mySurf2;
     Adaptor3d_CurveOnSurface CurOnSur(myC2D2, mySurf2);
     U = GetUParameter(CurOnSur, S, 2);
     Length = myLength2;
   }
-  else 
+  else
+  {
     throw Standard_ConstructionError("Approx_CurvlinFunc::EvalCurOnSur");
+  }
 
   Standard_Real Mag, dU_dS, d2U_dS2, dV_dU, dW_dU, dV_dS, dW_dS, d2V_dS2, d2W_dS2, d2V_dU2, d2W_dU2;
+
   gp_Pnt2d C2D;
-  gp_Pnt C;
+  gp_Pnt   C;
   gp_Vec2d dC2D_dU, d2C2D_dU2;
-  gp_Vec dC_dU, d2C_dU2, dC_dS, d2C_dS2, dS_dV, dS_dW, d2S_dV2, d2S_dW2, d2S_dVdW;
+  gp_Vec   dC_dU, d2C_dU2, dC_dS, d2C_dS2, dS_dV, dS_dW, d2S_dV2, d2S_dW2, d2S_dVdW;
+  try
+  {
+    switch (Order)
+    {
+      case 0:
+        Cur2D->D0(U, C2D);
+        Surf->D0(C2D.X(), C2D.Y(), C);
 
-  switch(Order) {
-  case 0:
-    Cur2D->D0(U, C2D);
-    Surf->D0(C2D.X(), C2D.Y(), C);
-    
-    Result(0) = C2D.X();
-    Result(1) = C2D.Y();
-    Result(2) = C.X();
-    Result(3) = C.Y();
-    Result(4) = C.Z();
-    break;
+        Result(0) = C2D.X();
+        Result(1) = C2D.Y();
+        Result(2) = C.X();
+        Result(3) = C.Y();
+        Result(4) = C.Z();
+        return Standard_True;
+      case 1:
+        Cur2D->D1(U, C2D, dC2D_dU);
+        dV_dU = dC2D_dU.X();
+        dW_dU = dC2D_dU.Y();
+        Surf->D1(C2D.X(), C2D.Y(), C, dS_dV, dS_dW);
+        dC_dU = dS_dV * dV_dU + dS_dW * dW_dU;
+        Mag = dC_dU.Magnitude();
+        dU_dS = Length / Mag;
 
-  case 1:
-    Cur2D->D1(U, C2D, dC2D_dU);
-    dV_dU = dC2D_dU.X();
-    dW_dU = dC2D_dU.Y();
-    Surf->D1(C2D.X(), C2D.Y(), C, dS_dV, dS_dW);
-    dC_dU = dS_dV*dV_dU + dS_dW*dW_dU;
-    Mag = dC_dU.Magnitude();
-    dU_dS = Length/Mag;
+        dV_dS = dV_dU * dU_dS;
+        dW_dS = dW_dU * dU_dS;
+        dC_dS = dC_dU * dU_dS;
 
-    dV_dS = dV_dU*dU_dS;
-    dW_dS = dW_dU*dU_dS;
-    dC_dS = dC_dU*dU_dS;
+        Result(0) = dV_dS;
+        Result(1) = dW_dS;
+        Result(2) = dC_dS.X();
+        Result(3) = dC_dS.Y();
+        Result(4) = dC_dS.Z();
+        return Standard_True;
+      case 2:
+        Cur2D->D2(U, C2D, dC2D_dU, d2C2D_dU2);
+        dV_dU = dC2D_dU.X();
+        dW_dU = dC2D_dU.Y();
+        d2V_dU2 = d2C2D_dU2.X();
+        d2W_dU2 = d2C2D_dU2.Y();
+        Surf->D2(C2D.X(), C2D.Y(), C, dS_dV, dS_dW, d2S_dV2, d2S_dW2, d2S_dVdW);
+        dC_dU = dS_dV * dV_dU + dS_dW * dW_dU;
+        d2C_dU2 = (d2S_dV2 * dV_dU + d2S_dVdW * dW_dU) * dV_dU + dS_dV * d2V_dU2
+                + (d2S_dVdW * dV_dU + d2S_dW2 * dW_dU) * dW_dU + dS_dW * d2W_dU2;
+        Mag = dC_dU.Magnitude();
+        dU_dS = Length / Mag;
+        d2U_dS2 = -Length * dC_dU.Dot(d2C_dU2) * dU_dS / (Mag * Mag * Mag);
 
-    Result(0) = dV_dS;
-    Result(1) = dW_dS;
-    Result(2) = dC_dS.X();
-    Result(3) = dC_dS.Y();
-    Result(4) = dC_dS.Z();    
-    break;
+        dV_dS = dV_dU * dU_dS;
+        dW_dS = dW_dU * dU_dS;
+        d2V_dS2 = d2V_dU2 * dU_dS * dU_dS + dV_dU * d2U_dS2;
+        d2W_dS2 = d2W_dU2 * dU_dS * dU_dS + dW_dU * d2U_dS2;
 
-  case 2:
-    Cur2D->D2(U, C2D, dC2D_dU, d2C2D_dU2);
-    dV_dU = dC2D_dU.X();
-    dW_dU = dC2D_dU.Y();
-    d2V_dU2 = d2C2D_dU2.X();
-    d2W_dU2 = d2C2D_dU2.Y();
-    Surf->D2(C2D.X(), C2D.Y(), C, dS_dV, dS_dW, d2S_dV2, d2S_dW2, d2S_dVdW);
-    dC_dU = dS_dV*dV_dU + dS_dW*dW_dU;
-    d2C_dU2 = (d2S_dV2*dV_dU + d2S_dVdW*dW_dU)*dV_dU + dS_dV*d2V_dU2 + 
-              (d2S_dVdW*dV_dU + d2S_dW2*dW_dU)*dW_dU + dS_dW*d2W_dU2;
-    Mag = dC_dU.Magnitude();
-    dU_dS = Length/Mag;
-    d2U_dS2 = -Length*dC_dU.Dot(d2C_dU2)*dU_dS/(Mag*Mag*Mag);
-    
-    dV_dS = dV_dU * dU_dS;
-    dW_dS = dW_dU * dU_dS;
-    d2V_dS2 = d2V_dU2*dU_dS*dU_dS + dV_dU*d2U_dS2;
-    d2W_dS2 = d2W_dU2*dU_dS*dU_dS + dW_dU*d2U_dS2;
-    
-    d2U_dS2 = -dC_dU.Dot(d2C_dU2)*dU_dS/(Mag*Mag);
-    d2C_dS2 = (d2S_dV2 * dV_dS + d2S_dVdW * dW_dS) * dV_dS + dS_dV * d2V_dS2 +
-              (d2S_dW2 * dW_dS + d2S_dVdW * dV_dS) * dW_dS + dS_dW * d2W_dS2;
-    
-    Result(0) = d2V_dS2;
-    Result(1) = d2W_dS2;
-    Result(2) = d2C_dS2.X();
-    Result(3) = d2C_dS2.Y();
-    Result(4) = d2C_dS2.Z();      
-    break;
+        d2U_dS2 = -dC_dU.Dot(d2C_dU2) * dU_dS / (Mag * Mag);
+        d2C_dS2 = (d2S_dV2 * dV_dS + d2S_dVdW * dW_dS) * dV_dS + dS_dV * d2V_dS2
+                + (d2S_dW2 * dW_dS + d2S_dVdW * dV_dS) * dW_dS + dS_dW * d2W_dS2;
 
-  default: Result(0) = Result(1) = Result(2) = Result(3) = Result(4) = 0;
-    return Standard_False;
+        Result(0) = d2V_dS2;
+        Result(1) = d2W_dS2;
+        Result(2) = d2C_dS2.X();
+        Result(3) = d2C_dS2.Y();
+        Result(4) = d2C_dS2.Z();
+        return Standard_True;
+      default:
+        break;
+    }
   }
-  return Standard_True;
+  catch (const Standard_Failure&)
+  {
+  }
+
+  Result(0) = Result(1) = Result(2) = Result(3) = Result(4) = 0;
+  return Standard_False;
 }

@@ -82,157 +82,194 @@ void GeomPlate_MakeApprox_Eval::Evaluate (Standard_Integer * Dimension,
 				Standard_Integer * ErrorCode) const
                         	// Error Code
 {
-  *ErrorCode = 0;
-  Standard_Integer idim,jpar;
-  Standard_Real Upar,Vpar;
-
-// Dimension incorrecte
-  if (*Dimension!=3) {
-    *ErrorCode = 1;
+  if (*Dimension != 3)
+  {
+    *ErrorCode = 1; // invalid dimension (internal error)
+    return;
   }
 
-// Parametres incorrects
- if (*FavorIso==1) {
-    Upar = *ConstParam;
-    if (( Upar < UStartEnd[0] ) || ( Upar > UStartEnd[1] )) {
+  // Parametres incorrects
+  if (*FavorIso == 1)
+  {
+    const Standard_Real Upar = *ConstParam;
+    if ((Upar < UStartEnd[0]) || (Upar > UStartEnd[1]))
+    {
       *ErrorCode = 2;
+      return;
     }
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-      Vpar = Parameters[jpar-1];
-      if (( Vpar < VStartEnd[0] ) || ( Vpar > VStartEnd[1] )) {
+    for (int jpar = 1; jpar <= *NbParams; jpar++)
+    {
+      const double Vpar = Parameters[jpar - 1];
+      if ((Vpar < VStartEnd[0]) || (Vpar > VStartEnd[1]))
+      {
         *ErrorCode = 2;
+        return;
       }
     }
- }
- else {
-    Vpar = *ConstParam;
-    if (( Vpar < VStartEnd[0] ) || ( Vpar > VStartEnd[1] )) {
+  }
+  else
+  {
+    const double Vpar = *ConstParam;
+    if ((Vpar < VStartEnd[0]) || (Vpar > VStartEnd[1]))
+    {
       *ErrorCode = 2;
+      return;
     }
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-      Upar = Parameters[jpar-1];
-      if (( Upar < UStartEnd[0] ) || ( Upar > UStartEnd[1] )) {
+    for (int jpar = 1; jpar <= *NbParams; jpar++)
+    {
+      const double Upar = Parameters[jpar - 1];
+      if ((Upar < UStartEnd[0]) || (Upar > UStartEnd[1]))
+      {
         *ErrorCode = 2;
+        return;
       }
     }
- }
+  }
 
-// Initialisation
-  for (idim=1;idim<=*Dimension;idim++) {
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-      Result[idim-1+(jpar-1)*(*Dimension)] = 0.;
+  try
+  {
+    const int Order = *UOrder + *VOrder;
+
+    gp_Pnt pnt;
+    gp_Vec v1, v2, v3, v4, v5;
+    if (*FavorIso == 1)
+    {
+      const double Upar = *ConstParam;
+      switch (Order)
+      {
+        case 0:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Vpar = Parameters[jpar - 1];
+            pnt = mySurf->Value(Upar, Vpar);
+            Result[(jpar - 1) * (*Dimension)] = pnt.X();
+            Result[1 + (jpar - 1) * (*Dimension)] = pnt.Y();
+            Result[2 + (jpar - 1) * (*Dimension)] = pnt.Z();
+          }
+          *ErrorCode = 0;
+          return;
+        case 1:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Vpar = Parameters[jpar - 1];
+            mySurf->D1(Upar, Vpar, pnt, v1, v2);
+            if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v1.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v1.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v1.Z();
+            }
+            else
+            {
+              Result[(jpar - 1) * (*Dimension)] = v2.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v2.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v2.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+        case 2:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Vpar = Parameters[jpar - 1];
+            mySurf->D2(Upar, Vpar, pnt, v1, v2, v3, v4, v5);
+            if (*UOrder == 2)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v3.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v3.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v3.Z();
+            }
+            else if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v5.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v5.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v5.Z();
+            }
+            else if (*UOrder == 0)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v4.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v4.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v4.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+      }
+    }
+    else
+    {
+      const double Vpar = *ConstParam;
+      switch (Order)
+      {
+        case 0:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Upar = Parameters[jpar - 1];
+            pnt = mySurf->Value(Upar, Vpar);
+            Result[(jpar - 1) * (*Dimension)] = pnt.X();
+            Result[1 + (jpar - 1) * (*Dimension)] = pnt.Y();
+            Result[2 + (jpar - 1) * (*Dimension)] = pnt.Z();
+          }
+          *ErrorCode = 0;
+          return;
+        case 1:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Upar = Parameters[jpar - 1];
+            mySurf->D1(Upar, Vpar, pnt, v1, v2);
+            if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v1.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v1.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v1.Z();
+            }
+            else
+            {
+              Result[(jpar - 1) * (*Dimension)] = v2.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v2.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v2.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+        case 2:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Upar = Parameters[jpar - 1];
+            mySurf->D2(Upar, Vpar, pnt, v1, v2, v3, v4, v5);
+            if (*UOrder == 2)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v3.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v3.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v3.Z();
+            }
+            else if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v5.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v5.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v5.Z();
+            }
+            else if (*UOrder == 0)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v4.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v4.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v4.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+      }
     }
   }
- 
-
- Standard_Integer Order = *UOrder + *VOrder;
- gp_Pnt pnt;
-// gp_Vec vect, v1, v2, v3, v4, v5, v6, v7, v8, v9;
- gp_Vec v1, v2, v3, v4, v5;
-
- if (*FavorIso==1) {
-  Upar = *ConstParam;
-  switch (Order) {
-  case 0 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Vpar = Parameters[jpar-1];
-	pnt = mySurf->Value (Upar, Vpar);
-	Result[(jpar-1)*(*Dimension)] = pnt.X();
-	Result[1+(jpar-1)*(*Dimension)] = pnt.Y(); 
-	Result[2+(jpar-1)*(*Dimension)] = pnt.Z();
-    }
-    break;
-  case 1 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Vpar = Parameters[jpar-1];
-	mySurf->D1 (Upar, Vpar, pnt, v1, v2);
-        if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v1.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v1.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v1.Z();
-	}
-	else {
-	  Result[(jpar-1)*(*Dimension)] = v2.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v2.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v2.Z();
-	}
-    }
-    break;
-  case 2 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Vpar = Parameters[jpar-1];
-	mySurf->D2 (Upar, Vpar, pnt, v1, v2, v3, v4, v5);
-        if (*UOrder==2) {
-	  Result[(jpar-1)*(*Dimension)] = v3.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v3.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v3.Z();
-	}
-	else if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v5.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v5.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v5.Z();
-	}
-	else if (*UOrder==0) {
-	  Result[(jpar-1)*(*Dimension)] = v4.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v4.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v4.Z();
-	}
-    }
-    break;
+  catch (const Standard_Failure&)
+  {
   }
- }
- else { 
-  Vpar = *ConstParam;
-  switch (Order) {
-  case 0 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Upar = Parameters[jpar-1];
-	pnt = mySurf->Value (Upar, Vpar);
-	Result[(jpar-1)*(*Dimension)] = pnt.X();
-	Result[1+(jpar-1)*(*Dimension)] = pnt.Y(); 
-	Result[2+(jpar-1)*(*Dimension)] = pnt.Z();
-    }
-    break;
-  case 1 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Upar = Parameters[jpar-1];
-	mySurf->D1 (Upar, Vpar, pnt, v1, v2);
-        if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v1.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v1.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v1.Z();
-	}
-	else {
-	  Result[(jpar-1)*(*Dimension)] = v2.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v2.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v2.Z();
-	}
-    }
-    break;
-  case 2 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Upar = Parameters[jpar-1];
-	mySurf->D2 (Upar, Vpar, pnt, v1, v2, v3, v4, v5);
-        if (*UOrder==2) {
-	  Result[(jpar-1)*(*Dimension)] = v3.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v3.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v3.Z();
-	}
-	else if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v5.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v5.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v5.Z();
-	}
-	else if (*UOrder==0) {
-	  Result[(jpar-1)*(*Dimension)] = v4.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v4.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v4.Z();
-	}
-    }
-    break;
-  }
- }    	
 
+  for (int idim = 1; idim <= *Dimension; idim++)
+    for (int jpar = 1; jpar <= *NbParams; jpar++)
+      Result[idim - 1 + (jpar - 1) * (*Dimension)] = 0.;
+
+  *ErrorCode = 3; // evaluation failed
 }
 
 

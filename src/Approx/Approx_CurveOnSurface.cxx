@@ -75,71 +75,76 @@ void Approx_CurveOnSurface_Eval::Evaluate (Standard_Integer *Dimension,
                                            Standard_Real    *Result,// [Dimension]
                                            Standard_Integer *ErrorCode)
 {
-  *ErrorCode = 0;
-  Standard_Real par = *Param;
-
-// Dimension is incorrect
-  if (*Dimension != 5) {
-    *ErrorCode = 1;
+  if (*Dimension != 5)
+  {
+    *ErrorCode = 1; // Dimension is incorrect (internal error)
+    return;
   }
 
-// Parameter is incorrect
-  if(StartEnd[0] != StartEndSav[0] || StartEnd[1]!= StartEndSav[1]) 
-    {
-      fonct = fonct->Trim(StartEnd[0],StartEnd[1],Precision::PConfusion());
-      fonct2d = fonct2d->Trim(StartEnd[0],StartEnd[1],
-				Precision::PConfusion());
-      StartEndSav[0]=StartEnd[0];
-      StartEndSav[1]=StartEnd[1];
-    }
-  gp_Pnt pnt;
-
-
-  gp_Pnt2d pnt2d;
-
-  switch (*Order) {
-  case 0: 
-    {
-      fonct2d->D0(par, pnt2d);
-      fonct->D0(par, pnt);
-      Result[0] = pnt2d.X();
-      Result[1] = pnt2d.Y();
-      Result[2] = pnt.X();
-      Result[3] = pnt.Y();
-      Result[4] = pnt.Z();
-      break;
-    }
-  case 1:
-    {
-      gp_Vec v1;
-      gp_Vec2d v21;
-      fonct2d->D1(par, pnt2d, v21);
-      fonct->D1(par,pnt, v1);
-      Result[0] = v21.X();
-      Result[1] = v21.Y();
-      Result[2] = v1.X();
-      Result[3] = v1.Y();
-      Result[4] = v1.Z();
-      break;
+  const Standard_Real par = *Param;
+  if (par < StartEnd[0] || par > StartEnd[1])
+  {
+    *ErrorCode = 2; // Parameter is incorrect (internal error)
+    return;
   }
-  case 2:
+
+  try
+  {
+    if (StartEnd[0] != StartEndSav[0] || StartEnd[1] != StartEndSav[1])
     {
-      gp_Vec v1, v2;
-      gp_Vec2d v21, v22;    
-      fonct2d->D2(par, pnt2d, v21, v22);
-      fonct->D2(par, pnt, v1, v2);         
-      Result[0] = v22.X();
-      Result[1] = v22.Y();
-      Result[2] = v2.X();
-      Result[3] = v2.Y();
-      Result[4] = v2.Z();
-      break;
+      // trim range
+      fonct = fonct->Trim(StartEnd[0], StartEnd[1], Precision::PConfusion());
+      fonct2d = fonct2d->Trim(StartEnd[0], StartEnd[1], Precision::PConfusion());
+      StartEndSav[0] = StartEnd[0];
+      StartEndSav[1] = StartEnd[1];
     }
-  default:
-    Result[0] = Result[1] = Result[2] = Result[3] = Result[4] = 0.;
-    *ErrorCode = 3;
-    break;
+
+    gp_Pnt pnt;
+    gp_Pnt2d pnt2d;
+    gp_Vec   v1, v2;
+    gp_Vec2d v21, v22;
+    switch (*Order)
+    {
+      case 0:
+        fonct2d->D0(par, pnt2d);
+        fonct->D0(par, pnt);
+        Result[0] = pnt2d.X();
+        Result[1] = pnt2d.Y();
+        Result[2] = pnt.X();
+        Result[3] = pnt.Y();
+        Result[4] = pnt.Z();
+        *ErrorCode = 0;
+        return;
+      case 1:
+        fonct2d->D1(par, pnt2d, v21);
+        fonct->D1(par, pnt, v1);
+        Result[0] = v21.X();
+        Result[1] = v21.Y();
+        Result[2] = v1.X();
+        Result[3] = v1.Y();
+        Result[4] = v1.Z();
+        *ErrorCode = 0;
+        return;
+      case 2:
+        fonct2d->D2(par, pnt2d, v21, v22);
+        fonct->D2(par, pnt, v1, v2);
+        Result[0] = v22.X();
+        Result[1] = v22.Y();
+        Result[2] = v2.X();
+        Result[3] = v2.Y();
+        Result[4] = v2.Z();
+        *ErrorCode = 0;
+        return;
+      default:
+        break;
+    }
   }
+  catch (const Standard_Failure&)
+  {
+  }
+
+  Result[0] = Result[1] = Result[2] = Result[3] = Result[4] = 0.;
+  *ErrorCode = 3; // evaluation failed
 }
 
 //=======================================================================
@@ -173,54 +178,63 @@ void Approx_CurveOnSurface_Eval3d::Evaluate (Standard_Integer *Dimension,
                                              Standard_Real    *Result,// [Dimension]
                                              Standard_Integer *ErrorCode)
 {
-  *ErrorCode = 0;
-  Standard_Real par = *Param;
-
-// Dimension is incorrect
-  if (*Dimension != 3) {
-    *ErrorCode = 1;
+  if (*Dimension != 3)
+  {
+    *ErrorCode = 1; // Dimension is incorrect (internal error)
+    return;
   }
 
-// Parameter is incorrect
-  if(StartEnd[0] != StartEndSav[0] || StartEnd[1]!= StartEndSav[1]) 
-    {
-      fonct = fonct->Trim(StartEnd[0],StartEnd[1],Precision::PConfusion());
-      StartEndSav[0]=StartEnd[0];
-      StartEndSav[1]=StartEnd[1];
-    }
-
-  gp_Pnt pnt;
-
-  switch (*Order) {
-  case 0:
-    pnt = fonct->Value(par);
-    Result[0] = pnt.X();
-    Result[1] = pnt.Y();
-    Result[2] = pnt.Z();
-    break;
-  case 1:
-    {
-      gp_Vec v1;
-      fonct->D1(par, pnt, v1);
-      Result[0] = v1.X();
-      Result[1] = v1.Y();
-      Result[2] = v1.Z();
-      break;
-    }
-  case 2:
-    {
-      gp_Vec v1, v2;
-      fonct->D2(par, pnt, v1, v2);
-      Result[0] = v2.X();
-      Result[1] = v2.Y();
-      Result[2] = v2.Z();
-      break;
-    }
-  default:
-    Result[0] = Result[1] = Result[2] = 0.;
-    *ErrorCode = 3;
-    break;
+  const Standard_Real par = *Param;
+  if (par < StartEnd[0] || par > StartEnd[1])
+  {
+    *ErrorCode = 2; // Parameter is incorrect (internal error)
+    return;
   }
+
+  try
+  {
+    if (StartEnd[0] != StartEndSav[0] || StartEnd[1] != StartEndSav[1])
+    {
+      fonct = fonct->Trim(StartEnd[0], StartEnd[1], Precision::PConfusion());
+      StartEndSav[0] = StartEnd[0];
+      StartEndSav[1] = StartEnd[1];
+    }
+
+    gp_Pnt pnt;
+    gp_Vec v1, v2;
+    switch (*Order)
+    {
+      case 0:
+        pnt = fonct->Value(par);
+        Result[0] = pnt.X();
+        Result[1] = pnt.Y();
+        Result[2] = pnt.Z();
+        *ErrorCode = 0;
+        return;
+      case 1:
+        fonct->D1(par, pnt, v1);
+        Result[0] = v1.X();
+        Result[1] = v1.Y();
+        Result[2] = v1.Z();
+        *ErrorCode = 0;
+        return;
+      case 2:
+        fonct->D2(par, pnt, v1, v2);
+        Result[0] = v2.X();
+        Result[1] = v2.Y();
+        Result[2] = v2.Z();
+        *ErrorCode = 0;
+        return;
+      default:
+        break;
+    }
+  }
+  catch (const Standard_Failure&)
+  {
+  }
+
+  Result[0] = Result[1] = Result[2] = 0.;
+  *ErrorCode = 3; // evaluation failed
 }
 
 //=======================================================================
@@ -254,53 +268,61 @@ void Approx_CurveOnSurface_Eval2d::Evaluate (Standard_Integer *Dimension,
                                              Standard_Real    *Result,// [Dimension]
                                              Standard_Integer *ErrorCode)
 {
-  *ErrorCode = 0;
-  Standard_Real par = *Param;
-
-// Dimension is incorrect
-  if (*Dimension != 2) {
-    *ErrorCode = 1;
+  if (*Dimension != 2)
+  {
+    *ErrorCode = 1; // Dimension is incorrect (internal error)
+    return;
   }
 
-// Parameter is incorrect
-  if(StartEnd[0] != StartEndSav[0] || StartEnd[1]!= StartEndSav[1]) 
-    {
-      fonct2d = fonct2d->Trim(StartEnd[0],StartEnd[1],Precision::PConfusion());
-      StartEndSav[0]=StartEnd[0];
-      StartEndSav[1]=StartEnd[1];
-    }
- 
-  gp_Pnt2d pnt;
-
-  switch (*Order) {
-  case 0:
-    {
-      pnt = fonct2d->Value(par);
-      Result[0] = pnt.X();
-      Result[1] = pnt.Y();
-      break;
-    }
-  case 1:
-    {
-      gp_Vec2d v1;
-      fonct2d->D1(par, pnt, v1);
-      Result[0] = v1.X();
-      Result[1] = v1.Y();
-      break;
-    }
-  case 2:
-    {
-      gp_Vec2d v1, v2;
-      fonct2d->D2(par, pnt, v1, v2);
-      Result[0] = v2.X();
-      Result[1] = v2.Y();
-      break;
-    }
-  default:
-    Result[0] = Result[1] = 0.;
-    *ErrorCode = 3;
-    break;
+  const Standard_Real par = *Param;
+  if (par < StartEnd[0] || par > StartEnd[1])
+  {
+    *ErrorCode = 2; // Parameter is incorrect (internal error)
+    return;
   }
+
+  try
+  {
+    if (StartEnd[0] != StartEndSav[0] || StartEnd[1] != StartEndSav[1])
+    {
+      // trim range
+      fonct2d = fonct2d->Trim(StartEnd[0], StartEnd[1], Precision::PConfusion());
+      StartEndSav[0] = StartEnd[0];
+      StartEndSav[1] = StartEnd[1];
+    }
+
+    gp_Pnt2d pnt;
+    gp_Vec2d v1, v2;
+    switch (*Order)
+    {
+      case 0:
+        pnt = fonct2d->Value(par);
+        Result[0] = pnt.X();
+        Result[1] = pnt.Y();
+        *ErrorCode = 0;
+        return;
+      case 1:
+        fonct2d->D1(par, pnt, v1);
+        Result[0] = v1.X();
+        Result[1] = v1.Y();
+        *ErrorCode = 0;
+        return;
+      case 2:
+        fonct2d->D2(par, pnt, v1, v2);
+        Result[0] = v2.X();
+        Result[1] = v2.Y();
+        *ErrorCode = 0;
+        return;
+      default:
+        break;
+    }
+  }
+  catch (const Standard_Failure&)
+  {
+  }
+
+  Result[0] = Result[1] = 0.;
+  *ErrorCode = 3; // evaluation failed
 }
 
 //=============================================================================

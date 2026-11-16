@@ -53,47 +53,61 @@ void Approx_Curve2d_Eval::Evaluate (Standard_Integer *Dimension,
                                     Standard_Real    *Result,// [Dimension]
                                     Standard_Integer *ErrorCode)
 {
-  *ErrorCode = 0;
-  Standard_Real par = *Param;
+  if (*Dimension != 2)
+  {
+    *ErrorCode = 1; // Dimension is incorrect (internal error)
+    return;
+  }
 
-// Dimension is incorrect
-  if (*Dimension!=2) {
-    *ErrorCode = 1;
+  const Standard_Real par = *Param;
+  if (par < StartEnd[0] || par > StartEnd[1])
+  {
+    *ErrorCode = 2; // Parameter is incorrect (internal error)
+    return;
   }
-// Parameter is incorrect
-  if ( par < StartEnd[0] || par > StartEnd[1] ) {
-    *ErrorCode = 2;
-  }
-  if(StartEnd[0] != StartEndSav[0] || StartEnd[1]!= StartEndSav[1]) 
+
+  try
+  {
+    if (StartEnd[0] != StartEndSav[0] || StartEnd[1] != StartEndSav[1])
     {
-      fonct = fonct->Trim(StartEnd[0],StartEnd[1],Precision::PConfusion());
-      StartEndSav[0]=StartEnd[0];
-      StartEndSav[1]=StartEnd[1];
+      // trim range
+      fonct = fonct->Trim(StartEnd[0], StartEnd[1], Precision::PConfusion());
+      StartEndSav[0] = StartEnd[0];
+      StartEndSav[1] = StartEnd[1];
     }
-  gp_Pnt2d pnt;
-  gp_Vec2d v1, v2;
 
-  switch (*Order) {
-  case 0:
-    pnt = fonct->Value(par);
-    Result[0] = pnt.X();
-    Result[1] = pnt.Y();
-    break;
-  case 1:
-    fonct->D1(par, pnt, v1);
-    Result[0] = v1.X();
-    Result[1] = v1.Y();
-    break;
-  case 2:
-    fonct->D2(par, pnt, v1, v2);
-    Result[0] = v2.X();
-    Result[1] = v2.Y();
-    break;
-  default:
-    Result[0] = Result[1] = 0.;
-    *ErrorCode = 3;
-    break;
+    gp_Pnt2d pnt;
+    gp_Vec2d v1, v2;
+    switch (*Order)
+    {
+      case 0:
+        pnt = fonct->Value(par);
+        Result[0] = pnt.X();
+        Result[1] = pnt.Y();
+        *ErrorCode = 0;
+        return;
+      case 1:
+        fonct->D1(par, pnt, v1);
+        Result[0] = v1.X();
+        Result[1] = v1.Y();
+        *ErrorCode = 0;
+        return;
+      case 2:
+        fonct->D2(par, pnt, v1, v2);
+        Result[0] = v2.X();
+        Result[1] = v2.Y();
+        *ErrorCode = 0;
+        return;
+      default:
+        break;
+    }
   }
+  catch (const Standard_Failure&)
+  {
+  }
+
+  Result[0] = Result[1] = 0.;
+  *ErrorCode = 3; // evaluation failed
 }
 
  Approx_Curve2d::Approx_Curve2d(const Handle(Adaptor2d_Curve2d)& C2D,const Standard_Real First,const Standard_Real Last,const Standard_Real TolU,const Standard_Real TolV,const GeomAbs_Shape Continuity,const Standard_Integer MaxDegree,const Standard_Integer MaxSegments)

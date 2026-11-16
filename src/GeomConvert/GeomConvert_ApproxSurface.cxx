@@ -74,216 +74,265 @@ void GeomConvert_ApproxSurface_Eval::Evaluate (Standard_Integer * Dimension,
 			   // Result[Dimension,N]
 			   Standard_Integer * ErrorCode) const
                            // Error Code
-{ 
-  *ErrorCode = 0;
-//  Standard_Integer idim;
-  Standard_Integer jpar;
-  Standard_Real Upar,Vpar;
-
-// Dimension incorrecte
-  if (*Dimension!=3) {
-    *ErrorCode = 1;
+{
+  if (*Dimension != 3)
+  {
+    *ErrorCode = 1; // invalid dimension (internal error)
+    return;
   }
 
-// Parametres incorrects
-/* if (*FavorIso==1) {
+  // Parametres incorrects
+  /*if (*FavorIso==1)
+  {
     Upar = *ConstParam;
-    if (( Upar < UStartEnd[0] ) || ( Upar > UStartEnd[1] )) {
+    if ((Upar < UStartEnd[0]) || (Upar > UStartEnd[1]))
+    {
       *ErrorCode = 2;
+      return;
     }
-    for (jpar=1;jpar<=*NbParams;jpar++) {
+    for (int jpar = 1; jpar <= *NbParams; jpar++)
+    {
       Vpar = Parameters[jpar-1];
-      if (( Vpar < VStartEnd[0] ) || ( Vpar > VStartEnd[1] )) {
+      if ((Vpar < VStartEnd[0]) || (Vpar > VStartEnd[1]))
+      {
         *ErrorCode = 2;
+        return;
       }
     }
- }
- else {
+  }
+  else
+  {
     Vpar = *ConstParam;
-    if (( Vpar < VStartEnd[0] ) || ( Vpar > VStartEnd[1] )) {
+    if ((Vpar < VStartEnd[0]) || (Vpar > VStartEnd[1]))
+    {
       *ErrorCode = 2;
+      return;
     }
-    for (jpar=1;jpar<=*NbParams;jpar++) {
+    for (int jpar = 1; jpar <= *NbParams; jpar++)
+    {
       Upar = Parameters[jpar-1];
-      if (( Upar < UStartEnd[0] ) || ( Upar > UStartEnd[1] )) {
+      if ((Upar < UStartEnd[0]) || (Upar > UStartEnd[1]))
+      {
         *ErrorCode = 2;
+        return;
       }
-    }
- }*/
-
-// Initialisation
-
-  if (myAdaptor->FirstUParameter() != UStartEnd[0] || myAdaptor->LastUParameter() != UStartEnd[1])
-    myAdaptor = myAdaptor->UTrim (UStartEnd[0], UStartEnd[1], Precision::PConfusion());
-
-  if (myAdaptor->FirstVParameter() != VStartEnd[0] || myAdaptor->LastVParameter() != VStartEnd[1])
-    myAdaptor = myAdaptor->VTrim (VStartEnd[0], VStartEnd[1], Precision::PConfusion());
-
-/*
-  for (idim=1;idim<=*Dimension;idim++) {
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-      Result[idim-1+(jpar-1)*(*Dimension)] = 0.;
     }
   }*/
- 
 
- Standard_Integer Order = *UOrder + *VOrder;
- gp_Pnt pnt;
- gp_Vec vect, v1, v2, v3, v4, v5, v6, v7, v8, v9;
+  // Initialisation
+  try
+  {
+    // trim range
+    if (myAdaptor->FirstUParameter() != UStartEnd[0] || myAdaptor->LastUParameter() != UStartEnd[1])
+      myAdaptor = myAdaptor->UTrim(UStartEnd[0], UStartEnd[1], Precision::PConfusion());
 
- if (*FavorIso==1) {
-  Upar = *ConstParam;
-  switch (Order) {
-  case 0 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Vpar = Parameters[jpar-1];
-	pnt = myAdaptor->Value (Upar, Vpar);
-	Result[(jpar-1)*(*Dimension)] = pnt.X();
-	Result[1+(jpar-1)*(*Dimension)] = pnt.Y(); 
-	Result[2+(jpar-1)*(*Dimension)] = pnt.Z();
+    if (myAdaptor->FirstVParameter() != VStartEnd[0] || myAdaptor->LastVParameter() != VStartEnd[1])
+      myAdaptor = myAdaptor->VTrim(VStartEnd[0], VStartEnd[1], Precision::PConfusion());
+
+    const int Order = *UOrder + *VOrder;
+
+    gp_Pnt pnt;
+    gp_Vec vect, v1, v2, v3, v4, v5, v6, v7, v8, v9;
+    if (*FavorIso == 1)
+    {
+      const double Upar = *ConstParam;
+      switch (Order)
+      {
+        case 0:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Vpar = Parameters[jpar - 1];
+            pnt = myAdaptor->Value(Upar, Vpar);
+            Result[(jpar - 1) * (*Dimension)] = pnt.X();
+            Result[1 + (jpar - 1) * (*Dimension)] = pnt.Y();
+            Result[2 + (jpar - 1) * (*Dimension)] = pnt.Z();
+          }
+          *ErrorCode = 0;
+          return;
+        case 1:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Vpar = Parameters[jpar - 1];
+            myAdaptor->D1(Upar, Vpar, pnt, v1, v2);
+            if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v1.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v1.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v1.Z();
+            }
+            else
+            {
+              Result[(jpar - 1) * (*Dimension)] = v2.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v2.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v2.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+        case 2:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Vpar = Parameters[jpar - 1];
+            myAdaptor->D2(Upar, Vpar, pnt, v1, v2, v3, v4, v5);
+            if (*UOrder == 2)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v3.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v3.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v3.Z();
+            }
+            else if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v5.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v5.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v5.Z();
+            }
+            else if (*UOrder == 0)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v4.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v4.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v4.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+        case 3:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Vpar = Parameters[jpar - 1];
+            myAdaptor->D3(Upar, Vpar, pnt, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            if (*UOrder == 2)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v8.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v8.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v8.Z();
+            }
+            else if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v9.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v9.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v9.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+        case 4:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Vpar = Parameters[jpar - 1];
+            vect = myAdaptor->DN(Upar, Vpar, *UOrder, *VOrder);
+            Result[(jpar - 1) * (*Dimension)] = vect.X();
+            Result[1 + (jpar - 1) * (*Dimension)] = vect.Y();
+            Result[2 + (jpar - 1) * (*Dimension)] = vect.Z();
+          }
+          *ErrorCode = 0;
+          return;
+      }
     }
-    break;
-  case 1 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Vpar = Parameters[jpar-1];
-	myAdaptor->D1 (Upar, Vpar, pnt, v1, v2);
-        if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v1.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v1.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v1.Z();
-	}
-	else {
-	  Result[(jpar-1)*(*Dimension)] = v2.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v2.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v2.Z();
-	}
+    else
+    {
+      const double Vpar = *ConstParam;
+      switch (Order)
+      {
+        case 0:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Upar = Parameters[jpar - 1];
+            pnt = myAdaptor->Value(Upar, Vpar);
+            Result[(jpar - 1) * (*Dimension)] = pnt.X();
+            Result[1 + (jpar - 1) * (*Dimension)] = pnt.Y();
+            Result[2 + (jpar - 1) * (*Dimension)] = pnt.Z();
+          }
+          *ErrorCode = 0;
+          return;
+        case 1:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Upar = Parameters[jpar - 1];
+            myAdaptor->D1(Upar, Vpar, pnt, v1, v2);
+            if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v1.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v1.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v1.Z();
+            }
+            else
+            {
+              Result[(jpar - 1) * (*Dimension)] = v2.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v2.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v2.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+        case 2:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Upar = Parameters[jpar - 1];
+            myAdaptor->D2(Upar, Vpar, pnt, v1, v2, v3, v4, v5);
+            if (*UOrder == 2)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v3.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v3.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v3.Z();
+            }
+            else if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v5.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v5.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v5.Z();
+            }
+            else if (*UOrder == 0)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v4.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v4.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v4.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+        case 3:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Upar = Parameters[jpar - 1];
+            myAdaptor->D3(Upar, Vpar, pnt, v1, v2, v3, v4, v5, v6, v7, v8, v9);
+            if (*UOrder == 2)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v8.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v8.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v8.Z();
+            }
+            else if (*UOrder == 1)
+            {
+              Result[(jpar - 1) * (*Dimension)] = v9.X();
+              Result[1 + (jpar - 1) * (*Dimension)] = v9.Y();
+              Result[2 + (jpar - 1) * (*Dimension)] = v9.Z();
+            }
+          }
+          *ErrorCode = 0;
+          return;
+        case 4:
+          for (int jpar = 1; jpar <= *NbParams; jpar++)
+          {
+            const double Upar = Parameters[jpar - 1];
+            vect = myAdaptor->DN(Upar, Vpar, *UOrder, *VOrder);
+            Result[(jpar - 1) * (*Dimension)] = vect.X();
+            Result[1 + (jpar - 1) * (*Dimension)] = vect.Y();
+            Result[2 + (jpar - 1) * (*Dimension)] = vect.Z();
+          }
+          *ErrorCode = 0;
+          return;
+      }
     }
-    break;
-  case 2 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Vpar = Parameters[jpar-1];
-	myAdaptor->D2 (Upar, Vpar, pnt, v1, v2, v3, v4, v5);
-        if (*UOrder==2) {
-	  Result[(jpar-1)*(*Dimension)] = v3.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v3.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v3.Z();
-	}
-	else if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v5.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v5.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v5.Z();
-	}
-	else if (*UOrder==0) {
-	  Result[(jpar-1)*(*Dimension)] = v4.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v4.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v4.Z();
-	}
-    }
-    break;
-  case 3 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Vpar = Parameters[jpar-1];
-	myAdaptor->D3 (Upar, Vpar, pnt, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-        if (*UOrder==2) {
-	  Result[(jpar-1)*(*Dimension)] = v8.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v8.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v8.Z();
-	}
-	else if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v9.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v9.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v9.Z();
-	}
-    }
-    break;
-  case 4 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Vpar = Parameters[jpar-1];
-	vect = myAdaptor->DN (Upar, Vpar, *UOrder, *VOrder);
-	Result[(jpar-1)*(*Dimension)] = vect.X();
-	Result[1+(jpar-1)*(*Dimension)] = vect.Y(); 
-	Result[2+(jpar-1)*(*Dimension)] = vect.Z();
-    }
-    break;
   }
- }
- else { 
-  Vpar = *ConstParam;
-  switch (Order) {
-  case 0 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Upar = Parameters[jpar-1];
-	pnt = myAdaptor->Value (Upar, Vpar);
-	Result[(jpar-1)*(*Dimension)] = pnt.X();
-	Result[1+(jpar-1)*(*Dimension)] = pnt.Y(); 
-	Result[2+(jpar-1)*(*Dimension)] = pnt.Z();
-    }
-    break;
-  case 1 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Upar = Parameters[jpar-1];
-	myAdaptor->D1 (Upar, Vpar, pnt, v1, v2);
-        if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v1.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v1.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v1.Z();
-	}
-	else {
-	  Result[(jpar-1)*(*Dimension)] = v2.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v2.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v2.Z();
-	}
-    }
-    break;
-  case 2 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Upar = Parameters[jpar-1];
-	myAdaptor->D2 (Upar, Vpar, pnt, v1, v2, v3, v4, v5);
-        if (*UOrder==2) {
-	  Result[(jpar-1)*(*Dimension)] = v3.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v3.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v3.Z();
-	}
-	else if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v5.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v5.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v5.Z();
-	}
-	else if (*UOrder==0) {
-	  Result[(jpar-1)*(*Dimension)] = v4.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v4.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v4.Z();
-	}
-    }
-    break;
-  case 3 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Upar = Parameters[jpar-1];
-	myAdaptor->D3 (Upar, Vpar, pnt, v1, v2, v3, v4, v5, v6, v7, v8, v9);
-        if (*UOrder==2) {
-	  Result[(jpar-1)*(*Dimension)] = v8.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v8.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v8.Z();
-	}
-	else if (*UOrder==1) {
-	  Result[(jpar-1)*(*Dimension)] = v9.X();
-	  Result[1+(jpar-1)*(*Dimension)] = v9.Y(); 
-	  Result[2+(jpar-1)*(*Dimension)] = v9.Z();
-	}
-    }
-    break;
-  case 4 :
-    for (jpar=1;jpar<=*NbParams;jpar++) {
-	Upar = Parameters[jpar-1];
-	vect = myAdaptor->DN (Upar, Vpar, *UOrder, *VOrder);
-	Result[(jpar-1)*(*Dimension)] = vect.X();
-	Result[1+(jpar-1)*(*Dimension)] = vect.Y(); 
-	Result[2+(jpar-1)*(*Dimension)] = vect.Z();
-    }
-    break;
+  catch (const Standard_Failure&)
+  {
   }
- }    	
 
+  //for (idim = 1; idim <= *Dimension; idim++)
+  //  for (jpar = 1; jpar <= *NbParams; jpar++)
+  //    Result[idim-1+(jpar-1)*(*Dimension)] = 0.;
+
+  *ErrorCode = 3; // evaluation failed
 }
 
 

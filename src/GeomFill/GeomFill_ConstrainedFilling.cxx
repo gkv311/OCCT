@@ -1201,7 +1201,7 @@ Standard_Integer GeomFill_ConstrainedFilling::Eval(const Standard_Real W,
     if(ctr[1] == 2){
       tgalg[ibound[1]]->Value(W).Coord(res[jmp+3],res[jmp+4],res[jmp+5]);
     }
-    break;
+    return 0;
   case 1 :
     gp_Pnt pt;
     gp_Vec vt;
@@ -1219,9 +1219,9 @@ Standard_Integer GeomFill_ConstrainedFilling::Eval(const Standard_Real W,
     if(ctr[1] == 2){
       tgalg[ibound[1]]->D1(W).Coord(res[jmp+3],res[jmp+4],res[jmp+5]);
     }
-    break;
+    return 0;
   }
-  return 0;
+  return 3; // evaluation failed
 }
 
 //=======================================================================

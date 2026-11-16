@@ -92,33 +92,41 @@ void Approx_CurvilinearParameter_EvalCurv::Evaluate (Standard_Integer * Dimensio
                                                      Standard_Real    * Result,
                                                      Standard_Integer * ErrorCode)
 {
-  *ErrorCode = 0;
-  Standard_Real S = *Param;
-  TColStd_Array1OfReal Res(0, 2);
-  Standard_Integer i;
-  
-// Dimension is incorrect
-  if (*Dimension != 3) {
-    *ErrorCode = 1;
-  }
-// Parameter is incorrect
-  if ( S < StartEnd[0] || S > StartEnd[1] ) {
-    *ErrorCode = 2;
+  if (*Dimension != 3)
+  {
+    *ErrorCode = 1; // Dimension is incorrect (internal error)
+    return;
   }
 
-  if(StartEnd[0] != StartEndSav[0] || StartEnd[1]!= StartEndSav[1]) 
-    {
-      fonct->Trim(StartEnd[0],StartEnd[1], Precision::Confusion());
-      StartEndSav[0]=StartEnd[0];
-      StartEndSav[1]=StartEnd[1];
-    }
-
-  if(!fonct->EvalCase1(S, *Order, Res)) {
-    *ErrorCode = 3;
+  const Standard_Real par = *Param;
+  if (par < StartEnd[0] || par > StartEnd[1])
+  {
+    *ErrorCode = 2; // Parameter is incorrect (internal error)
+    return;
   }
 
-  for(i = 0; i <= 2; i++)
-    Result[i] = Res(i);  
+  if (StartEnd[0] != StartEndSav[0] || StartEnd[1] != StartEndSav[1])
+  {
+    fonct->Trim(StartEnd[0], StartEnd[1], Precision::Confusion());
+    StartEndSav[0] = StartEnd[0];
+    StartEndSav[1] = StartEnd[1];
+  }
+
+  double anArr[3] = {};
+  TColStd_Array1OfReal Res(anArr[0], 0, 2);
+  if (fonct->EvalCase1(par, *Order, Res))
+  {
+    for (int i = 0; i <= 2; ++i)
+      Result[i] = anArr[i];
+
+    *ErrorCode = 0;
+    return;
+  }
+
+  for (int i = 0; i <= 2; ++i)
+    Result[i] = 0.0;
+
+  *ErrorCode = 3; // evaluation failed
 }
 
 Approx_CurvilinearParameter::Approx_CurvilinearParameter(const Handle(Adaptor3d_Curve)& C3D,
@@ -231,33 +239,47 @@ void Approx_CurvilinearParameter_EvalCurvOnSurf::Evaluate (Standard_Integer * Di
                                                            Standard_Real    * Result,
                                                            Standard_Integer * ErrorCode)
 {
-  *ErrorCode = 0;
-  Standard_Real S = *Param;
-  TColStd_Array1OfReal Res(0, 4);
-  Standard_Integer i;
-
-// Dimension is incorrect
-  if (*Dimension != 5) {
-    *ErrorCode = 1;
-  }
-// Parameter is incorrect
-  if ( S < StartEnd[0] || S > StartEnd[1] ) {
-    *ErrorCode = 2;
+  if (*Dimension != 5)
+  {
+    *ErrorCode = 1; // Dimension is incorrect (internal error)
+    return;
   }
 
-  if(StartEnd[0] != StartEndSav[0] || StartEnd[1]!= StartEndSav[1]) 
+  const Standard_Real par = *Param;
+  if (par < StartEnd[0] || par > StartEnd[1])
+  {
+    *ErrorCode = 2; // Parameter is incorrect (internal error)
+    return;
+  }
+
+  try
+  {
+    if (StartEnd[0] != StartEndSav[0] || StartEnd[1] != StartEndSav[1])
     {
-      fonct->Trim(StartEnd[0],StartEnd[1], Precision::Confusion());
-      StartEndSav[0]=StartEnd[0];
-      StartEndSav[1]=StartEnd[1];
+      // trim range
+      fonct->Trim(StartEnd[0], StartEnd[1], Precision::Confusion());
+      StartEndSav[0] = StartEnd[0];
+      StartEndSav[1] = StartEnd[1];
     }
 
-  if(!fonct->EvalCase2(S, *Order, Res)) {
-    *ErrorCode = 3;
+    double anArr[5] = {};
+    TColStd_Array1OfReal Res(anArr[0] ,0, 4);
+    if (fonct->EvalCase2(par, *Order, Res))
+    {
+      for (int i = 0; i <= 4; ++i)
+        Result[i] = anArr[i];
+
+      *ErrorCode = 0;
+      return;
+    }
+  }
+  catch (const Standard_Failure&)
+  {
   }
 
-  for(i = 0; i <= 4; i++)
-    Result[i] = Res(i);  
+  *ErrorCode = 3;
+  for (int i = 0; i <= 4; ++i)
+    Result[i] = 0.0;
 }
 
 Approx_CurvilinearParameter::Approx_CurvilinearParameter(const Handle(Adaptor2d_Curve2d)& C2D,
@@ -392,33 +414,42 @@ void Approx_CurvilinearParameter_EvalCurvOn2Surf::Evaluate (Standard_Integer * D
                                                             Standard_Real    * Result,
                                                             Standard_Integer * ErrorCode)
 {
-  *ErrorCode = 0;
-  Standard_Real S = *Param;
-  TColStd_Array1OfReal Res(0, 6);
-  Standard_Integer i;
-
-// Dimension is incorrect
-  if (*Dimension != 7) {
-    *ErrorCode = 1;
-  }
-// Parameter is incorrect
-  if ( S < StartEnd[0] || S > StartEnd[1] ) {
-    *ErrorCode = 2;
+  if (*Dimension != 7)
+  {
+    *ErrorCode = 1; // Dimension is incorrect (internal error)
+    return;
   }
 
-/*  if(StartEnd[0] != StartEndSav[0] || StartEnd[1]!= StartEndSav[1]) 
-    {
-      fonct->Trim(StartEnd[0],StartEnd[1], Precision::Confusion());
-      StartEndSav[0]=StartEnd[0];
-      StartEndSav[1]=StartEnd[1];
-    }
-*/
-  if(!fonct->EvalCase3(S, *Order, Res)) {
-    *ErrorCode = 3;
+  const Standard_Real par = *Param;
+  if (par < StartEnd[0] || par > StartEnd[1])
+  {
+    *ErrorCode = 2; // Parameter is incorrect (internal error)
+    return;
   }
 
-  for(i = 0; i <= 6; i++)
-    Result[i] = Res(i);  
+  /*if (StartEnd[0] != StartEndSav[0] || StartEnd[1]!= StartEndSav[1])
+  {
+    // trim range
+    fonct->Trim(StartEnd[0], StartEnd[1], Precision::Confusion());
+    StartEndSav[0] = StartEnd[0];
+    StartEndSav[1] = StartEnd[1];
+  }*/
+
+  double anArr[7] = {};
+  TColStd_Array1OfReal Res(anArr[0], 0, 6);
+  if (fonct->EvalCase3(par, *Order, Res))
+  {
+    for (int i = 0; i <= 6; ++i)
+      Result[i] = anArr[i];
+
+    *ErrorCode = 0;
+    return;
+  }
+
+  for (int i = 0; i <= 6; ++i)
+    Result[i] = 0.0;
+
+  *ErrorCode = 3;
 }
 
 Approx_CurvilinearParameter::Approx_CurvilinearParameter(const Handle(Adaptor2d_Curve2d)& C2D1,
