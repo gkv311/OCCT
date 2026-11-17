@@ -13,8 +13,8 @@ igesread [locate_data_file bug24012_face.igs] face *
 igesread [locate_data_file bug24012_line.igs] edge *
 
 nproject r edge face
-checknbshapes r -edge 1
-checkprops r -l 5.96
+checknbshapes r -edge 2
+checkprops r -l 6.99
 
 vinit
 vsetdispmode 0

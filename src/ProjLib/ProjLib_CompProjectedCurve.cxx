@@ -978,12 +978,18 @@ void ProjLib_CompProjectedCurve::Init()
               myCurve, mySurface);
           }
 
-          if((Triple.X() - mySequence->Value(myNbCurves)->Value(mySequence->Value(myNbCurves)->Length()).X()) > 1.e-10)
+          const bool sameBound = (Triple.X() - mySequence->Last()->Last().X()) <= 1.e-10;
+          if (!sameBound)
             mySequence->Value(myNbCurves)->Append(Triple);
+
           if((LastU - Triple.X()) < Tol) {t = LastU + 1; break;}//return;
 
           Step = SearchStep;
-          t = Triple.X() + Step;
+          if (sameBound)
+            t = prevDeb + Step;
+          else
+            t = Triple.X() + Step;
+
           if (t > (LastU-MinStep/2) ) 
           { 
             Step =Step+LastU-t;
