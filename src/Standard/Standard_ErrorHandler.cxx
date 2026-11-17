@@ -128,7 +128,7 @@ void Standard_ErrorHandler::Raise()
     exit(1);
   }
 
-  myCaughtError->Reraise();
+  myCaughtError->ThrowFromJump(myCaughtError);
 }
 
 //============================================================================

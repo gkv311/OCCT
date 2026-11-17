@@ -5,7 +5,7 @@ puts ""
 
 pload QAcommands
 
-dsetsignal set -strackTraceLength 10
+dsetsignal set -stackTraceLength 10
 set IsDone [catch {set aResult [OCC30762]} result]
 
 if { ${IsDone} != 0 } {

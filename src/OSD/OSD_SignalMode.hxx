@@ -20,7 +20,13 @@ enum OSD_SignalMode
 OSD_SignalMode_AsIs,         //!< Do not set or remove signal handlers
 OSD_SignalMode_Set,          //!< Set OCCT signal handlers
 OSD_SignalMode_SetUnhandled, //!< Set OCCT signal handler but only if no handler is set, for each particular signal type
-OSD_SignalMode_Unset         //!< Unset signal handler to system default
+OSD_SignalMode_Unset,        //!< Unset signal handler to system default
+
+//! Set OCCT signal handlers to throw std::shared_ptr<Standard_Failure> instead of normal Standard_Failure exceptions.
+//! This should help to distinguish dangerous signal like segmentation fail from common exceptions,
+//! avoid them being silently suppressed by OCCT algorithms via common pattern `catch(const Standard_Failure&)`
+//! and instead process them specifically at application level (report internal error to user and gracefully terminate).
+OSD_SignalMode_SetExtra,
 };
 
 #endif // _OSD_SignalMode_HeaderFile

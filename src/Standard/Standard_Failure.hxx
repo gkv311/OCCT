@@ -83,6 +83,9 @@ public:
   //! Reraises a caught exception and changes its error message.
   Standard_EXPORT void Reraise (const Standard_SStream& aReason);
 
+  //! Throws this exception from Standard_ErrorHandler::Raise().
+  Standard_EXPORT virtual void ThrowFromJump(const std::shared_ptr<Standard_Failure>& theFail) const;
+
 public:
 
   //! Return exception (sub)class name for displaying in messages.
