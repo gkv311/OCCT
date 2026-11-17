@@ -6,7 +6,9 @@ puts ""
 ## Weird difference between two BRepTools::Write() overloads
 ###############################
 
-restore [locate_data_file bug27264_6.brep] a
+puts "REQUIRED ALL: Standard_ProgramError: File was not written with this version of the topology"
+
+catch { restore [locate_data_file bug27264_6.brep] a }
 
 set info [nbshapes a]
 

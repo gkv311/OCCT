@@ -41,6 +41,39 @@ const Standard_CString TopTools_ShapeSet::THE_ASCII_VERSIONS[TopTools_FormatVers
   "CASCADE Topology V3, (c) Open Cascade"
 };
 
+namespace
+{
+  //! Sentry to set/unset C locale to the stream.
+  template<class StreamT>
+  class TopTools_StreamSentry
+  {
+  public:
+    TopTools_StreamSentry(StreamT& theStream, std::streamsize thePrec = std::streamsize(-1))
+    : myStream(&theStream),
+      myOldLocale(theStream.imbue(std::locale::classic()))
+    {
+      if (thePrec != std::streamsize(-1))
+        myOldPrecision = theStream.precision(thePrec);
+    }
+
+    ~TopTools_StreamSentry()
+    {
+      if (myStream == nullptr)
+        return;
+
+      myStream->imbue(myOldLocale);
+      if (myOldPrecision != std::streamsize(-1))
+        myStream->precision(myOldPrecision);
+
+      myStream = nullptr;
+    }
+  private:
+    StreamT*        myStream = nullptr;
+    std::locale     myOldLocale;
+    std::streamsize myOldPrecision{-1};
+  };
+}
+
 //=======================================================================
 //function : TopTools_ShapeSet
 //purpose  : 
@@ -455,11 +488,11 @@ void  TopTools_ShapeSet::Dump(Standard_OStream& OS)const
 
 void  TopTools_ShapeSet::Write(Standard_OStream& OS, const Message_ProgressRange& theProgress)
 {
-  // always use C locale for writing shapes
-  std::locale anOldLocale = OS.imbue (std::locale::classic());
-
   // use 15-digit precision
-  std::streamsize prec = OS.precision(15);
+  static constexpr std::streamsize TheFloatPrec = 15;
+
+  // always use C locale for writing shapes
+  TopTools_StreamSentry<Standard_OStream> aStreamSentry(OS, TheFloatPrec);
 
   // write the copyright
   OS << "\n" << THE_ASCII_VERSIONS[myFormatNb] << "\n";
@@ -474,7 +507,6 @@ void  TopTools_ShapeSet::Write(Standard_OStream& OS, const Message_ProgressRange
 
   if (aPS.UserBreak()) {
     OS << "Interrupted by the user\n";
-    OS.imbue (anOldLocale);
     return;
   }
 
@@ -486,7 +518,6 @@ void  TopTools_ShapeSet::Write(Standard_OStream& OS, const Message_ProgressRange
 
   if (aPS.UserBreak()) {
     OS << "Interrupted by the user\n";
-    OS.imbue(anOldLocale);
     return;
   }
 
@@ -539,8 +570,6 @@ void  TopTools_ShapeSet::Write(Standard_OStream& OS, const Message_ProgressRange
   }
   
   OS << "\n";
-  OS.precision(prec);
-  OS.imbue (anOldLocale);
 
   if (aPS.UserBreak())
       OS << "Interrupted by the user\n";
@@ -594,7 +623,7 @@ static TopAbs_ShapeEnum ReadShapeEnum(Standard_IStream& IS)
 void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange& theProgress)
 {
   // always use C locale for reading shapes
-  std::locale anOldLocale = IS.imbue (std::locale::classic());
+  TopTools_StreamSentry<Standard_IStream> aStreamSentry(IS);
 
   Clear();
 
@@ -630,11 +659,9 @@ void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange&
     }
     
   } while (!IS.fail());
-  if (IS.fail()) {
-    std::cout << "File was not written with this version of the topology"<<std::endl;
-    IS.imbue (anOldLocale);
-    return;
-  }
+
+  if (IS.fail())
+    throw Standard_ProgramError("File was not written with this version of the topology");
 
   //-----------------------------------------
   // read the locations
@@ -645,9 +672,7 @@ void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange&
   myLocations.Read(IS, aPS.Next(10));
 
   if (aPS.UserBreak()) {
-    std::cout << "Interrupted by the user"<<std::endl;
-    // on remet le LC_NUMERIC a la precedente valeur
-    IS.imbue (anOldLocale);
+    //throw Standard_ProgramError("Interrupted by the user");
     return;
   }
 
@@ -657,8 +682,7 @@ void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange&
   ReadGeometry(IS, aPS.Next(75));
 
   if (aPS.UserBreak()) {
-    std::cout << "Interrupted by the user"<<std::endl;
-    IS.imbue(anOldLocale);
+    //throw Standard_ProgramError("Interrupted by the user");
     return;
   }
 
@@ -668,11 +692,9 @@ void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange&
 
   char buffer[255];
   IS >> buffer;
-  if (strcmp(buffer,"TShapes")) {
-    std::cout << "Not a TShape table"<<std::endl;
-    // on remet le LC_NUMERIC a la precedente valeur
-    IS.imbue (anOldLocale);
-    return;
+  if (IS.fail() || strcmp(buffer,"TShapes") != 0)
+  {
+    throw Standard_ProgramError("Not a TShape table");
   }
 
   Standard_Integer i, nbShapes;
@@ -719,11 +741,10 @@ void  TopTools_ShapeSet::Read(Standard_IStream& IS, const Message_ProgressRange&
     myShapes.Add(S);
   }
 
-  // on remet le LC_NUMERIC a la precedente valeur
-  IS.imbue (anOldLocale);
-
   if (aPS.UserBreak())
-    std::cout << "Interrupted by the user" << std::endl;
+  {
+    //throw Standard_ProgramError("Interrupted by the user");
+  }
 }
 
 //=======================================================================

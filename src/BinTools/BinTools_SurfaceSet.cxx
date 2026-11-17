@@ -832,7 +832,7 @@ Standard_IStream& BinTools_SurfaceSet::ReadSurface(Standard_IStream& IS,
     Standard_SStream aMsg;
     aMsg << "EXCEPTION in BinTools_SurfaceSet::ReadSurface(..)" << std::endl;
     aMsg << anException << std::endl;
-    throw Standard_Failure(aMsg.str().c_str());
+    throw Standard_ProgramError(aMsg.str().c_str());
   }
   return IS;
 }
@@ -847,14 +847,9 @@ void  BinTools_SurfaceSet::Read (Standard_IStream& IS,
 {
   char buffer[255];
   IS >> buffer;
-  if (IS.fail() || strcmp(buffer,"Surfaces")) {
-    Standard_SStream aMsg;
-    aMsg << "BinTools_SurfaceSet::Read:  Not a surface table"<<std::endl;
-#ifdef OCCT_DEBUG
-    std::cout <<"SurfaceSet buffer: " << buffer << std::endl;
-#endif
-    throw Standard_Failure(aMsg.str().c_str());
-    return;
+  if (IS.fail() || strcmp(buffer, "Surfaces") != 0)
+  {
+    throw Standard_ProgramError("BinTools_SurfaceSet::Read(): Not a surface table");
   }
 
   Handle(Geom_Surface) S;

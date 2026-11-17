@@ -258,6 +258,7 @@ public:
   //! @param[in] theShape        the shape to write
   //! @param[in][out] theStream  the stream to output shape into
   //! @param theRange            the range of progress indicator to fill in
+  //! @throws Standard_ProgramError in case of serialization failure
   static void Write (const TopoDS_Shape& theShape,
                      Standard_OStream& theStream,
                      const Message_ProgressRange& theProgress = Message_ProgressRange())
@@ -275,6 +276,7 @@ public:
   //!                              has no effect on triangulation-only geometry
   //! @param[in] theVersion        the TopTools format version
   //! @param theProgress the range of progress indicator to fill in
+  //! @throws Standard_ProgramError in case of serialization failure
   Standard_EXPORT static void Write (const TopoDS_Shape& theShape,
                                      Standard_OStream& theStream,
                                      const Standard_Boolean theWithTriangles,
@@ -284,6 +286,7 @@ public:
 
   //! Reads a Shape  from <S> in  returns it in  <Sh>.
   //! <B> is used to build the shape.
+  //! @throws Standard_ProgramError in case of parsing or reading failure
   Standard_EXPORT static void Read (TopoDS_Shape& Sh, Standard_IStream& S, const BRep_Builder& B,
                                     const Message_ProgressRange& theProgress = Message_ProgressRange());
 

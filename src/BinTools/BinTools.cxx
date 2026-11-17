@@ -17,6 +17,7 @@
 #include <BinTools.hxx>
 #include <BinTools_ShapeSet.hxx>
 #include <FSD_FileHeader.hxx>
+#include <Message.hxx>
 #include <OSD_FileSystem.hxx>
 #include <Storage_StreamTypeMismatchError.hxx>
 
@@ -220,7 +221,15 @@ Standard_Boolean BinTools::Write (const TopoDS_Shape& theShape,
     return Standard_False;
 
   aStream->precision (15);
-  Write (theShape, *aStream, theWithTriangles, theWithNormals, theVersion, theRange);
+  try
+  {
+    Write (theShape, *aStream, theWithTriangles, theWithNormals, theVersion, theRange);
+  }
+  catch (const Standard_Failure& anExcept)
+  {
+    Message::SendFail() << "BinTools::Write() thrown exception:\n" << anExcept;
+    return false;
+  }
   aStream->flush();
   return aStream->good();
 }
@@ -240,6 +249,17 @@ Standard_Boolean BinTools::Read (TopoDS_Shape& theShape, const Standard_CString 
     return Standard_False;
   }
 
-  Read (theShape, *aStream, theRange);
+  try
+  {
+    TopoDS_Shape aShape;
+    Read (aShape, *aStream, theRange);
+    theShape = aShape;
+  }
+  catch (const Standard_Failure& anExcept)
+  {
+    Message::SendFail() << "BinTools::Read() thrown exception:\n" << anExcept;
+    return false;
+  }
+
   return aStream->good();
 }

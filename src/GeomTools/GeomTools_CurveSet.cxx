@@ -843,11 +843,10 @@ Handle(Geom_Curve) GeomTools_CurveSet::ReadCurve (Standard_IStream& IS)
     }
   }
   catch(Standard_Failure const& anException) {
-#ifdef OCCT_DEBUG
-    std::cout <<"EXCEPTION in GeomTools_CurveSet::ReadCurve(..)!!!" << std::endl;
-    std::cout << anException << std::endl;
-#endif
-    (void)anException;
+    Standard_SStream aMsg;
+    aMsg << "EXCEPTION in GeomTools_CurveSet::ReadCurve(..)" << std::endl;
+    aMsg << anException << std::endl;
+    throw Standard_ProgramError(aMsg.str().c_str());
   }
   return C;
 }
@@ -861,9 +860,9 @@ void  GeomTools_CurveSet::Read(Standard_IStream& IS, const Message_ProgressRange
 {
   char buffer[255];
   IS >> buffer;
-  if (strcmp(buffer,"Curves")) {
-    std::cout << "Not a Curve table"<<std::endl;
-    return;
+  if (IS.fail() || strcmp(buffer, "Curves") != 0)
+  {
+    throw Standard_ProgramError("GeomTools_CurveSet::Read(): Not a Curve table");
   }
 
   Standard_Integer i, nbcurve;

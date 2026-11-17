@@ -249,9 +249,9 @@ void  TopTools_LocationSet::Read(Standard_IStream& IS, const Message_ProgressRan
   Standard_Integer l1,p;
 
   IS >> buffer;
-  if (strcmp(buffer,"Locations")) {
-    std::cout << "Not a location table "<<std::endl;
-    return;
+  if (IS.fail() || strcmp(buffer,"Locations") != 0)
+  {
+    throw Standard_ProgramError("TopTools_LocationSet::Read(): Not a location table");
   }
 
   Standard_Integer i, nbLoc;
