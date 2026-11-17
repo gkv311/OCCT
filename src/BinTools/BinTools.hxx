@@ -59,6 +59,7 @@ public:
   //! @param[in] theShape        the shape to write
   //! @param[in][out] theStream  the stream to output shape into
   //! @param theRange            the range of progress indicator to fill in
+  //! @throws Standard_ProgramError in case of serialization failure
   static void Write (const TopoDS_Shape& theShape,
                      Standard_OStream& theStream,
                      const Message_ProgressRange& theRange = Message_ProgressRange())
@@ -76,6 +77,7 @@ public:
   //!                              has no effect on triangulation-only geometry
   //! @param[in] theVersion        the BinTools format version
   //! @param theRange              the range of progress indicator to fill in
+  //! @throws Standard_ProgramError in case of serialization failure
   Standard_EXPORT static void Write(const TopoDS_Shape& theShape, Standard_OStream& theStream,
                                     const Standard_Boolean theWithTriangles,
                                     const Standard_Boolean theWithNormals,
@@ -83,6 +85,7 @@ public:
                                     const Message_ProgressRange& theRange = Message_ProgressRange());
 
   //! Reads a shape from <theStream> and returns it in <theShape>.
+  //! @throws Standard_ProgramError in case of parsing or reading failure
   Standard_EXPORT static void Read (TopoDS_Shape& theShape, Standard_IStream& theStream,
                                     const Message_ProgressRange& theRange = Message_ProgressRange());
 

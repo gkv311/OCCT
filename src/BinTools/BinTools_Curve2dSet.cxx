@@ -306,14 +306,14 @@ void BinTools_Curve2dSet::WriteCurve2d(
       OS << Handle(Geom2d_OffsetCurve)::DownCast(C);
     }
     else {
-      throw Standard_Failure("UNKNOWN CURVE2d TYPE");
+      throw Standard_ProgramError("UNKNOWN CURVE2d TYPE");
     }
   }
   catch(Standard_Failure const& anException) {
     Standard_SStream aMsg;
     aMsg << "EXCEPTION in BinTools_Curve2dSet::WriteCurve2d(..)" << std::endl;
     aMsg << anException << std::endl;
-    throw Standard_Failure(aMsg.str().c_str());
+    throw Standard_ProgramError(aMsg.str().c_str());
   }  
 }
 
@@ -652,7 +652,7 @@ Standard_IStream& BinTools_Curve2dSet::ReadCurve2d(Standard_IStream& IS,
     default:
       {
 	C = NULL;
-        throw Standard_Failure("UNKNOWN CURVE2d TYPE");
+        throw Standard_ProgramError("UNKNOWN CURVE2d TYPE");
       }
       break;
     }
@@ -662,7 +662,7 @@ Standard_IStream& BinTools_Curve2dSet::ReadCurve2d(Standard_IStream& IS,
     Standard_SStream aMsg;
     aMsg <<"EXCEPTION in BinTools_Curve2dSet::ReadCurve2d(...)" << std::endl;
     aMsg << anException << std::endl;
-    throw Standard_Failure(aMsg.str().c_str());
+    throw Standard_ProgramError(aMsg.str().c_str());
   }
   return IS;
 }
@@ -676,16 +676,10 @@ void  BinTools_Curve2dSet::Read (Standard_IStream& IS,
                                  const Message_ProgressRange& theRange)
 {
   char buffer[255];
-
   IS >> buffer;
-  if (IS.fail() || strcmp(buffer,"Curve2ds")) {
-    Standard_SStream aMsg;
-    aMsg << "BinTools_Curve2dSet::Read:  Not a Curve2d table"<<std::endl;
-#ifdef OCCT_DEBUG
-    std::cout <<"Curve2dSet buffer: " << buffer << std::endl;
-#endif
-    throw Standard_Failure(aMsg.str().c_str());
-    return;
+  if (IS.fail() || strcmp(buffer,"Curve2ds") != 0)
+  {
+    throw Standard_ProgramError("BinTools_Curve2dSet::Read(): Not a Curve2d table");
   }
 
   Handle(Geom2d_Curve) C;

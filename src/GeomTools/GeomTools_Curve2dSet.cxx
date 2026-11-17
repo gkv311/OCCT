@@ -822,11 +822,10 @@ Handle(Geom2d_Curve) GeomTools_Curve2dSet::ReadCurve2d(Standard_IStream& IS)
     }
   }
   catch(Standard_Failure const& anException) {
-#ifdef OCCT_DEBUG
-    std::cout <<"EXCEPTION in GeomTools_Curve2dSet::ReadCurve2d(..)!!!" << std::endl;
-    std::cout << anException << std::endl;
-#endif
-    (void)anException;
+    Standard_SStream aMsg;
+    aMsg << "EXCEPTION in GeomTools_Curve2dSet::ReadCurve2d(..)" << std::endl;
+    aMsg << anException << std::endl;
+    throw Standard_ProgramError(aMsg.str().c_str());
   }
   return C;
 }
@@ -840,9 +839,9 @@ void  GeomTools_Curve2dSet::Read(Standard_IStream& IS, const Message_ProgressRan
 {
   char buffer[255];
   IS >> buffer;
-  if (strcmp(buffer,"Curve2ds")) {
-    std::cout << "Not a Curve2d table"<<std::endl;
-    return;
+  if (IS.fail() || strcmp(buffer, "Curve2ds") != 0)
+  {
+    throw Standard_ProgramError("GeomTools_Curve2dSet::Read(): Not a Curve2d table");
   }
 
   Standard_Integer i, nbcurve;

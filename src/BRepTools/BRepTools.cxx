@@ -705,17 +705,26 @@ Standard_Boolean  BRepTools::Write (const TopoDS_Shape& theShape,
   if(!isGood)
     return isGood;
 
-  BRepTools_ShapeSet SS (theWithTriangles, theWithNormals);
-  SS.SetFormatNb (theVersion);
-  SS.Add (theShape);
-
-  *aStream << "DBRep_DrawableShape\n";  // for easy Draw read
-  SS.Write (*aStream, theProgress);
-  isGood = aStream->good();
-  if (isGood)
+  try
   {
-    SS.Write (theShape, *aStream);
+    BRepTools_ShapeSet SS (theWithTriangles, theWithNormals);
+    SS.SetFormatNb (theVersion);
+    SS.Add (theShape);
+
+    *aStream << "DBRep_DrawableShape\n";  // for easy Draw read
+    SS.Write (*aStream, theProgress);
+    isGood = aStream->good();
+    if (isGood)
+    {
+      SS.Write (theShape, *aStream);
+    }
   }
+  catch (const Standard_Failure& anExcept)
+  {
+    Message::SendFail() << "BRepTools::Write() thrown exception:\n" << anExcept;
+    return false;
+  }
+
   aStream->flush();
   isGood = aStream->good();
 
@@ -742,10 +751,24 @@ Standard_Boolean BRepTools::Read(TopoDS_Shape& Sh,
   {
     return Standard_False;
   }
-  BRepTools_ShapeSet SS(B);
-  SS.Read (*aStream, theProgress);
-  if(!SS.NbShapes()) return Standard_False;
-  SS.Read (Sh,*aStream);
+
+  try
+  {
+    BRepTools_ShapeSet SS(B);
+    SS.Read(*aStream, theProgress);
+    if (SS.NbShapes() == 0)
+      return Standard_False;
+
+    TopoDS_Shape aShape;
+    SS.Read(aShape, *aStream);
+    Sh = aShape;
+  }
+  catch (const Standard_Failure& anExcept)
+  {
+    Message::SendFail() << "BRepTools::Read() thrown exception:\n" << anExcept;
+    return false;
+  }
+
   return Standard_True;
 }
 

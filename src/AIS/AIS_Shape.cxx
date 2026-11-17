@@ -20,7 +20,6 @@
 #include <AIS_InteractiveContext.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepTools.hxx>
-#include <BRepTools_ShapeSet.hxx>
 #include <Graphic3d_AspectFillArea3d.hxx>
 #include <Graphic3d_AspectLine3d.hxx>
 #include <Graphic3d_Group.hxx>

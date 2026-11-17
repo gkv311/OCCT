@@ -315,14 +315,14 @@ void BinTools_CurveSet::WriteCurve(const Handle(Geom_Curve)& C,
       OS << Handle(Geom_OffsetCurve)::DownCast(C);
     }
     else {
-      throw Standard_Failure("UNKNOWN CURVE TYPE");
+      throw Standard_ProgramError("UNKNOWN CURVE TYPE");
     }
   }
    catch(Standard_Failure const& anException) {
      Standard_SStream aMsg;
      aMsg << "EXCEPTION in BinTools_CurveSet::WriteCurve(..)" << std::endl;
      aMsg << anException << std::endl;
-     throw Standard_Failure(aMsg.str().c_str());
+     throw Standard_ProgramError(aMsg.str().c_str());
    }  
 }
 
@@ -668,7 +668,7 @@ Standard_IStream& BinTools_CurveSet::ReadCurve(Standard_IStream& IS,
     default:
       {
 	C = NULL;
-	throw Standard_Failure("UNKNOWN CURVE TYPE");
+  throw Standard_ProgramError("UNKNOWN CURVE TYPE");
       }
     }
   }
@@ -692,14 +692,9 @@ void  BinTools_CurveSet::Read (Standard_IStream& IS,
 {
   char buffer[255];
   IS >> buffer;
-  if (IS.fail() || strcmp(buffer,"Curves")) {
-    Standard_SStream aMsg;
-    aMsg << "BinTools_CurveSet::Read:  Not a Curve table"<<std::endl;
-#ifdef OCCT_DEBUG
-    std::cout <<"CurveSet buffer: " << buffer << std::endl;
-#endif
-    throw Standard_Failure(aMsg.str().c_str());
-    return;
+  if (IS.fail() || strcmp(buffer, "Curves") != 0)
+  {
+    throw Standard_ProgramError("BinTools_CurveSet::Read(): Not a Curve table");
   }
 
   Handle(Geom_Curve) C;
