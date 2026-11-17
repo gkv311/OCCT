@@ -174,6 +174,25 @@ static Standard_Integer CommandCmd (ClientData theClientData, Tcl_Interp* interp
     Tcl_SetResult(interp, const_cast<char*>(aStr.c_str()), TCL_VOLATILE);
     code = TCL_ERROR;
   }
+  catch (const std::shared_ptr<Standard_Failure>& anExceptPtr)
+  {
+    const char* toExitOnCatch = Tcl_GetVar(interp, "Draw_ExitOnCatch", TCL_GLOBAL_ONLY);
+    if (toExitOnCatch != nullptr && Draw::Atoi(toExitOnCatch))
+    {
+      Message::SendFail() << "An exception was caught " << *anExceptPtr;
+#ifdef _WIN32
+      Tcl_Exit(0);
+#else
+      Tcl_Eval(interp,"exit");
+#endif
+    }
+
+    Standard_SStream ss;
+    ss << "An exception was caught " << *anExceptPtr << std::ends;
+    const std::string aStr = ss.str();
+    Tcl_SetResult(interp, const_cast<char*>(aStr.c_str()), TCL_VOLATILE);
+    code = TCL_ERROR;
+  }
   catch (std::exception const& theStdException)
   {
     const char* toExitOnCatch = Tcl_GetVar (interp, "Draw_ExitOnCatch", TCL_GLOBAL_ONLY);

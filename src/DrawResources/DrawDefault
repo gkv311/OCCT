@@ -121,7 +121,7 @@ if { $tcl_platform(platform) == "windows" && ! [catch {dgetenv PATH}] } {
 }
 
 # arm signal handler with default FPE setting
-dsetsignal
+dsetsignal extra
 
 # silent return from the script
 return

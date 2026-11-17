@@ -23,6 +23,61 @@
 static OSD_SignalMode OSD_WasSetSignal = OSD_SignalMode_AsIs;
 static Standard_Integer OSD_SignalStackTraceLength = 0;
 
+//! Special exception that throws as a pointer instead of a reference,
+//! so that it will be NOT caught by standard `catch(const Standard_Failure& )` block.
+template<class BaseExceptionT>
+class OSD_SignalException : public BaseExceptionT
+{
+public:
+  //! Construct instance with the given message.
+  static std::shared_ptr<Standard_Failure> NewInstance(const char* theMessage = "")
+  {
+    if (OSD_WasSetSignal == OSD_SignalMode_SetExtra)
+      return std::make_shared<OSD_SignalException>(theMessage);
+
+    return std::make_shared<BaseExceptionT>(theMessage);
+  }
+
+  //! Construct instance with the given message and stack.
+  static std::shared_ptr<Standard_Failure> NewInstance(const char* theMessage, const char* theStackTrace)
+  {
+    if (OSD_WasSetSignal == OSD_SignalMode_SetExtra)
+      return std::make_shared<OSD_SignalException>(theMessage, theStackTrace);
+
+    return std::make_shared<BaseExceptionT>(theMessage, theStackTrace);
+  }
+
+  //! Main constructor.
+  OSD_SignalException(const char* theMessage) : BaseExceptionT(theMessage) {}
+
+  //! Constructor with stack.
+  OSD_SignalException(const char* theMessage, const char* theStackTrace) : BaseExceptionT(theMessage, theStackTrace) {}
+
+  //! Should not be called.
+  virtual void Throw() const override { throw *this; }
+
+  //! To be called from Standard_ErrorHandler::Raise().
+  virtual void ThrowFromJump(const std::shared_ptr<Standard_Failure>& theFail) const override
+  {
+    if (OSD_WasSetSignal == OSD_SignalMode_SetExtra)
+      throw theFail; // intentionally throw as a pointer instead of `*this`
+    else
+      throw *this;
+  }
+};
+
+#ifdef OCC_CONVERT_SIGNALS
+  #define THROW_OR_JUMP(theType,theMsg) \
+    Standard_Failure::Jump(OSD_SignalException<theType>::NewInstance(theMsg))
+  #define THROW_OR_JUMP_EX(theType,theMsg,theStack) \
+    Standard_Failure::Jump(OSD_SignalException<theType>::NewInstance(theMsg,theStack))
+#else
+  #define THROW_OR_JUMP(theType,theMsg) \
+    OSD_WasSetSignal == OSD_SignalMode_SetExtra ? throw std::make_shared<theType>(theMsg) : throw theType(theMsg)
+  #define THROW_OR_JUMP_EX(theType,theMsg,theStack) \
+    OSD_WasSetSignal == OSD_SignalMode_SetExtra ? throw std::make_shared<theType>(theMsg,theStack) : throw theType(theMsg,theStack)
+#endif
+
 //=======================================================================
 //function : SignalMode
 //purpose  :
@@ -111,12 +166,6 @@ static LONG _osd_debug   ( void );
 
 # define _OSD_FPX ( _EM_INVALID | _EM_DENORMAL | _EM_ZERODIVIDE | _EM_OVERFLOW )
 
-#ifdef OCC_CONVERT_SIGNALS
-#define THROW_OR_JUMP(Type,Message,Stack) Type::Jump(Type::NewInstance(Message,Stack))
-#else
-#define THROW_OR_JUMP(Type,Message,Stack) throw Type(Message,Stack)
-#endif
-
 //=======================================================================
 //function : CallHandler
 //purpose  :
@@ -194,7 +243,7 @@ static LONG CallHandler (DWORD theExceptionCode,
     }
     case STATUS_NO_MEMORY:
     {
-      THROW_OR_JUMP (OSD_Exception_STATUS_NO_MEMORY, "MEMORY ALLOCATION ERROR ( no room in the process heap )", NULL);
+      THROW_OR_JUMP_EX(OSD_Exception_STATUS_NO_MEMORY, "MEMORY ALLOCATION ERROR ( no room in the process heap )", nullptr);
       break;
     }
     case EXCEPTION_ACCESS_VIOLATION:
@@ -350,7 +399,7 @@ static void SIGWntHandler (int signum, int sub_code)
           break ;
         default:
           std::cout << "SIGWntHandler(default) -> throw Standard_NumericError(\"Floating Point Error\");" << std::endl;
-          THROW_OR_JUMP (Standard_NumericError, "Floating Point Error", NULL);
+          THROW_OR_JUMP_EX(Standard_NumericError, "Floating Point Error", nullptr);
           break ;
       }
       break ;
@@ -439,10 +488,16 @@ void OSD::SetThreadLocalSignal (OSD_SignalMode theSignalMode,
 {
 #ifdef _MSC_VER
   _se_translator_function aPreviousFunc = NULL;
-  if (theSignalMode == OSD_SignalMode_Set || theSignalMode == OSD_SignalMode_SetUnhandled)
+  if (theSignalMode == OSD_SignalMode_Set
+   || theSignalMode == OSD_SignalMode_SetExtra
+   || theSignalMode == OSD_SignalMode_SetUnhandled)
+  {
     aPreviousFunc = _set_se_translator(TranslateSE);
+  }
   if (theSignalMode == OSD_SignalMode_Unset || (theSignalMode == OSD_SignalMode_SetUnhandled && aPreviousFunc != NULL))
+  {
     _set_se_translator(aPreviousFunc);
+  }
 #else
   (void)theSignalMode;
 #endif
@@ -483,7 +538,9 @@ void OSD::SetSignal (OSD_SignalMode theSignalMode,
   // in the calling process
   {
     LPTOP_LEVEL_EXCEPTION_FILTER aPreviousFunc = NULL;
-    if (theSignalMode == OSD_SignalMode_Set || theSignalMode == OSD_SignalMode_SetUnhandled)
+    if (theSignalMode == OSD_SignalMode_Set
+     || theSignalMode == OSD_SignalMode_SetExtra
+     || theSignalMode == OSD_SignalMode_SetUnhandled)
     {
       aPreviousFunc = ::SetUnhandledExceptionFilter(WntHandler);
     }
@@ -501,7 +558,9 @@ void OSD::SetSignal (OSD_SignalMode theSignalMode,
   {
     typedef void (*SignalFuncType)(int); // same as _crt_signal_t available since vc14
     SignalFuncType aPreviousFunc = SIG_DFL;
-    if (theSignalMode == OSD_SignalMode_Set || theSignalMode == OSD_SignalMode_SetUnhandled)
+    if (theSignalMode == OSD_SignalMode_Set
+     || theSignalMode == OSD_SignalMode_SetExtra
+     || theSignalMode == OSD_SignalMode_SetUnhandled)
     {
       aPreviousFunc = signal(aSignalTypes[i], (SignalFuncType)SIGWntHandler);
     }
@@ -516,7 +575,9 @@ void OSD::SetSignal (OSD_SignalMode theSignalMode,
   // Set Ctrl-C and Ctrl-Break handler
   fCtrlBrk = Standard_False;
 #ifndef OCCT_UWP
-  if (theSignalMode == OSD_SignalMode_Set || theSignalMode == OSD_SignalMode_SetUnhandled)
+  if (theSignalMode == OSD_SignalMode_Set
+   || theSignalMode == OSD_SignalMode_SetExtra
+   || theSignalMode == OSD_SignalMode_SetUnhandled)
   {
     SetConsoleCtrlHandler(&_osd_ctrl_break_handler, true);
   }
@@ -568,54 +629,54 @@ static LONG __fastcall _osd_raise (DWORD theCode, const char* theMsg, const char
   switch (theCode)
   {
     case EXCEPTION_ACCESS_VIOLATION:
-      THROW_OR_JUMP (OSD_Exception_ACCESS_VIOLATION, aMsg, theStack);
+      THROW_OR_JUMP_EX(OSD_Exception_ACCESS_VIOLATION, aMsg, theStack);
       break;
     case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-      THROW_OR_JUMP (OSD_Exception_ARRAY_BOUNDS_EXCEEDED, aMsg, theStack);
+      THROW_OR_JUMP_EX(OSD_Exception_ARRAY_BOUNDS_EXCEEDED, aMsg, theStack);
       break;
     case EXCEPTION_DATATYPE_MISALIGNMENT:
-      THROW_OR_JUMP (Standard_ProgramError, aMsg, theStack);
+      THROW_OR_JUMP_EX(Standard_ProgramError, aMsg, theStack);
       break;
     case EXCEPTION_ILLEGAL_INSTRUCTION:
-      THROW_OR_JUMP (OSD_Exception_ILLEGAL_INSTRUCTION, aMsg, theStack);
+      THROW_OR_JUMP_EX(OSD_Exception_ILLEGAL_INSTRUCTION, aMsg, theStack);
       break;
     case EXCEPTION_IN_PAGE_ERROR:
-      THROW_OR_JUMP (OSD_Exception_IN_PAGE_ERROR, aMsg, theStack);
+      THROW_OR_JUMP_EX(OSD_Exception_IN_PAGE_ERROR, aMsg, theStack);
       break;
     case EXCEPTION_INT_DIVIDE_BY_ZERO:
-      THROW_OR_JUMP (Standard_DivideByZero, aMsg, theStack);
+      THROW_OR_JUMP_EX(Standard_DivideByZero, aMsg, theStack);
       break;
     case EXCEPTION_INT_OVERFLOW:
-      THROW_OR_JUMP (OSD_Exception_INT_OVERFLOW, aMsg, theStack);
+      THROW_OR_JUMP_EX(OSD_Exception_INT_OVERFLOW, aMsg, theStack);
       break;
     case EXCEPTION_INVALID_DISPOSITION:
-      THROW_OR_JUMP (OSD_Exception_INVALID_DISPOSITION, aMsg, theStack);
+      THROW_OR_JUMP_EX(OSD_Exception_INVALID_DISPOSITION, aMsg, theStack);
       break;
     case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-      THROW_OR_JUMP (OSD_Exception_NONCONTINUABLE_EXCEPTION, aMsg, theStack);
+      THROW_OR_JUMP_EX(OSD_Exception_NONCONTINUABLE_EXCEPTION, aMsg, theStack);
       break;
     case EXCEPTION_PRIV_INSTRUCTION:
-      THROW_OR_JUMP (OSD_Exception_PRIV_INSTRUCTION, aMsg, theStack);
+      THROW_OR_JUMP_EX(OSD_Exception_PRIV_INSTRUCTION, aMsg, theStack);
       break;
     case EXCEPTION_STACK_OVERFLOW:
-      THROW_OR_JUMP (OSD_Exception_STACK_OVERFLOW, aMsg, theStack);
+      THROW_OR_JUMP_EX(OSD_Exception_STACK_OVERFLOW, aMsg, theStack);
       break;
     case EXCEPTION_FLT_DIVIDE_BY_ZERO:
-      THROW_OR_JUMP (Standard_DivideByZero, aMsg, theStack);
+      THROW_OR_JUMP_EX(Standard_DivideByZero, aMsg, theStack);
       break;
     case EXCEPTION_FLT_STACK_CHECK:
     case EXCEPTION_FLT_OVERFLOW:
-      THROW_OR_JUMP (Standard_Overflow, aMsg, theStack);
+      THROW_OR_JUMP_EX(Standard_Overflow, aMsg, theStack);
       break;
     case EXCEPTION_FLT_UNDERFLOW:
-      THROW_OR_JUMP (Standard_Underflow, aMsg, theStack);
+      THROW_OR_JUMP_EX(Standard_Underflow, aMsg, theStack);
       break;
     case EXCEPTION_FLT_INVALID_OPERATION:
     case EXCEPTION_FLT_DENORMAL_OPERAND:
     case EXCEPTION_FLT_INEXACT_RESULT:
     case STATUS_FLOAT_MULTIPLE_TRAPS:
     case STATUS_FLOAT_MULTIPLE_FAULTS:
-      THROW_OR_JUMP (Standard_NumericError, aMsg, theStack);
+      THROW_OR_JUMP_EX(Standard_NumericError, aMsg, theStack);
       break;
     default:
       break;
@@ -814,18 +875,18 @@ static void Handler (const int theSignal)
   sigemptyset(&set);
   switch (theSignal) {
   case SIGHUP:
-    Standard_Failure::Jump(OSD_SIGHUP::NewInstance("SIGHUP 'hangup' detected."));
+    THROW_OR_JUMP(OSD_SIGHUP, "SIGHUP 'hangup' detected.");
     exit(SIGHUP);
     break;
   case SIGINT:
     // For safe handling of Control-C as stop event, arm a variable but do not
     // generate longjump (we are out of context anyway)
     fCtrlBrk = Standard_True;
-    // Standard_Failure::Jump(OSD_SIGINT::NewInstance("SIGINT 'interrupt' detected."));
+    // THROW_OR_JUMP(OSD_SIGINT, "SIGINT 'interrupt' detected.");
     // exit(SIGINT);
     break;
   case SIGQUIT:
-    Standard_Failure::Jump(OSD_SIGQUIT::NewInstance("SIGQUIT 'quit' detected."));
+    THROW_OR_JUMP(OSD_SIGQUIT, "SIGQUIT 'quit' detected.");
     exit(SIGQUIT);
     break;
   case SIGILL:
@@ -847,32 +908,32 @@ static void Handler (const int theSignal)
 
         OSD::SetFloatingSignal(true);
 
-        Standard_Failure::Jump(Standard_NumericError::NewInstance("SIGILL Arithmetic exception detected"));
+        THROW_OR_JUMP(Standard_NumericError, "SIGILL Arithmetic exception detected");
         break;
       }
     }
   #endif
-    Standard_Failure::Jump(OSD_SIGILL::NewInstance("SIGILL 'illegal instruction' detected."));
+    THROW_OR_JUMP(OSD_SIGILL, "SIGILL 'illegal instruction' detected.");
     exit(SIGILL);
     break;
   }
   case SIGKILL:
-    Standard_Failure::Jump(OSD_SIGKILL::NewInstance("SIGKILL 'kill' detected."));
+    THROW_OR_JUMP(OSD_SIGKILL, "SIGKILL 'kill' detected.");
     exit(SIGKILL);
     break;
   case SIGBUS:
     sigaddset(&set, SIGBUS);
     sigprocmask(SIG_UNBLOCK, &set, NULL) ;
-    Standard_Failure::Jump(OSD_SIGBUS::NewInstance("SIGBUS 'bus error' detected."));
+    THROW_OR_JUMP(OSD_SIGBUS, "SIGBUS 'bus error' detected.");
     exit(SIGBUS);
     break;
   case SIGSEGV:
-    Standard_Failure::Jump(OSD_SIGSEGV::NewInstance("SIGSEGV 'segmentation violation' detected."));
+    THROW_OR_JUMP(OSD_SIGSEGV, "SIGSEGV 'segmentation violation' detected.");
     exit(SIGSEGV);
     break;
 #ifdef SIGSYS
   case SIGSYS:
-    Standard_Failure::Jump(OSD_SIGSYS::NewInstance("SIGSYS 'bad argument to system call' detected."));
+    THROW_OR_JUMP(OSD_SIGSYS, "SIGSYS 'bad argument to system call' detected.");
     exit(SIGSYS);
     break;
 #endif
@@ -883,39 +944,39 @@ static void Handler (const int theSignal)
     OSD::SetFloatingSignal (Standard_True);
 #endif
 #if (!defined (__sun)) && (!defined(SOLARIS))
-    Standard_Failure::Jump(Standard_NumericError::NewInstance("SIGFPE Arithmetic exception detected"));
+    THROW_OR_JUMP(Standard_NumericError, "SIGFPE Arithmetic exception detected");
     break;
 #else
     // Reste SOLARIS
     if (aSigInfo) {
       switch(aSigInfo->si_code) {
       case FPE_FLTDIV_TRAP :
-        Standard_Failure::Jump(Standard_DivideByZero::NewInstance("Floating Divide By Zero"));
+        THROW_OR_JUMP(Standard_DivideByZero, "Floating Divide By Zero");
         break;
       case FPE_INTDIV_TRAP :
-        Standard_Failure::Jump(Standard_DivideByZero::NewInstance("Integer Divide By Zero"));
+        THROW_OR_JUMP(Standard_DivideByZero, "Integer Divide By Zero");
         break;
       case FPE_FLTOVF_TRAP :
-        Standard_Failure::Jump(Standard_Overflow::NewInstance("Floating Overflow"));
+        THROW_OR_JUMP(Standard_Overflow, "Floating Overflow");
         break;
       case FPE_INTOVF_TRAP :
-        Standard_Failure::Jump(Standard_Overflow::NewInstance("Integer Overflow"));
+        THROW_OR_JUMP(Standard_Overflow, "Integer Overflow");
         break;
       case FPE_FLTUND_TRAP :
-        Standard_Failure::Jump(Standard_NumericError::NewInstance("Floating Underflow"));
+        THROW_OR_JUMP(Standard_NumericError, "Floating Underflow");
         break;
       case FPE_FLTRES_TRAP:
-        Standard_Failure::Jump(Standard_NumericError::NewInstance("Floating Point Inexact Result"));
+        THROW_OR_JUMP(Standard_NumericError, "Floating Point Inexact Result");
         break;
       case FPE_FLTINV_TRAP :
-        Standard_Failure::Jump(Standard_NumericError::NewInstance("Invalid Floating Point Operation"));
+        THROW_OR_JUMP(Standard_NumericError, "Invalid Floating Point Operation");
         break;
       default:
-        Standard_Failure::Jump(Standard_NumericError::NewInstance("Numeric Error"));
+        THROW_OR_JUMP(Standard_NumericError, "Numeric Error");
         break;
       }
     } else {
-      Standard_Failure::Jump(Standard_NumericError::NewInstance("SIGFPE Arithmetic exception detected"));
+      THROW_OR_JUMP(Standard_NumericError, "SIGFPE Arithmetic exception detected");
     }
 #endif
     break;
@@ -958,7 +1019,7 @@ static void SegvHandler(const int theSignal,
         Standard::StackTrace (aStackBuffer, aStackBufLen, aStackLength);
       }
 
-      Standard_Failure::Jump (OSD_SIGSEGV::NewInstance (aMsg, aStackBuffer));
+      THROW_OR_JUMP_EX(OSD_SIGSEGV, aMsg, aStackBuffer);
     }
   }
 #ifdef OCCT_DEBUG
@@ -985,7 +1046,7 @@ static void SegvHandler(const int theSignal,
     {
       char aMsg[100];
       Snprintf (aMsg, "SIGSEGV 'segmentation violation' detected. Address %lx", anOffset);
-      OSD_SIGSEGV::NewInstance (aMsg)->Jump();
+      THROW_OR_JUMP(OSD_SIGSEGV, aMsg);
     }
   }
 #ifdef OCCT_DEBUG
@@ -1122,7 +1183,9 @@ void OSD::SetSignal (OSD_SignalMode theSignalMode,
 
     // set handler according to specified mode and current handler
     int retcode = -1;
-    if (theSignalMode == OSD_SignalMode_Set || theSignalMode == OSD_SignalMode_SetUnhandled)
+    if (theSignalMode == OSD_SignalMode_Set
+     || theSignalMode == OSD_SignalMode_SetExtra
+     || theSignalMode == OSD_SignalMode_SetUnhandled)
     {
       retcode = sigaction (aSignalTypes[i], &anActSet, &anActOld);
     }

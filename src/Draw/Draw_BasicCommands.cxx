@@ -1197,6 +1197,10 @@ static int dsetsignal (Draw_Interpretor& theDI, Standard_Integer theArgNb, const
     {
       aMode = OSD_SignalMode_Set;
     }
+    else if (anArg == "setextra" || anArg == "extra")
+    {
+      aMode = OSD_SignalMode_SetExtra;
+    }
     else if (anArg == "unhandled")
     {
       aMode = OSD_SignalMode_SetUnhandled;
@@ -1217,10 +1221,10 @@ static int dsetsignal (Draw_Interpretor& theDI, Standard_Integer theArgNb, const
     {
     }
     else if (anArgIter + 1 < theArgNb
-          && (anArg == "-stracktracelength"
-           || anArg == "-stracktracelen"
-           || anArg == "-stracklength"
-           || anArg == "-stracklen"))
+          && (anArg == "-stacktracelength"
+           || anArg == "-stacktracelen"
+           || anArg == "-stacklength"
+           || anArg == "-stacklen"))
     {
       aStackLen = Draw::Atoi (theArgVec[++anArgIter]);
     }
@@ -1241,6 +1245,7 @@ static int dsetsignal (Draw_Interpretor& theDI, Standard_Integer theArgNb, const
     default:
     case OSD_SignalMode_AsIs:         aModeStr = "asis";      break;
     case OSD_SignalMode_Set:          aModeStr = "set";       break;
+    case OSD_SignalMode_SetExtra:     aModeStr = "extra";     break;
     case OSD_SignalMode_SetUnhandled: aModeStr = "unhandled"; break;
     case OSD_SignalMode_Unset:        aModeStr = "unset";     break;
   }
@@ -1565,10 +1570,10 @@ void Draw::BasicCommands(Draw_Interpretor& theCommands)
   theCommands.Add("dperf","dperf [reset] -- show performance counters, reset if argument is provided",
 		  __FILE__,dperf,g);
   theCommands.Add("dsetsignal",
-            "dsetsignal [{asIs|set|unhandled|unset}=set] [{0|1|default=$CSF_FPE}]"
-    "\n\t\t:            [-strackTraceLength Length]"
+            "dsetsignal [{asIs|set|setExtra|unhandled|unset}=set] [{0|1|default=$CSF_FPE}]"
+    "\n\t\t:            [-stackTraceLength Length]"
     "\n\t\t: Sets OSD signal handler, with FPE option if argument is given."
-    "\n\t\t:  -strackTraceLength specifies length of stack trace to put into exceptions redirected from signals.",
+    "\n\t\t:  -stackTraceLength specifies length of stack trace to put into exceptions redirected from signals.",
 		  __FILE__,dsetsignal,g);
 
   theCommands.Add("dparallel",

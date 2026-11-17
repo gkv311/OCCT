@@ -282,6 +282,15 @@ void Standard_Failure::Throw() const
 }
 
 // =======================================================================
+// function : ThrowFromJump
+// purpose  :
+// =======================================================================
+void Standard_Failure::ThrowFromJump(const std::shared_ptr<Standard_Failure>& ) const
+{
+  throw *this;
+}
+
+// =======================================================================
 // function : Print
 // purpose  :
 // =======================================================================

@@ -24,7 +24,8 @@
 #define DEFINE_STANDARD_EXCEPTION(C1,C2) \
  \
 class C1 : public C2 { \
-  void Throw () const Standard_OVERRIDE { throw *this; } \
+  void Throw () const override { throw *this; } \
+  void ThrowFromJump(const std::shared_ptr<Standard_Failure>& ) const override { throw *this; } \
 public: \
   C1() : C2() {} \
   C1(Standard_CString theMessage) : C2(theMessage) {} \
@@ -38,9 +39,9 @@ public: \
     std::shared_ptr<C1> _E = std::make_shared<C1>(); \
     _E->Reraise (theMessage); \
   } \
-  static std::shared_ptr<C1> NewInstance(Standard_CString theMessage = "") { return std::make_shared<C1>(theMessage); } \
-  static std::shared_ptr<C1> NewInstance(Standard_CString theMessage, Standard_CString theStackTrace) { return std::make_shared<C1>(theMessage, theStackTrace); } \
-  virtual const char* ExceptionType() const Standard_OVERRIDE { return #C1; } \
+  static std::shared_ptr<Standard_Failure> NewInstance(Standard_CString theMessage = "") { return std::make_shared<C1>(theMessage); } \
+  static std::shared_ptr<Standard_Failure> NewInstance(Standard_CString theMessage, Standard_CString theStackTrace) { return std::make_shared<C1>(theMessage, theStackTrace); } \
+  virtual const char* ExceptionType() const override { return #C1; } \
 };
 
 //! Obsolete macro, kept for compatibility with old code

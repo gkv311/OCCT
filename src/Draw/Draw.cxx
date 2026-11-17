@@ -384,7 +384,7 @@ void Draw_Appli(int argc, char** argv, const FDraw_InitAppli Draw_InitAppli)
   // *****************************************************************
   // set signals
   // *****************************************************************
-  OSD::SetSignal(Standard_False);
+  OSD::SetSignal(OSD_SignalMode_SetExtra, Standard_False);
   //OSD::SetSignalStackTraceLength (10);
 
 #ifdef _WIN32
