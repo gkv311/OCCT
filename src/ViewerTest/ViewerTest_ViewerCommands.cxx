@@ -37,6 +37,7 @@
 #include <Aspect_DisplayConnection.hxx>
 #include <Aspect_Grid.hxx>
 #include <Aspect_TypeOfLine.hxx>
+#include <DBRep.hxx>
 #include <Draw_Appli.hxx>
 #include <Draw_Interpretor.hxx>
 #include <Draw_ProgressIndicator.hxx>
@@ -80,9 +81,11 @@
 #include <Prs3d_LineAspect.hxx>
 #include <Prs3d_Text.hxx>
 #include <Select3D_SensitivePrimitiveArray.hxx>
+#include <StdSelect_BRepOwner.hxx>
 #include <TColStd_HSequenceOfAsciiString.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
 #include <TColStd_HSequenceOfReal.hxx>
+#include <TopTools_ShapeMapHasher.hxx>
 #include <ViewerTest_AutoUpdater.hxx>
 #include <ViewerTest_ContinuousRedrawer.hxx>
 #include <ViewerTest_EventManager.hxx>
@@ -6751,7 +6754,7 @@ static int VTestImage(Draw_Interpretor& theDI, Standard_Integer theArgNb, const 
 //           pixel positions (x1,y1),...,(xn,yn)
 //           4) any of these selections with shift button pressed
 //=======================================================================
-static Standard_Integer VSelect (Draw_Interpretor& ,
+static Standard_Integer VSelect (Draw_Interpretor& theDI,
                                  Standard_Integer theNbArgs,
                                  const char** theArgVec)
 {
@@ -6762,58 +6765,150 @@ static Standard_Integer VSelect (Draw_Interpretor& ,
     return 1;
   }
 
+  const TCollection_AsciiString aCmdName(theArgVec[0]);
+  bool toClear = false;
+
+  // named objects selection
+  NCollection_List<Handle(AIS_InteractiveObject)> anObjects;
+  NCollection_List<int> anOwnerIndices;
+  NCollection_List<std::pair<TCollection_AsciiString, TopoDS_Shape>> aSubshapes;
+  int aSelMode = -1;
+  ViewerTest_AutoUpdater anUpdateTool(aCtx, ViewerTest::CurrentView());
+
+  // point/rectangle selection
   NCollection_Sequence<Graphic3d_Vec2i> aPnts;
-  bool toAllowOverlap = false;
-  bool toConvertToBacking = true;
-  AIS_SelectionScheme aSelScheme = AIS_SelectionScheme_Replace;
+  int toAllowOverlap = -1;
+  int toConvertToBacking = -1;
+  AIS_SelectionScheme aSelScheme = aCmdName == "vchangeselected"
+                                 ? AIS_SelectionScheme_XOR
+                                 : AIS_SelectionScheme_UNKNOWN;
   for (Standard_Integer anArgIter = 1; anArgIter < theNbArgs; ++anArgIter)
   {
     TCollection_AsciiString anArg (theArgVec[anArgIter]);
     anArg.LowerCase();
-    if (anArg == "-allowoverlap")
+    if (anUpdateTool.parseRedrawMode(theArgVec[anArgIter]))
     {
-      toAllowOverlap = true;
-      if (anArgIter + 1 < theNbArgs
-       && Draw::ParseOnOff (theArgVec[anArgIter + 1], toAllowOverlap))
-      {
-        ++anArgIter;
-      }
+      //
     }
-    else if (anArg == "-replace")
+    else if (toConvertToBacking == -1 && (anArg == "-dip" || anArg == "-dp"))
+    {
+      toConvertToBacking = 1;
+    }
+    else if (toConvertToBacking == -1 && anArg == "-px")
+    {
+      toConvertToBacking = 0;
+    }
+    else if (toAllowOverlap == -1 && anArg == "-allowoverlap")
+    {
+      toAllowOverlap = Draw::ParseOnOffIterator(theNbArgs, theArgVec, anArgIter) ? 1 : 0;
+    }
+    else if (aSelScheme == AIS_SelectionScheme_UNKNOWN && anArg == "-replace")
     {
       aSelScheme = AIS_SelectionScheme_Replace;
     }
-    else if (anArg == "-replaceextra")
+    else if (aSelScheme == AIS_SelectionScheme_UNKNOWN && anArg == "-replaceextra")
     {
       aSelScheme = AIS_SelectionScheme_ReplaceExtra;
     }
-    else if (anArg == "-xor"
-          || anArg == "-shift")
+    else if (aSelScheme == AIS_SelectionScheme_UNKNOWN && (anArg == "-xor" || anArg == "-shift"))
     {
       aSelScheme = AIS_SelectionScheme_XOR;
     }
-    else if (anArg == "-add")
+    else if (aSelScheme == AIS_SelectionScheme_UNKNOWN && anArg == "-add")
     {
       aSelScheme = AIS_SelectionScheme_Add;
     }
-    else if (anArg == "-remove")
+    else if (aSelScheme == AIS_SelectionScheme_UNKNOWN && anArg == "-remove")
     {
       aSelScheme = AIS_SelectionScheme_Remove;
     }
+    else if (!toClear && anArg == "-clear")
+    {
+      toClear = true;
+    }
     else if (anArgIter + 1 < theNbArgs
+          && (anArg == "-subshape" || anArg == "-subshapes"))
+    {
+      for (; anArgIter + 1 < theNbArgs; ++anArgIter)
+      {
+        const TCollection_AsciiString aShapeName(theArgVec[anArgIter + 1]);
+        const TopoDS_Shape aShape = DBRep::GetExisting(aShapeName);
+        if (aShape.IsNull())
+        {
+          if (aSubshapes.IsEmpty())
+          {
+            theDI << "Syntax error: shape '" << aShapeName << "' not found";
+            return 1;
+          }
+          break;
+        }
+
+        aSubshapes.Append(std::make_pair(aShapeName, aShape));
+      }
+    }
+    else if (anArgIter + 1 < theNbArgs
+          && (anArg == "-owner" || anArg == "-owners")
+          && TCollection_AsciiString(theArgVec[anArgIter + 1]).IsIntegerValue())
+    {
+      for (; anArgIter + 1 < theNbArgs; ++anArgIter)
+      {
+        TCollection_AsciiString anOwnerStr(theArgVec[anArgIter + 1]);
+        if (!anOwnerStr.IsIntegerValue())
+          break;
+
+        anOwnerIndices.Append(anOwnerStr.IntegerValue());
+      }
+    }
+    else if (aSelMode == -1
+          && anArgIter + 1 < theNbArgs
+          && (anArg == "-mode" || anArg == "-selmode"))
+    {
+      const TCollection_AsciiString aSelModeString(theArgVec[++anArgIter]);
+      TopAbs_ShapeEnum aShapeType = TopAbs_SHAPE;
+      if (aSelModeString.IsIntegerValue())
+      {
+        aSelMode = aSelModeString.IntegerValue();
+      }
+      else if (TopAbs::ShapeTypeFromString(aSelModeString.ToCString(), aShapeType))
+      {
+        aSelMode = AIS_Shape::SelectionMode(aShapeType);
+      }
+      else
+      {
+        theDI << "Syntax error: unknown selection mode '" << aSelModeString << "'";
+        return 1;
+      }
+    }
+    else if (anObjects.IsEmpty()
+          && anArgIter + 1 < theNbArgs
           && anArg.IsIntegerValue()
           && TCollection_AsciiString (theArgVec[anArgIter + 1]).IsIntegerValue())
     {
       const TCollection_AsciiString anArgNext (theArgVec[++anArgIter]);
       aPnts.Append (Graphic3d_Vec2i (anArg.IntegerValue(), anArgNext.IntegerValue()));
     }
-    else if (anArgIter + 1 == theNbArgs
+    else if (aSelScheme == AIS_SelectionScheme_UNKNOWN
+          && anObjects.IsEmpty()
+          && anArgIter + 1 == theNbArgs
           && anArg.IsIntegerValue())
     {
       if (anArg.IntegerValue() == 1)
       {
         aSelScheme = AIS_SelectionScheme_XOR;
       }
+    }
+    else if (aPnts.IsEmpty())
+    {
+      const TCollection_AsciiString aName(theArgVec[anArgIter]);
+      Handle(AIS_InteractiveObject) aPrs;
+      if (!GetMapOfAIS().Find2(aName, aPrs)
+        || aPrs.IsNull())
+      {
+        theDI << "Syntax error: wrong object name '" << aName << "'";
+        return 1;
+      }
+
+      anObjects.Append(aPrs);
     }
     else
     {
@@ -6822,13 +6917,168 @@ static Standard_Integer VSelect (Draw_Interpretor& ,
     }
   }
 
-  if (toAllowOverlap)
+  if (aSelScheme == AIS_SelectionScheme_UNKNOWN)
+    aSelScheme = AIS_SelectionScheme_Replace;
+
+  if (!anObjects.IsEmpty())
   {
-    aCtx->MainSelector()->AllowOverlapDetection (toAllowOverlap);
+    if (!aPnts.IsEmpty())
+    {
+      theDI << "Syntax error: wrong number of arguments";
+      return 1;
+    }
+
+    NCollection_Sequence<Handle(SelectMgr_EntityOwner)> anOwners;
+    if (!anOwnerIndices.IsEmpty())
+    {
+      if (anObjects.Size() != 1)
+      {
+        theDI << "Syntax error: wrong number of arguments";
+        return 1;
+      }
+
+      const Handle(AIS_InteractiveObject)& aSelObj = anObjects.First();
+      if (aSelMode == -1)
+      {
+        TColStd_ListOfInteger aModes;
+        aCtx->ActivatedModes(aSelObj, aModes);
+        if (aModes.Size() != 1)
+        {
+          theDI << "Error: ambiguous selection mode, use -selMode option";
+          return 1;
+        }
+        aSelMode = aModes.First();
+      }
+
+      const Handle(SelectMgr_Selection)& aSel = aSelObj->Selection(aSelMode);
+      if (aSel.IsNull() || aSel->GetSelectionState() != SelectMgr_SOS_Activated)
+      {
+        theDI << "Error: selection mode '" << aSelMode << "' is inactive";
+        return 1;
+      }
+
+      NCollection_IndexedMap<Handle(SelectMgr_EntityOwner)> anOwnerMap;
+      for (const Handle(SelectMgr_SensitiveEntity)& aSelEntIter : aSel->Entities())
+      {
+        if (!aSelEntIter->BaseSensitive().IsNull()
+         && !aSelEntIter->BaseSensitive()->OwnerId().IsNull())
+          anOwnerMap.Add(aSelEntIter->BaseSensitive()->OwnerId());
+      }
+
+      for (int anIndexIter : anOwnerIndices)
+      {
+        if (anIndexIter <= 0 || anIndexIter > anOwnerMap.Extent())
+        {
+          theDI << "Error: owner index '" << anIndexIter << "' is out of range [1," << anOwnerMap.Extent() << "]";
+          return 1;
+        }
+        anOwners.Append(anOwnerMap.FindKey(anIndexIter));
+      }
+    }
+
+    if (!aSubshapes.IsEmpty())
+    {
+      if (anObjects.Size() != 1)
+      {
+        theDI << "Syntax error: wrong number of arguments";
+        return 1;
+      }
+
+      NCollection_DataMap<TopoDS_Shape, Handle(SelectMgr_EntityOwner), TopTools_ShapeMapHasher> aShapeOwnerMap;
+
+      const Handle(AIS_InteractiveObject)& aSelObj = anObjects.First();
+      for (const Handle(SelectMgr_Selection)& aSelIter : aSelObj->Selections())
+      {
+        if (aSelIter->GetSelectionState() != SelectMgr_SOS_Activated)
+          continue;
+
+        for (const Handle(SelectMgr_SensitiveEntity)& aSelEntIter : aSelIter->Entities())
+        {
+          if (aSelEntIter->BaseSensitive().IsNull())
+            continue;
+
+          Handle(StdSelect_BRepOwner) aBRepOwner =
+              Handle(StdSelect_BRepOwner)::DownCast(aSelEntIter->BaseSensitive()->OwnerId());
+          if (!aBRepOwner.IsNull())
+            aShapeOwnerMap.Bind(aBRepOwner->Shape(), aBRepOwner);
+        }
+      }
+
+      for (const std::pair<TCollection_AsciiString, TopoDS_Shape>& aShapeIter : aSubshapes)
+      {
+        Handle(SelectMgr_EntityOwner) anOwner;
+        if (!aShapeOwnerMap.Find(aShapeIter.second, anOwner))
+        {
+          theDI << "Error: subshape '" << aShapeIter.first << "' owner not found";
+          return 1;
+        }
+        anOwners.Append(anOwner);
+      }
+    }
+
+    if (anOwners.IsEmpty())
+    {
+      for (const Handle(AIS_InteractiveObject)& aSelObj : anObjects)
+      {
+        const Handle(SelectMgr_EntityOwner) anOwner = aSelObj->GlobalSelOwner();
+        if (anOwner.IsNull()
+        || !anOwner->HasSelectable())
+        {
+          TCollection_AsciiString aName;
+          GetMapOfAIS().Find1(aSelObj, aName);
+          theDI << "Error: the presentation '" << aName << "' has no global owner";
+          return 1;
+        }
+
+        anOwners.Append(anOwner);
+      }
+    }
+
+    if (toClear
+     || (aSelScheme != AIS_SelectionScheme_Remove
+      && aSelScheme != AIS_SelectionScheme_Add
+      && aSelScheme != AIS_SelectionScheme_XOR))
+    {
+      aCtx->ClearSelected(false);
+    }
+    for (const Handle(SelectMgr_EntityOwner)& anOwnerIter : anOwners)
+    {
+      switch (aSelScheme)
+      {
+        case AIS_SelectionScheme_Remove:
+          aCtx->SetSelectedState(anOwnerIter, false);
+          break;
+        case AIS_SelectionScheme_XOR:
+          aCtx->AddOrRemoveSelected(anOwnerIter, false);
+          break;
+        default:
+        case AIS_SelectionScheme_Add:
+        case AIS_SelectionScheme_Replace:
+          aCtx->SetSelectedState(anOwnerIter, true);
+          break;
+      }
+    }
+    return 0;
+  }
+  else if (!anOwnerIndices.IsEmpty() || !aSubshapes.IsEmpty())
+  {
+    theDI << "Syntax error: object name is missing";
+    return 1;
   }
 
+  if (toClear)
+  {
+    aCtx->ClearSelected(false);
+    if (aPnts.IsEmpty())
+      return 0;
+  }
+
+  anUpdateTool.Invalidate(); // will be updated in other way
+  if (toAllowOverlap != -1)
+    aCtx->MainSelector()->AllowOverlapDetection(toAllowOverlap == 1);
+
   const Handle(V3d_View)& aView = ViewerTest::CurrentView();
-  if (toConvertToBacking)
+  if (toConvertToBacking != 0) // enabled by default
   {
     for (Graphic3d_Vec2i& aPntIter : aPnts)
     {
@@ -6845,16 +7095,9 @@ static Standard_Integer VSelect (Draw_Interpretor& ,
   }
   else if (aPnts.Length() == 2)
   {
-    if (toAllowOverlap
-     && aPnts.First().y() < aPnts.Last().y())
-    {
-      std::swap (aPnts.ChangeFirst(), aPnts.ChangeLast());
-    }
-    else if (!toAllowOverlap
-           && aPnts.First().y() > aPnts.Last().y())
-    {
-      std::swap (aPnts.ChangeFirst(), aPnts.ChangeLast());
-    }
+    if ((toAllowOverlap == 1 && aPnts.First().y() < aPnts.Last().y())
+     || (toAllowOverlap != 1 && aPnts.First().y() > aPnts.Last().y()))
+      std::swap(aPnts.ChangeFirst(), aPnts.ChangeLast());
 
     aCurrentEventManager->SelectInViewer (aPnts, aSelScheme);
   }
@@ -8390,34 +8633,6 @@ static Standard_Integer VAnimation (Draw_Interpretor& theDI,
 
   aView->Redraw();
   aView->SetImmediateUpdate (wasImmediateUpdate);
-  return 0;
-}
-
-
-//=======================================================================
-//function : VChangeSelected
-//purpose  : Adds the shape to selection or remove one from it
-//=======================================================================
-static Standard_Integer VChangeSelected (Draw_Interpretor& di,
-                                Standard_Integer argc,
-                                const char ** argv)
-{
-  if(argc != 2)
-  {
-    di<<"Usage : " << argv[0] << " shape \n";
-    return 1;
-  }
-  //get AIS_Shape:
-  TCollection_AsciiString aName(argv[1]);
-  Handle(AIS_InteractiveObject) anAISObject;
-  if (!GetMapOfAIS().Find2 (aName, anAISObject)
-    || anAISObject.IsNull())
-  {
-    di<<"Use 'vdisplay' before";
-    return 1;
-  }
-
-  ViewerTest::GetAISContext()->AddOrRemoveSelected(anAISObject, Standard_True);
   return 0;
 }
 
@@ -14914,8 +15129,8 @@ Command for testing reading/writing image libraries.
 )" /* [testimage] */);
 
   addCmd ("vselect", VSelect, /* [vselect] */ R"(
-vselect x1 y1 [x2 y2 [x3 y3 ... xn yn]] [-allowoverlap 0|1]
-        [-replace|-replaceextra|-xor|-add|-remove] [-px|-dip]=-dip
+vselect x1 y1 [x2 y2 [x3 y3 ... xn yn]] [-px|-dip]=-dip [-allowoverlap 0|1]
+        [-replace|-replaceextra|-xor|-add|-remove]=-replace
 Emulate different types of selection:
  1) Single click selection.
  2) Selection with rectangle having corners at pixel positions (x1,y1) and (x2,y2).
@@ -14927,7 +15142,18 @@ Emulate different types of selection:
     Default behavior is to detect only full inclusion
     (partial inclusion - overlap - is not allowed by default).
  5) Selection scheme replace, replaceextra, xor, add or remove (replace by default).
+
+vselect [Object1 ... ObjectN]
+        [Object [-selMode Number] -owners Index1 ... IndexN]
+        [Object -subShapes Shape1 ... ShapeN]
+        [-replace|-xor|-add|-remove]=-replace [-clear]
+Select specified objects or owners within the single object.
+Owners are indexed statring from 1 in the order printed by vstate.
 )" /* [vselect] */);
+
+  addCmd ("vchangeselected", VSelect, /* [vchangeselected] */ R"(
+vchangeselected shape : alias for 'vselect -xor object'.
+)" /* [vchangeselected] */);
 
   addCmd ("vmoveto", VMoveTo, /* [vmoveto] */ R"(
 vmoveto [x y] [-reset] [-px|-dip]=-dip
@@ -15040,10 +15266,6 @@ Video recording:
   -crf     constant rate factor (specific to codec)
   -preset  codec parameters preset (specific to codec)
 )" /* [vanim] */);
-
-  addCmd ("vchangeselected", VChangeSelected, /* [vchangeselected] */ R"(
-vchangeselected shape : Add shape to selection or remove one from it.
-)" /* [vchangeselected] */);
 
   addCmd ("vnbselected", VNbSelected, /* [vnbselected] */ R"(
 vnbselected : Returns number of selected objects in the interactive context.
