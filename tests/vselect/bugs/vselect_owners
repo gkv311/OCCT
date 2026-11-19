@@ -1,0 +1,47 @@
+puts {
+===============================================================================
+Test vselect command for selecting objects and owners
+===============================================================================
+}
+
+pload MODELING VISUALIZATION
+
+box b 300 0 0 100 200 300
+psphere s 100
+
+vinit View1
+vaxo
+vdisplay b s -dispMode 1
+vfit
+
+vselect b
+if { ![string match "*Selected*" [vstate b]] } { puts "Error: box should be selected, step 1" }
+if {  [string match "*Selected*" [vstate s]] } { puts "Error: sphere should not be selected, step 1" }
+
+vselect s
+if {  [string match "*Selected*" [vstate b]] } { puts "Error: box should not be selected, step 2" }
+if { ![string match "*Selected*" [vstate s]] } { puts "Error: sphere should be selected, step 2" }
+
+vselect b s
+if { ![string match "*Selected*" [vstate b]] } { puts "Error: box should be selected, step 3" }
+if { ![string match "*Selected*" [vstate s]] } { puts "Error: sphere should be selected, step 3" }
+
+vselmode b -set FACE 1
+vselect b -owners 3 4
+if { [vnbselected] != 2 }                   { puts "Error: 2 faces should be selected, step 4" }
+if { ![string match "*Face #3*" [vstate]] } { puts "Error: Face #3 should be selected, step 4" }
+if { ![string match "*Face #4*" [vstate]] } { puts "Error: Face #4 should be selected, step 4" }
+
+vselect b -xor -owners 3 6 1
+if { [vnbselected] != 3 }                   { puts "Error: 3 faces should be selected, step 5" }
+if { ![string match "*Face #1*" [vstate]] } { puts "Error: Face #1 should be selected, step 5" }
+if { ![string match "*Face #4*" [vstate]] } { puts "Error: Face #4 should be selected, step 5" }
+if { ![string match "*Face #6*" [vstate]] } { puts "Error: Face #6 should be selected, step 5" }
+
+explode b F
+vselect b -subshapes b_2 b_5
+if { [vnbselected] != 2 }                   { puts "Error: 2 faces should be selected, step 6" }
+if { ![string match "*Face #2*" [vstate]] } { puts "Error: Face #2 should be selected, step 6" }
+if { ![string match "*Face #5*" [vstate]] } { puts "Error: Face #5 should be selected, step 6" }
+
+vdump $imagedir/${casename}.png

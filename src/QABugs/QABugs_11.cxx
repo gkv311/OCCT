@@ -4772,9 +4772,6 @@ void QABugs::Commands_11(Draw_Interpretor& theCommands) {
 
   theCommands.Add("OCC128", "OCC128", __FILE__, OCC128, group);
 
-  // Remove as bad version of QAAddOrRemoveSelected from QADraw
-  //theCommands.Add("OCC129", "OCC129 shape islocal", __FILE__, OCC129, group);
-
   theCommands.Add("OCC136", "OCC136", __FILE__, OCC136, group);
 
   theCommands.Add("OCC105","OCC105 shape",__FILE__,OCC105,group); 
