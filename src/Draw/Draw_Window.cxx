@@ -1956,6 +1956,8 @@ static void ResetStdChannel (int type)
 \*--------------------------------------------------------*/
 static DWORD WINAPI tkLoop (const LPVOID theThreadParameter)
 {
+  OSD_Thread::SetCurrentName("occt:draw::tkLoop");
+
   (void)theThreadParameter;
   Tcl_CreateExitHandler(exitProc, 0);
   
@@ -2046,7 +2048,9 @@ static DWORD WINAPI tkLoop (const LPVOID theThreadParameter)
 
   while (console_semaphore == STOP_CONSOLE)
   {
-    Tcl_DoOneEvent (TCL_ALL_EVENTS | TCL_DONT_WAIT);
+    // avoid calling Tcl_DoOneEvent() from background thread while DRAW adds
+    // Tcl commands via Tcl_CreateCommand() from the main thread to avoid data races
+    Sleep(1);
   }
 
   if (Draw_IsConsoleSubsystem
