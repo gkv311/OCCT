@@ -266,8 +266,11 @@ static NCollection_List<Draw_Window*>& getDrawWindowList()
 //! Base_Window struct definition
 struct Draw_Window::Base_Window
 {
-  GC gc;
-  XSetWindowAttributes xswa;
+  GC                      gc = nullptr;
+  XSetWindowAttributes    xswa {};
+  NCollection_Vec2<int>   position;
+  NCollection_Vec2<int>   size;
+  TCollection_AsciiString title;
 };
 #endif
 #endif
@@ -403,12 +406,20 @@ void Draw_Window::init (const NCollection_Vec2<int>& theXY,
   myBase->xswa.colormap = Draw_WindowColorMap;
   unsigned long aSetMask = CWBackPixel | CWBorderPixel;
 
-  XSizeHints aWinHints;
-  aWinHints.flags = USPosition;
-  aWinHints.x = theXY.x();
-  aWinHints.y = theXY.y();
-  if (myWindow == 0)
+  if (myWindow == 0 && Draw_VirtualWindows)
   {
+    myBase->position = theXY;
+    myBase->size     = theSize;
+    myUseBuffer      = true;
+    InitBuffer();
+  }
+  else if (myWindow == 0)
+  {
+    XSizeHints aWinHints = {};
+    aWinHints.flags = USPosition;
+    aWinHints.x = theXY.x();
+    aWinHints.y = theXY.y();
+
     myWindow = XCreateWindow (Draw_WindowDisplay,
                               myMother,
                               theXY.x(), theXY.y(),
@@ -425,15 +436,9 @@ void Draw_Window::init (const NCollection_Vec2<int>& theXY,
 
     Atom aDeleteWindowAtom = Draw_DisplayConnection->GetAtom (Aspect_XA_DELETE_WINDOW);
     XSetWMProtocols (Draw_WindowDisplay, myWindow, &aDeleteWindowAtom, 1);
-
-    if (Draw_VirtualWindows)
-    {
-      myUseBuffer = Standard_True;
-      InitBuffer();
-    }
   }
 
-  myBase->gc = XCreateGC (Draw_WindowDisplay, myWindow, 0, NULL);
+  myBase->gc = XCreateGC(Draw_WindowDisplay, GetDrawable(), 0, nullptr);
 
   XSetPlaneMask (Draw_WindowDisplay, myBase->gc, AllPlanes);
   XSetForeground (Draw_WindowDisplay,
@@ -441,10 +446,11 @@ void Draw_Window::init (const NCollection_Vec2<int>& theXY,
   XSetBackground (Draw_WindowDisplay,
                   myBase->gc, BlackPixel(Draw_WindowDisplay, Draw_WindowScreen));
   // save in case of window recovery
-
-  myBase->xswa.backing_store = Always;
-  XChangeWindowAttributes (Draw_WindowDisplay, myWindow,
-                           CWBackingStore, &myBase->xswa);
+  if (myWindow != 0)
+  {
+    myBase->xswa.backing_store = Always;
+    XChangeWindowAttributes(Draw_WindowDisplay, myWindow, CWBackingStore, &myBase->xswa);
+  }
 
   XSetLineAttributes (Draw_WindowDisplay, myBase->gc,
                       0, LineSolid, CapButt, JoinMiter);
@@ -460,6 +466,10 @@ void Draw_Window::init (const NCollection_Vec2<int>& theXY,
 //=======================================================================
 void Draw_Window::SetUseBuffer (Standard_Boolean theToUse)
 {
+#if defined(HAVE_XLIB)
+  if (myWindow == 0)
+    return;
+#endif
   myUseBuffer = theToUse;
   InitBuffer();
 }
@@ -551,9 +561,18 @@ void Draw_Window::InitBuffer()
     {
       XFreePixmap (Draw_WindowDisplay, myImageBuffer);
     }
-    XWindowAttributes aWinAttr;
-    XGetWindowAttributes (Draw_WindowDisplay, myWindow, &aWinAttr);
-    myImageBuffer = XCreatePixmap (Draw_WindowDisplay, myWindow, aWinAttr.width, aWinAttr.height, aWinAttr.depth);
+
+    if (myWindow != 0)
+    {
+      XWindowAttributes aWinAttr = {};
+      XGetWindowAttributes(Draw_WindowDisplay, myWindow, &aWinAttr);
+      myImageBuffer = XCreatePixmap(Draw_WindowDisplay, myWindow, aWinAttr.width, aWinAttr.height, aWinAttr.depth);
+    }
+    else
+    {
+      myImageBuffer = XCreatePixmap(Draw_WindowDisplay, myMother, myBase->size.x(), myBase->size.y(),
+                                    DefaultDepth(Draw_WindowDisplay, Draw_WindowScreen));
+    }
   }
   else if (myImageBuffer != 0)
   {
@@ -578,6 +597,12 @@ void Draw_Window::SetPosition (Standard_Integer theNewXpos,
   }
   SetWindowPos (myWindow, 0, theNewXpos, theNewYpos, 0, 0, aFlags);
 #elif defined(HAVE_XLIB)
+  if (myWindow == 0)
+  {
+    myBase->position = NCollection_Vec2<int>(theNewXpos, theNewYpos);
+    return;
+  }
+
   Standard_Integer aPosX = 0, aPosY = 0;
   GetPosition (aPosX, aPosY);
   if (aPosX != theNewXpos
@@ -606,10 +631,17 @@ void Draw_Window::SetDimension (Standard_Integer theNewDx,
   }
   SetWindowPos (myWindow, 0, 0, 0, theNewDx, theNewDy, aFlags);
 #elif defined(HAVE_XLIB)
-  if (theNewDx != WidthWin()
-   || theNewDy != HeightWin())
+  if (myWindow != 0)
   {
-    XResizeWindow (Draw_WindowDisplay, myWindow, theNewDx, theNewDy);
+    XWindowAttributes aWinAttr = {};
+    XGetWindowAttributes(Draw_WindowDisplay, myWindow, &aWinAttr);
+    if (theNewDx != aWinAttr.width || theNewDy != aWinAttr.height)
+      XResizeWindow(Draw_WindowDisplay, myWindow, theNewDx, theNewDy);
+  }
+  else if (theNewDx != myBase->size.x() || theNewDy != myBase->size.y())
+  {
+    myBase->size.SetValues(theNewDx, theNewDy);
+    InitBuffer();
   }
 #else
   (void )theNewDx;
@@ -637,10 +669,18 @@ void Draw_Window::GetPosition (Standard_Integer& thePosX,
   thePosX = aPoint.x;
   thePosY = aPoint.y;
 #elif defined(HAVE_XLIB)
-  XWindowAttributes aWinAttr;
-  XGetWindowAttributes (Draw_WindowDisplay, myWindow, &aWinAttr);
-  thePosX = aWinAttr.x;
-  thePosY = aWinAttr.y;
+  if (myWindow != 0)
+  {
+    XWindowAttributes aWinAttr = {};
+    XGetWindowAttributes(Draw_WindowDisplay, myWindow, &aWinAttr);
+    thePosX = aWinAttr.x;
+    thePosY = aWinAttr.y;
+  }
+  else
+  {
+    thePosX = myBase->position.x();
+    thePosY = myBase->position.y();
+  }
 #endif
 }
 
@@ -655,9 +695,16 @@ Standard_Integer Draw_Window::HeightWin() const
   GetClientRect (myWindow, &aRect);
   return aRect.bottom - aRect.top;
 #elif defined(HAVE_XLIB)
-  XWindowAttributes aWinAttr;
-  XGetWindowAttributes (Draw_WindowDisplay, myWindow, &aWinAttr);
-  return aWinAttr.height;
+  if (myWindow != 0)
+  {
+    XWindowAttributes aWinAttr = {};
+    XGetWindowAttributes(Draw_WindowDisplay, myWindow, &aWinAttr);
+    return aWinAttr.height;
+  }
+  else
+  {
+    return myBase->size.y();
+  }
 #else
   return 1;
 #endif
@@ -674,9 +721,16 @@ Standard_Integer Draw_Window::WidthWin() const
   GetClientRect (myWindow, &aRect);
   return aRect.right - aRect.left;
 #elif defined(HAVE_XLIB)
-  XWindowAttributes aWinAttr;
-  XGetWindowAttributes (Draw_WindowDisplay, myWindow, &aWinAttr);
-  return aWinAttr.width;
+  if (myWindow != 0)
+  {
+    XWindowAttributes aWinAttr = {};
+    XGetWindowAttributes(Draw_WindowDisplay, myWindow, &aWinAttr);
+    return aWinAttr.width;
+  }
+  else
+  {
+    return myBase->size.x();
+  }
 #else
   return 1;
 #endif
@@ -692,7 +746,10 @@ void Draw_Window::SetTitle (const TCollection_AsciiString& theTitle)
   const TCollection_ExtendedString aTitleW (theTitle);
   SetWindowTextW (myWindow, aTitleW.ToWideString());
 #elif defined(HAVE_XLIB)
-  XStoreName (Draw_WindowDisplay, myWindow, theTitle.ToCString());
+  if (myWindow != 0)
+    XStoreName(Draw_WindowDisplay, myWindow, theTitle.ToCString());
+  else
+     myBase->title = theTitle;
 #else
   (void )theTitle;
 #endif
@@ -709,9 +766,16 @@ TCollection_AsciiString Draw_Window::GetTitle() const
   GetWindowTextW (myWindow, aTitleW, 30);
   return TCollection_AsciiString (aTitleW);
 #elif defined(HAVE_XLIB)
-  char* aTitle = NULL;
-  XFetchName (Draw_WindowDisplay, myWindow, &aTitle);
-  return TCollection_AsciiString (aTitle);
+  if (myWindow != 0)
+  {
+    char* aTitle = nullptr;
+    XFetchName(Draw_WindowDisplay, myWindow, &aTitle);
+    return TCollection_AsciiString(aTitle);
+  }
+  else
+  {
+    return myBase->title;
+  }
 #else
   return TCollection_AsciiString();
 #endif
@@ -776,7 +840,7 @@ bool Draw_Window::IsMapped() const
 //=======================================================================
 void Draw_Window::DisplayWindow()
 {
-  if (Draw_VirtualWindows)
+  if (Draw_VirtualWindows || myWindow == 0)
   {
     return;
   }
@@ -796,6 +860,9 @@ void Draw_Window::DisplayWindow()
 //=======================================================================
 void Draw_Window::Hide()
 {
+  if (myWindow == 0)
+    return;
+
 #ifdef _WIN32
   ShowWindow (myWindow, SW_HIDE);
 #elif defined(HAVE_XLIB)
@@ -813,8 +880,11 @@ void Draw_Window::Destroy()
   DestroyWindow (myWindow);
 #elif defined(HAVE_XLIB)
   XFreeGC (Draw_WindowDisplay, myBase->gc);
-  XDestroyWindow (Draw_WindowDisplay, myWindow);
-  myWindow = 0;
+  if (myWindow != 0)
+  {
+    XDestroyWindow(Draw_WindowDisplay, myWindow);
+    myWindow = 0;
+  }
   if (myImageBuffer != 0)
   {
     XFreePixmap (Draw_WindowDisplay, myImageBuffer);
@@ -853,7 +923,7 @@ void Draw_Window::Clear()
     XFillRectangle (Draw_WindowDisplay, myImageBuffer, myBase->gc, 0, 0, WidthWin(), HeightWin());
     XSetForeground (Draw_WindowDisplay, myBase->gc, aCurrValues.foreground);
   }
-  else
+  else if (myWindow != 0)
   {
     XClearArea (Draw_WindowDisplay, myWindow, 0, 0, 0, 0, False);
   }
@@ -997,7 +1067,7 @@ void Draw_Window::Redraw()
     ReleaseDC (myWindow, hDC);
   }
 #elif defined(HAVE_XLIB)
-  if (myUseBuffer)
+  if (myUseBuffer && myWindow != 0)
   {
     XCopyArea (Draw_WindowDisplay,
                myImageBuffer, myWindow,
@@ -1127,16 +1197,24 @@ Standard_Boolean Draw_Window::Save (const char* theFileName) const
   XSync (Draw_WindowDisplay, True);
 
   // the attributes
-  XWindowAttributes aWinAttr;
-  XGetWindowAttributes (Draw_WindowDisplay, myWindow, &aWinAttr);
+  XWindowAttributes aWinAttr = {};
+  if (myWindow != 0)
+  {
+    XGetWindowAttributes(Draw_WindowDisplay, myWindow, &aWinAttr);
+  }
+  else
+  {
+    aWinAttr.width  = myBase->size.x();
+    aWinAttr.height = myBase->size.y();
+  }
 
   if (!myUseBuffer)
   {
     // make sure that the whole window fit on display to prevent BadMatch error
-    XWindowAttributes aWinAttrRoot;
+    XWindowAttributes aWinAttrRoot = {};
     XGetWindowAttributes (Draw_WindowDisplay, XRootWindowOfScreen (aWinAttr.screen), &aWinAttrRoot);
 
-    Window aWinChildDummy;
+    Window aWinChildDummy = 0;
     int aWinLeft = 0, aWinTop = 0;
     XTranslateCoordinates (Draw_WindowDisplay, myWindow, XRootWindowOfScreen (aWinAttr.screen),
                            0, 0, &aWinLeft, &aWinTop, &aWinChildDummy);
@@ -1149,7 +1227,7 @@ Standard_Boolean Draw_Window::Save (const char* theFileName) const
     }
   }
 
-  XVisualInfo aVInfo;
+  XVisualInfo aVInfo = {};
   if (XMatchVisualInfo (Draw_WindowDisplay, Draw_WindowScreen, 32, TrueColor, &aVInfo) == 0
    && XMatchVisualInfo (Draw_WindowDisplay, Draw_WindowScreen, 24, TrueColor, &aVInfo) == 0)
   {
@@ -1201,6 +1279,9 @@ Standard_Boolean Draw_Window::Save (const char* theFileName) const
 //=======================================================================
 void Draw_Window::Wait (Standard_Boolean theToWait)
 {
+  if (myWindow == 0)
+    return;
+
   Flush();
   long aMask = ButtonPressMask | ExposureMask | StructureNotifyMask;
   if (!theToWait) { aMask |= PointerMotionMask; }
@@ -1329,27 +1410,29 @@ void Run_Appli(Standard_Boolean (*interprete) (const char*))
   }
   Tcl_DStringInit (&Draw_TclCommand);
 
+  bool isTkLoop = false;
 #ifdef _TK
-  if (Draw_VirtualWindows)
+  if (Tk_MainWindow(aCommands.Interp()) != nullptr)
   {
     // main window will never shown
     // but main loop will parse all Xlib messages
-    Tcl_Eval(aCommands.Interp(), "wm withdraw .");
-  }
-  // Loop infinitely, waiting for commands to execute.
-  // When there are no windows left, Tk_MainLoop returns and we exit.
-  Tk_MainLoop();
-#else
-  if (!toWaitInput)
-  {
-    return;
-  }
+    if (Draw_VirtualWindows)
+      Tcl_Eval(aCommands.Interp(), "wm withdraw .");
 
-  for (;;)
-  {
-    Tcl_DoOneEvent (0); // practically the same as Tk_MainLoop()
+    // Loop infinitely, waiting for commands to execute.
+    // When there are no windows left, Tk_MainLoop returns and we exit.
+    Tk_MainLoop();
+    isTkLoop = true;
   }
 #endif
+  if (!isTkLoop)
+  {
+    if (!toWaitInput)
+      return;
+
+    for (;;)
+      Tcl_DoOneEvent (0); // practically the same as Tk_MainLoop()
+  }
 
   for (NCollection_List<Draw_Window::FCallbackBeforeTerminate>::Iterator anIter (TermCallbacks());
        anIter.More(); anIter.Next())
@@ -1358,18 +1441,18 @@ void Run_Appli(Standard_Boolean (*interprete) (const char*))
   }
 }
 
-//======================================================
-// function : Init_Appli()
-// purpose  :
-//======================================================
-Standard_Boolean Init_Appli()
-{
-  Draw_Interpretor& aCommands = Draw::GetInterpretor();
-  aCommands.Init();
-  Tcl_Interp *interp = aCommands.Interp();
-  Tcl_Init (interp);
-
 #ifdef _TK
+static void initTk(Tcl_Interp* interp)
+{
+#if defined(HAVE_XLIB)
+  // Off-screen viewers use Xlib directly. Leave Tk available for explicit loading.
+  if (Draw_VirtualWindows)
+  {
+    Tcl_StaticPackage(nullptr, "Tk", Tk_Init, nullptr);
+    return;
+  }
+#endif
+
   try
   {
     OCC_CATCH_SIGNALS
@@ -1398,6 +1481,22 @@ Standard_Boolean Init_Appli()
 #endif
 
   Tk_GeometryRequest (aMainWindow, 200, 200);
+}
+#endif
+
+//======================================================
+// function : Init_Appli()
+// purpose  :
+//======================================================
+Standard_Boolean Init_Appli()
+{
+  Draw_Interpretor& aCommands = Draw::GetInterpretor();
+  aCommands.Init();
+  Tcl_Interp *interp = aCommands.Interp();
+  Tcl_Init (interp);
+
+#ifdef _TK
+  initTk(interp);
 #endif
 
 #if defined(HAVE_XLIB)
@@ -1420,11 +1519,11 @@ Standard_Boolean Init_Appli()
   //
   // synchronize the display server : could be done within Tk_Init
   //
-  XSynchronize (Draw_WindowDisplay, True);
-  XSetInputFocus (Draw_WindowDisplay,
-                  PointerRoot,
-                  RevertToPointerRoot,
-                  CurrentTime);
+  if (!Draw_VirtualWindows)
+  {
+    XSynchronize(Draw_WindowDisplay, True);
+    XSetInputFocus(Draw_WindowDisplay, PointerRoot, RevertToPointerRoot, CurrentTime);
+  }
 
   Draw_WindowScreen   = DefaultScreen(Draw_WindowDisplay);
   Draw_WindowColorMap = DefaultColormap(Draw_WindowDisplay,
