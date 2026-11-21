@@ -1159,13 +1159,14 @@ Standard_Boolean Draw_Window::Save (const char* theFileName) const
 
   Image_AlienPixMap anImage;
   bool isBigEndian = Image_PixMap::IsBigEndianHost();
-  const Standard_Size aSizeRowBytes = Standard_Size(aWinAttr.width) * 4;
+  Standard_Size aSizeRowBytes = Standard_Size(aWinAttr.width) * 4;
   if (!anImage.InitTrash (isBigEndian ? Image_Format_RGB32 : Image_Format_BGR32,
                           Standard_Size(aWinAttr.width), Standard_Size(aWinAttr.height), aSizeRowBytes))
   {
     return Standard_False;
   }
   anImage.SetTopDown (true);
+  aSizeRowBytes = anImage.SizeRowBytes(); // could be adjusted for memory alignment
 
   XImage* anXImage = XCreateImage (Draw_WindowDisplay, aVInfo.visual,
                                    32, ZPixmap, 0, (char* )anImage.ChangeData(), aWinAttr.width, aWinAttr.height, 32, int(aSizeRowBytes));
