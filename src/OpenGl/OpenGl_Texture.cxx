@@ -1377,11 +1377,34 @@ bool OpenGl_Texture::ImageDump (Image_PixMap& theImage,
     return false;
   }
 
+  const auto getAligned = [](const size_t theNumber, const size_t theAlignment) -> size_t
+  {
+    return theNumber + theAlignment - 1 - (theNumber - 1) % theAlignment;
+  };
+
   const GLint anAligment = Min (GLint(theImage.MaxRowAligmentBytes()), 8); // limit to 8 bytes for OpenGL
+
+  const GLint   anExtraBytes       = GLint(theImage.RowExtraBytes());
+  GLint         aPixelsWidth       = GLint(theImage.SizeRowBytes() / theImage.SizePixelBytes());
+  Standard_Size aSizeRowBytesEstim = getAligned(theImage.SizePixelBytes() * aPixelsWidth, anAligment);
+  if (anExtraBytes < anAligment)
+  {
+    aPixelsWidth = 0;
+  }
+  else if (aSizeRowBytesEstim != theImage.SizeRowBytes())
+  {
+    aPixelsWidth = 0;
+    return false;
+  }
+
   theCtx->core11fwd->glPixelStorei (GL_PACK_ALIGNMENT, anAligment);
   if (theCtx->hasPackRowLength)
   {
-    theCtx->core11fwd->glPixelStorei (GL_PACK_ROW_LENGTH, 0);
+    theCtx->core11fwd->glPixelStorei (GL_PACK_ROW_LENGTH, aPixelsWidth);
+  }
+  else if (aPixelsWidth != 0)
+  {
+    return false;
   }
   // glGetTextureImage() allows avoiding to binding texture id, but apparently requires clean FBO binding state...
   //if (theCtx->core45 != NULL) { theCtx->core45->glGetTextureImage (myTextureId, theLevel, aFormat.PixelFormat(), aFormat.DataType(), (GLsizei )theImage.SizeBytes(), theImage.ChangeData()); } else

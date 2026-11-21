@@ -933,16 +933,6 @@ void OpenGl_FrameBuffer::UnbindBuffer (const Handle(OpenGl_Context)& theGlCtx)
   }
 }
 
-// =======================================================================
-// function : getAligned
-// purpose  :
-// =======================================================================
-inline Standard_Size getAligned (const Standard_Size theNumber,
-                                 const Standard_Size theAlignment)
-{
-  return theNumber + theAlignment - 1 - (theNumber - 1) % theAlignment;
-}
-
 template<typename T>
 inline void convertRowFromRgba (T* theRgbRow,
                                 const Image_ColorRGBA* theRgbaRow,
@@ -1141,6 +1131,11 @@ Standard_Boolean OpenGl_FrameBuffer::BufferDump (const Handle(OpenGl_Context)& t
   }
 
   // setup alignment
+  const auto getAligned = [](const size_t theNumber, const size_t theAlignment) -> size_t
+  {
+    return theNumber + theAlignment - 1 - (theNumber - 1) % theAlignment;
+  };
+
   const GLint anAligment = Min (GLint(theImage.MaxRowAligmentBytes()), 8); // limit to 8 bytes for OpenGL
   theGlCtx->core11fwd->glPixelStorei (GL_PACK_ALIGNMENT, anAligment);
   bool isBatchCopy = !theImage.IsTopDown();

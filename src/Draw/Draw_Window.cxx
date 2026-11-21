@@ -1076,14 +1076,24 @@ static Standard_Boolean SaveBitmap (HBITMAP     theHBitmap,
   aBitmapInfo.biCompression = BI_RGB;
 
   // Copy the pixels
-  HDC aDC = GetDC (NULL);
-  Standard_Boolean isSuccess = GetDIBits (aDC, theHBitmap,
-                                          0,                           // first scan line to set
-                                          aBitmap.bmHeight,            // number of scan lines to copy
-                                          anImage.ChangeData(),        // array for bitmap bits
-                                          (LPBITMAPINFO )&aBitmapInfo, // bitmap data info
-                                          DIB_RGB_COLORS) != 0;
-  ReleaseDC (NULL, aDC);
+  HDC aDC = GetDC(nullptr);
+  bool isSuccess = true;
+  if (anImage.SizeRowBytes() == aSizeRowBytes)
+  {
+    isSuccess = GetDIBits(aDC, theHBitmap,
+                          0, aBitmap.bmHeight, anImage.ChangeData(),
+                          (LPBITMAPINFO )&aBitmapInfo, DIB_RGB_COLORS) != 0;
+  }
+  else
+  {
+    for (int aRowIter = 0; aRowIter < aBitmap.bmHeight; ++aRowIter)
+    {
+      isSuccess = isSuccess && GetDIBits(aDC, theHBitmap,
+                                         aRowIter, 1, anImage.ChangeRow((size_t)aRowIter),
+                                         (LPBITMAPINFO )&aBitmapInfo, DIB_RGB_COLORS) != 0;
+    }
+  }
+  ReleaseDC(nullptr, aDC);
   return isSuccess && anImage.Save (theFileName);
 }
 #endif
@@ -1159,13 +1169,14 @@ Standard_Boolean Draw_Window::Save (const char* theFileName) const
 
   Image_AlienPixMap anImage;
   bool isBigEndian = Image_PixMap::IsBigEndianHost();
-  const Standard_Size aSizeRowBytes = Standard_Size(aWinAttr.width) * 4;
+  Standard_Size aSizeRowBytes = Standard_Size(aWinAttr.width) * 4;
   if (!anImage.InitTrash (isBigEndian ? Image_Format_RGB32 : Image_Format_BGR32,
                           Standard_Size(aWinAttr.width), Standard_Size(aWinAttr.height), aSizeRowBytes))
   {
     return Standard_False;
   }
   anImage.SetTopDown (true);
+  aSizeRowBytes = anImage.SizeRowBytes(); // could be adjusted for memory alignment
 
   XImage* anXImage = XCreateImage (Draw_WindowDisplay, aVInfo.visual,
                                    32, ZPixmap, 0, (char* )anImage.ChangeData(), aWinAttr.width, aWinAttr.height, 32, int(aSizeRowBytes));

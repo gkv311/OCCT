@@ -76,9 +76,10 @@ public:
   Standard_EXPORT bool Save (const TCollection_AsciiString& theFileName);
 
   //! Initialize image plane with required dimensions.
-  //! thePixelFormat - if specified pixel format doesn't supported by image library
-  //!                  than nearest supported will be used instead!
-  //! theSizeRowBytes - may be ignored by this class and required alignment will be used instead!
+  //! @param[in] thePixelFormat if specified pixel format doesn't supported by image library
+  //!                            than nearest supported will be used instead!
+  //! @param[in] theSizeRowBytes may be ignored by this class
+  //!                            and required alignment will be used instead (depending on image library)!
   Standard_EXPORT virtual bool InitTrash (Image_Format        thePixelFormat,
                                           const Standard_Size theSizeX,
                                           const Standard_Size theSizeY,

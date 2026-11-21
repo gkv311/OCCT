@@ -214,6 +214,9 @@ public: // high-level API
 
   //! Initialize image plane with required dimensions.
   //! Memory will be left uninitialized (performance trick).
+  //!
+  //! Parameter @p theSizeRowBytes will define a stride size in bytes when it is large enough;
+  //! but beware that subclasses may ignore this parameter to meet their alignment requirements.
   Standard_EXPORT virtual bool InitTrash (Image_Format        thePixelFormat,
                                           const Standard_Size theSizeX,
                                           const Standard_Size theSizeY,
@@ -224,7 +227,11 @@ public: // high-level API
   Standard_EXPORT virtual bool InitCopy (const Image_PixMap& theCopy);
 
   //! Initialize image plane with required dimensions.
-  //! Buffer will be zeroed (black color for most formats).
+  //! Buffer will be allocated using InitTrash3D()/InitTrash() virtual interface
+  //! and then will be zeroed (black color for most formats).
+  //!
+  //! Parameter @p theSizeRowBytes will define a stride size in bytes when it is large enough;
+  //! but beware that subclasses may ignore this parameter to meet their alignment requirements.
   bool InitZero (Image_Format        thePixelFormat,
                  const Standard_Size theSizeX,
                  const Standard_Size theSizeY,
@@ -258,12 +265,19 @@ public:
 
   //! Initialize 2D/3D image with required dimensions.
   //! Memory will be left uninitialized (performance trick).
+  //!
+  //! Parameter @p theSizeRowBytes will define a stride size in bytes when it is large enough;
+  //! but beware that subclasses may ignore this parameter to meet their alignment requirements.
   Standard_EXPORT virtual bool InitTrash3D (Image_Format thePixelFormat,
                                             const NCollection_Vec3<Standard_Size>& theSizeXYZ,
                                             const Standard_Size theSizeRowBytes = 0);
 
   //! Initialize 2D/3D image with required dimensions.
-  //! Buffer will be zeroed (black color for most formats).
+  //! Buffer will be allocated using InitTrash3D()/InitTrash() virtual interface
+  //! and then will be zeroed (black color for most formats).
+  //!
+  //! Parameter @p theSizeRowBytes will define a stride size in bytes when it is large enough;
+  //! but beware that subclasses may ignore this parameter to meet their alignment requirements.
   Standard_EXPORT bool InitZero3D (Image_Format thePixelFormat,
                                    const NCollection_Vec3<Standard_Size>& theSizeXYZ,
                                    const Standard_Size theSizeRowBytes = 0,
