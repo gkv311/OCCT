@@ -76,6 +76,8 @@ InsertNewlineAtEOF: true
 KeepEmptyLinesAtTheStartOfBlocks: false
 MacroBlockBegin: ''
 MacroBlockEnd: ''
+Macros:
+  - 'Standard_DEPRECATED(x)=[[deprecated(x)]]'
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: Inner
 PenaltyBreakAssignment: 100
