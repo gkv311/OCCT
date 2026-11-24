@@ -225,14 +225,17 @@ Standard_Boolean RWStl_Reader::IsAscii (Standard_IStream& theStream,
     return true;
   }
 
-  // otherwise, detect binary format by presence of non-ascii symbols in first 128 bytes
+  // otherwise, detect binary format by presence of special symbols in first 128 bytes
   // (note that binary STL file may start with the same bytes "solid " as Ascii one)
   for (Standard_Integer aByteIter = 0; aByteIter < aNbRead; ++aByteIter)
   {
-    if ((unsigned char )aBuffer[aByteIter] > (unsigned char )'~')
-    {
+    const unsigned char aByte = aBuffer[aByteIter];
+    if (aByte == '\0')
       return false;
-    }
+    else if (aByte < 0x20
+          && aByte != '\t' && aByte != '\n' && aByte != '\r'
+          && aByte != '\f' && aByte != '\v' && aByte != 0x1B)
+      return false;
   }
   return true;
 }

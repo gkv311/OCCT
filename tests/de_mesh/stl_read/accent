@@ -1,0 +1,60 @@
+puts {
+===============================================================================
+Check detection of text STL file with accent symbols
+===============================================================================
+}
+
+set TEST_STL {solid repro_accent_é.stl
+facet normal -0.999972 0.000534 0.007491
+ outer loop
+    vertex -290.927094 18.166618 606.561890
+    vertex -290.927063 17.713787 606.597839
+    vertex -290.923737 18.204159 607.007996
+ endloop
+endfacet
+facet normal -0.858530 0.512258 0.022778
+ outer loop
+    vertex -290.927094 18.166618 606.561890
+    vertex -290.520050 18.852602 606.475769
+    vertex -290.519379 18.876188 605.971497
+ endloop
+endfacet
+facet normal -0.861434 0.506582 -0.036138
+ outer loop
+    vertex -290.927094 18.166618 606.561890
+    vertex -290.923737 18.204159 607.007996
+    vertex -290.520050 18.852602 606.475769
+ endloop
+endfacet
+facet normal -0.999988 -0.000439 -0.004778
+ outer loop
+    vertex -290.927063 17.713787 606.597839
+    vertex -290.927094 18.166618 606.561890
+    vertex -290.924438 18.116362 606.012512
+ endloop
+endfacet
+facet normal -0.961239 -0.275715 0.000897
+ outer loop
+    vertex -290.927063 17.713787 606.597839
+    vertex -290.914948 17.669771 606.052612
+    vertex -290.778473 17.195898 606.622681
+ endloop
+endfacet
+facet normal -0.999265 0.036309 -0.012324
+ outer loop
+    vertex -290.927063 17.829250 596.552490
+    vertex -290.910736 18.268063 596.522705
+    vertex -290.905609 18.216406 595.954102
+ endloop
+endfacet
+endsolid repro_accent_é.stl
+}
+
+set fd [open ${imagedir}/${casename}.stl w]
+fconfigure $fd -translation lf
+puts $fd $TEST_STL
+close $fd
+readstl s ${imagedir}/${casename}.stl -brep
+
+# 6 triangles
+checknbshapes s -face 6
