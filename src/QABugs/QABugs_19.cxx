@@ -2090,16 +2090,11 @@ static Standard_Integer OCC25004 (Draw_Interpretor& theDI,
   return 0;
 }
 
+#include <QADraw.hxx>
 #include <OSD_Environment.hxx>
 #include <Resource_Manager.hxx>
 
 #define THE_QATEST_DOC_FORMAT       "My Proprietary Format"
-
-#define QA_CHECK(theDesc, theExpr, theValue) \
-{\
-  const bool isTrue = !!(theExpr); \
-  std::cout << theDesc << (isTrue ? " TRUE  " : " FALSE ") << (isTrue == theValue ? " is OK\n" : " is FAIL\n"); \
-}
 
 class Test_TDocStd_Application : public TDocStd_Application
 {
@@ -2174,14 +2169,14 @@ static Standard_Integer OCC24925 (Draw_Interpretor& theDI,
     aSStatus = anApp->SaveAs (aDoc, aFileName);
     anApp->Close (aDoc);
   }
-  QA_CHECK ("SaveAs()", aSStatus == PCDM_SS_OK, true);
+  QA_EXPECT_TRUE(aSStatus == PCDM_SS_OK) << "SaveAs()";
 
   {
     Handle(TDocStd_Document) aDoc;
     aRStatus = anApp->Open (aFileName, aDoc);
     anApp->Close (aDoc);
   }
-  QA_CHECK ("Open()  ", aRStatus == PCDM_RS_OK, true);
+  QA_EXPECT_TRUE(aRStatus == PCDM_RS_OK) << "Open()  ";
   return 0;
 }
 

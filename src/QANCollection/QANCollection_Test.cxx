@@ -13,6 +13,7 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <QADraw.hxx>
 #include <QANCollection.hxx>
 #include <QANCollection_Common.hxx>
 
@@ -29,11 +30,6 @@
 
 #include <NCollection_Vector.hxx>
 #include <NCollection_IncAllocator.hxx>
-
-// Auxiliary macro to check and report status.
-#define QA_CHECK(di,ok,what) \
-  if (ok) di << "Checking " << what << ": OK\n";\
-  else    di << "Checking " << what << ": Error\n"
 
 #define ItemType gp_Pnt
 #define Key1Type Standard_Real
@@ -1471,7 +1467,7 @@ static Standard_Integer QAOsdPathType (Draw_Interpretor& theDI, Standard_Integer
 }
 
 // Unit tests for Standard_ReadLineBuffer.
-static int QAReadLineBuffer(Draw_Interpretor& theDI, int theNbArgs, const char** )
+static int QAReadLineBuffer(Draw_Interpretor& , int theNbArgs, const char** )
 {
   if (theNbArgs != 1)
     return 1;
@@ -1484,9 +1480,9 @@ static int QAReadLineBuffer(Draw_Interpretor& theDI, int theNbArgs, const char**
 
     size_t      aLineLen = 0;
     const char* aLine    = aBuffer.ReadLine(anInput, aLineLen);
-    QA_CHECK(theDI, aLineLen == aContent.size(), "expected line length");
-    QA_CHECK(theDI, aLine[aLineLen] == '\0', "line is null-terminated");
-    QA_CHECK(theDI, ::strncmp(aLine, aContent.c_str(), aLineLen) == 0, "line content is correct");
+    QA_EXPECT_EQ(aLineLen, aContent.size()) << "line length";
+    QA_EXPECT_EQ(aLine[aLineLen], '\0') << "line is null-terminated";
+    QA_EXPECT_EQ(::strncmp(aLine, aContent.c_str(), aLineLen), 0) << "line content is correct";
   }
   return 0;
 }
