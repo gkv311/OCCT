@@ -1490,8 +1490,9 @@ void V3d_View::SetZoom (const Standard_Real theCoef,const Standard_Boolean theTo
     aCoef = aViewHeight / 1e12;
   }
 
-  aCamera->SetEye (myCamStartOpEye);
-  aCamera->SetCenter (myCamStartOpCenter);
+  if (!theToStart)
+    aCamera->SetEyeAndCenter(myCamStartOpEye, myCamStartOpCenter);
+
   aCamera->SetScale (aCamera->Scale() / aCoef);
 
   ImmediateUpdate();
