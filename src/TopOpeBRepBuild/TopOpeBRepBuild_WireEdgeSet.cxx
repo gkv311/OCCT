@@ -256,6 +256,7 @@ const TopTools_ListOfShape & TopOpeBRepBuild_WireEdgeSet::MakeNeighboursList(con
     if (newn >= 2 ) {
 
       const TopoDS_Face& F = myFace;
+      TopOpeBRepTool_2d aC2DFactory; /// TODO
 
       // plusieurs aretes de couture connexes a E par V et telles que :
       // orientation de V dans E # orientation de V dans ces aretes.
@@ -266,7 +267,7 @@ const TopTools_ListOfShape & TopOpeBRepBuild_WireEdgeSet::MakeNeighboursList(con
       Standard_Real parE = BRep_Tool::Parameter(V,E);
       Standard_Real fiE,laE,tolpc;
       Standard_Boolean trim3d = Standard_True;
-      Handle(Geom2d_Curve) PCE = FC2D_CurveOnSurface(E,F,fiE,laE,tolpc,trim3d);
+      Handle(Geom2d_Curve) PCE = aC2DFactory.CurveOnSurface(E, F, fiE, laE, tolpc, trim3d);
 
       if (!PCE.IsNull()) PCE->D1(parE,pE,d1E);
       else               LocalD1(F,E,V,pE,d1E);
@@ -290,10 +291,10 @@ const TopTools_ListOfShape & TopOpeBRepBuild_WireEdgeSet::MakeNeighboursList(con
 	const TopoDS_Edge& EE = TopoDS::Edge(lclo.Value());
 	gp_Vec2d d1EE; gp_Pnt2d pEE;
 	Standard_Real parEE = BRep_Tool::Parameter(V,EE);
-	Standard_Real fiEE,laEE,tolpc1;
-	Handle(Geom2d_Curve) PCEE = FC2D_CurveOnSurface(EE,F,fiEE,laEE,tolpc1,trim3d);
-	
-	if (!PCEE.IsNull()) PCEE->D1(parEE,pEE,d1EE);
+  Standard_Real fiEE,laEE,tolpc1;
+  Handle(Geom2d_Curve) PCEE = aC2DFactory.CurveOnSurface(EE, F, fiEE, laEE, tolpc1, trim3d);
+
+  if (!PCEE.IsNull()) PCEE->D1(parEE,pEE,d1EE);
 	else                LocalD1(F,EE,V,pEE,d1EE);
 
 	TopAbs_Orientation EEori = EE.Orientation();
@@ -518,9 +519,10 @@ Standard_Boolean TopOpeBRepBuild_WireEdgeSet::IsClosed(const TopoDS_Shape& E) co
 void TopOpeBRepBuild_WireEdgeSet::IsUVISO(const TopoDS_Edge& E,const TopoDS_Face& F,Standard_Boolean& uiso,Standard_Boolean& viso) 
 {
   uiso = viso = Standard_False;
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   Standard_Real fE,lE,tolpc;Handle(Geom2d_Curve) PC;
   Standard_Boolean trim3d = Standard_True;
-  PC = FC2D_CurveOnSurface(E,F,fE,lE,tolpc,trim3d);
+  PC = aC2DFactory.CurveOnSurface(E, F, fE, lE, tolpc, trim3d);
   if (PC.IsNull()) throw Standard_ProgramError("TopOpeBRepBuild_WireEdgeSet::IsUVISO");
 
   Handle(Standard_Type) TheType = PC->DynamicType();

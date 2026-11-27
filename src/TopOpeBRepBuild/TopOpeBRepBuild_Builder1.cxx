@@ -1818,14 +1818,15 @@ Standard_Integer TopOpeBRepBuild_Builder1::IsSame2d (const TopTools_SequenceOfSh
 
   Handle(Geom2d_Curve) C2D;
   // C2DPieceTool
-  Handle(Geom2d_Curve) C2DPieceTool = FC2D_CurveOnSurface (aPTool, aFObj, f1, l1, tolpc, Standard_True);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  const Handle(Geom2d_Curve) C2DPieceTool = aC2DFactory.CurveOnSurface(aPTool, aFObj, f1, l1, tolpc, Standard_True);
 
   parP= f1*PAR_T + (1 - PAR_T)*l1;
   gp_Pnt2d aPPiece;
   C2DPieceTool -> D0(parP, aPPiece);
 
   // Tool Edge
-  C2D=FC2D_CurveOnSurface (anETool, aFObj, f, l, tolpc, Standard_True);
+  C2D = aC2DFactory.CurveOnSurface(anETool, aFObj, f, l, tolpc, Standard_True);
   Geom2dAPI_ProjectPointOnCurve aPP2d(aPPiece, C2D);
   parOri = aPP2d.LowerDistanceParameter();
 
@@ -1840,7 +1841,7 @@ Standard_Integer TopOpeBRepBuild_Builder1::IsSame2d (const TopTools_SequenceOfSh
   gp_Pnt2d aUV2; 
   C2D -> D0(parOri, aUV2);
   // C2DPieceObj
-  Handle(Geom2d_Curve) C2DPieceObj=FC2D_CurveOnSurface (aPObj, aFObj, f, l, tolpc, Standard_True);
+  Handle(Geom2d_Curve) C2DPieceObj = aC2DFactory.CurveOnSurface(aPObj, aFObj, f, l, tolpc, Standard_True);
 
   par=f*PAR_T + (1 - PAR_T)*l;
   C2DPieceObj->D0 (par, aUV1);
@@ -1855,7 +1856,7 @@ Standard_Integer TopOpeBRepBuild_Builder1::IsSame2d (const TopTools_SequenceOfSh
     gp_Vec2d aTrVec (aTFuv, aTLuv);
 
     Standard_Real fo = 0., lo = 0.;
-    Handle(Geom2d_Curve) C2DEdgeObj = FC2D_CurveOnSurface(anEObj, aFObj, fo, lo, tolpc, Standard_True);
+    Handle(Geom2d_Curve) C2DEdgeObj = aC2DFactory.CurveOnSurface(anEObj, aFObj, fo, lo, tolpc, Standard_True);
     gp_Pnt2d aOFuv, aOLuv;
     C2DEdgeObj -> D0(fo, aOFuv);
     C2DEdgeObj -> D0(lo, aOLuv);
@@ -1941,8 +1942,9 @@ void TopOpeBRepBuild_Builder1::OrientateEdgeOnFace(TopoDS_Edge& EdgeToPerform,
 static TopAbs_State ClassifyEdgeToFaceByOnePoint(const TopoDS_Edge& E,
 						 const TopoDS_Face& F)
 {
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   Standard_Real  f2 = 0., l2 = 0., tolpc = 0. , par = 0.;
-  Handle(Geom2d_Curve) C2D = FC2D_CurveOnSurface(E, F, f2, l2, tolpc, Standard_True);
+  Handle(Geom2d_Curve) C2D = aC2DFactory.CurveOnSurface(E, F, f2, l2, tolpc, Standard_True);
 
   par = f2*PAR_T + (1 - PAR_T)*l2;
 	

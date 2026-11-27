@@ -84,9 +84,9 @@ Standard_EXPORT Standard_Boolean FUN_tool_IsUViso(const TopoDS_Shape& E,const To
 				     Standard_Boolean& isoU,Standard_Boolean& isoV,
 				     gp_Dir2d& d2d,gp_Pnt2d& o2d)
 {
+  TopOpeBRepTool_2d aC2DFactory;
   isoU = isoV = Standard_False; Standard_Real f,l,tol; 
-  Handle(Geom2d_Curve) PC = 
-    FC2D_CurveOnSurface(TopoDS::Edge(E),TopoDS::Face(F),f,l,tol);
+  Handle(Geom2d_Curve) PC = aC2DFactory.CurveOnSurface(TopoDS::Edge(E),TopoDS::Face(F),f,l,tol);
   if (PC.IsNull()) return Standard_False;
   Standard_Boolean iso = FUN_tool_IsUViso(PC,isoU,isoV,d2d,o2d);
   return iso;
@@ -132,6 +132,7 @@ Standard_EXPORT Standard_Boolean FUN_tool_isobounds(const TopoDS_Shape& Sh,
   const Handle(Geom_Surface)& S = BRep_Tool::Surface(F);
   if (S.IsNull()) return Standard_False;
 
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   Standard_Boolean uclosed,vclosed; Standard_Real uperiod,vperiod; 
 
 //  Standard_Boolean uvclosed =
@@ -147,7 +148,8 @@ Standard_EXPORT Standard_Boolean FUN_tool_isobounds(const TopoDS_Shape& Sh,
   TopExp_Explorer ex(F,TopAbs_EDGE);
   for (; ex.More(); ex.Next()){
     const TopoDS_Edge& E = TopoDS::Edge(ex.Current());
-    Standard_Real f,l,tol; Handle(Geom2d_Curve) PC = FC2D_CurveOnSurface(E,F,f,l,tol);
+    Standard_Real f,l,tol;
+    Handle(Geom2d_Curve) PC = aC2DFactory.CurveOnSurface(E, F, f, l, tol);
     if (PC.IsNull()) return Standard_False;
     
     Standard_Boolean isou,isov; gp_Pnt2d o2d; gp_Dir2d d2d;
@@ -355,9 +357,10 @@ Standard_EXPORT Standard_Boolean FUN_tool_nggeomF(const Standard_Real& paronE,co
   Standard_Boolean project = Standard_True;
   TopAbs_Orientation oef; 
   Standard_Boolean edonfa = FUN_tool_orientEinFFORWARD(E,F,oef);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   if (edonfa) {
-    Standard_Real ttol; 
-    Handle(Geom2d_Curve) c2d = FC2D_CurveOnSurface(E,F,f,l,ttol);
+    Standard_Real ttol;
+    Handle(Geom2d_Curve) c2d = aC2DFactory.CurveOnSurface(E, F, f, l, ttol);
     project = c2d.IsNull();
     if (!project) 
       p2d = c2d->Value(paronE);
@@ -370,8 +373,8 @@ Standard_EXPORT Standard_Boolean FUN_tool_nggeomF(const Standard_Real& paronE,co
     //modified by NIZHNY-MZV  Wed Dec  1 13:55:08 1999
     //if !ok try to compute new pcurve 
     if(!ok) {
-      Standard_Real ttol; 
-      Handle(Geom2d_Curve) c2d = FC2D_CurveOnSurface(E,F,f,l,ttol);
+      Standard_Real ttol;
+      Handle(Geom2d_Curve) c2d = aC2DFactory.CurveOnSurface(E, F, f, l, ttol);
       ok = !c2d.IsNull();
       if (ok) 
 	p2d = c2d->Value(paronE);
@@ -548,15 +551,16 @@ Standard_EXPORT void FUN_tool_mkBnd2d(const TopoDS_Shape& W,const TopoDS_Shape& 
   Standard_Real tol = 1.e-8;
   Bnd_Box2d newB2d;
   TopExp_Explorer ex;
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   for (ex.Init(W,TopAbs_EDGE); ex.More(); ex.Next()) {
 //  for (TopExp_Explorer ex(W,TopAbs_EDGE); ex.More(); ex.Next()) {
     const TopoDS_Edge& E = TopoDS::Edge(ex.Current());
     const TopoDS_Face& F = TopoDS::Face(FF);
-    Standard_Real f,l,tolpc; Handle(Geom2d_Curve) pc; 
-    Standard_Boolean haspc = FC2D_HasCurveOnSurface(E,F);
+    Standard_Real f,l,tolpc; Handle(Geom2d_Curve) pc;
+    const Standard_Boolean haspc = aC2DFactory.HasCurveOnSurface(E, F);
     if (!haspc) { 
-      Standard_Real tolE = BRep_Tool::Tolerance(E); 
-      pc = FC2D_CurveOnSurface(E,F,f,l,tolpc);
+      Standard_Real tolE = BRep_Tool::Tolerance(E);
+      pc = aC2DFactory.CurveOnSurface(E, F, f, l, tolpc);
       Standard_Real newtol = Max(tolE,tolpc);
       BRep_Builder BB; BB.UpdateEdge(E,pc,F,newtol); 
     } 
@@ -737,7 +741,9 @@ Standard_EXPORT Standard_Boolean FUN_tool_paronEF(const TopoDS_Edge& E,const Sta
 				     const TopoDS_Face& F,gp_Pnt2d& UV, const Standard_Real tol3d)
 // <E> is on <F> ? <UV> : P -> <par> on <E>,<UV> on <F>
 {
-  Standard_Real f,l,tol; Handle(Geom2d_Curve) PC = FC2D_CurveOnSurface(E,F,f,l,tol);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  Standard_Real f,l,tol;
+  Handle(Geom2d_Curve) PC = aC2DFactory.CurveOnSurface(E, F, f, l, tol);
   if (PC.IsNull()) {
     Standard_Boolean ok = FUN_tool_parF(E,par,F,UV,tol3d);
     return ok;
@@ -964,7 +970,9 @@ Standard_EXPORT Standard_Boolean FUN_tool_SameOri(const TopoDS_Edge& E1,const To
 // ----------------------------------------------------------------------
 Standard_EXPORT Standard_Boolean FUN_tool_haspc(const TopoDS_Edge& E,const TopoDS_Face& F)
 {
-  Standard_Real f,l,tol; Handle(Geom2d_Curve) C2d =  FC2D_CurveOnSurface(E,F,f,l,tol);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  Standard_Real f,l,tol;
+  Handle(Geom2d_Curve) C2d = aC2DFactory.CurveOnSurface(E, F, f, l, tol);
   Standard_Boolean null = C2d.IsNull();
   return !null;
 }

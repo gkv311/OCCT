@@ -776,8 +776,9 @@ Standard_Boolean TopOpeBRepBuild_Builder::GParamOnReference(const TopoDS_Vertex&
 
   gp_Pln pln = suplan->Pln(); gp_Pnt p3 = BRep_Tool::Pnt(V);
   Standard_Real u,v; ElSLib::Parameters(pln,p3,u,v); gp_Pnt2d p2(u,v);
-  Standard_Real f,l,tolpc; Handle(Geom2d_Curve) C2D;
-  C2D = FC2D_CurveOnSurface(myEdgeReference,myFaceReference,f,l,tolpc);
+  Standard_Real f, l, tolpc;
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  Handle(Geom2d_Curve) C2D = aC2DFactory.CurveOnSurface(myEdgeReference, myFaceReference, f, l, tolpc);
   if (C2D.IsNull()) throw Standard_ProgramError("TopOpeBRepBuild_Builder::GParamOnReference");
   
 //  Standard_Real U;

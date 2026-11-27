@@ -621,11 +621,13 @@ Standard_Integer TopOpeBRepTool_TOOL::tryOriEinF(const Standard_Real par, const 
   Standard_Boolean checkclo = Standard_True; Standard_Integer oeinf = TopOpeBRepTool_TOOL::OriinSor(e,f,checkclo);
   if (oeinf != 0) return oeinf;
 
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   Handle(Geom2d_Curve) pc; Standard_Real pf,pl,tol;
-  Standard_Boolean hasold = FC2D_HasOldCurveOnSurface(e,f,pc);
+  const Standard_Boolean hasold = TopOpeBRepTool_2d::HasOldCurveOnSurface(e, f, pc);
   if (!hasold) return 0;
-  pc = FC2D_EditableCurveOnSurface(e,f,pf,pl,tol);
-  
+
+  pc = aC2DFactory.EditableCurveOnSurface(e, f, pf, pl, tol);
+
   // n2d is such that (p2d,oop2d) is oriented INSIDE F
   gp_Pnt2d uv; gp_Vec2d tg2d; pc->D1(par,uv,tg2d);
   gp_Vec2d n2d(gp_Dir2d(-tg2d.Y(), tg2d.X()));
@@ -665,11 +667,13 @@ Standard_Boolean TopOpeBRepTool_TOOL::NgApp(const Standard_Real par,const TopoDS
   //       on curve to find out "significant" tangents
   Standard_Boolean fquad = FUN_tool_quad(f);
   if (!fquad) return Standard_False;
-  // <pc> : 
+  // <pc> :
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   Handle(Geom2d_Curve) pc; Standard_Real pf,pl,tol;
-  Standard_Boolean hasold = FC2D_HasOldCurveOnSurface(e,f,pc);
+  const Standard_Boolean hasold = aC2DFactory.HasOldCurveOnSurface(e, f, pc);
   if (!hasold) return Standard_False;
-  pc = FC2D_EditableCurveOnSurface(e,f,pf,pl,tol);
+
+  pc = aC2DFactory.EditableCurveOnSurface(e, f, pf, pl, tol);
   // <orieinf> : 
   TopoDS_Shape aLocalShape = f.Oriented(TopAbs_FORWARD);  
   Standard_Integer orieinf = TopOpeBRepTool_TOOL::tryOriEinF(par,e,TopoDS::Face(aLocalShape));
@@ -956,13 +960,14 @@ Standard_Boolean TopOpeBRepTool_TOOL::UVISO(const Handle(Geom2d_Curve)& PC,
 Standard_Boolean TopOpeBRepTool_TOOL::UVISO(const TopoDS_Edge& E, const TopoDS_Face& F,
 			       Standard_Boolean & isoU, Standard_Boolean& isoV, gp_Dir2d& d2d, gp_Pnt2d& o2d)
 {
-  //  Standard_Real f,l,tol; Handle(Geom2d_Curve) PC = FC2D_CurveOnSurface(E,F,f,l,tol);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   Handle(Geom2d_Curve) PC; Standard_Real f,l,tol;
-  Standard_Boolean hasold = FC2D_HasOldCurveOnSurface(E,F,PC);
-  PC = FC2D_EditableCurveOnSurface(E,F,f,l,tol);
-  if (!hasold) FC2D_AddNewCurveOnSurface(PC,E,F,f,l,tol);
-  
-  Standard_Boolean iso = UVISO(PC,isoU,isoV,d2d,o2d);  
+  const Standard_Boolean hasold = TopOpeBRepTool_2d::HasOldCurveOnSurface(E, F, PC);
+  PC = aC2DFactory.EditableCurveOnSurface(E, F, f, l, tol);
+  if (!hasold)
+    aC2DFactory.AddNewCurveOnSurface(PC, E, F, f, l, tol);
+
+  Standard_Boolean iso = UVISO(PC,isoU,isoV,d2d,o2d);
   return iso;
 }
 
@@ -1022,9 +1027,9 @@ void TopOpeBRepTool_TOOL::TrslUV(const gp_Vec2d& t2d, TopOpeBRepTool_C2DF& C2DF)
 
 Standard_Boolean TopOpeBRepTool_TOOL::TrslUVModifE(const gp_Vec2d& t2d, const TopoDS_Face& F, TopoDS_Edge& E)
 {
-  Standard_Real f,l,tol; Handle(Geom2d_Curve) PC = FC2D_CurveOnSurface(E,F,f,l,tol);
-//  Handle(Geom2d_Curve) PC; Standard_Real f,l,tol;
-
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  Standard_Real f, l, tol;
+  Handle(Geom2d_Curve) PC = aC2DFactory.CurveOnSurface(E, F, f, l, tol);
   if (PC.IsNull()) return Standard_False;
   PC->Translate(t2d);
 //  Handle(Geom2d_Curve) toclear; BB.UpdateEdge(E,toclear,F,tole);

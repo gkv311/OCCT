@@ -66,7 +66,8 @@ void TopOpeBRep_Hctxee2d::SetEdges(const TopoDS_Edge& E1,const TopoDS_Edge& E2,
   gp_Pnt2d pfirst,plast;
 
   Handle(Geom2d_Curve) PC1;
-  PC1 = FC2D_CurveOnSurface(myEdge1,F1,first,last,tolpc);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  PC1 = aC2DFactory.CurveOnSurface(myEdge1, F1, first, last, tolpc);
   if (PC1.IsNull()) throw Standard_Failure("TopOpeBRep_Hctxee2d::SetEdges : no 2d curve");
   myCurve1.Load(PC1);
   BRep_Tool::UVPoints(myEdge1,F1,pfirst,plast);
@@ -87,8 +88,8 @@ void TopOpeBRep_Hctxee2d::SetEdges(const TopoDS_Edge& E1,const TopoDS_Edge& E2,
   const Handle(Geom_Surface) S2 = BRep_Tool::Surface(F2,L2);
   if (S1 == S2 && L1 == L2) memesupport=Standard_True;
   
-  if ( ST1 == GeomAbs_Plane || memesfaces || memesupport) {    
-    Handle(Geom2d_Curve) PC2 = FC2D_CurveOnSurface(myEdge2,F1,first,last,tolpc);
+  if ( ST1 == GeomAbs_Plane || memesfaces || memesupport) {
+    Handle(Geom2d_Curve) PC2 = aC2DFactory.CurveOnSurface(myEdge2, F1, first, last, tolpc);
     myCurve2.Load(PC2);
     BRep_Tool::UVPoints(myEdge2,F1,pfirst,plast);
     tole = BRep_Tool::Tolerance(myEdge2);

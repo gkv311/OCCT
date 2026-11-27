@@ -45,7 +45,7 @@ Standard_EXPORT Standard_Boolean FUN_projPonL(const gp_Pnt& P,const TopOpeBRep_L
   Standard_Boolean paramLdef = Standard_False;
   Standard_Integer Esi = (L.ArcIsEdge(1)) ? 1:2;
   const TopoDS_Edge& E = TopoDS::Edge(L.Arc());
-  Standard_Boolean hasC3D = FC2D_HasC3D(E);
+  const Standard_Boolean hasC3D = TopOpeBRepTool_2d::HasC3D(E);
   Standard_Real dist;
   if (hasC3D) {
     BRepAdaptor_Curve BAC(E);
@@ -393,7 +393,7 @@ void TopOpeBRep_FacesFiller::VP_PositionOnR(TopOpeBRep_LineInter& L)
   
   Standard_Boolean isline = Standard_False;
   const TopoDS_Edge& earc = TopoDS::Edge(L.Arc());
-  Standard_Boolean hasc3d = FC2D_HasC3D(earc);
+  const Standard_Boolean hasc3d = TopOpeBRepTool_2d::HasC3D(earc);
   if (hasc3d) isline = FUN_tool_line(earc);
   else {
     BRepAdaptor_Curve2d BAC2D;

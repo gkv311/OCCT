@@ -159,7 +159,8 @@ static Standard_Boolean FUN_EPIforEvisoONperiodicF
 {
   Standard_Real pf,pl,tolpc;  
   TopoDS_Vertex Vf, Vl; TopExp::Vertices(E,Vf,Vl);
-  Handle(Geom2d_Curve) PC = FC2D_CurveOnSurface(E,F,pf,pl,tolpc);
+  TopOpeBRepTool_2d aC2DFactory;
+  Handle(Geom2d_Curve) PC = aC2DFactory.CurveOnSurface(E,F,pf,pl,tolpc);
   const Handle(Geom_Surface)& S = BRep_Tool::Surface(F);
   Standard_Real tole = BRep_Tool::Tolerance(E);
   TopOpeBRepDS_BuildTool BT; BRep_Builder BB;
@@ -959,12 +960,14 @@ static Standard_Boolean FUN_SplitEvisoONperiodicF(const Handle(TopOpeBRepDS_HDat
     // <EG> has no representation on face <FS> yet, 
     // set the pcurve on <FS>.
     // --------------------------------------------------
+    TopOpeBRepTool_2d aC2DFactory; /// TODO
     Standard_Real pf,pl,tol;
-    Handle(Geom2d_Curve) PC = FC2D_CurveOnSurface(EG,FS,pf,pl,tol);
+    Handle(Geom2d_Curve) PC = aC2DFactory.CurveOnSurface(EG, FS, pf, pl, tol);
     if (PC.IsNull()) {
       TopoDS_Edge EEG = EG; Standard_Boolean ok = FUN_tool_pcurveonF(FS,EEG);
       if (!ok) throw Standard_ProgramError("_Builder::SplitONVisolineonCyl");
-      Standard_Real f,l; PC = FC2D_CurveOnSurface(EEG,FS,f,l,tol);
+      Standard_Real f, l;
+      PC = aC2DFactory.CurveOnSurface(EEG, FS, f, l, tol);
     }
     
     Standard_Boolean uiso,viso;gp_Dir2d d2d;gp_Pnt2d o2d; 
@@ -1267,8 +1270,9 @@ static Standard_Boolean AreFacesCoincideInArea (const TopoDS_Shape& theBaseFace,
   Standard_Real pf,pl,tol;
   Standard_Boolean trim3d = Standard_True;
   Handle(Geom2d_Curve) PCref = BRep_Tool::CurveOnSurface(anEdge,aBaseFace,pf,pl);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   if (PCref.IsNull()) {
-    PCref = FC2D_CurveOnSurface(anEdge,aBaseFace,pf,pl,tol,trim3d);
+    PCref = aC2DFactory.CurveOnSurface(anEdge, aBaseFace, pf, pl, tol, trim3d);
     if (PCref.IsNull()) return Standard_False;
     tol = BRep_Tool::Tolerance(anEdge);
     BB.UpdateEdge(anEdge,PCref,aBaseFace,tol);
@@ -1307,7 +1311,7 @@ static Standard_Boolean AreFacesCoincideInArea (const TopoDS_Shape& theBaseFace,
       continue;         // the same pcurve
     Handle(Geom2d_Curve) PC = BRep_Tool::CurveOnSurface(aE,aBaseFace,pf,pl);
     if (PC.IsNull()) {
-      PC = FC2D_CurveOnSurface(aE,aBaseFace,pf,pl,tol,trim3d);
+      PC = aC2DFactory.CurveOnSurface(aE, aBaseFace, pf, pl, tol, trim3d);
       if (PC.IsNull()) {isError = Standard_True; break;}
       BB.UpdateEdge(aE,PC,aBaseFace,tolE);
     }

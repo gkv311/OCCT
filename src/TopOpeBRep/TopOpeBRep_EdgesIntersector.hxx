@@ -29,6 +29,7 @@
 #include <TopOpeBRep_SequenceOfPoint2d.hxx>
 #include <TopOpeBRep_P2Dstatus.hxx>
 #include <TopOpeBRepDS_Config.hxx>
+#include <TopOpeBRepTool_2d.hxx>
 
 class Bnd_Box;
 class BRepAdaptor_Surface;
@@ -105,7 +106,10 @@ public:
   Standard_EXPORT const TopOpeBRep_Point2d& Point() const;
   
   Standard_EXPORT const TopOpeBRep_Point2d& Point (const Standard_Integer I) const;
-  
+
+  //! Return the tool computing pcurves.
+  TopOpeBRepTool_2d& ChangeC2DFactory() { return myC2DFactory; }
+
   Standard_EXPORT virtual Standard_Boolean ReduceSegment (TopOpeBRep_Point2d& P1, TopOpeBRep_Point2d& P2, TopOpeBRep_Point2d& Pn) const;
   
   Standard_EXPORT TopOpeBRep_P2Dstatus Status1() const;
@@ -204,7 +208,7 @@ private:
   Standard_Integer myip2d;
   Standard_Integer mynp2d;
   Standard_Boolean myselectkeep;
-
+  TopOpeBRepTool_2d myC2DFactory;
 
 };
 

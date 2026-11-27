@@ -312,8 +312,9 @@ Standard_Real TopOpeBRepTool_ShapeTool::PeriodizeParameter
   Standard_Real Ufirst,Ulast,Vfirst,Vlast;
   Surf->Bounds(Ufirst,Ulast,Vfirst,Vlast);
 
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   Standard_Real first,last,tolpc;
-  const Handle(Geom2d_Curve) PC = FC2D_CurveOnSurface(E,F,first,last,tolpc);
+  const Handle(Geom2d_Curve) PC = aC2DFactory.CurveOnSurface(E, F, first, last, tolpc);
   if (PC.IsNull()) throw Standard_ProgramError("ShapeTool::PeriodizeParameter : no 2d curve");
 
   Handle(Standard_Type) TheType = PC->DynamicType();

@@ -155,6 +155,7 @@ void TopOpeBRepBuild_Builder::GFillCurveTopologyWES(const TopOpeBRepDS_CurveIter
 
   Standard_Integer iG = FCit.Current();
   const TopTools_ListOfShape& LnewE = NewEdges(iG);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   TopTools_ListIteratorOfListOfShape Iti(LnewE);
   for (; Iti.More(); Iti.Next()) {
     TopoDS_Shape EE = Iti.Value();
@@ -169,19 +170,16 @@ void TopOpeBRepBuild_Builder::GFillCurveTopologyWES(const TopOpeBRepDS_CurveIter
 
     const Handle(Geom2d_Curve)& PC = FCit.PCurve();
 
-    Standard_Boolean EhasPConFTF =
-     
-                      FC2D_HasCurveOnSurface(E,FTF);
+    const Standard_Boolean EhasPConFTF = aC2DFactory.HasCurveOnSurface(E, FTF);
     //modified by NIZHNY-MZV  Mon Mar 27 15:24:39 2000
     if(!EhasPConFTF)
       myBuildTool.PCurve(FTF,E,PC);
-    
-    Standard_Boolean EhasPConWESF = FC2D_HasCurveOnSurface(E,WESF);
-    
+
+    const Standard_Boolean EhasPConWESF = aC2DFactory.HasCurveOnSurface(E, WESF);
     if ( !EhasPConWESF) {
 //      Standard_Real tolE = BRep_Tool::Tolerance(E);
-      Standard_Real f2,l2,tolpc; Handle(Geom2d_Curve) C2D;
-      C2D = FC2D_CurveOnSurface(E,WESF,f2,l2,tolpc);
+      Standard_Real f2,l2,tolpc;
+      Handle(Geom2d_Curve) C2D = aC2DFactory.CurveOnSurface(E, WESF, f2, l2, tolpc);
       if (C2D.IsNull()) throw Standard_ProgramError("GFillCurveTopologyWES");
 #ifdef OCCT_DEBUG
 //      Standard_Real tol = Max(tolE,tolpc);
@@ -190,7 +188,7 @@ void TopOpeBRepBuild_Builder::GFillCurveTopologyWES(const TopOpeBRepDS_CurveIter
       myBuildTool.PCurve(WESF,E,C2D);
 
 #ifdef OCCT_DEBUG
-      EhasPConWESF = FC2D_HasCurveOnSurface(E,WESF);
+      EhasPConWESF = aC2DFactory.HasCurveOnSurface(E, WESF);
       if (!EhasPConWESF) std::cout<<"TopOpeBRepBuild_Builder::GFillCurveTopologyWES : Null PCurve on F"<<iWESF<<std::endl;
 #endif
     }

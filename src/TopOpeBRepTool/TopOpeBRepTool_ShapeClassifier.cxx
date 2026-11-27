@@ -471,10 +471,10 @@ void TopOpeBRepTool_ShapeClassifier::StateEdgeReference()
       const TopoDS_Face& F = TopoDS::Face(myRef);
       if(mySameDomain)
 	{
-	  Standard_Boolean trimCurve = Standard_True;
-	  C2D = FC2D_CurveOnSurface(myEdge,F,f2d,l2d,tol2d,trimCurve);
-
-	  if(C2D.IsNull())
+    TopOpeBRepTool_2d aC2DFactory; /// TODO
+    Standard_Boolean trimCurve = Standard_True;
+    C2D = aC2DFactory.CurveOnSurface(myEdge, F, f2d, l2d, tol2d, trimCurve);
+    if(C2D.IsNull())
 	    throw Standard_ProgramError("StateShapeShape : no 2d curve");
 
 	  Standard_Real t = 0.127956477;

@@ -190,18 +190,18 @@ void TopOpeBRepBuild_Builder::End()
 //	Standard_Integer nlof = lof.Extent();
 #endif
         for (TopTools_ListIteratorOfListOfShape ilof(lof);ilof.More();ilof.Next()) {
+          TopOpeBRepTool_2d aC2DFactory; /// TODO
           const TopoDS_Face& F = TopoDS::Face(ilof.Value());
           Standard_Real tolpc;
-          Standard_Boolean pcf = FC2D_HasCurveOnSurface(E,F);
-          Handle(Geom2d_Curve) C2D;
+          const Standard_Boolean pcf = aC2DFactory.HasCurveOnSurface(E, F);
+          Handle(Geom2d_Curve) C2D = aC2DFactory.CurveOnSurface(E, F, f, l, tolpc);
           if (!pcf) {
-            C2D = FC2D_CurveOnSurface(E,F,f,l,tolpc);
             if (C2D.IsNull()) throw Standard_ProgramError("TopOpeBRepBuild_Builder::End 1");
             Standard_Real tolE = BRep_Tool::Tolerance(E);
             Standard_Real tol = Max(tolE,tolpc);
             B.UpdateEdge(E,C2D,F,tol);
           }
-          C2D = FC2D_CurveOnSurface(E,F,f,l,tolpc);
+
           gp_Pnt2d P2 = C2D->Value(pv);
           BRepAdaptor_Surface BAS(F,Standard_False);
           Pv = BAS.Value(P2.X(),P2.Y());

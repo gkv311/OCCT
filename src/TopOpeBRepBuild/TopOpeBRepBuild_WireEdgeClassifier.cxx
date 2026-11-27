@@ -162,13 +162,14 @@ TopoDS_Shape TopOpeBRepBuild_WireEdgeClassifier::LoopToShape(const Handle(TopOpe
   TopoDS_Face F = TopoDS::Face(aLocalShape);
 //  TopoDS_Face F = TopoDS::Face(F1.EmptyCopied());
   BRep_Builder BB; TopoDS_Wire W; BB.MakeWire(W);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   for  (; Bit.More(); Bit.Next()) {
     const TopoDS_Edge& E = TopoDS::Edge(MYBB->Element(Bit));
     Standard_Real tolE; tolE = BRep_Tool::Tolerance(E);
-    Standard_Boolean haspc = FC2D_HasCurveOnSurface(E,F);
+    const Standard_Boolean haspc = aC2DFactory.HasCurveOnSurface(E, F);
     if (!haspc) {
       Standard_Real f,l,tolpc;Handle(Geom2d_Curve) C2D;
-      C2D = FC2D_CurveOnSurface(E,F,f,l,tolpc);
+      C2D = aC2DFactory.CurveOnSurface(E, F, f, l, tolpc);
       if (!C2D.IsNull()) {
 	Standard_Real tol = Max(tolpc,tolE);
 	BB.UpdateEdge(E,C2D,F,tol);
@@ -363,16 +364,19 @@ void  TopOpeBRepBuild_WireEdgeClassifier::ResetElement(const TopoDS_Shape& EE)
 {
   const TopoDS_Edge& E = TopoDS::Edge(EE);
   const TopoDS_Face& F = myBCEdge.Face();
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+
   Standard_Real f2,l2,tolpc;Handle(Geom2d_Curve) C2D; //jyl980406+
-  Standard_Boolean haspc = FC2D_HasCurveOnSurface(E,F); //jyl980406+
+  const Standard_Boolean haspc = aC2DFactory.HasCurveOnSurface(E, F); //jyl980406+
   if (!haspc) { //jyl980406+
-    Standard_Boolean trim3d = Standard_True; C2D = FC2D_CurveOnSurface(E,F,f2,l2,tolpc,trim3d); //jyl980406+
+    Standard_Boolean trim3d = Standard_True;
+    C2D = aC2DFactory.CurveOnSurface(E, F, f2, l2, tolpc, trim3d); //jyl980406+
     Standard_Real tolE = BRep_Tool::Tolerance(E); //jyl980406+  
     Standard_Real tol = Max(tolE,tolpc); //jyl980406+
     BRep_Builder BB; BB.UpdateEdge(E,C2D,F,tol); //jyl980406+
   } //jyl980406+
-  
-  C2D = FC2D_CurveOnSurface(E,F,f2,l2,tolpc);
+
+  C2D = aC2DFactory.CurveOnSurface(E, F, f2, l2, tolpc);
   if (C2D.IsNull()) throw Standard_ProgramError("WEC : ResetElement");
 
   Standard_Real t = 0.397891143689; Standard_Real par = ((1-t)*f2 + t*l2);
@@ -397,19 +401,20 @@ Standard_Boolean TopOpeBRepBuild_WireEdgeClassifier::CompareElement(const TopoDS
   Standard_Boolean bRet = Standard_True;
   const TopoDS_Edge& E = TopoDS::Edge(EE);
   const TopoDS_Face& F = myBCEdge.Face();
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
 
   Standard_Real f2,l2,tolpc;Handle(Geom2d_Curve) C2D; //jyl980402+
-  Standard_Boolean haspc = FC2D_HasCurveOnSurface(E,F); //jyl980402+
+  Standard_Boolean haspc = aC2DFactory.HasCurveOnSurface(E, F); //jyl980402+
   if (!haspc) { //jyl980402+
-    Standard_Boolean trim3d = Standard_True; C2D = FC2D_CurveOnSurface(E,F,f2,l2,tolpc,trim3d); //jyl980406+
-    // C2D = FC2D_CurveOnSurface(E,F,f2,l2,tolpc,trim3d); //jyl980406-
+    Standard_Boolean trim3d = Standard_True;
+    C2D = aC2DFactory.CurveOnSurface(E, F, f2, l2, tolpc, trim3d); //jyl980406+
     Standard_Real tolE = BRep_Tool::Tolerance(E); //jyl980402+  
     Standard_Real tol = Max(tolE,tolpc); //jyl980402+
     BRep_Builder BB; BB.UpdateEdge(E,C2D,F,tol); //jyl980402+
   } //jyl980402+
 
   if (myFirstCompare) {
-    C2D = FC2D_CurveOnSurface(E,F,f2,l2,tolpc);
+    C2D = aC2DFactory.CurveOnSurface(E, F, f2, l2, tolpc);
     Standard_Real t = 0.33334567; Standard_Real par = ((1-t)*f2 + t*l2);
     gp_Pnt2d p2d = C2D->Value(par);
     

@@ -147,6 +147,7 @@ Standard_Boolean TopOpeBRepTool_CORRISO::Init(const TopoDS_Shape& S)
   if (S.IsNull()) return Standard_False;
   myS = S;
 
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   TopExp_Explorer ex(S, TopAbs_EDGE);
   for (; ex.More(); ex.Next()){
     const TopoDS_Edge& E = TopoDS::Edge(ex.Current());
@@ -162,11 +163,12 @@ Standard_Boolean TopOpeBRepTool_CORRISO::Init(const TopoDS_Shape& S)
     myEds.Append(E);
 
     // myERep2d :
-//    Standard_Real f,l,tol; Handle(Geom2d_Curve) PC = FC2D_CurveOnSurface(E,myFref,f,l,tol);
-    Handle(Geom2d_Curve) PC; Standard_Real f,l,tol;
-    Standard_Boolean hasold = FC2D_HasOldCurveOnSurface(E,myFref,PC);
-    PC = FC2D_EditableCurveOnSurface(E,myFref,f,l,tol);
-    if (!hasold) FC2D_AddNewCurveOnSurface(PC,E,myFref,f,l,tol);
+    Handle(Geom2d_Curve) PC;
+    Standard_Real f, l, tol;
+    const Standard_Boolean hasold = TopOpeBRepTool_2d::HasOldCurveOnSurface(E, myFref, PC);
+    PC = aC2DFactory.EditableCurveOnSurface(E, myFref, f, l, tol);
+    if (!hasold)
+      aC2DFactory.AddNewCurveOnSurface(PC, E, myFref, f, l, tol);
     if (PC.IsNull()) return Standard_False;
     TopOpeBRepTool_C2DF C2DF(PC,f,l,tol,myFref);
     myERep2d.Bind(E,C2DF);
@@ -995,10 +997,14 @@ Standard_Boolean TopOpeBRepTool_CORRISO::AddNewConnexity(const TopoDS_Vertex& ,
   // <myERep2d> : 
   Standard_Boolean isb = myERep2d.IsBound(E);
   if (!isb) {
-    Handle(Geom2d_Curve) PC; Standard_Real f,l,tol;
-    Standard_Boolean hasold = FC2D_HasOldCurveOnSurface(E,myFref,PC);
-    PC = FC2D_EditableCurveOnSurface(E,myFref,f,l,tol);
-    if (!hasold) FC2D_AddNewCurveOnSurface(PC,E,myFref,f,l,tol);
+    TopOpeBRepTool_2d aC2DFactory; /// TODO
+    Handle(Geom2d_Curve) PC;
+    Standard_Real f, l, tol;
+    const Standard_Boolean hasold = TopOpeBRepTool_2d::HasOldCurveOnSurface(E, myFref, PC);
+    PC = aC2DFactory.EditableCurveOnSurface(E, myFref, f, l, tol);
+    if (!hasold)
+      aC2DFactory.AddNewCurveOnSurface(PC, E, myFref, f, l, tol);
+
     if (PC.IsNull()) return Standard_False;
     TopOpeBRepTool_C2DF C2DF(PC,f,l,tol,myFref);
     myERep2d.Bind(E,C2DF);  

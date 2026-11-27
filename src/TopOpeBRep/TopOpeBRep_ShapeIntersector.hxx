@@ -86,7 +86,10 @@ public:
   
   //! return the current intersection of a Face and an Edge.
   Standard_EXPORT TopOpeBRep_FaceEdgeIntersector& ChangeFaceEdgeIntersector();
-  
+
+  //! Return the tool computing pcurves.
+  TopOpeBRepTool_2d& ChangeC2DFactory() { return myEEIntersector.ChangeC2DFactory(); }
+
   //! return  geometric  shape <Index> ( = 1 or 2 )  of
   //! current intersection.
   Standard_EXPORT const TopoDS_Shape& CurrentGeomShape (const Standard_Integer Index) const;

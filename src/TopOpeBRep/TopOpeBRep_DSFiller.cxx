@@ -337,7 +337,8 @@ void TopOpeBRep_DSFiller::InsertIntersection(const TopoDS_Shape& aS1,
 					     const Standard_Boolean orientFORWARD)
 {
   FBOX_Prepare();
-  FC2D_Prepare(aS1,aS2);
+  myShapeIntersector.ChangeC2DFactory().Prepare(aS1, aS2);
+  myShapeIntersector2d.ChangeC2DFactory().Prepare(aS1, aS2);
 
   if (myPShapeClassifier == NULL) myPShapeClassifier = new TopOpeBRepTool_ShapeClassifier();
   myFacesFiller.SetPShapeClassifier(myPShapeClassifier);

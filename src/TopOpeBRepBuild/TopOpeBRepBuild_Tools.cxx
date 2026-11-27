@@ -403,7 +403,8 @@ const Standard_Real PAR_T = 0.43213918;
   const TopoDS_Edge& aEd=anEdgeObj;
   const TopoDS_Face& aFS=aFObj;
   Standard_Real f2 = 0., l2 = 0., tolpc = 0., f = 0., l = 0., par = 0.;
-  Handle(Geom2d_Curve) C2D=FC2D_CurveOnSurface(aEd,aFS,f2,l2,tolpc, Standard_True);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  Handle(Geom2d_Curve) C2D = aC2DFactory.CurveOnSurface(aEd, aFS, f2, l2, tolpc, Standard_True);
 
   BRepAdaptor_Curve  aCA(aEd);
   f=aCA.FirstParameter();
@@ -432,8 +433,8 @@ void TopOpeBRepBuild_Tools::GetNormalInNearestPoint(const TopoDS_Face& F,
   
   gp_Vec2d aTangent;
 
-  Handle(Geom2d_Curve) C2D = FC2D_CurveOnSurface(E, F, f2, l2, tolpc, Standard_True);
-  
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  Handle(Geom2d_Curve) C2D = aC2DFactory.CurveOnSurface(E, F, f2, l2, tolpc, Standard_True);
 
   par = f2*PAR_T + (1 - PAR_T)*l2;
 
@@ -625,13 +626,13 @@ void TopOpeBRepBuild_Tools::UpdateEdgeOnFace(const TopoDS_Edge& aEdgeToUpdate,
   Standard_Real tolE = BRep_Tool::Tolerance(TopoDS::Edge(aEdgeToUpdate));
   Standard_Real f2 = 0.,l2 = 0.,tolpc = 0.; 
   Handle(Geom2d_Curve) C2D; 
-    
+
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
   if(BRep_Tool::Degenerated(aEdgeToUpdate)) {
     //we can not compute PCurve for Degenerated Edge
     //so we take as it was on old face and after (in CorrectFace2D) 
     // we will adjust this PCurve
-    C2D = FC2D_CurveOnSurface(aEdgeToUpdate, fromFace,
-			      f2, l2, tolpc, Standard_True);
+    C2D = aC2DFactory.CurveOnSurface(aEdgeToUpdate, fromFace, f2, l2, tolpc, Standard_True);
     Standard_Real tol = Max(tolE, tolpc);
     Handle(Geom2d_Curve) C2Dn = Handle(Geom2d_Curve)::DownCast(C2D -> Copy());
     Handle(Geom2d_TrimmedCurve) newC2D = new Geom2d_TrimmedCurve(C2Dn, f2, l2);
@@ -644,7 +645,7 @@ void TopOpeBRepBuild_Tools::UpdateEdgeOnFace(const TopoDS_Edge& aEdgeToUpdate,
       UpdateEdgeOnPeriodicalFace(aEdgeToUpdate, fromFace, toFace);
     }
     else {
-      C2D = FC2D_CurveOnSurface(aEdgeToUpdate, toFace , f2, l2, tolpc, Standard_True);
+      C2D = aC2DFactory.CurveOnSurface(aEdgeToUpdate, toFace, f2, l2, tolpc, Standard_True);
       Standard_Real tol = Max(tolE,tolpc);
       BB.UpdateEdge(aEdgeToUpdate ,C2D, toFace , tol);
     }
@@ -688,9 +689,8 @@ void TopOpeBRepBuild_Tools::UpdateEdgeOnPeriodicalFace(const TopoDS_Edge& aEdgeT
   Standard_Real f2 = 0., l2 = 0., tolpc = 0., tol = 0.;
 
   //first  PCurve
-  Handle(Geom2d_Curve) C2D = FC2D_CurveOnSurface(newE,
-						 tFace, f2, 
-						 l2, tolpc, Standard_True);
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  Handle(Geom2d_Curve) C2D = aC2DFactory.CurveOnSurface(newE, tFace, f2, l2, tolpc, Standard_True);
 
   tol = Max(tolpc, tolE);
 
@@ -700,11 +700,11 @@ void TopOpeBRepBuild_Tools::UpdateEdgeOnPeriodicalFace(const TopoDS_Edge& aEdgeT
   Standard_Real ff = 0., lf = 0., fr = 0., lr = 0.;
   gp_Pnt2d aUVf, aUVr;
   
-  Handle(Geom2d_Curve) oldC2DFor = BRep_Tool::CurveOnSurface(newE, //FC2D_CurveOnSurface(newE,
+  Handle(Geom2d_Curve) oldC2DFor = BRep_Tool::CurveOnSurface(newE, //aC2DFactory.CurveOnSurface(newE,
 						       fFace, ff, 
 						       lf);//, tolpc, Standard_True);
   newE.Reverse();
-  Handle(Geom2d_Curve) oldC2DRev = BRep_Tool::CurveOnSurface(newE, //FC2D_CurveOnSurface(newE,
+  Handle(Geom2d_Curve) oldC2DRev = BRep_Tool::CurveOnSurface(newE, //aC2DFactory.CurveOnSurface(newE,
 						       fFace, fr, 
 						       lr);//, tolpc, Standard_True);
 

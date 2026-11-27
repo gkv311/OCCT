@@ -313,10 +313,10 @@ Standard_Boolean EdgesIntersector_checkT1D(const TopoDS_Edge& E1,const TopoDS_Ed
                       aSurfaceType2=aSurface2.GetType();
   
   if (aSurfaceType1==GeomAbs_Sphere && aSurfaceType2==GeomAbs_Sphere) {
-    PC1 = FC2D_MakeCurveOnSurface (myEdge1,myFace1,first,last,tolpc, Standard_True);
+    PC1 = myC2DFactory.MakeCurveOnSurface(myEdge1, myFace1, first, last, tolpc, Standard_True);
   }
   else {
-    PC1 = FC2D_CurveOnSurface(myEdge1,myFace1,first,last,tolpc);
+    PC1 = myC2DFactory.CurveOnSurface(myEdge1, myFace1, first, last, tolpc);
   }
   //modified by NIZNHY-PKV Thu Nov  4 15:44:13 1999 to
 
@@ -342,8 +342,8 @@ Standard_Boolean EdgesIntersector_checkT1D(const TopoDS_Edge& E1,const TopoDS_Ed
   const Handle(Geom_Surface) S2 = BRep_Tool::Surface(myFace2,L2);
   if (S1 == S2 && L1 == L2) memesupport=Standard_True;
   
-  if ( mySurfaceType1 == GeomAbs_Plane || memesfaces || memesupport) {    
-    Handle(Geom2d_Curve) PC2 = FC2D_CurveOnSurface(myEdge2,myFace1,first,last,tolpc);
+  if ( mySurfaceType1 == GeomAbs_Plane || memesfaces || memesupport) {
+    Handle(Geom2d_Curve) PC2 = myC2DFactory.CurveOnSurface(myEdge2, myFace1, first, last, tolpc);
     myCurve2.Load(PC2);
     BRep_Tool::UVPoints(myEdge2,myFace1,pfirst,plast);
     tole = BRep_Tool::Tolerance(myEdge2);
@@ -401,7 +401,7 @@ Standard_Boolean EdgesIntersector_checkT1D(const TopoDS_Edge& E1,const TopoDS_Ed
 
       //modified by NIZNHY-PKV Fri Nov  5 12:29:13 1999 from
       if (aSurfaceType1==GeomAbs_Sphere && aSurfaceType2==GeomAbs_Sphere) {
-	PC2on1 =  FC2D_MakeCurveOnSurface (myEdge2, myFace1, first, last, tolpc, Standard_True);
+        PC2on1 = myC2DFactory.MakeCurveOnSurface(myEdge2, myFace1, first, last, tolpc, Standard_True);
       }
       else { 
 	PC2on1 = TopOpeBRepTool_CurveTool::MakePCurveOnFace(myFace1,NC,tolreached2d);

@@ -386,14 +386,15 @@ void TopOpeBRepBuild_Builder::GFABUMakeFaces(const TopoDS_Shape& FF,TopOpeBRepBu
 		  if      (oE == TopAbs_INTERNAL) neINTERNAL++;
 		  else if (oE == TopAbs_EXTERNAL) neEXTERNAL++;
 	  
-		  Standard_Boolean hasPC = FC2D_HasCurveOnSurface(newEdge,newFace);                                     // jyl980402+
-		  if (!hasPC)                                                                                           // jyl980402+
+      TopOpeBRepTool_2d aC2DFactory; /// TODO
+      const Standard_Boolean hasPC = aC2DFactory.HasCurveOnSurface(newEdge, newFace);                       // jyl980402+
+      if (!hasPC)                                                                                           // jyl980402+
 		    {                                                                                                   // jyl980402+
 		      Standard_Real tolE = BRep_Tool::Tolerance(newEdge);                                               // jyl980402+
-		      Standard_Real f2,l2,tolpc; Handle(Geom2d_Curve) C2D;                                              // jyl980402+
-		      //C2D = FC2D_CurveOnSurface(newEdge,newFace,f2,l2,tolpc);                                         // jyl980402+
-		      C2D = FC2D_CurveOnSurface(newEdge,newFace,f2,l2,tolpc, Standard_True);                            // xpu051198 (CTS21701)
-		      if(C2D.IsNull()) throw Standard_ProgramError("TopOpeBRepBuild_Builder::GFABUMakeFaces null PC"); // jyl980402+
+          Standard_Real f2, l2, tolpc;
+          Handle(Geom2d_Curve) C2D =
+              aC2DFactory.CurveOnSurface(newEdge, newFace, f2, l2, tolpc, Standard_True); // xpu051198 (CTS21701)
+          if(C2D.IsNull()) throw Standard_ProgramError("TopOpeBRepBuild_Builder::GFABUMakeFaces null PC"); // jyl980402+
 		      Standard_Real tol = Max(tolE,tolpc);                                                              // jyl980402+
 		      BRep_Builder BB_PC; BB_PC.UpdateEdge(newEdge,C2D,newFace,tol);                                    // jyl980402+
 		    }                                                                                                   // jyl980402+

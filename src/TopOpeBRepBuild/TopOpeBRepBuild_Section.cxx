@@ -507,7 +507,9 @@ void TopOpeBRepBuild_Builder::SplitSectionEdges()
       
       TopTools_ListIteratorOfListOfShape itlon(lon); for(;itlon.More();itlon.Next()) {
 	TopoDS_Edge& eon = TopoDS::Edge(itlon.Value());
-	Standard_Real f,l; Standard_Boolean hasPC = FC2D_HasCurveOnSurface(eon,F);
+
+  TopOpeBRepTool_2d aC2DFactory; /// TODO
+  Standard_Real f,l; Standard_Boolean hasPC = aC2DFactory.HasCurveOnSurface(eon,F);
 	if (hasPC) continue;
 #ifdef OCCT_DEBUG
 	if (TopOpeBRepTool_GettraceC2D()) {
@@ -515,9 +517,9 @@ void TopOpeBRepBuild_Builder::SplitSectionEdges()
 	  std::cout<<"tsee s "<<iF<<" "<<idebE<<";"<<std::endl;
 	}
 #endif
-//	Standard_Real tolpc; MGhc2 PC = FC2D_CurveOnSurface(eon,F,esdF,f,l,tolpc);
-	Standard_Real tolpc; MGhc2 PC = FC2D_CurveOnSurface(eon,F,esdF,f,l,tolpc,Standard_True);//xpu051198 :PRO15049
-	hasPC = (!PC.IsNull());
+  Standard_Real tolpc;
+  MGhc2 PC = aC2DFactory.CurveOnSurface(eon, F, esdF, f, l, tolpc, Standard_True); //xpu051198 :PRO15049
+  hasPC = (!PC.IsNull());
 	if (!hasPC) throw Standard_ProgramError("TopOpeBRepBuild_Builder::SSE null PC on F");
 	Standard_Real tol = Max(tolE,tolpc);
 	BB.UpdateEdge(eon,PC,F,tol);
@@ -559,11 +561,13 @@ void TopOpeBRepBuild_Builder::SplitSectionEdges()
 #ifdef OCCT_DEBUG
 //      Standard_Real tolE = BRep_Tool::Tolerance(EG);
 #endif
-      Standard_Boolean haspc = FC2D_HasCurveOnSurface(EG,FS); if (haspc) continue;
-      Standard_Boolean hasc3d = FC2D_HasC3D(EG);
+      TopOpeBRepTool_2d aC2DFactory; /// TODO
+      Standard_Boolean haspc = aC2DFactory.HasCurveOnSurface(EG,FS); if (haspc) continue;
+      Standard_Boolean hasc3d = TopOpeBRepTool_2d::HasC3D(EG);
       if (!hasc3d) throw Standard_ProgramError("TopOpeBRepBuild_Builder::SSE EG without C3D");
       Standard_Real pf,pl,tolpc; Handle(Geom2d_Curve) PC;
-      Standard_Boolean trim3d = Standard_True; PC = FC2D_CurveOnSurface(EG,FS,pf,pl,tolpc,trim3d);
+      Standard_Boolean trim3d = Standard_True;
+      PC = aC2DFactory.CurveOnSurface(EG, FS, pf, pl, tolpc, trim3d);
       if (PC.IsNull()) throw Standard_ProgramError("TopOpeBRepBuild_Builder::SSE EG without PC on FS");
     } 
   } //5
@@ -597,8 +601,9 @@ void TopOpeBRepBuild_Builder::SplitSectionEdges()
       Standard_Boolean isrest = myDataStructure->DS().IsSectionEdge(EG); if (!isrest) continue;
       
       // xpu191198 : cto016*
+      TopOpeBRepTool_2d aC2DFactory; /// TODO
       Standard_Real pf,pl,tolpc; Handle(Geom2d_Curve) PC;
-      Standard_Boolean trim3d = Standard_True; PC = FC2D_CurveOnSurface(EG,FF,pf,pl,tolpc,trim3d);
+      Standard_Boolean trim3d = Standard_True; PC = aC2DFactory.CurveOnSurface(EG, FF, pf, pl, tolpc, trim3d);
       Standard_Boolean isoU,isoV; gp_Pnt2d o2d; gp_Dir2d d2d; 
       Standard_Boolean ISO = TopOpeBRepTool_TOOL::UVISO(PC,isoU,isoV,d2d,o2d);
       if (ISO) {
@@ -607,10 +612,10 @@ void TopOpeBRepBuild_Builder::SplitSectionEdges()
 	for (; itON.More(); itON.Next()){
 	  TopoDS_Edge eon = TopoDS::Edge(itON.Value());
 
-	  Standard_Real pfon,plon,tolpcon; Handle(Geom2d_Curve) PCon;
-	  PCon = FC2D_CurveOnSurface(eon,FF,pfon,plon,tolpcon,trim3d);
+    Standard_Real pfon,plon,tolpcon; Handle(Geom2d_Curve) PCon;
+    PCon = aC2DFactory.CurveOnSurface(eon, FF, pfon, plon, tolpcon, trim3d);
 
-	  Standard_Boolean isouon,isovon; gp_Pnt2d o2don; gp_Dir2d d2don; 
+    Standard_Boolean isouon,isovon; gp_Pnt2d o2don; gp_Dir2d d2don;
 	  Standard_Boolean ISOon = TopOpeBRepTool_TOOL::UVISO(PCon,isouon,isovon,d2don,o2don);
 	  Standard_Boolean PCko = !ISOon || ((isoU && !isouon) || (isoV && !isovon));
 	  if (PCko) throw Standard_ProgramError("TopOpeBRepBuild_Builder::splitON");
