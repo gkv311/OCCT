@@ -468,7 +468,7 @@ Standard_EXPORT void FUN_purgeDSonSE(const Handle(TopOpeBRepDS_HDataStructure)& 
 
   TopTools_MapOfShape fsdmFancSE;
   // ---------------
-  const TopTools_ListOfShape& lFancSE = FDSCNX_EdgeConnexitySameShape(SE,HDS);
+  const TopTools_ListOfShape& lFancSE = BDS.Connex().EdgeConnexitySameShape(SE,HDS);
   for (TopTools_ListIteratorOfListOfShape itf(lFancSE); itf.More(); itf.Next()){
     const TopTools_ListOfShape& fsdm = BDS.ShapeSameDomain(itf.Value());
     for (TopTools_ListIteratorOfListOfShape itsdm(fsdm); itsdm.More(); itsdm.Next()){

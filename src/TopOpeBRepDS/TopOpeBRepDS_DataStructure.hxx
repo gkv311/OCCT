@@ -36,6 +36,8 @@
 #include <TopOpeBRepDS_ShapeSurface.hxx>
 #include <TopOpeBRepDS_IndexedDataMapOfShapeWithState.hxx>
 #include <TopOpeBRepDS_Config.hxx>
+#include <TopOpeBRepDS_connex.hxx>
+
 class Geom_Surface;
 class TopoDS_Edge;
 class TopOpeBRepDS_Interference;
@@ -273,6 +275,12 @@ public:
   
   Standard_EXPORT TopTools_IndexedMapOfShape& ChangeMapOfRejectedShapesTool();
 
+  //! Returns the tool for the exploration of the connexity of the shapes.
+  const TopOpeBRepDS_connex& Connex() const { return myConnex; }
+
+  //! Returns the tool for the exploration of the connexity of the shapes.
+  TopOpeBRepDS_connex& ChangeConnex() { return myConnex; }
+
 
 friend class TopOpeBRepDS_SurfaceExplorer;
 friend class TopOpeBRepDS_CurveExplorer;
@@ -313,6 +321,7 @@ private:
   TopOpeBRepDS_IndexedDataMapOfShapeWithState myMapOfShapeWithStateTool;
   TopTools_IndexedMapOfShape myMapOfRejectedShapesObj;
   TopTools_IndexedMapOfShape myMapOfRejectedShapesTool;
+  TopOpeBRepDS_connex myConnex;
 
 
 };

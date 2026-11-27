@@ -439,7 +439,7 @@ void TopOpeBRepBuild_BuilderON::GFillONPartsWES2(const Handle(TopOpeBRepDS_Inter
   TopTools_ListOfShape le3;Standard_Boolean eghassd3d = FDS_HasSameDomain3d(BDS,EG,&le3);  
   Standard_Integer ie3d = 0; TopAbs_Orientation oe3d = TopAbs_EXTERNAL;
   Standard_Integer ie2d = 0; TopAbs_Orientation oe2d = TopAbs_EXTERNAL;
-  TopTools_ListOfShape lfcx; FDSCNX_FaceEdgeConnexFaces(FS,EG,HDS,lfcx);
+  TopTools_ListOfShape lfcx;  HDS->DS().Connex().FaceEdgeConnexFaces(FS,EG,HDS,lfcx);
   Standard_Integer nlfcx=lfcx.Extent();
 
   Standard_Boolean hsdFOR = HDS->HasSameDomain(FOR);
@@ -1544,7 +1544,7 @@ void TopOpeBRepBuild_BuilderON::GFillONPartsWES2(const Handle(TopOpeBRepDS_Inter
 	// xpu231198 :PRO15946 (FOR11,EG24,FCX20)
 	// xpu090299 (JAP60247, FOR6,FCX33,EG34)
 	const TopoDS_Edge& Esd = TopoDS::Edge(BDS.Shape(Iesd));
-	TopTools_ListOfShape lfor; FDSCNX_FaceEdgeConnexFaces(FOR,Esd,HDS,lfor);
+  TopTools_ListOfShape lfor; HDS->DS().Connex().FaceEdgeConnexFaces(FOR,Esd,HDS,lfor);
 	Standard_Integer nfor = lfor.Extent(); 
 	if (nfor < 1) b = shareG; //Esd is FOR's closing edge
 	else if (nfor > 1) return;//NYIRaise (unvalid shape)
@@ -1624,7 +1624,7 @@ void TopOpeBRepBuild_BuilderON::GFillONPartsWES2(const Handle(TopOpeBRepDS_Inter
 	    // xpu181198 CTS21302(FOR22,EG9,FCX5)
 	    // ntOOFOR :
 	    const TopoDS_Edge& Esd = TopoDS::Edge(BDS.Shape(Iesd)); // rkEsd=rkFOR
-	    TopTools_ListOfShape lfcFk; FDSCNX_FaceEdgeConnexFaces(FOR,Esd,HDS,lfcFk);
+	    TopTools_ListOfShape lfcFk; HDS->DS().Connex().FaceEdgeConnexFaces(FOR,Esd,HDS,lfcFk);
 	    if (lfcFk.Extent() != 1) return; // shape bizarre
 	    Standard_Real parEsd; ok = FUN_tool_parE(eON,parON,Esd,parEsd,tolEG);
 	    if (!ok) return;

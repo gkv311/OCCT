@@ -215,7 +215,7 @@ static void FUN_sortplcy(const TopTools_ListOfShape& lof, TopTools_ListOfShape& 
     if (!issplit) return Standard_False;
     const TopTools_ListOfShape& speds = BU.Splits(ed,TopAbs_ON);
     TopTools_ListOfShape lfcF2; // faces of shapei connexed to ed
-    FDSCNX_FaceEdgeConnexFaces(TopoDS::Face(F2),ed,HDS,lfcF2);
+    HDS->DS().Connex().FaceEdgeConnexFaces(TopoDS::Face(F2),ed,HDS,lfcF2);
     // prequesitory : ed in {edges of Ow2} 
     //                ed's faces ancestor = {F2,fofj}
     if (lfcF2.Extent() != 1) return Standard_False; 
@@ -431,7 +431,7 @@ static Standard_Boolean FUN_rebuildfc(const TopOpeBRepBuild_Builder& BU, const H
   for (; ite.More(); ite.Next()){
     const TopoDS_Shape& ed = ite.Value();
     TopTools_ListOfShape lfcFk; // faces of shapei connexed to ed
-    FDSCNX_FaceEdgeConnexFaces(TopoDS::Face(Fk),ed,HDS,lfcFk);
+    HDS->DS().Connex().FaceEdgeConnexFaces(TopoDS::Face(Fk),ed,HDS,lfcFk);
     // prequesitory : ed in {edges of Owk} 
     //                ed's faces ancestor = {Fk,fofj}
     if (lfcFk.Extent() != 1) return Standard_False; 

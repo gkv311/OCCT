@@ -476,7 +476,7 @@ void TopOpeBRepBuild_Builder::SplitSectionEdges()
 #ifdef OCCT_DEBUG
 //      Standard_Integer iesd = BDS.Shape(esd);
 #endif
-      const TopTools_ListOfShape& lf = FDSCNX_EdgeConnexitySameShape(esd,myDataStructure);
+      const TopTools_ListOfShape& lf = myDataStructure->DS().Connex().EdgeConnexitySameShape(esd,myDataStructure);
       GCopyList(lf,lF);
     }
 #ifdef OCCT_DEBUG

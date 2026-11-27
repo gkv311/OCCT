@@ -736,7 +736,7 @@ void TopOpeBRepDS_EIR::ProcessEdgeInterferences(const Standard_Integer EIX)
 	continue;
       }
 
-      const TopTools_ListOfShape& lfx = FDSCNX_EdgeConnexitySameShape(E,myHDS);
+      const TopTools_ListOfShape& lfx = myHDS->DS().Connex().EdgeConnexitySameShape(E,myHDS);
 
       // nlfx < 2 => 0 ou 1 face accede E => pas d'autre fcx pouvant generer une courbe 3d
       TopTools_ListIteratorOfListOfShape itlfx(lfx);

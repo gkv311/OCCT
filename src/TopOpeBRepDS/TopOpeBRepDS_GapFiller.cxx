@@ -135,7 +135,7 @@ void TopOpeBRepDS_GapFiller::FindAssociatedPoints(const Handle(TopOpeBRepDS_Inte
 
   if (!Contains(F1,E)) {F = F2; F2 = F1; F1 = F;}
 
-  const TopTools_ListOfShape& LF = FDSCNX_EdgeConnexitySameShape(E,myHDS);
+  const TopTools_ListOfShape& LF = myHDS->DS().Connex().EdgeConnexitySameShape(E,myHDS);
   //------------------------------------------------------------------------
   // Si le point de I est sur deux faces connexes a E => connexite des sections
   // => pas d association a faire.

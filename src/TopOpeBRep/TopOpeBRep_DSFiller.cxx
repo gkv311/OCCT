@@ -352,7 +352,7 @@ void TopOpeBRep_DSFiller::InsertIntersection(const TopoDS_Shape& aS1,
   if ( ! CheckInsert(aS1,aS2) ) {
     HDS->AddAncestors(aS1); // xpu100798 cto902B4 (f24 as face ancestor of e19)
     HDS->AddAncestors(aS2); // xpu100798 
-    FDSCNX_Prepare(aS1,aS2,HDS);
+    HDS->ChangeDS().ChangeConnex().Prepare(aS1,aS2,HDS);
     return;
   }
   
@@ -547,7 +547,7 @@ void TopOpeBRep_DSFiller::InsertIntersection(const TopoDS_Shape& aS1,
 
   HDS->AddAncestors(S1); // xpu100798 cto902B4 (f24 as face ancestor of e19)
   HDS->AddAncestors(S2); // xpu100798 
-  FDSCNX_Prepare(aS1,aS2,HDS);
+  HDS->ChangeDS().ChangeConnex().Prepare(aS1,aS2,HDS);
   FDSSDM_prepare(HDS);
   
 #ifdef OCCT_DEBUG

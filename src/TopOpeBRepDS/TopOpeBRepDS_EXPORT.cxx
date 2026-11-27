@@ -252,7 +252,7 @@ Standard_EXPORT Standard_Boolean FDS_EdgeIsConnexToSameDomainFaces
 //----------------------------------------------------
 {
   const TopOpeBRepDS_DataStructure& BDS = HDS->DS();
-  const TopTools_ListOfShape& lf = FDSCNX_EdgeConnexitySameShape(E,HDS);
+  const TopTools_ListOfShape& lf = BDS.Connex().EdgeConnexitySameShape(E,HDS);
   Standard_Integer nlf = lf.Extent();
   if (nlf < 2) return Standard_False;
 
@@ -493,8 +493,8 @@ static Standard_Boolean FUN_ds_hasSDMancestorfaces
 {
   const TopOpeBRepDS_DataStructure& BDS = HDS->DS();
 
-  const TopTools_ListOfShape& lFcE1 = FDSCNX_EdgeConnexitySameShape(E1,HDS);
-  const TopTools_ListOfShape& lFcE2 = FDSCNX_EdgeConnexitySameShape(E2,HDS);
+  const TopTools_ListOfShape& lFcE1 = BDS.Connex().EdgeConnexitySameShape(E1,HDS);
+  const TopTools_ListOfShape& lFcE2 = BDS.Connex().EdgeConnexitySameShape(E2,HDS);
 
   TopTools_IndexedMapOfShape mapfcE2; 
   TopTools_ListIteratorOfListOfShape it2(lFcE2);
@@ -541,7 +541,7 @@ Standard_EXPORT void FUN_ds_PURGEforE9(const Handle(TopOpeBRepDS_HDataStructure)
     TopOpeBRepDS_ListOfInterference l3dF; Standard_Integer n3dF = FUN_selectSKinterference(LIcopy,TopOpeBRepDS_FACE,l3dF);    
     if (n3dF == 0) continue;
     
-    const TopTools_ListOfShape& lfcxE = FDSCNX_EdgeConnexitySameShape(E,HDS);
+    const TopTools_ListOfShape& lfcxE = BDS.Connex().EdgeConnexitySameShape(E,HDS);
     Standard_Integer nlfcxE = lfcxE.Extent();
     if (nlfcxE == 0) continue; // NYIRaise
     TopTools_ListIteratorOfListOfShape itf(lfcxE);
@@ -734,7 +734,7 @@ Standard_EXPORT void FUN_ds_completeforSE2(const Handle(TopOpeBRepDS_HDataStruct
       const TopoDS_Edge& ES = TopoDS::Edge(BDS.Shape(S)); 
 
       // lfCX = {fCX / fCX shares ES with FTRA}
-      const TopTools_ListOfShape& lfCX = FDSCNX_EdgeConnexitySameShape(ES,HDS);      
+      const TopTools_ListOfShape& lfCX = BDS.Connex().EdgeConnexitySameShape(ES,HDS);
       for (TopTools_ListIteratorOfListOfShape itfcx(lfCX); itfcx.More(); itfcx.Next()){
 	const TopoDS_Face& FCX = TopoDS::Face(itfcx.Value());
 	Standard_Integer IFCX = BDS.Shape(FCX);

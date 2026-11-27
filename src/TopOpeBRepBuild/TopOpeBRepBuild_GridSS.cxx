@@ -1435,7 +1435,7 @@ void TopOpeBRepBuild_Builder::FillOnPatches
       if (anAncMap.IsBound(aE) && !avoidMap.Contains(aE)) {
         const TopoDS_Shape& anAncE = anAncMap(aE); // its ancestor edge from opposite shape
         const TopTools_ListOfShape& aFaces =       // connex faces of anAncE
-          FDSCNX_EdgeConnexityShapeIndex (anAncE,myDataStructure,rankOpp);
+          myDataStructure->DS().Connex().EdgeConnexityShapeIndex (anAncE,myDataStructure,rankOpp);
         // determine if aBaseFace has coinciding part on the left side of aE
         // with one of connex faces, and this pair of faces are same oriented
         Standard_Boolean isOnFace = Standard_False;
@@ -1498,7 +1498,7 @@ void TopOpeBRepBuild_Builder::FillOnPatches
       if (!anEdge.IsNull()) {
         // find faces of the opposite shape touching anAncE
         TopTools_ListOfShape aFaces;
-        FDSCNX_FaceEdgeConnexFaces (aBaseFace,anAncE,myDataStructure,aFaces);
+        myDataStructure->DS().Connex().FaceEdgeConnexFaces (aBaseFace,anAncE,myDataStructure,aFaces);
         if (aFaces.IsEmpty()) continue;
         TopoDS_Shape aCnxF = aFaces.First();
         aFaces.Clear();
