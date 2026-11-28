@@ -886,7 +886,7 @@ void OpenGl_GraphicDriver::RemoveView (const Handle(Graphic3d_CView)& theView)
     // try to hijack another context if any
     const Handle(OpenGl_Context)& anOtherCtx = GetSharedContext();
     if (!anOtherCtx.IsNull()
-      && anOtherCtx != aWindow->GetGlContext())
+      && (aWindow.IsNull() || anOtherCtx != aWindow->GetGlContext()))
     {
       aCtx = anOtherCtx;
       aCtx->MakeCurrent();
